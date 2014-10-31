@@ -1,8 +1,9 @@
 #include "PatchController.h"
-#include "CodecController.h"
-#include "ApplicationSettings.h"
-#include "MemoryBuffer.hpp"
 #include "owlcontrol.h"
+// #include "CodecController.h"
+#include "MemoryBuffer.hpp"
+#include "SharedMemory.h"
+#include "ApplicationSettings.h"
 
 #define SINGLE_MODE          1
 #define DUAL_GREEN_MODE      2
@@ -23,7 +24,7 @@ void PatchController::setParameterValues(uint16_t* values){
 }
 
 void PatchController::init(){
-  parameterValues = getAnalogValues();
+  parameterValues = smem.parameters;
   setActiveSlot(GREEN);
   initialisePatch(GREEN);
   initialisePatch(RED);
@@ -47,10 +48,10 @@ void PatchController::initialisePatch(LedPin slot){
   // so that it can be picked up by a call to getInitialisingProcessor() from the Patch constructor
   if(slot == RED){
     initialisingProcessor = &red;
-    red.setPatch(settings.patch_red);  
+    red.setPatch(settings.patch_red);
   }else{
     initialisingProcessor = &green;
-    green.setPatch(settings.patch_green);  
+    green.setPatch(settings.patch_green);
   }
 }
 
@@ -62,12 +63,12 @@ __attribute__ ((section (".coderam")))
 void PatchController::process(AudioBuffer& buffer){
   if(activeSlot == GREEN && green.index != settings.patch_green){
     initialisePatch(GREEN);
-    codec.softMute(false);
+    // codec.softMute(false);
     debugClear();
     return;
   }else if(activeSlot == RED && red.index != settings.patch_red){
     initialisePatch(RED);
-    codec.softMute(false);
+    // codec.softMute(false);
     debugClear();
     return;
   }
@@ -103,7 +104,7 @@ void PatchController::process(AudioBuffer& buffer){
 }
 
 void PatchController::setPatch(LedPin slot, uint8_t index){
-  codec.softMute(true);
+  // codec.softMute(true);
   if(slot == RED){
     settings.patch_red = index;
   }else{

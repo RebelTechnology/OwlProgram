@@ -10,12 +10,14 @@ LDLIBS   = -lm
 # LDSCRIPT = Source/sram-in-flash.ld
 LDSCRIPT = Source/flash.ld
 
-C_SRC   = errorhandlers.c main.c gpio.c
-CPP_SRC = OwlProgram.cpp StompBox.cpp operators.cpp
+C_SRC   = errorhandlers.c main.c gpio.c eepromcontrol.c basicmaths.c
+CPP_SRC = OwlProgram.cpp StompBox.cpp PatchController.cpp operators.cpp
+CPP_SRC += ApplicationSettings.cpp PatchProcessor.cpp PatchRegistry.cpp
 
 OBJS =  $(C_SRC:%.c=Build/%.o)  $(CPP_SRC:%.cpp=Build/%.o)
 
 # object files
+OBJS += $(BUILD)/stm32f4xx_flash.o
 # OBJS += $(PERIPH) 
 OBJS += $(BUILD)/startup.o # no system_hse.o: clocks and ram set by loader
 # OBJS += $(USB_DEVICE) $(USB_OTG)

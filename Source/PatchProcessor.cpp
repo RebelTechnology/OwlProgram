@@ -4,8 +4,7 @@
 #include "device.h"
 #include <string.h>
 
-#include "MidiController.h"
-#include "OpenWareMidiControl.h"
+// #include "OpenWareMidiControl.h"
 
 PatchProcessor::PatchProcessor() 
   : patch(NULL), bufferCount(0) {}

@@ -2,8 +2,8 @@
 #define __SAMPLEBUFFER_H__
 
 #include <stdint.h>
+#include <string.h>
 #include "StompBox.h"
-// #include "audio.h"
 #include "device.h"
 
 // template<int bits, bool saturate, int size, float* left, float* right>
@@ -13,10 +13,9 @@ protected:
   float right[AUDIO_MAX_BLOCK_SIZE];
   uint16_t size;
 public:
-  SampleBuffer() : size(AUDIO_MAX_BLOCK_SIZE) {}
-// __attribute__ ((section (".coderam")))
-  void split(uint16_t* input){
+  void split(uint16_t* input, uint16_t samples){
 #if AUDIO_BITDEPTH == 16
+    size = samples >> 1u;
     float* l = left;
     float* r = right;
     uint32_t blkCnt = size >> 1u;
@@ -28,6 +27,7 @@ public:
       blkCnt--;
     }
 #else /* AUDIO_BITDEPTH == 16 */
+    size = samples >> 2u;
 #ifdef AUDIO_BIGEND
     float* l = left;
     float* r = right;
@@ -60,7 +60,6 @@ public:
 #endif /* AUDIO_BIGEND */
 #endif /* AUDIO_BITDEPTH == 16 */
   }
-// __attribute__ ((section (".coderam")))
   void comb(uint16_t* output){
 #if AUDIO_BITDEPTH == 16
     float* l = left;
@@ -131,10 +130,11 @@ public:
   inline int getChannels(){
     return AUDIO_CHANNELS;
   }
-  void setSize(uint16_t sz){
-    if(sz <= AUDIO_MAX_BLOCK_SIZE)
-      size = sz;
-  }
+  // void setSize(uint16_t sz){
+  // size is set by split()
+  //   if(sz <= AUDIO_MAX_BLOCK_SIZE)
+  //     size = sz;
+  // }
   inline int getSize(){
     return size;
   }

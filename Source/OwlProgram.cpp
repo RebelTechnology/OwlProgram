@@ -4,8 +4,26 @@
 #include "gpio.h"
 #include "owlcontrol.h"
 #include "SharedMemory.h"
+#include "SampleBuffer.hpp"
+#include "PatchRegistry.h"
+#include "PatchController.h"
+#include "ApplicationSettings.h"
 
-void processBlock(){
+void setup(){
+  setLed(RED);
+  settings.init();
+  patches.init();
+  patches.setPatch(GREEN, 0);
+  patches.setPatch(RED, 0);
+  patches.setActiveSlot(GREEN);
+}
+
+SampleBuffer buffer;
+PatchRegistry registry;
+PatchController patches;
+ApplicationSettings settings;
+
+void blinky(){
   static uint8_t counter = 0;
   switch(counter++ & 0xff){
   case 0x00:
@@ -21,4 +39,11 @@ void processBlock(){
     setLed(NONE);
     break;
   }
+}
+
+void processBlock(){
+  blinky();
+  buffer.split(smem.audio_input, smem.audio_blocksize);
+  patches.process(buffer);  
+  buffer.comb(smem.audio_output);
 }
