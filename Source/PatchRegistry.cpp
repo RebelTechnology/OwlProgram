@@ -1,8 +1,9 @@
 #include "PatchRegistry.h"
+#include "SharedMemory.h"
 #include "basicmaths.h"
 #include "OwlPatches/includes.h"
 
-#define REGISTER_PATCH(T, STR, UNUSED, UNUSED2) registerPatch(STR, Register<T>::construct)
+#define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, Register<T>::construct)
 
 PatchRegistry::PatchRegistry() : nofPatches(0) {
 #include "OwlPatches/patches.cpp"
@@ -24,10 +25,12 @@ Patch* PatchRegistry::create(unsigned int index) {
   return NULL;
 }
 
-void PatchRegistry::registerPatch(const char* name, PatchCreator creator){
+void PatchRegistry::registerPatch(const char* name, uint8_t inputs, uint8_t outputs,
+				  PatchCreator creator){
   if(nofPatches < MAX_NUMBER_OF_PATCHES){
     names[nofPatches] = name;
     creators[nofPatches] = creator;
     nofPatches++;
+    smem.registerPatch(name, inputs, outputs);
   }
 }

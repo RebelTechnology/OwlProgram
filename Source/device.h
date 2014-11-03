@@ -123,7 +123,7 @@
 #define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t *)__FILE__, __LINE__))
 #endif
 
-/* #define CCM __attribute__ ((section (".ccmdata"))) */
+#define CCM __attribute__ ((section (".ccmdata")))
 /* #ifdef EXTERNAL_SRAM */
 /* #define EXT __attribute__ ((section (".extdata"))) */
 /* #endif */

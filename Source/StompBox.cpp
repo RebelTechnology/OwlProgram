@@ -35,11 +35,9 @@ AudioBuffer* Patch::createMemoryBuffer(int channels, int samples){
   // return processor->createMemoryBuffer(channels, samples);
 }
 
-void Patch::pressButton(PatchButtonId bid){
-  // todo
+void Patch::setButton(PatchButtonId bid, bool pressed){
+  setButton(bid, pressed);
   switch(bid){
-  case BYPASS_BUTTON:
-    break;
   case PUSHBUTTON:
     toggleLed();
     break;

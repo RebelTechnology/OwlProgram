@@ -155,8 +155,7 @@ SECTIONS
   . = ALIGN(4);
 } >CCMRAM
 
-  /* External SRAM, vars must be located here explicitly */
-  /* Example: int foo __attribute__ ((section (".extdata"))); */
+  /* External SRAM, used for heap memory - no variables to be allocated here! */
 .extdata (NOLOAD) :
 {
   . = ALIGN(4);

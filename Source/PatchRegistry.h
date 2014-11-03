@@ -16,7 +16,8 @@ public:
   Patch* create(unsigned int index);
   Patch* create(const char* name);
   unsigned int getNumberOfPatches();
-  void registerPatch(const char* name, PatchCreator creator);
+  void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, 
+		     PatchCreator creator);
 private:
   template<class T> struct Register {
     static Patch* construct() {

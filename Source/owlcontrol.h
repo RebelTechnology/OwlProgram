@@ -6,6 +6,8 @@
 #include "stm32f4xx.h"
 #include "device.h"
 #include "gpio.h"
+#include "StompBox.h"
+#include "SharedMemory.h"
 
 #ifdef __cplusplus
  extern "C" {
@@ -46,6 +48,17 @@
 #ifdef OWLMODULAR
      togglePin(GPIOB, GPIO_Pin_7); // PB7 OWL Modular digital output
 #endif
+   }
+
+   inline bool getButton(PatchButtonId bid){
+     return smem.buttons & (1<<bid);
+   }
+
+   inline void setButton(PatchButtonId bid, bool on){
+     if(on)
+       smem.buttons |= 1<<bid;
+     else
+       smem.buttons &= ~(1<<bid);
    }
 
    inline void debugSet(){

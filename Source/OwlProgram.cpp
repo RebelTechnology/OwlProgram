@@ -13,15 +13,12 @@ void setup(){
   setLed(RED);
   settings.init();
   patches.init();
-  patches.setPatch(GREEN, 0);
-  patches.setPatch(RED, 0);
-  patches.setActiveSlot(GREEN);
 }
 
-SampleBuffer buffer;
-PatchRegistry registry;
+SampleBuffer buffer CCM;
+PatchRegistry registry CCM;
 PatchController patches;
-ApplicationSettings settings;
+ApplicationSettings settings CCM;
 
 void blinky(){
   static uint8_t counter = 0;

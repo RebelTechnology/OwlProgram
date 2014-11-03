@@ -35,7 +35,7 @@ public:
   void registerParameter(PatchParameterId pid, const char* name, const char* description = "");
   float getParameterValue(PatchParameterId pid);
   bool isButtonPressed(PatchButtonId bid);
-  void pressButton(PatchButtonId bid);
+  void setButton(PatchButtonId bid, bool pressed);
   int getBlockSize();
   double getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
