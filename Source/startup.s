@@ -32,7 +32,8 @@ defined in linker script */
   .weak  Reset_Handler
   .type  Reset_Handler, %function
 Reset_Handler:
-  push   {r5-r7, lr} // Push work registers and lr
+ /* Push work registers and lr */
+/*  push   {r4-r7, lr} */
 /* Zero fill the bss segment. */
   ldr  r2, =_sbss
   b  LoopFillZerobss
@@ -47,8 +48,11 @@ LoopFillZerobss:
   bl __libc_init_array
 /* Call the application's entry point.*/
   bl  main
-  pop     {r5-r7,lr} // Pop work registers and pc to return from main (doesn't work, jumps to Reset_Handler!)
-  bx  lr    // should exit here, instead jumps to Reset_Handler
+/* Pop work registers and pc to return from main */
+/*  pop     {r4-r7,pc} */
+/*  pop     {r4-r7,lr} */
+  nop
+  /* bx  lr    // should exit here, instead jumps to Reset_Handler */
 .size  Reset_Handler, .-Reset_Handler
 
 /**

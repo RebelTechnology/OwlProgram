@@ -22,7 +22,7 @@ MEMORY
   SHAREDRAM (rwx)  : ORIGIN = 0x10000000, LENGTH = 8K
   CCMRAM (rwx)     : ORIGIN = 0x10002000, LENGTH = 56K    /* total CCM is 64kb */
   LOADERRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 64K
-  PATCHRAM (rwx)   : ORIGIN = 0x20010000, LENGTH = 64K    /* total RAM is 128kb */
+  PATCHRAM (rwx)   : ORIGIN = 0x20010000, LENGTH = 48K    /* total RAM is 112kb */
   BANK1_SRAM1 (rx) : ORIGIN = 0x60000000, LENGTH = 0K
   BANK1_SRAM2 (rx) : ORIGIN = 0x64000000, LENGTH = 0K
   BANK1_SRAM3 (rx) : ORIGIN = 0x68000000, LENGTH = 1M
@@ -148,6 +148,8 @@ SECTIONS
   . = ALIGN(4);
 } >SHAREDRAM
 
+/* CCM section, vars must be located here explicitly */
+/* Example: int foo __attribute__ ((section (".ccmdata"))); */
 .ccmdata (NOLOAD) :
 {
   . = ALIGN(4);

@@ -10,8 +10,8 @@
 #include "ApplicationSettings.h"
 
 void setup(){
-  setLed(RED);
-  settings.init();
+  setLed(GREEN);
+  settings.init(); // todo: get rid of ApplicationSettings
   patches.init();
 }
 

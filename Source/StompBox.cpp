@@ -13,7 +13,8 @@ Patch::Patch() { // : processor(patches.getInitialisingPatchProcessor()){
 Patch::~Patch(){}
 
 void Patch::registerParameter(PatchParameterId pid, const char* name, const char* description){
-  smem.registerPatchParameter(pid, name);
+  if(smem.registerPatchParameter != NULL)
+    smem.registerPatchParameter(pid, name);
 }
 
 double Patch::getSampleRate(){

@@ -34,7 +34,7 @@ void PatchController::reset(){
   init();
 }
 
-__attribute__ ((section (".coderam")))
+// __attribute__ ((section (".coderam")))
 void PatchController::processParallel(AudioBuffer& buffer){
   MemoryBuffer left(buffer.getSamples(0), 1, buffer.getSize());
   MemoryBuffer right(buffer.getSamples(1), 1, buffer.getSize());
@@ -42,9 +42,9 @@ void PatchController::processParallel(AudioBuffer& buffer){
   red.patch->processAudio(right);
 }
 
-__attribute__ ((section (".coderam")))
+// __attribute__ ((section (".coderam")))
 void PatchController::initialisePatch(LedPin slot){
-  // the initialisingProcessor must be set 
+  // the initialisingProcessor must be set
   // so that it can be picked up by a call to getInitialisingProcessor() from the Patch constructor
   if(slot == RED){
     initialisingProcessor = &red;
@@ -59,7 +59,7 @@ PatchProcessor* PatchController::getInitialisingPatchProcessor(){
   return initialisingProcessor;
 }
 
-__attribute__ ((section (".coderam")))
+// __attribute__ ((section (".coderam")))
 void PatchController::process(AudioBuffer& buffer){
   if(activeSlot == GREEN && green.index != settings.patch_green){
     initialisePatch(GREEN);

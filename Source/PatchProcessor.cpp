@@ -3,6 +3,7 @@
 #include "MemoryBuffer.hpp"
 #include "device.h"
 #include <string.h>
+#include "SharedMemory.h"
 
 // #include "OpenWareMidiControl.h"
 
@@ -20,7 +21,7 @@ void PatchProcessor::clear(){
   delete patch;
   patch = NULL;
   index = -1;
-  memset(parameterNames, 0, sizeof(parameterNames));
+  // memset(parameterNames, 0, sizeof(parameterNames));
 }
 
 void PatchProcessor::setPatch(uint8_t patchIndex){
@@ -29,19 +30,21 @@ void PatchProcessor::setPatch(uint8_t patchIndex){
     index = patchIndex;
   else
     index = 0;
-  // patch = registry.create(index);
+  patch = registry.create(index);
 }
 
-void PatchProcessor::registerParameter(PatchParameterId pid, const char* name, const char* description){
-  if(pid < NOF_ADC_VALUES)
-    parameterNames[pid] = name;
+void PatchProcessor::registerParameter(PatchParameterId pid, const char* name){
+  if(smem.registerPatchParameter != NULL)
+    smem.registerPatchParameter(pid, name);
+  // if(pid < NOF_ADC_VALUES)
+  //   parameterNames[pid] = name;
 }
 
-const char* PatchProcessor::getParameterName(PatchParameterId pid){
-  if(pid < NOF_ADC_VALUES)
-    return parameterNames[pid];
-  return NULL;
-}
+// const char* PatchProcessor::getParameterName(PatchParameterId pid){
+//   if(pid < NOF_ADC_VALUES)
+//     return parameterNames[pid];
+//   return NULL;
+// }
 
 AudioBuffer* PatchProcessor::createMemoryBuffer(int channels, int size){
   MemoryBuffer* buf = new ManagedMemoryBuffer(channels, size);
@@ -59,7 +62,7 @@ float PatchProcessor::getParameterValue(PatchParameterId pid){
     return 0.0f;
 }
 
-__attribute__ ((section (".coderam")))
+// __attribute__ ((section (".coderam")))
 void PatchProcessor::setParameterValues(uint16_t *params){
   /* Implements an exponential moving average (leaky integrator) to smooth ADC values
    * y(n) = (1-alpha)*y(n-1) + alpha*y(n)
