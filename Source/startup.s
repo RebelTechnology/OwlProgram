@@ -33,7 +33,9 @@ defined in linker script */
   .type  Reset_Handler, %function
 Reset_Handler:
  /* Push work registers and lr */
-/*  push   {r4-r7, lr} */
+ push   {r4-r11, lr}
+ /* Save the core registers. */
+// stmdb r0!, {r4-r11, r14}
 /* Zero fill the bss segment. */
   ldr  r2, =_sbss
   b  LoopFillZerobss
@@ -49,10 +51,13 @@ LoopFillZerobss:
 /* Call the application's entry point.*/
   bl  main
 /* Pop work registers and pc to return from main */
-/*  pop     {r4-r7,pc} */
-/*  pop     {r4-r7,lr} */
+   pop     {r4-r11,pc}
+// ldmia r0!, {r4-r11, r14}
+	
+/* pop     {r3-r7,lr} */
+/*  bx  lr */
+/* should exit here, instead goes to Reset_Handler */
   nop
-  /* bx  lr    // should exit here, instead jumps to Reset_Handler */
 .size  Reset_Handler, .-Reset_Handler
 
 /**
@@ -81,7 +86,7 @@ Infinite_Loop:
     
 g_pfnVectors:
   .word  _estack
-  .word  Reset_Handler
+  .word  main
   .word  NMI_Handler
   .word  HardFault_Handler
   .word  MemManage_Handler

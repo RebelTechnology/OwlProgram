@@ -12,8 +12,9 @@ LDLIBS   = -lm
 # LDSCRIPT = Source/sram-in-flash.ld
 LDSCRIPT = Source/flash.ld
 
-C_SRC   = errorhandlers.c main.c gpio.c eepromcontrol.c basicmaths.c
-CPP_SRC = OwlProgram.cpp StompBox.cpp PatchController.cpp operators.cpp
+C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c
+CPP_SRC = main.cpp
+CPP_SRC += OwlProgram.cpp StompBox.cpp PatchController.cpp operators.cpp
 CPP_SRC += ApplicationSettings.cpp PatchProcessor.cpp PatchRegistry.cpp
 
 OBJS =  $(C_SRC:%.c=Build/%.o)  $(CPP_SRC:%.cpp=Build/%.o)

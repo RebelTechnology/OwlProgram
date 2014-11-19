@@ -6,6 +6,10 @@
 #define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, Register<T>::construct)
 
 PatchRegistry::PatchRegistry() : nofPatches(0) {
+}
+
+void PatchRegistry::init(){
+  nofPatches = 0;
 #include "OwlPatches/patches.cpp"
 }
 

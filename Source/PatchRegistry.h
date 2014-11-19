@@ -12,6 +12,7 @@ class PatchRegistry {
   typedef Patch* (*PatchCreator)(); // function pointer to create Patch
 public:
   PatchRegistry();
+  void init();
   const char* getName(unsigned int index); 
   Patch* create(unsigned int index);
   Patch* create(const char* name);
