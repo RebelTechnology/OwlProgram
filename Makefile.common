@@ -60,7 +60,7 @@ $(BUILD)/%.s: %.cpp
 	$(CXX) -S $(CXXFLAGS) $< -o $@
 
 $(BUILD)/%.bin: $(BUILD)/%.elf
-	$(OBJCOPY) -O binary -R .data -R .jcr $< $@
+	$(OBJCOPY) -O binary -R .jcr $< $@
 	@echo Successfully built OWL firmware $@
 
 clean:
