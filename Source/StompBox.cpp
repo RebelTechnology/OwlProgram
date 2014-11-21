@@ -27,7 +27,7 @@ int Patch::getBlockSize(){
 
 float Patch::getParameterValue(PatchParameterId pid){
   if(pid < smem.parameters_size)
-    return smem.parameters[pid];
+    return smem.parameters[pid]/4096.0f;
   return 0.0;
 }
 
