@@ -1,6 +1,7 @@
 #include <inttypes.h>
 #include "SharedMemory.h"
 #include "owlcontrol.h"
+#include "stm32f4xx.h"
 
 #include <string.h>
 #include "myalloc.h"
@@ -20,9 +21,15 @@ extern "C" void __libc_init_array();
 // extern void __call_static_initializers(void);
 // extern void __init_user();
 
+#define DEBUG_DWT
+
+#include <malloc.h>
+extern char *heap_end;
+extern int allocated_mem;
+
 #define BANK1_SRAM3 0x68000000
 int main(void){
-  /* todo from startup.s Reset_Handler:
+  /* from startup.s Reset_Handler:
      zero-fill _ebss
      Call static constructors:   bl __libc_init_array
      call C++ static initializers?
@@ -32,8 +39,6 @@ int main(void){
 
     InitMem((char*)BANK1_SRAM3, 1024*1024);
 
-    // void *ptr = myalloc(1);
-
   if(smem.checksum != sizeof(smem)){
     // problem!
     smem.status = AUDIO_ERROR_STATUS;
@@ -41,25 +46,35 @@ int main(void){
     // smem.exitProgram();
     // return -1;
   }
+
+#ifdef DEBUG_DWT
+  volatile unsigned int *DWT_CYCCNT = (volatile unsigned int *)0xE0001004; //address of the register
+  volatile unsigned int *DWT_CONTROL = (volatile unsigned int *)0xE0001000; //address of the register
+  volatile unsigned int *SCB_DEMCR = (volatile unsigned int *)0xE000EDFC; //address of the register
+  *SCB_DEMCR = *SCB_DEMCR | 0x01000000;
+  *DWT_CONTROL = *DWT_CONTROL | 1 ; // enable the counter
+  // if(!(CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk)) {
+  //   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  //   DWT->CYCCNT = 0;
+  //   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+  // }
+#endif /* DEBUG_DWT */
+
   setup();
+  smem.heap_bytes_used = allocated_mem;
   for(;;){
     if(smem.status == AUDIO_READY_STATUS){
-  // static uint8_t counter = 0;
-  // switch(counter++ & 0xff){
-  // case 0x00:
-  //   setLed(RED);
-  //   break;
-  // case 0x40:
-  //   setLed(GREEN);
-  //   break;
-  // case 0x80:
-  //   setLed(RED);
-  //   break;
-  // case 0xc0:
-  //   setLed(GREEN);
-  //   break;
-  // }
+#ifdef DEBUG_DWT
+      *DWT_CYCCNT = 0; // reset the counter
+      // DWT->CYCCNT = 0; // reset the counter
+#endif
+
       processBlock();
+#ifdef DEBUG_DWT
+      smem.cycles_per_block = *DWT_CYCCNT;
+      // dwt_count = DWT->CYCCNT;
+#endif /* DEBUG_DWT */
+
       if(smem.status == AUDIO_EXIT_STATUS)
 	// smem.exitProgram();
     	return 0;

@@ -18,10 +18,10 @@ void setup(){
   patches.init(); // causes reset?
 }
 
-SampleBuffer buffer CCM;
-PatchRegistry registry CCM;
+SampleBuffer buffer;
+PatchRegistry registry;
 PatchController patches;
-ApplicationSettings settings CCM;
+ApplicationSettings settings;
 
 void blinky(){
   static uint8_t counter = 0;
