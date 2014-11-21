@@ -18,7 +18,7 @@ MEMORY
   BOOTLOADER (rw)  : ORIGIN = 0x08000000, LENGTH = 16K    /* Sector 0 */
   EEPROM (rw)      : ORIGIN = 0x08004000, LENGTH = 16K    /* Sector 1 */
   FIRMWARE (rx)    : ORIGIN = 0x08008000, LENGTH = 224K   /* Sector 2 */
-  PATCHFLASH (rx)  : ORIGIN = 0x08040000, LENGTH = 128K   /* Sector 6 */ /* total Flash memory is 1Mb */
+  /* PATCHFLASH (rx)  : ORIGIN = 0x08040000, LENGTH = 128K   /\* Sector 6 *\/ /\* total Flash memory is 1Mb *\/ */
   SHAREDRAM (rwx)  : ORIGIN = 0x10000000, LENGTH = 8K
   CCMRAM (rwx)     : ORIGIN = 0x10002000, LENGTH = 56K    /* total CCM is 64kb */
   LOADERRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 64K
@@ -38,7 +38,7 @@ SECTIONS
     . = ALIGN(4);
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(4);
-  } >PATCHRAM AT>PATCHFLASH
+  } >PATCHRAM /* AT>PATCHFLASH */
 
   /* The program code and other data goes into FLASH */
   .text :
@@ -59,36 +59,36 @@ SECTIONS
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
     _text_end = .;
-  } >PATCHRAM AT>PATCHFLASH
+  } >PATCHRAM /* AT>PATCHFLASH */
   _text_load = LOADADDR (.text);
 
-   .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >PATCHRAM AT>PATCHFLASH
+   .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >PATCHRAM /* AT>PATCHFLASH */
     .ARM : {
     __exidx_start = .;
       *(.ARM.exidx*)
       __exidx_end = .;
-    } >PATCHRAM AT>PATCHFLASH
+    } >PATCHRAM /* AT>PATCHFLASH */
 
   .preinit_array     :
   {
     PROVIDE_HIDDEN (__preinit_array_start = .);
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
-  } >PATCHRAM AT>PATCHFLASH
+  } >PATCHRAM /* AT>PATCHFLASH */
   .init_array :
   {
     PROVIDE_HIDDEN (__init_array_start = .);
     KEEP (*(SORT(.init_array.*)))
     KEEP (*(.init_array*))
     PROVIDE_HIDDEN (__init_array_end = .);
-  } >PATCHRAM AT>PATCHFLASH
+  } >PATCHRAM /* AT>PATCHFLASH */
   .fini_array :
   {
     PROVIDE_HIDDEN (__fini_array_start = .);
     KEEP (*(.fini_array*))
     KEEP (*(SORT(.fini_array.*)))
     PROVIDE_HIDDEN (__fini_array_end = .);
-  } >PATCHRAM AT>PATCHFLASH
+  } >PATCHRAM /* AT>PATCHFLASH */
 
 /*   .eeprom (NOLOAD) : */
 /*     { */

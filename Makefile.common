@@ -24,7 +24,7 @@ BOOTLOADER ?= ~/devel/OwlWare/Libraries/OwlBoot/OwlBoot.bin
 vpath %.cpp $(TEMPLATEROOT)/Source
 vpath %.c $(TEMPLATEROOT)/Source
 vpath %.s $(TEMPLATEROOT)/Source
-vpath %.c /home/mars/devel/OwlWare/Libraries/syscalls
+vpath %.c Libraries/syscalls
 vpath %.c $(CORE)
 vpath %.c $(PERIPH_FILE)/src
 vpath %.c $(PERIPH_FILE)/inc
@@ -60,7 +60,7 @@ $(BUILD)/%.s: %.cpp
 	$(CXX) -S $(CXXFLAGS) $< -o $@
 
 $(BUILD)/%.bin: $(BUILD)/%.elf
-	$(OBJCOPY) -O binary -R .jcr $< $@
+	$(OBJCOPY) -O binary $< $@
 	@echo Successfully built OWL firmware $@
 
 clean:

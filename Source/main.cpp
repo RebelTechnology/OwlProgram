@@ -3,6 +3,7 @@
 #include "owlcontrol.h"
 
 #include <string.h>
+#include "myalloc.h"
 
 __attribute__ ((section (".sharedram")))
 volatile SharedMemory smem;
@@ -19,6 +20,7 @@ extern "C" void __libc_init_array();
 // extern void __call_static_initializers(void);
 // extern void __init_user();
 
+#define BANK1_SRAM3 0x68000000
 int main(void){
   /* todo from startup.s Reset_Handler:
      zero-fill _ebss
@@ -26,8 +28,12 @@ int main(void){
      call C++ static initializers?
   */
     memset(_sbss, 0, (_ebss-_sbss));
-    // __libc_init_array(); // causes reset
-    
+    __libc_init_array(); // caused reset when .data had been strippped
+
+    InitMem((char*)BANK1_SRAM3, 1024*1024);
+
+    // void *ptr = myalloc(1);
+
   if(smem.checksum != sizeof(smem)){
     // problem!
     smem.status = AUDIO_ERROR_STATUS;

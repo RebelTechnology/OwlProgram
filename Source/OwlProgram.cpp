@@ -8,13 +8,14 @@
 #include "PatchRegistry.h"
 #include "PatchController.h"
 #include "ApplicationSettings.h"
-// #include "../Libraries/OwlPatches/GainPatch.hpp"
+#include "../Libraries/OwlPatches/GainPatch.hpp"
 
 void setup(){
   setLed(GREEN);
+  // int* foo = new int; // causes reset
   registry.init();
   settings.init(); // todo: get rid of ApplicationSettings
-  // patches.init(); // causes reset?
+  patches.init(); // causes reset?
 }
 
 SampleBuffer buffer CCM;
@@ -40,12 +41,9 @@ void blinky(){
   }
 }
 
-// GainPatch patch;
-
 void processBlock(){
   blinky();
   buffer.split(smem.audio_input, smem.audio_blocksize);
-  // patch.processAudio(buffer);
   // patches.process(buffer);
   buffer.comb(smem.audio_output);
 }

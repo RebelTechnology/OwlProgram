@@ -1,6 +1,7 @@
 #include "StompBox.h"
 #include <string.h>
 #include <stdlib.h>
+#include "myalloc.h"
 
 class MemoryBuffer : public AudioBuffer {
 protected:
@@ -28,13 +29,13 @@ public:
 class ManagedMemoryBuffer : public MemoryBuffer {
 public:
   ManagedMemoryBuffer(int ch, int sz) :
-    MemoryBuffer((float*)malloc(ch*sz*sizeof(float)), ch, sz) {
+    MemoryBuffer((float*)myalloc(ch*sz*sizeof(float)), ch, sz) {
     if(buffer == NULL){
       channels = 0;
       size = 0;
     }
   }
   ~ManagedMemoryBuffer(){
-    free(buffer);
+    myfree(buffer);
   }
 };
