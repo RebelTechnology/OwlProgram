@@ -1,11 +1,11 @@
 /*
-g++ -Wall -g -I/opt/local/include -L/opt/local/lib -o SampleBufferTest -lboost_unit_test_framework  SampleBufferTest.cpp && ./SampleBufferTest
+g++ -Wall -g -I/opt/local/include -L/opt/local/lib -o SampleBufferTest  SampleBufferTest.cpp -lboost_unit_test_framework  && ./SampleBufferTest
 */
 
 #include <stdint.h>
 typedef int16_t q15_t;
 typedef int32_t q31_t;
-#define AUDIO_BITDEPTH 32
+#define AUDIO_BITDEPTH 16
 #define AUDIO_CHANNELS 2
 #include "SampleBuffer.hpp"
 
@@ -22,12 +22,14 @@ BOOST_AUTO_TEST_CASE(universeInOrder){
 }
 
 BOOST_AUTO_TEST_CASE(testSplit){
-  SampleBuffer<128> buffer;
+  SampleBuffer buffer;
+  buffer.setSize(128);
   float samples[256];
   for(int i=0; i<256; ++i)
     samples[i] = i/128.0 - 1.0f;
-  uint16_t input[512];
+  int16_t input[512];
   for(int i=0; i<256; ++i){
+#if AUDIO_BITDEPTH == 24
 #ifdef AUDIO_BIGEND
 //     // big endian
     input[i*2] = (((int32_t)(samples[i]*2147483648.0f)) >> 16) & 0xffff; // MSB
@@ -37,9 +39,12 @@ BOOST_AUTO_TEST_CASE(testSplit){
     input[i*2] = ((int32_t)(samples[i]*2147483648.0f)) & 0xffff; // LSB
     input[i*2+1] = (((int32_t)(samples[i]*2147483648.0f)) >> 16) & 0xffff; // MSB
 #endif
+#else /* AUDIO_BITDEPTH == 24 */
+    input[i] = ((int16_t)(samples[i]*32768.0f));
+#endif
   }
 //     input[i] = ((int32_t)(samples[i]*8388608.0f))<<8;
-  buffer.split(input);
+  buffer.split(input, 256);
   for(int i=0; i<128; ++i){
     BOOST_CHECK_CLOSE(buffer.getSamples(0)[i], samples[i*2], TEST_PRECISION);
     BOOST_CHECK_CLOSE(buffer.getSamples(1)[i], samples[i*2+1], TEST_PRECISION);
@@ -74,9 +79,10 @@ BOOST_AUTO_TEST_CASE(testSplit){
 // }
 
 BOOST_AUTO_TEST_CASE(testCombAndSplit){
-  SampleBuffer<128> buffer;
+  SampleBuffer buffer;
+  buffer.setSize(128);
   float samples[128];
-  uint16_t output[512];
+  int16_t output[512];
 
   for(int i=0; i<128; ++i)
     samples[i] = i/64.0 - 1.0f;
@@ -87,7 +93,7 @@ BOOST_AUTO_TEST_CASE(testCombAndSplit){
   }
 
   buffer.comb(output);
-  buffer.split(output);
+  buffer.split(output, 256);
 
   for(int i=0; i<128; ++i){
     BOOST_CHECK_CLOSE(buffer.getSamples(0)[i], samples[i], TEST_PRECISION);
@@ -96,9 +102,10 @@ BOOST_AUTO_TEST_CASE(testCombAndSplit){
 }
 
 BOOST_AUTO_TEST_CASE(testMultiplyAndCombSplit){
-  SampleBuffer<128> buffer;
+  SampleBuffer buffer;
+  buffer.setSize(128);
   float samples[128];
-  uint16_t output[512];
+  int16_t output[512];
 
   for(int i=0; i<128; ++i)
     samples[i] = i/64.0 - 1.0f;
@@ -108,7 +115,7 @@ BOOST_AUTO_TEST_CASE(testMultiplyAndCombSplit){
     buffer.getSamples(1)[i] = samples[i];
   }
   buffer.comb(output);
-  buffer.split(output);
+  buffer.split(output, 256);
 
   for(int i=0; i<buffer.getSize(); ++i){
 //     buffer.getSamples(0)[i] = samples[i] * 0.9;
@@ -121,19 +128,20 @@ BOOST_AUTO_TEST_CASE(testMultiplyAndCombSplit){
     BOOST_CHECK_CLOSE(buffer.getSamples(0)[i], samples[i]*0.9, TEST_PRECISION);
     BOOST_CHECK_CLOSE(buffer.getSamples(1)[i], samples[i]*0.1, TEST_PRECISION);
   }
-  buffer.comb(output);
-  buffer.split(output);
-  for(int i=0; i<128; ++i){
-    BOOST_CHECK_CLOSE(buffer.getSamples(0)[i], samples[i]*0.9, TEST_PRECISION);
-    BOOST_CHECK_CLOSE(buffer.getSamples(1)[i], samples[i]*0.1, TEST_PRECISION);
-  }
+  // buffer.comb(output);
+  // buffer.split(output, 256);
+  // for(int i=0; i<128; ++i){
+  //   BOOST_CHECK_CLOSE(buffer.getSamples(0)[i], samples[i]*0.9, TEST_PRECISION);
+  //   BOOST_CHECK_CLOSE(buffer.getSamples(1)[i], samples[i]*0.1, TEST_PRECISION);
+  // }
 }
 
 BOOST_AUTO_TEST_CASE(testCombAndSplitAndComb){
-  SampleBuffer<128> buffer;
+  SampleBuffer buffer;
+  buffer.setSize(128);
   float samples[128];
-  uint16_t output[512];
-  uint16_t input[512];
+  int16_t output[512];
+  int16_t input[512];
 
   for(int i=0; i<128; ++i)
     samples[i] = i/64.0 - 1.0f;
@@ -144,10 +152,10 @@ BOOST_AUTO_TEST_CASE(testCombAndSplitAndComb){
   }
 
   buffer.comb(output);
-  buffer.split(output);
+  buffer.split(output, 256);
   buffer.comb(input);
 
-  for(int i=0; i<512; ++i)
+  for(int i=0; i<256; ++i)
     BOOST_CHECK_EQUAL(input[i], output[i]);
 }
 

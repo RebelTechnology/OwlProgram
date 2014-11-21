@@ -6,6 +6,8 @@
 #include "StompBox.h"
 #include "device.h"
 
+typedef int16_t q15_t;
+
 // template<int bits, bool saturate, int size, float* left, float* right>
 class SampleBuffer : public AudioBuffer {
 protected:
@@ -13,7 +15,7 @@ protected:
   float right[AUDIO_MAX_BLOCK_SIZE];
   uint16_t size;
 public:
-  void split(uint16_t* input, uint16_t samples){
+  void split(int16_t* input, uint16_t samples){
 #if AUDIO_BITDEPTH == 16
     size = samples >> 1u;
     float* l = left;
@@ -60,7 +62,7 @@ public:
 #endif /* AUDIO_BIGEND */
 #endif /* AUDIO_BITDEPTH == 16 */
   }
-  void comb(uint16_t* output){
+  void comb(int16_t* output){
 #if AUDIO_BITDEPTH == 16
     float* l = left;
     float* r = right;
@@ -84,7 +86,7 @@ public:
     float* l = left;
     float* r = right;
     uint32_t blkCnt = size;
-    uint16_t* dst = output;
+    int16_t* dst = output;
     int32_t qint;
     while(blkCnt > 0u){
 #ifdef AUDIO_SATURATE_SAMPLES
@@ -130,11 +132,11 @@ public:
   inline int getChannels(){
     return AUDIO_CHANNELS;
   }
-  // void setSize(uint16_t sz){
+  void setSize(uint16_t sz){
   // size is set by split()
-  //   if(sz <= AUDIO_MAX_BLOCK_SIZE)
-  //     size = sz;
-  // }
+    if(sz <= AUDIO_MAX_BLOCK_SIZE)
+      size = sz;
+  }
   inline int getSize(){
     return size;
   }
