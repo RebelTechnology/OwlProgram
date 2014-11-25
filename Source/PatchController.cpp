@@ -3,7 +3,7 @@
 // #include "CodecController.h"
 #include "MemoryBuffer.hpp"
 #include "SharedMemory.h"
-#include "ApplicationSettings.h"
+#include "PatchParameters.h"
 
 #define SINGLE_MODE          1
 #define DUAL_GREEN_MODE      2
@@ -19,15 +19,11 @@ PatchController::PatchController(){
 PatchController::~PatchController(){
 }
 
-void PatchController::setParameterValues(uint16_t* values){
-  parameterValues = values;
-}
-
 void PatchController::init(){
   parameterValues = smem.parameters;
-  setActiveSlot(GREEN);
-  initialisePatch(GREEN);
-  initialisePatch(RED);
+  // setActiveSlot(GREEN);
+  initialisePatch(GREEN, getGreenPatchId());
+  initialisePatch(RED, getRedPatchId());
 }
 
 void PatchController::reset(){
@@ -43,15 +39,15 @@ void PatchController::processParallel(AudioBuffer& buffer){
 }
 
 // __attribute__ ((section (".coderam")))
-void PatchController::initialisePatch(LedPin slot){
+void PatchController::initialisePatch(LedPin slot, uint8_t index){
   // the initialisingProcessor must be set
   // so that it can be picked up by a call to getInitialisingProcessor() from the Patch constructor
   if(slot == RED){
     initialisingProcessor = &red;
-    red.setPatch(settings.patch_red);
+    red.setPatch(index);
   }else{
     initialisingProcessor = &green;
-    green.setPatch(settings.patch_green);
+    green.setPatch(index);
   }
 }
 
@@ -61,23 +57,26 @@ PatchProcessor* PatchController::getInitialisingPatchProcessor(){
 
 // __attribute__ ((section (".coderam")))
 void PatchController::process(AudioBuffer& buffer){
-  if(activeSlot == GREEN && green.index != settings.patch_green){
-    initialisePatch(GREEN);
-    // codec.softMute(false);
-    debugClear();
-    return;
-  }else if(activeSlot == RED && red.index != settings.patch_red){
-    initialisePatch(RED);
-    // codec.softMute(false);
-    debugClear();
-    return;
+  if(isButtonPressed(RED_BUTTON)){
+    mode |= 1;
+    if(red.index != getRedPatchId()){
+      initialisePatch(RED, getRedPatchId());
+      return;
+    }
+  }else{
+    mode &= ~1;
+    if(green.index != getGreenPatchId()){
+      initialisePatch(GREEN, getGreenPatchId());
+      return;
+    }
   }
   switch(mode){
-  case SINGLE_MODE:
+  case SINGLE_GREEN_MODE:
   case DUAL_GREEN_MODE:
     green.setParameterValues(parameterValues);
     green.patch->processAudio(buffer);
     break;
+  case SINGLE_RED_MODE:
   case DUAL_RED_MODE:
     red.setParameterValues(parameterValues);
     red.patch->processAudio(buffer);
@@ -103,48 +102,48 @@ void PatchController::process(AudioBuffer& buffer){
   }
 }
 
-void PatchController::setPatch(LedPin slot, uint8_t index){
-  // codec.softMute(true);
-  if(slot == RED){
-    settings.patch_red = index;
-  }else{
-    settings.patch_green = index;
-  }
-  setActiveSlot(slot);
-}
+// void PatchController::setPatch(LedPin slot, uint8_t index){
+//   // codec.softMute(true);
+//   if(slot == RED){
+//     settings.patch_red = index;
+//   }else{
+//     settings.patch_green = index;
+//   }
+//   setActiveSlot(slot);
+// }
 
-LedPin PatchController::getActiveSlot(){
-  return activeSlot;
-}
+// LedPin PatchController::getActiveSlot(){
+//   return activeSlot;
+// }
 
-void PatchController::setActiveSlot(LedPin slot){
-  switch(settings.patch_mode){
-  case(PATCHMODE_SINGLE):
-    mode = SINGLE_MODE;
-    break;
-  case(PATCHMODE_DUAL):
-    mode = slot == RED ? DUAL_RED_MODE : DUAL_GREEN_MODE;
-    break;
-  case(PATCHMODE_SERIES):
-    mode = slot == RED ? SERIES_RED_MODE : SERIES_GREEN_MODE;
-    break;
-  case(PATCHMODE_PARALLEL):
-    mode = slot == RED ? PARALLEL_RED_MODE : PARALLEL_GREEN_MODE;
-    break;
-  }
-  activeSlot = slot;
-  setLed(slot);
-}
+// void PatchController::setActiveSlot(LedPin slot){
+//   switch(getPatchMode()){
+//   case(PATCHMODE_SINGLE):
+//     mode = SINGLE_MODE;
+//     break;
+//   case(PATCHMODE_DUAL):
+//     mode = slot == RED ? DUAL_RED_MODE : DUAL_GREEN_MODE;
+//     break;
+//   case(PATCHMODE_SERIES):
+//     mode = slot == RED ? SERIES_RED_MODE : SERIES_GREEN_MODE;
+//     break;
+//   case(PATCHMODE_PARALLEL):
+//     mode = slot == RED ? PARALLEL_RED_MODE : PARALLEL_GREEN_MODE;
+//     break;
+//   }
+//   activeSlot = slot;
+//   setLed(slot);
+// }
 
-void PatchController::toggleActiveSlot(){
-  if(activeSlot == GREEN)
-    setActiveSlot(RED);
-  else
-    setActiveSlot(GREEN);
-}
+// void PatchController::toggleActiveSlot(){
+//   if(activeSlot == GREEN)
+//     setActiveSlot(RED);
+//   else
+//     setActiveSlot(GREEN);
+// }
 
 PatchProcessor* PatchController::getActivePatchProcessor(){
-  if(activeSlot == RED)
+  if(mode & 1)
     return &red;
   return &green;
 }

@@ -5,10 +5,8 @@
 #include <string.h>
 #include "StompBox.h"
 #include "device.h"
+#include "arm_math.h"
 
-typedef int16_t q15_t;
-
-// template<int bits, bool saturate, int size, float* left, float* right>
 class SampleBuffer : public AudioBuffer {
 protected:
   float left[AUDIO_MAX_BLOCK_SIZE];

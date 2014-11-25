@@ -1,7 +1,7 @@
 TEMPLATEROOT = .
 
-CFLAGS = -g 
-# CFLAGS   = -O2 
+# CFLAGS = -g 
+CFLAGS   = -O2 
 # CFLAGS   = -O1
 CFLAGS  += -Wall -Wcpp -DUSE_FULL_ASSERT -D__FPU_PRESENT=1 -D__FPU_USED=1
 CFLAGS  += -DEXTERNAL_SRAM
@@ -15,7 +15,7 @@ LDSCRIPT = Source/flash.ld
 C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c myalloc.c
 CPP_SRC = main.cpp
 CPP_SRC += OwlProgram.cpp StompBox.cpp PatchController.cpp operators.cpp
-CPP_SRC += ApplicationSettings.cpp PatchProcessor.cpp PatchRegistry.cpp
+CPP_SRC += PatchProcessor.cpp PatchRegistry.cpp
 
 OBJS =  $(C_SRC:%.c=Build/%.o)  $(CPP_SRC:%.cpp=Build/%.o)
 

@@ -7,21 +7,18 @@
 #include "SampleBuffer.hpp"
 #include "PatchRegistry.h"
 #include "PatchController.h"
-#include "ApplicationSettings.h"
 #include "../Libraries/OwlPatches/GainPatch.hpp"
 
 void setup(){
   setLed(GREEN);
   // int* foo = new int; // causes reset
   registry.init();
-  settings.init(); // todo: get rid of ApplicationSettings
   patches.init(); // causes reset?
 }
 
 SampleBuffer buffer;
 PatchRegistry registry;
 PatchController patches;
-ApplicationSettings settings;
 
 void blinky(){
   static uint8_t counter = 0;

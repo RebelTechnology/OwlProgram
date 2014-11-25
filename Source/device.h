@@ -13,7 +13,7 @@
 #define RED_PATCH                    1
 
 #define AUDIO_BIGEND
-/* #define AUDIO_SATURATE_SAMPLES // SATURATE adds almost 500 cycles to 24-bit mode */
+#define AUDIO_SATURATE_SAMPLES // SATURATE adds almost 500 cycles to 24-bit mode
 #define AUDIO_PROTOCOL               I2S_PROTOCOL_PHILIPS
 #define AUDIO_FORMAT                 I2S_FORMAT_16bit
 #define AUDIO_CODEC_MASTER           true
