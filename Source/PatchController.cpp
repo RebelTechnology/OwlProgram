@@ -3,7 +3,6 @@
 // #include "CodecController.h"
 #include "MemoryBuffer.hpp"
 #include "SharedMemory.h"
-#include "PatchParameters.h"
 
 #define SINGLE_MODE          1
 #define DUAL_GREEN_MODE      2
@@ -142,8 +141,14 @@ void PatchController::process(AudioBuffer& buffer){
 //     setActiveSlot(GREEN);
 // }
 
-PatchProcessor* PatchController::getActivePatchProcessor(){
-  if(mode & 1)
-    return &red;
-  return &green;
-}
+// Patch* PatchController::getActivePatch(){
+//   if(mode & 1)
+//     return &red;
+//   return &green;
+// }
+
+// PatchProcessor* PatchController::getActivePatchProcessor(){
+//   if(mode & 1)
+//     return &red;
+//   return &green;
+// }

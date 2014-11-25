@@ -4,10 +4,12 @@
 #include "owlcontrol.h"
 #include "device.h"
 #include "SharedMemory.h"
+#include "PatchProcessor.h"
+#include "PatchController.h"
 
 AudioBuffer::~AudioBuffer(){}
 
-Patch::Patch() { // : processor(patches.getInitialisingPatchProcessor()){
+Patch::Patch() : processor(patches.getInitialisingPatchProcessor()){
 }
 
 Patch::~Patch(){}
@@ -26,17 +28,24 @@ int Patch::getBlockSize(){
 }
 
 float Patch::getParameterValue(PatchParameterId pid){
-  if(pid < smem.parameters_size)
-    return smem.parameters[pid]/4096.0f;
-  return 0.0;
+  return processor->getParameterValue(pid);
+  // if(pid < smem.parameters_size)
+  //   return smem.parameters[pid]/4096.0f;
+  // return 0.0;
 }
 
 AudioBuffer* Patch::createMemoryBuffer(int channels, int samples){
-  return NULL; // todo
-  // return processor->createMemoryBuffer(channels, samples);
+  return processor->createMemoryBuffer(channels, samples);
+  // MemoryBuffer* buf = new ManagedMemoryBuffer(channels, size);
+  // if(buf == NULL)
+  //   return NULL;
+  // buffers[bufferCount++] = buf;
+  // buf->clear();
+  // return buf;
 }
 
 void Patch::setButton(PatchButtonId bid, bool pressed){
+  // processor->setButton(bid, pressed);
   if(pressed)
     smem.buttons |= 1<<bid;
   else
@@ -44,5 +53,6 @@ void Patch::setButton(PatchButtonId bid, bool pressed){
 }
 
 bool Patch::isButtonPressed(PatchButtonId bid){
+  // return processor->isButtonPressed(bid);
   return smem.buttons & (1<<bid);
 }

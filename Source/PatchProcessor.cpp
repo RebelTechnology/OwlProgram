@@ -33,12 +33,12 @@ void PatchProcessor::setPatch(uint8_t patchIndex){
   patch = registry.create(index);
 }
 
-void PatchProcessor::registerParameter(PatchParameterId pid, const char* name){
-  if(smem.registerPatchParameter != NULL)
-    smem.registerPatchParameter(pid, name);
+// void PatchProcessor::registerParameter(PatchParameterId pid, const char* name){
+//   if(smem.registerPatchParameter != NULL)
+//     smem.registerPatchParameter(pid, name);
   // if(pid < NOF_ADC_VALUES)
   //   parameterNames[pid] = name;
-}
+// }
 
 // const char* PatchProcessor::getParameterName(PatchParameterId pid){
 //   if(pid < NOF_ADC_VALUES)

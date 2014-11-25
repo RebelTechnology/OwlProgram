@@ -1,8 +1,10 @@
 #ifndef __PatchController_h__
 #define __PatchController_h__
 
-#include "PatchProcessor.h"
+/* #include "PatchProcessor.h" */
 #include "owlcontrol.h"
+#include "StompBox.h"
+#include "PatchProcessor.h"
 
 class PatchController;
 extern PatchController patches;
@@ -31,29 +33,31 @@ public:
   /* void setActiveSlot(LedPin slot); */
   void initialisePatch(LedPin slot, uint8_t index);
   PatchProcessor* getInitialisingPatchProcessor();
-  PatchProcessor* getActivePatchProcessor();
-  PatchProcessor* getCurrentPatchProcessor(){
-    /* deprecated: the FAUST OWL target depends on this method */
-    return getActivePatchProcessor();
-  }
+  /* PatchProcessor* getActivePatchProcessor(); */
+  /* PatchProcessor* getCurrentPatchProcessor(){ */
+  /*   /\* deprecated: the FAUST OWL target depends on this method *\/ */
+  /*   return getActivePatchProcessor(); */
+  /* } */
+  /* Patch* getActivePatch(); */
 private:
   void processParallel(AudioBuffer& buffer);
   PatchProcessor* initialisingProcessor;
   PatchProcessor green;
   PatchProcessor red;
-  /* LedPin activeSlot = NONE; */
   uint8_t mode;
   uint16_t* parameterValues;
 
 public:  
   uint16_t getParameter(int pid){
-    return smem.parameters[pid];
+      return smem.parameters[pid];
   }
   void setParameter(int pid, uint16_t value){
     smem.parameters[pid] = value;
   }
   float getParameterValue(PatchParameterId pid){
-    return smem.parameters[pid]/4096.0f;
+    if(pid < smem.parameters_size)
+      return smem.parameters[pid]/4096.0f;
+    return 0.0f;
   }
   bool isButtonPressed(PatchButtonId bid){
     return smem.buttons & (1<<bid);

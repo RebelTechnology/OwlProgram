@@ -13,8 +13,8 @@ LDLIBS   = -lm
 LDSCRIPT = Source/flash.ld
 
 C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c myalloc.c
-CPP_SRC = main.cpp
-CPP_SRC += OwlProgram.cpp StompBox.cpp PatchController.cpp operators.cpp
+CPP_SRC = main.cpp operators.cpp
+CPP_SRC += OwlProgram.cpp StompBox.cpp PatchController.cpp
 CPP_SRC += PatchProcessor.cpp PatchRegistry.cpp
 
 OBJS =  $(C_SRC:%.c=Build/%.o)  $(CPP_SRC:%.cpp=Build/%.o)

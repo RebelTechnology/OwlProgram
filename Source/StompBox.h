@@ -2,6 +2,7 @@
 #define __StompBox_h__
 
 #include <string>
+class PatchProcessor;
 
 enum PatchParameterId {
   PARAMETER_A,
@@ -42,6 +43,10 @@ public:
 public:
   virtual void processAudio(AudioBuffer& output) = 0;
 private:
+  PatchProcessor* processor;
+  /* uint8_t bufferCount; */
+  /* uint16_t parameterValues[NOF_ADC_VALUES]; */
+  /* AudioBuffer* buffers[MAX_BUFFERS_PER_PATCH]; */
 };
 
 #endif // __StompBox_h__
