@@ -18,11 +18,13 @@ FIRMWARESENDER = Tools/FirmwareSender/FirmwareSender
 C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c myalloc.c
 CPP_SRC = main.cpp operators.cpp
 OWL_SRC = StompBox.cpp PatchProcessor.cpp
+SOLO_SRC = SoloProgram.cpp
+MULTI_SRC = PatchController.cpp PatchRegistry.cpp MultiProgram.cpp
 
 OBJS =  $(C_SRC:%.c=Build/%.o) $(CPP_SRC:%.cpp=Build/%.o)
 
-SOLO_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(BUILD)/OwlSoloProgram.o
-MULTI_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(BUILD)/PatchController.o $(BUILD)/OwlMultiProgram.o $(BUILD)/PatchRegistry.o 
+SOLO_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(SOLO_SRC:%.cpp=Build/%.o)
+MULTI_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(MULTI_SRC:%.cpp=Build/%.o)
 BLINKY_OBJS = $(BUILD)/BlinkyProgram.o 
 
 # object files

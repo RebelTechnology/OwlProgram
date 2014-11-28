@@ -8,7 +8,7 @@ void setup(){
   setLed(GREEN);
 }
 
-void processBlock(){
+void blinky(){
   static uint8_t counter = 0;
   switch(counter++ & 0xff){
   case 0x00:
@@ -24,4 +24,20 @@ void processBlock(){
     setLed(NONE);
     break;
   }
+}
+
+void copyBlock(){
+  for(int i=0; i<smem.audio_blocksize; ++i)
+    smem.audio_output[i] = smem.audio_input[i];
+}
+
+void clearBlock(){
+  for(int i=0; i<smem.audio_blocksize; ++i)
+    smem.audio_output[i] = 0;
+}
+
+void processBlock(){
+  blinky();
+  // copyBlock();
+  // clearBlock();
 }
