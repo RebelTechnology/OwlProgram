@@ -7,7 +7,6 @@
 #include "SampleBuffer.hpp"
 #include "PatchRegistry.h"
 #include "PatchController.h"
-#include "../Libraries/OwlPatches/GainPatch.hpp"
 
 void setup(){
   setLed(GREEN);
@@ -39,7 +38,7 @@ void blinky(){
 }
 
 void processBlock(){
-  blinky();
+  // blinky();
   // for(int i=0; i<smem.audio_blocksize; ++i){
   //   // smem.audio_output[i] = 0;
   //   smem.audio_output[i] = smem.audio_input[i];

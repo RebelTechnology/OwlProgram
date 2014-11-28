@@ -56,6 +56,7 @@ PatchProcessor* PatchController::getInitialisingPatchProcessor(){
 
 // __attribute__ ((section (".coderam")))
 void PatchController::process(AudioBuffer& buffer){
+  mode = getPatchMode();
   if(isButtonPressed(RED_BUTTON)){
     mode |= 1;
     if(red.index != getRedPatchId()){
