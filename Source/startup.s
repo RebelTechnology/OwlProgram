@@ -87,11 +87,8 @@ Infinite_Loop:
 g_pfnVectors:
   .word  _estack
   .word  main
-  ;; .word 0xDADAC0DE
-  ;; .byte 'O'
-  ;; .byte 'W'
-  ;; .byte 'L'
-  ;; .byte 'a'
+/*  .word 0xDADAC0DE */
+/* .string "OWL Program" */
   .word  NMI_Handler
   .word  HardFault_Handler
   .word  MemManage_Handler

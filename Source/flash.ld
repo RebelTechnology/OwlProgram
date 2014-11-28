@@ -1,6 +1,4 @@
-/*
-Linker script for STM32F407
-*/
+/* Linker script for STM32F407 */
 
 /* Entry Point */
 ENTRY(Reset_Handler)
@@ -21,8 +19,8 @@ MEMORY
   /* PATCHFLASH (rx)  : ORIGIN = 0x08040000, LENGTH = 128K   /\* Sector 6 *\/ /\* total Flash memory is 1Mb *\/ */
   SHAREDRAM (rwx)  : ORIGIN = 0x10000000, LENGTH = 8K
   CCMRAM (rwx)     : ORIGIN = 0x10002000, LENGTH = 56K    /* total CCM is 64kb */
-  LOADERRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 64K
-  PATCHRAM (rwx)   : ORIGIN = 0x20010000, LENGTH = 48K    /* total RAM is 112kb */
+  LOADERRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 32K    /* 32k for the main firmware */
+  PATCHRAM (rwx)   : ORIGIN = 0x20008000, LENGTH = 80K    /* total RAM is 112kb */
   BANK1_SRAM1 (rx) : ORIGIN = 0x60000000, LENGTH = 0K
   BANK1_SRAM2 (rx) : ORIGIN = 0x64000000, LENGTH = 0K
   BANK1_SRAM3 (rx) : ORIGIN = 0x68000000, LENGTH = 1M

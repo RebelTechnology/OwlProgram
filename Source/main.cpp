@@ -22,7 +22,11 @@ extern "C" void __libc_init_array();
 // extern void __init_user();
 
 #define DEBUG_DWT
-
+extern "C"{
+int _exit() {
+  return 0;
+}
+}
 #include <malloc.h>
 extern char *heap_end;
 extern int allocated_mem;
@@ -76,14 +80,11 @@ int main(void){
 #endif /* DEBUG_DWT */
 
       if(smem.status == AUDIO_EXIT_STATUS)
-	// smem.exitProgram();
     	return 0;
       smem.status = AUDIO_PROCESSED_STATUS; // always check status before changing it
     }
     if(smem.status == AUDIO_EXIT_STATUS)
-	// smem.exitProgram();
       return 0;
   }
-	// smem.exitProgram();
-  // return -1;
+  return -1;
 }

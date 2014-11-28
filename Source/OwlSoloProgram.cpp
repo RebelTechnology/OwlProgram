@@ -1,9 +1,8 @@
 #include "SharedMemory.h"
 #include "SampleBuffer.hpp"
 #include "PatchProcessor.h"
-
-#include "../Libraries/OwlPatches/SimpleDelayPatch.hpp"
-#include "../Libraries/OwlPatches/GainPatch.hpp"
+#include "basicmaths.h"
+#include "solopatch.h"
 
 PatchProcessor processor;
 
@@ -11,9 +10,16 @@ PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
 }
 
+#define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
+
+void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){
+  if(smem.registerPatch != NULL)
+    smem.registerPatch(name, inputs, outputs);
+  processor.setPatch(patch);
+}
+
 void setup(){
-  // processor.setPatch(new GainPatch());
-  processor.setPatch(new SimpleDelayPatch());
+#include "solopatch.cpp"
 }
 
 SampleBuffer buffer;

@@ -11,8 +11,8 @@
 void setup(){
   setLed(GREEN);
   // int* foo = new int; // causes reset
-  registry.init();
-  patches.init(); // causes reset?
+  // registry.init();
+  // patches.init(); // causes reset?
 }
 
 SampleBuffer buffer;
@@ -38,12 +38,12 @@ void blinky(){
 }
 
 void processBlock(){
-  // blinky();
+  blinky();
   // for(int i=0; i<smem.audio_blocksize; ++i){
   //   // smem.audio_output[i] = 0;
   //   smem.audio_output[i] = smem.audio_input[i];
   // }
-  buffer.split(smem.audio_input, smem.audio_blocksize);
-  patches.process(buffer);
-  buffer.comb(smem.audio_output);
+  // buffer.split(smem.audio_input, smem.audio_blocksize);
+  // patches.process(buffer);
+  // buffer.comb(smem.audio_output);
 }
