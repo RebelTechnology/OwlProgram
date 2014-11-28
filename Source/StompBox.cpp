@@ -9,7 +9,9 @@
 
 AudioBuffer::~AudioBuffer(){}
 
-Patch::Patch() : processor(patches.getInitialisingPatchProcessor()){
+PatchProcessor* getInitialisingPatchProcessor();
+
+Patch::Patch() : processor(getInitialisingPatchProcessor()){
 }
 
 Patch::~Patch(){}

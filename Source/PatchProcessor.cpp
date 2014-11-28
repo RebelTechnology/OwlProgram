@@ -24,14 +24,19 @@ void PatchProcessor::clear(){
   // memset(parameterNames, 0, sizeof(parameterNames));
 }
 
-void PatchProcessor::setPatch(uint8_t patchIndex){
-  clear();
-  if(patchIndex < registry.getNumberOfPatches())
-    index = patchIndex;
-  else
-    index = 0;
-  patch = registry.create(index);
+void PatchProcessor::setPatch(Patch* p){
+  patch = p;
 }
+
+
+// void PatchProcessor::setPatch(uint8_t patchIndex){
+//   clear();
+//   if(patchIndex < registry.getNumberOfPatches())
+//     index = patchIndex;
+//   else
+//     index = 0;
+//   patch = registry.create(index);
+// }
 
 // void PatchProcessor::registerParameter(PatchParameterId pid, const char* name){
 //   if(smem.registerPatchParameter != NULL)

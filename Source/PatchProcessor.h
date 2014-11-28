@@ -10,7 +10,7 @@ public:
   PatchProcessor();
   ~PatchProcessor();
   void clear();
-  void setPatch(uint8_t index);
+  void setPatch(Patch* patch);
   /* void registerParameter(PatchParameterId pid, const char* name); */
   /* const char* getParameterName(PatchParameterId pid); */
   float getParameterValue(PatchParameterId pid);

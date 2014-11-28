@@ -3,6 +3,8 @@
 // #include "CodecController.h"
 #include "MemoryBuffer.hpp"
 #include "SharedMemory.h"
+#include "PatchRegistry.h"
+#include "PatchProcessor.h"
 
 #define SINGLE_MODE          1
 #define DUAL_GREEN_MODE      2
@@ -43,11 +45,19 @@ void PatchController::initialisePatch(LedPin slot, uint8_t index){
   // so that it can be picked up by a call to getInitialisingProcessor() from the Patch constructor
   if(slot == RED){
     initialisingProcessor = &red;
-    red.setPatch(index);
+    Patch* patch = registry.create(index);
+    red.setPatch(patch);
+    red.index = index;
   }else{
     initialisingProcessor = &green;
-    green.setPatch(index);
+    Patch* patch = registry.create(index);
+    green.setPatch(patch);
+    green.index = index;
   }
+}
+
+PatchProcessor* getInitialisingPatchProcessor(){
+  return patches.getInitialisingPatchProcessor();
 }
 
 PatchProcessor* PatchController::getInitialisingPatchProcessor(){

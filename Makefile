@@ -14,10 +14,13 @@ LDSCRIPT = Source/flash.ld
 
 C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c myalloc.c
 CPP_SRC = main.cpp operators.cpp
-CPP_SRC += OwlProgram.cpp StompBox.cpp PatchController.cpp
-CPP_SRC += PatchProcessor.cpp PatchRegistry.cpp
+CPP_SRC += StompBox.cpp
+CPP_SRC += PatchProcessor.cpp
 
 OBJS =  $(C_SRC:%.c=Build/%.o)  $(CPP_SRC:%.cpp=Build/%.o)
+
+SOLO_OBJS = $(BUILD)/OwlSoloProgram.o 
+MULTI_OBJS =  $(BUILD)/PatchController.o $(BUILD)/OwlProgram.o $(BUILD)/PatchRegistry.o 
 
 # object files
 OBJS += $(BUILD)/stm32f4xx_flash.o
@@ -36,3 +39,12 @@ OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
 
 # include common make file
 include $(TEMPLATEROOT)/Makefile.f4
+
+# Build executable 
+$(BUILD)/solo.elf : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(LDLIBS)
+
+$(BUILD)/multi.elf : $(MULTI_OBJS) $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -o $@ $(MULTI_OBJS) $(OBJS) $(LDLIBS)
+
+all: $(BUILD)/multi.elf

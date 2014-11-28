@@ -35,8 +35,6 @@ vpath %.c $(DISCOVERY_FILE)
 vpath %.c $(USB_DEVICE_FILE)/Core/src
 vpath %.c $(USB_OTG_FILE)/src/
 
-all: bin
-
 # Build executable 
 $(ELF) : $(OBJS) $(LDSCRIPT)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
@@ -64,7 +62,7 @@ $(BUILD)/%.bin: $(BUILD)/%.elf
 	@echo Successfully built OWL firmware $@
 
 clean:
-	rm -f $(OBJS) $(OBJS:.o=.d) $(ELF) $(CLEANOTHER) $(BIN) $(ELF:.elf=.s) $(OBJS:.o=.s) gdbscript
+	rm -f $(OBJS) $(SOLO_OBJS) $(MULTI_OBJS) $(OBJS:.o=.d) $(SOLO_OBJS:.o=.d) $(MULTI_OBJS:.o=.d) $(ELF) $(CLEANOTHER) $(BIN) $(ELF:.elf=.s) $(OBJS:.o=.s) gdbscript
 
 debug: $(ELF)
 	echo "target extended localhost:4242" > gdbscript
@@ -103,4 +101,4 @@ bootloader: $(BOOTLOADER)
 	@echo Uploaded $(BOOTLOADER) to OWL bootsector
 
 # pull in dependencies
--include $(OBJS:.o=.d)
+-include $(OBJS:.o=.d) $(SOLO_OBJS:.o=.d) $(MULTI_OBJS:.o=.d)
