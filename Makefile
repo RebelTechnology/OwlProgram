@@ -68,3 +68,18 @@ multi: $(BUILD)/multi.bin
 
 blinky: $(BUILD)/blinky.bin
 	$(FIRMWARESENDER) -in  $< -out "OWL FS"
+
+
+# Heavy 
+HEAVY_SRC = HeavyProgram.cpp
+HEAVY_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(HEAVY_SRC:%.cpp=Build/%.o)
+HEAVY_FILES = $(wildcard HeavySource/*.c)
+HEAVY_OBJS += $(addprefix Build/, $(notdir $(HEAVY_FILES:.c=.o)))
+vpath %.c $(TEMPLATEROOT)/HeavySource
+CFLAGS += -D__unix__
+
+$(BUILD)/heavy.elf : $(HEAVY_OBJS) $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -o $@ $(HEAVY_OBJS) $(OBJS) $(LDLIBS)
+
+heavy:  $(BUILD)/heavy.bin
+	$(FIRMWARESENDER) -in  $< -out "OWL FS"
