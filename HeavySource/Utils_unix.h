@@ -8,9 +8,7 @@
 
 #if HV_UNIX
 #include <assert.h>
-//#include <immintrin.h>
 #include <math.h>
-// #include <mm_malloc.h>
 #include <malloc.h>
 #include <alloca.h>
 #include <stdarg.h>
@@ -25,8 +23,8 @@
 
 // Memory management
 #define hv_alloca(_n) alloca(_n)
-#define hv_malloc(_n) _mm_malloc(_n, 32) // 32 to ensure AVX compatability (16 otherwise)
-#define hv_free(x) _mm_free(x)
+#define hv_malloc(_n) malloc(_n)
+#define hv_free(x) free(x)
 #define hv_realloc(a, b) realloc(a, b)
 #define hv_memcpy(a, b, c) memcpy(a, b, c)
 #define hv_memset(a, b) memset(a, 0, b)
