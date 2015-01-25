@@ -13,18 +13,13 @@
 
 // object includes
 #include "SignalVar.h"
-#include "SignalPhasor.h"
-#include "ControlVar.h"
-#include "ControlBinop.h"
 #include "HeavyMath.h"
 
 typedef struct Hv_heavy {
   HvBase base;
 
   // objects
-  SignalPhasor sPhasor_iCqih;
-  ControlBinop cBinop_uX4CI;
-  ControlVar cVar_yjsJz;
+  SignalVarf sVarf_n0XoC;
 } Hv_heavy;
 
 #endif // _HEAVYCONTEXT_HEAVY_H_

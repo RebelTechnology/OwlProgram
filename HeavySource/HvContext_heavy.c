@@ -20,9 +20,7 @@
  * Function Declarations
  */
 
-static void cLoadbang_qq6iR_sendMessage(HvBase *, int, const HvMessage *const);
-static void cBinop_uX4CI_sendMessage(HvBase *, int, const HvMessage *const);
-static void cVar_yjsJz_sendMessage(HvBase *, int, const HvMessage *const);
+
 
 
 
@@ -66,11 +64,10 @@ Hv_heavy *hv_heavy_new(int numInputChannels, int numOutputChannels, double sampl
   Base(_c)->userData = NULL;
 
   Base(_c)->numBytes = sizeof(Hv_heavy);
-  Base(_c)->numBytes += sPhasor_k_init(&_c->sPhasor_iCqih, 440.0f, sampleRate);
-  Base(_c)->numBytes += cVar_init_f(&_c->cVar_yjsJz, 0.0f);
+  Base(_c)->numBytes += sVarf_init(&_c->sVarf_n0XoC, 0.5f, 0.0f, 1);
 
   // loadbang
-  ctx_scheduleMessage(Base(_c), msg_initWithBang(HV_MESSAGE_ON_STACK(1), 0.0), &cLoadbang_qq6iR_sendMessage, 0);
+
 
   return _c;
 }
@@ -90,15 +87,7 @@ void hv_heavy_free(Hv_heavy *_c) {
  * Static Function Implementation
  */
 
-static void cLoadbang_qq6iR_sendMessage(HvBase *_c, int letIn, const HvMessage *const m) {
-  cVar_onMessage(_c, &Context(_c)->cVar_yjsJz, 0, m, &cVar_yjsJz_sendMessage);
-}
-static void cBinop_uX4CI_sendMessage(HvBase *_c, int letIn, const HvMessage *const m) {
-  sPhasor_k_onMessage(_c, &Context(_c)->sPhasor_iCqih, 1, m);
-}
-static void cVar_yjsJz_sendMessage(HvBase *_c, int letIn, const HvMessage *const m) {
-  cBinop_k_onMessage(_c, NULL, HV_BINOP_ADD, 0.75f, 0, m, &cBinop_uX4CI_sendMessage);
-}
+
 
 
 
@@ -114,7 +103,7 @@ int hv_heavy_process(Hv_heavy *const _c, float **const inputBuffers, float **con
 
 #if HV_NUM_OUTPUT_CHANNELS > 0
   // declare temporary signal vars
-  hv_bufferf_t Bf0, Bf1, Bf2, Bf3;
+  hv_bufferf_t Bf0;
   // no temporary integer buffers
 
   // declare the output vars
@@ -142,27 +131,9 @@ int hv_heavy_process(Hv_heavy *const _c, float **const inputBuffers, float **con
 #endif // HV_NUM_OUTPUT_CHANNELS > 1
 
     // process all signal functions
-    __hv_phasor_k_f(&_c->sPhasor_iCqih, VOf(Bf0));
-    __hv_var_ks_f(VOf(Bf1), 0.5f, 0.0f, 0);
-    __hv_sub_f(VIf(Bf0), VIf(Bf1), VOf(Bf1));
-    __hv_abs_f(VIf(Bf1), VOf(Bf1));
-    __hv_var_ks_f(VOf(Bf0), 0.25f, 0.0f, 0);
-    __hv_sub_f(VIf(Bf1), VIf(Bf0), VOf(Bf0));
-    __hv_var_ks_f(VOf(Bf1), 6.28319f, 0.0f, 0);
-    __hv_mul_f(VIf(Bf0), VIf(Bf1), VOf(Bf1));
-    __hv_mul_f(VIf(Bf1), VIf(Bf1), VOf(Bf0));
-    __hv_mul_f(VIf(Bf1), VIf(Bf0), VOf(Bf2));
-    __hv_var_ks_f(VOf(Bf3), 0.166667f, 0.0f, 0);
-    __hv_mul_f(VIf(Bf2), VIf(Bf3), VOf(Bf3));
-    __hv_sub_f(VIf(Bf1), VIf(Bf3), VOf(Bf3));
-    __hv_mul_f(VIf(Bf2), VIf(Bf0), VOf(Bf0));
-    __hv_var_ks_f(VOf(Bf2), 0.00833333f, 0.0f, 0);
-    __hv_mul_f(VIf(Bf0), VIf(Bf2), VOf(Bf2));
-    __hv_add_f(VIf(Bf3), VIf(Bf2), VOf(Bf2));
-    __hv_var_ks_f(VOf(Bf3), 0.4f, 0.0f, 0);
-    __hv_mul_f(VIf(Bf2), VIf(Bf3), VOf(Bf3));
-    __hv_add_f(VIf(Bf3), VIf(O1), VOf(O1));
-    __hv_add_f(VIf(Bf3), VIf(O0), VOf(O0));
+    sVarf_process(&_c->sVarf_n0XoC, VOf(Bf0));
+    __hv_add_f(VIf(Bf0), VIf(O1), VOf(O1));
+    __hv_add_f(VIf(Bf0), VIf(O0), VOf(O0));
 #endif // HV_NUM_OUTPUT_CHANNELS > 0
 
     // save output vars to output buffer (and update loop counters)

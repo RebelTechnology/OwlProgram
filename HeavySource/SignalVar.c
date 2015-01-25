@@ -5,14 +5,16 @@
 // __var~f
 
 static void sVarf_update(SignalVarf *o, float k, float step, bool reverse) {
-#if __AVX__
+#if HV_SIMD_AVX
   if (reverse) o->v = _mm256_setr_ps(k+7.0f*step, k+6.0f*step, k+5.0f*step, k+4.0f*step, k+3.0f*step, k+2.0f*step, k+step, k);
   else o->v = _mm256_set_ps(k+7.0f*step, k+6.0f*step, k+5.0f*step, k+4.0f*step, k+3.0f*step, k+2.0f*step, k+step, k);
-#elif __SSE__
+#elif HV_SIMD_SSE
   if (reverse) o->v = _mm_setr_ps(k+3.0f*step, k+2.0f*step, k+step, k);
   else o->v = _mm_set_ps(k+3.0f*step, k+2.0f*step, k+step, k);
-#else
-#error
+#elif HV_SIMD_NEON
+#error todo implement me
+#else // HV_SIMD_NONE
+  o->v = k;
 #endif
 }
 
@@ -32,14 +34,16 @@ void sVarf_onMessage(HvBase *_c, SignalVarf *o, const HvMessage *m) {
 // __var~i
 
 static void sVari_update(SignalVari *o, int k, int step, bool reverse) {
-#if __AVX__
+#if HV_SIMD_AVX
   if (reverse) o->v = _mm256_setr_epi32(k+7*step, k+6*step, k+5*step, k+4*step, k+3*step, k+2*step, k+step, k);
   else o->v = _mm256_set_epi32(k+7*step, k+6*step, k+5*step, k+4*step, k+3*step, k+2*step, k+step, k);
-#elif __SSE__
+#elif HV_SIMD_SSE
   if (reverse) o->v = _mm_setr_epi32(k+3*step, k+2*step, k+step, k);
   else o->v = _mm_set_epi32(k+3*step, k+2*step, k+step, k);
-#else
-#error
+#elif HV_SIMD_NEON
+#error todo implement me
+#else // HV_SIMD_NEON
+  o->v = k;
 #endif
 }
 

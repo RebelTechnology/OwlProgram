@@ -8,9 +8,9 @@
 
 #if HV_UNIX
 #include <assert.h>
-/* #include <immintrin.h> */
+//#include <immintrin.h>
 #include <math.h>
-/* #include <mm_malloc.h> */
+// #include <mm_malloc.h>
 #include <malloc.h>
 #include <alloca.h>
 #include <stdarg.h>
@@ -56,6 +56,7 @@
 #define hv_acosh_f(a) acoshf(a)
 #define hv_atan_f(a) atanf(a)
 #define hv_atanh_f(a) atanhf(a)
+#define hv_atan2_f(a, b) atan2f(a, b)
 #define hv_exp_f(a) expf(a)
 #define hv_abs_f(a) fabsf(a)
 #define hv_sqrt_f(a) sqrtf(a)
@@ -65,6 +66,7 @@
 #define hv_ceil_f(a) ceilf(a)
 #define hv_floor_f(a) floorf(a)
 #define hv_round_f(a) roundf(a)
+#define hv_pow_f(a, b) powf(a, b)
 
 // Utilities
 #define hv_assert(e) assert(e)

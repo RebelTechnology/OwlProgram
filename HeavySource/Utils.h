@@ -32,6 +32,30 @@
 #error Unsupported platform
 #endif
 
+// TODO:(joe) put these #includes in the correct place
+// https://software.intel.com/sites/landingpage/IntrinsicsGuide/
+// http://stackoverflow.com/questions/11228855/header-files-for-simd-intrinsics
+#if defined(_MSC_VER)
+/* Microsoft C/C++-compatible compiler */
+#include <intrin.h>
+#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
+/* GCC-compatible compiler, targeting x86/x86-64 */
+#include <x86intrin.h>
+#elif defined(__GNUC__) && defined(__ARM_NEON__)
+/* GCC-compatible compiler, targeting ARM with NEON */
+#include <arm_neon.h>
+#elif defined(__GNUC__) && defined(__IWMMXT__)
+/* GCC-compatible compiler, targeting ARM with WMMX */
+#include <mmintrin.h>
+#elif (defined(__GNUC__) || defined(__xlC__)) && (defined(__VEC__) || defined(__ALTIVEC__))
+/* XLC or GCC-compatible compiler, targeting PowerPC with VMX/VSX */
+#include <altivec.h>
+#elif defined(__GNUC__) && defined(__SPE__)
+/* GCC-compatible compiler, targeting PowerPC with SPE */
+#include <spe.h>
+#endif
+//
+
 // Memory management
 extern void *hv_alloca(hv_size_t numbytes);
 extern void *hv_malloc(hv_size_t numbytes); // allocates memory on 16 byte boundaries and clears it to zero
@@ -69,6 +93,7 @@ extern float hv_acos_f(float x);
 extern float hv_acosh_f(float x);
 extern float hv_atan_f(float x);
 extern float hv_atanh_f(float x);
+extern float hv_atan2_f(float x, float y);
 extern float hv_exp_f(float x);
 extern float hv_abs_f(float x);
 extern float hv_sqrt_f(float x);
@@ -78,6 +103,7 @@ extern float hv_log10_f(float x);
 extern float hv_ceil_f(float x);
 extern float hv_floor_f(float x);
 extern float hv_round_f(float x);
+extern float hv_pow_f(float x, float y);
 
 // Utilities
 extern void hv_assert(int e);
@@ -95,65 +121,86 @@ extern hv_uint32_t hv_min_max_log2(hv_uint32_t x);
 #endif
 
 // SIMD
-#if __ARM_NEON__
-#define hv_bufferf_t float32x4_t
-#define hv_bufferi_t int32x4_t
-#define hv_bInf_t float32x4_t
-#define hv_bOutf_t float32x4_t*
-#define hv_bIni_t int32x4_t
-#define hv_bOuti_t int32x4_t*
-#define VI(_x) (_x)
-#define VO(_x) (&_x)
-#define HV_N_SIMD 4
-#elif __AVX__
-#define hv_bufferf_t __m256
-#define hv_bufferi_t __m256i
-#define hv_bInf_t __m256
-#define hv_bOutf_t __m256*
-#define hv_bIni_t __m256i
-#define hv_bOuti_t __m256i*
-#define VIf(_x) (_x)
-#define VOf(_x) (&_x)
-#define VIi(_x) (_x)
-#define VOi(_x) (&_x)
-#define HV_N_SIMD 8
-#elif __SSE__
-#define hv_bufferf_t __m128
-#define hv_bufferi_t __m128i
-#define hv_bInf_t __m128
-#define hv_bOutf_t __m128*
-#define hv_bIni_t __m128i
-#define hv_bOuti_t __m128i*
-#define VIf(_x) (_x)
-#define VOf(_x) (&_x)
-#define VIi(_x) (_x)
-#define VOi(_x) (&_x)
-#define HV_N_SIMD 4
+#if !defined(HV_SIMD_NONE) && (defined(__ARM_NEON__) || defined(__AVX__) || defined(__SSE__))
+  #if __ARM_NEON__
+    // NEON
+    #define HV_N_SIMD 4
+    #define HV_SIMD_NEON 1
+    #define hv_bufferf_t float32x4_t
+    #define hv_bufferi_t int32x4_t
+    #define hv_bInf_t float32x4_t
+    #define hv_bOutf_t float32x4_t*
+    #define hv_bIni_t int32x4_t
+    #define hv_bOuti_t int32x4_t*
+    #define VI(_x) (_x)
+    #define VO(_x) (&_x)
+  #elif __AVX__
+    // AVX
+    // It is assumed that if AVX exists then SSE will also be available
+    #define HV_N_SIMD 8
+    #define HV_SIMD_AVX 1
+    #define HV_SIMD_SSE 1
+    #if __SSE2__
+      #define HV_SIMD_SSE2 1
+    #endif
+    #if __SSE3__
+      #define HV_SIMD_SSE3 1
+    #endif
+    #if __SSE4_2__
+      #define HV_SIMD_SSE4_2 1
+    #endif
+    #define hv_bufferf_t __m256
+    #define hv_bufferi_t __m256i
+    #define hv_bInf_t __m256
+    #define hv_bOutf_t __m256*
+    #define hv_bIni_t __m256i
+    #define hv_bOuti_t __m256i*
+    #define VIf(_x) (_x)
+    #define VOf(_x) (&_x)
+    #define VIi(_x) (_x)
+    #define VOi(_x) (&_x)
+  #elif __SSE__
+    // SSE
+    #define HV_N_SIMD 4
+    #define HV_SIMD_SSE 1
+    #if __SSE2__
+      #define HV_SIMD_SSE2 1
+    #endif
+    #if __SSE3__
+      #define HV_SIMD_SSE3 1
+    #endif
+    #if __SSE4_2__
+      #define HV_SIMD_SSE4_2 1
+    #endif
+    #define hv_bufferf_t __m128
+    #define hv_bufferi_t __m128i
+    #define hv_bInf_t __m128
+    #define hv_bOutf_t __m128*
+    #define hv_bIni_t __m128i
+    #define hv_bOuti_t __m128i*
+    #define VIf(_x) (_x)
+    #define VOf(_x) (&_x)
+    #define VIi(_x) (_x)
+    #define VOi(_x) (&_x)
+  #endif
 #else
-typedef struct hv_veci128 {
-  int a;
-  int b;
-  int c;
-  int d;
-} hv_veci128;
-typedef struct hv_vecf128 {
-  float a;
-  float b;
-  float c;
-  float d;
-} hv_vecf128;
-#define hv_bufferf_t hv_vecf128
-#define hv_bufferi_t hv_veci128
-#define hv_bInf_t hv_vecf128
-#define hv_bOutf_t hv_vecf128*
-#define hv_bIni_t hv_veci128
-#define hv_bOuti_t hv_veci128*
-#define VIf(_x) ((float *) &_x)
-#define VOf(_x) ((float *) &_x)
-#define VIi(_x) ((int *) &_x)
-#define VOi(_x) ((int *) &_x)
-#define HV_N_SIMD 4
+  // DEFAULT
+  #define HV_N_SIMD 1
+  #undef HV_SIMD_NONE
+  #define HV_SIMD_NONE 1
+  #define hv_bufferf_t float
+  #define hv_bufferi_t int
+  #define hv_bInf_t float
+  #define hv_bOutf_t float*
+  #define hv_bIni_t int
+  #define hv_bOuti_t int*
+  #define VIf(_x) (_x)
+  #define VOf(_x) (&_x)
+  #define VIi(_x) (_x)
+  #define VOi(_x) (&_x)
 #endif
+
+
 #define HV_N_SIMD_MASK (HV_N_SIMD-1)
 
 #endif // _HEAVY_UTILS_H_
