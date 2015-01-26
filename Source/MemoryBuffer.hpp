@@ -29,13 +29,13 @@ public:
 class ManagedMemoryBuffer : public MemoryBuffer {
 public:
   ManagedMemoryBuffer(int ch, int sz) :
-    MemoryBuffer((float*)myalloc(ch*sz*sizeof(float)), ch, sz) {
+    MemoryBuffer((float*)malloc(ch*sz*sizeof(float)), ch, sz) {
     if(buffer == NULL){
       channels = 0;
       size = 0;
     }
   }
   ~ManagedMemoryBuffer(){
-    myfree(buffer);
+    free(buffer);
   }
 };

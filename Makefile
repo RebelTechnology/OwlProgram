@@ -15,7 +15,7 @@ LDLIBS   = -lm
 LDSCRIPT = Source/flash.ld
 FIRMWARESENDER = Tools/FirmwareSender/FirmwareSender
 
-C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c myalloc.c
+C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c # myalloc.c
 CPP_SRC = main.cpp operators.cpp
 OWL_SRC = StompBox.cpp PatchProcessor.cpp
 SOLO_SRC = SoloProgram.cpp
@@ -32,7 +32,7 @@ OBJS += $(BUILD)/stm32f4xx_flash.o
 # OBJS += $(PERIPH) 
 OBJS += $(BUILD)/startup.o # no system_hse.o: clocks and ram set by loader
 #OBJS += $(USB_DEVICE) $(USB_OTG)
-#OBJS += $(SYSCALLS)
+OBJS += $(SYSCALLS)
 #OBJS += $(BUILD)/misc.o
 OBJS += # $(BUILD)/stm32f4xx_gpio.o $(BUILD)/stm32f4xx_rcc.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o

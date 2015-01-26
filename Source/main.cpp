@@ -22,14 +22,16 @@ extern "C" void __libc_init_array();
 // extern void __init_user();
 
 #define DEBUG_DWT
+/*
 extern "C"{
 int _exit() {
   return 0;
 }
 }
+*/
 #include <malloc.h>
 extern char *heap_end;
-extern int allocated_mem;
+// extern int allocated_mem;
 
 #define BANK1_SRAM3 0x68000000
 int main(void){
@@ -41,7 +43,7 @@ int main(void){
     memset(_sbss, 0, (_ebss-_sbss));
     __libc_init_array(); // caused reset when .data had been strippped
 
-    InitMem((char*)BANK1_SRAM3, 1024*1024);
+    // InitMem((char*)BANK1_SRAM3, 1024*1024);
 
   if(smem.checksum != sizeof(smem)){
     // problem!
@@ -65,7 +67,7 @@ int main(void){
 #endif /* DEBUG_DWT */
 
   setup();
-  smem.heap_bytes_used = allocated_mem;
+  // smem.heap_bytes_used = allocated_mem;
   for(;;){
     if(smem.status == AUDIO_READY_STATUS){
 #ifdef DEBUG_DWT
