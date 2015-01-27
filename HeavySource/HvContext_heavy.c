@@ -64,7 +64,7 @@ Hv_heavy *hv_heavy_new(int numInputChannels, int numOutputChannels, double sampl
   Base(_c)->userData = NULL;
 
   Base(_c)->numBytes = sizeof(Hv_heavy);
-  Base(_c)->numBytes += sPhasor_k_init(&_c->sPhasor_LmKf7, 300.0f, sampleRate);
+  Base(_c)->numBytes += sPhasor_k_init(&_c->sPhasor_CQ71c, 100.0f, sampleRate);
 
   // loadbang
 
@@ -131,8 +131,7 @@ int hv_heavy_process(Hv_heavy *const _c, float **const inputBuffers, float **con
 #endif // HV_NUM_OUTPUT_CHANNELS > 1
 
     // process all signal functions
-    __hv_phasor_k_f(&_c->sPhasor_LmKf7, VOf(Bf0));
-    __hv_add_f(VIf(Bf0), VIf(O1), VOf(O1));
+    __hv_phasor_k_f(&_c->sPhasor_CQ71c, VOf(Bf0));
     __hv_add_f(VIf(Bf0), VIf(O0), VOf(O0));
 #endif // HV_NUM_OUTPUT_CHANNELS > 0
 
@@ -151,7 +150,7 @@ int hv_heavy_process(Hv_heavy *const _c, float **const inputBuffers, float **con
   return n; // return the number of frames processed
 }
 
-void hv_heavy_process_inline(Hv_heavy *c, float *const inputBuffers, float *const outputBuffers, int n4) {
+int hv_heavy_process_inline(Hv_heavy *c, float *const inputBuffers, float *const outputBuffers, int n4) {
   int i = ctx_getNumInputChannels(Base(c));
   float **bIn = (float **) hv_alloca(i*sizeof(float *));
   while (i--) bIn[i] = inputBuffers+(i*n4);
@@ -160,5 +159,6 @@ void hv_heavy_process_inline(Hv_heavy *c, float *const inputBuffers, float *cons
   float **bOut = (float **) hv_alloca(i*sizeof(float *));
   while (i--) bOut[i] = outputBuffers+(i*n4);
 
-  hv_heavy_process(c, bIn, bOut, n4);
+  int n = hv_heavy_process(c, bIn, bOut, n4);
+  return n;
 }

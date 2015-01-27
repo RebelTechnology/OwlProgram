@@ -136,10 +136,10 @@ HV_EXPORT Hv_heavy *hv_heavy_new(int numInputChannels, int numOutputChannels, do
 HV_EXPORT void hv_heavy_free(Hv_heavy *c);
 
 /** Processes one block of samples for a patch instance. The buffer format is an array of arrays. */
-HV_EXPORT void hv_heavy_process(Hv_heavy *c, float **const inputBuffers, float **const outputBuffers, int n4);
+HV_EXPORT int hv_heavy_process(Hv_heavy *c, float **const inputBuffers, float **const outputBuffers, int n4);
 
 /** Processes one block of samples for a patch instance. The buffer format is an uninterleaved array of channels. */
-HV_EXPORT void hv_heavy_process_inline(Hv_heavy *c, float *const inputBuffers, float *const outputBuffers, int n4);
+HV_EXPORT int hv_heavy_process_inline(Hv_heavy *c, float *const inputBuffers, float *const outputBuffers, int n4);
 
 #endif // _HEAVY_HEAVY_H_
 

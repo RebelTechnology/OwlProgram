@@ -99,7 +99,7 @@ extern hv_uint32_t hv_min_max_log2(hv_uint32_t x);
 // SIMD
 #ifndef HV_SIMD_NONE
   #define HV_SIMD_NEON __ARM_NEON__
-  #define HV_SIMD_SSE (__SSE__ && __SSE2__ && __SSE3__ && __SSSE3__ && __SSE_4_1__ && __SSE_4_2__)
+  #define HV_SIMD_SSE (__SSE__ && __SSE2__ && __SSE3__ && __SSSE3__ && __SSE4_1__ && __SSE4_2__)
   // It is assumed that if AVX exists then SSE will also be available
   #define HV_SIMD_AVX (__AVX__ && HV_SIMD_SSE)
 #endif

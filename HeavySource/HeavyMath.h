@@ -5,7 +5,7 @@
 
 #include "Utils.h"
 
-static const float HV_MAX_INT_AS_FLOAT = 0.0000001192093f; // ((2^23)-1)^-1
+// https://software.intel.com/sites/landingpage/IntrinsicsGuide/
 
 static inline void sZero_process(hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
@@ -15,7 +15,7 @@ static inline void sZero_process(hv_bOutf_t bOut) {
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
-  hv_memset(bOut, HV_N_SIMD*sizeof(float));
+  *bOut = 0.0f;
 #endif
 }
 
@@ -27,7 +27,7 @@ static inline void sLoad_process(float *bIn, hv_bOutf_t bOut) {
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
-  hv_memcpy(bOut, (const void *) &bIn, sizeof(hv_bufferf_t));
+  *bOut = *bIn;
 #endif
 }
 
@@ -39,7 +39,7 @@ static inline void sStore_process(float *bOut, hv_bInf_t bIn) {
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
-  hv_memcpy(bOut, (const void *) &bIn, sizeof(hv_bufferf_t));
+  *bOut = bIn;
 #endif
 }
 
@@ -429,11 +429,21 @@ static inline void __hv_max_f(hv_bInf_t bIn0, hv_bInf_t bIn1, hv_bOutf_t bOut) {
 #endif
 }
 
-static inline void sPow_process(hv_bInf_t bIn0, hv_bInf_t bIn1, hv_bOutf_t bOut) {
+static inline void __hv_pow_f(hv_bInf_t bIn0, hv_bInf_t bIn1, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-//#error todo implement me
+  (*bOut)[0] = hv_pow_f(bIn0[0], bIn1[0]);
+  (*bOut)[1] = hv_pow_f(bIn0[1], bIn1[1]);
+  (*bOut)[2] = hv_pow_f(bIn0[2], bIn1[2]);
+  (*bOut)[3] = hv_pow_f(bIn0[3], bIn1[3]);
+  (*bOut)[4] = hv_pow_f(bIn0[4], bIn1[4]);
+  (*bOut)[5] = hv_pow_f(bIn0[5], bIn1[5]);
+  (*bOut)[6] = hv_pow_f(bIn0[6], bIn1[6]);
+  (*bOut)[7] = hv_pow_f(bIn0[7], bIn1[7]);
 #elif HV_SIMD_SSE
-//#error todo implement me
+  (*bOut)[0] = hv_pow_f(bIn0[0], bIn1[0]);
+  (*bOut)[1] = hv_pow_f(bIn0[1], bIn1[1]);
+  (*bOut)[2] = hv_pow_f(bIn0[2], bIn1[2]);
+  (*bOut)[3] = hv_pow_f(bIn0[3], bIn1[3]);
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -510,21 +520,6 @@ static inline void __hv_and_f(hv_bInf_t bIn0, hv_bInf_t bIn1, hv_bOutf_t bOut) {
 #error todo implement me
 #else // HV_SIMD_NONE
   *bOut = (float) (((int) bIn0) & ((int) bIn1));
-#endif
-}
-
-static inline void sIf_process(hv_bInf_t bIn0, hv_bInf_t bIn1, hv_bOutf_t bOut0, hv_bOutf_t bOut1) {
-#if HV_SIMD_AVX
-  *bOut1 = _mm256_and_ps(bIn1, bIn0); // != 0, goes out right outlet
-  *bOut0 = _mm256_andnot_ps(bIn1, bIn0); // == 0 goes out left inlet
-#elif HV_SIMD_SSE
-  *bOut1 = _mm_and_ps(bIn1, bIn0); // != 0, goes out right outlet
-  *bOut0 = _mm_andnot_ps(bIn1, bIn0); // == 0 goes out left inlet
-#elif HV_SIMD_NEON
-#error todo implement me
-#else // HV_SIMD_NONE
-  *bOut0 = (bIn1 == 0.0f) ? bIn0 : 0.0f; // false (i.e. zero) goes left
-  *bOut1 = (bIn1 != 0.0f) ? bIn0 : 0.0f; // true (i.e. non-zero) goes right
 #endif
 }
 

@@ -19,7 +19,7 @@ typedef struct Hv_heavy {
   HvBase base;
 
   // objects
-  SignalPhasor sPhasor_LmKf7;
+  SignalPhasor sPhasor_CQ71c;
 } Hv_heavy;
 
 #endif // _HEAVYCONTEXT_HEAVY_H_
