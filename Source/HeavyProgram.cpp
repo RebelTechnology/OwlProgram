@@ -2,6 +2,7 @@
 #include "SampleBuffer.hpp"
 #include "PatchProcessor.h"
 #include "HeavyPatch.hpp"
+#include "owlcontrol.h"
 
 PatchProcessor processor;
 

@@ -64,7 +64,7 @@ Hv_heavy *hv_heavy_new(int numInputChannels, int numOutputChannels, double sampl
   Base(_c)->userData = NULL;
 
   Base(_c)->numBytes = sizeof(Hv_heavy);
-  Base(_c)->numBytes += sVarf_init(&_c->sVarf_n0XoC, 0.5f, 0.0f, 1);
+  Base(_c)->numBytes += sPhasor_k_init(&_c->sPhasor_LmKf7, 300.0f, sampleRate);
 
   // loadbang
 
@@ -131,7 +131,7 @@ int hv_heavy_process(Hv_heavy *const _c, float **const inputBuffers, float **con
 #endif // HV_NUM_OUTPUT_CHANNELS > 1
 
     // process all signal functions
-    sVarf_process(&_c->sVarf_n0XoC, VOf(Bf0));
+    __hv_phasor_k_f(&_c->sPhasor_LmKf7, VOf(Bf0));
     __hv_add_f(VIf(Bf0), VIf(O1), VOf(O1));
     __hv_add_f(VIf(Bf0), VIf(O0), VOf(O0));
 #endif // HV_NUM_OUTPUT_CHANNELS > 0

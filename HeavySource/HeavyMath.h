@@ -5,6 +5,8 @@
 
 #include "Utils.h"
 
+static const float HV_MAX_INT_AS_FLOAT = 0.0000001192093f; // ((2^23)-1)^-1
+
 static inline void sZero_process(hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
   *bOut = _mm256_setzero_ps();
@@ -29,7 +31,7 @@ static inline void sLoad_process(float *bIn, hv_bOutf_t bOut) {
 #endif
 }
 
-static inline void sStore_process(hv_bOutf_t bOut, hv_bInf_t bIn) {
+static inline void sStore_process(float *bOut, hv_bInf_t bIn) {
 #if HV_SIMD_AVX
   _mm256_store_ps(bOut, bIn);
 #elif HV_SIMD_SSE
@@ -43,9 +45,9 @@ static inline void sStore_process(hv_bOutf_t bOut, hv_bInf_t bIn) {
 
 static inline void sLog_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -55,9 +57,9 @@ static inline void sLog_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sLog10_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -67,9 +69,9 @@ static inline void sLog10_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sLog2_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -79,9 +81,9 @@ static inline void sLog2_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sCos_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -91,9 +93,9 @@ static inline void sCos_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sAcos_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -103,9 +105,9 @@ static inline void sAcos_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sCosh_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -115,9 +117,9 @@ static inline void sCosh_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sAcosh_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -127,9 +129,9 @@ static inline void sAcosh_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sSin_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -139,9 +141,9 @@ static inline void sSin_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sAsin_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -151,9 +153,9 @@ static inline void sAsin_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sSinh_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -163,9 +165,9 @@ static inline void sSinh_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sAsinh_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -175,9 +177,9 @@ static inline void sAsinh_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sTan_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -187,9 +189,9 @@ static inline void sTan_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sAtan_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -199,9 +201,9 @@ static inline void sAtan_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sAtan2_process(hv_bInf_t bIn0, hv_bInf_t bIn1, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -211,9 +213,9 @@ static inline void sAtan2_process(hv_bInf_t bIn0, hv_bInf_t bIn1, hv_bOutf_t bOu
 
 static inline void sTanh_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -223,9 +225,9 @@ static inline void sTanh_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sAtanh_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -234,14 +236,12 @@ static inline void sAtanh_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 }
 
 static inline void sSqrt_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
-// TODO: check this works
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
   static const __m128 zero = (__m128) {0.0f, 0.0f, 0.0f, 0.0f};
-  __m128 b = _mm_load_ps(bIn);
-  __m128 mask = _mm_cmpgt_ps(b, zero); // b > 0, ensure that all values are positive
-  _mm_store_ps(bOut, _mm_sqrt_ps(_mm_and_ps(mask, b)));
+  __m128 mask = _mm_cmpgt_ps(bIn, zero); // b > 0, ensure that all values are positive
+  *bOut = _mm_sqrt_ps(_mm_and_ps(mask, bIn));
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -265,9 +265,9 @@ static inline void __hv_abs_f(hv_bInf_t bIn, hv_bOutf_t bOut) {
 
 static inline void sExp_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -278,7 +278,7 @@ static inline void sExp_process(hv_bInf_t bIn, hv_bOutf_t bOut) {
 static inline void __hv_ceil_f(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
   *bOut = _mm256_ceil_ps(bIn);
-#elif HV_SIMD_SSE4_2
+#elif HV_SIMD_SSE
   *bOut = _mm_ceil_ps(bIn);
 #elif HV_SIMD_NEON
 #error todo implement me
@@ -290,7 +290,7 @@ static inline void __hv_ceil_f(hv_bInf_t bIn, hv_bOutf_t bOut) {
 static inline void __hv_floor_f(hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
   *bOut = _mm256_floor_ps(bIn);
-#elif HV_SIMD_SSE4_2
+#elif HV_SIMD_SSE
   *bOut = _mm_floor_ps(bIn);
 #elif HV_SIMD_NEON
 #error todo implement me
@@ -431,9 +431,9 @@ static inline void __hv_max_f(hv_bInf_t bIn0, hv_bInf_t bIn1, hv_bOutf_t bOut) {
 
 static inline void sPow_process(hv_bInf_t bIn0, hv_bInf_t bIn1, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE
@@ -491,9 +491,9 @@ static inline void __hv_lte_f(hv_bInf_t bIn0, hv_bInf_t bIn1, hv_bOutf_t bOut) {
 
 static inline void sBitwiseXor_process(hv_bInf_t bIn0, hv_bInf_t bIn1, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_SSE
-#error todo implement me
+//#error todo implement me
 #elif HV_SIMD_NEON
 #error todo implement me
 #else // HV_SIMD_NONE

@@ -12,14 +12,14 @@
 #define Context(_x) ((Hv_heavy *) (_x))
 
 // object includes
-#include "SignalVar.h"
+#include "SignalPhasor.h"
 #include "HeavyMath.h"
 
 typedef struct Hv_heavy {
   HvBase base;
 
   // objects
-  SignalVarf sVarf_n0XoC;
+  SignalPhasor sPhasor_LmKf7;
 } Hv_heavy;
 
 #endif // _HEAVYCONTEXT_HEAVY_H_
