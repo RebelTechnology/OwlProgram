@@ -25,9 +25,9 @@
 #define HV_UNIX 1
 #include <stddef.h>
 #define hv_size_t size_t
-#define hv_uint32_t unsigned int
-#define hv_uint16_t unsigned short
-#define hv_int32_t int
+#define hv_uint32_t uint32_t
+#define hv_uint16_t uint16_t
+#define hv_int32_t int32_t
 #else
 #error Unsupported platform
 #endif
