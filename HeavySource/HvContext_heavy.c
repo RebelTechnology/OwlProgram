@@ -64,7 +64,7 @@ Hv_heavy *hv_heavy_new(int numInputChannels, int numOutputChannels, double sampl
   Base(_c)->userData = NULL;
 
   Base(_c)->numBytes = sizeof(Hv_heavy);
-  Base(_c)->numBytes += sPhasor_k_init(&_c->sPhasor_CQ71c, 100.0f, sampleRate);
+  Base(_c)->numBytes += sPhasor_k_init(&_c->sPhasor_CQ71c, 10.0f, sampleRate);
 
   // loadbang
 

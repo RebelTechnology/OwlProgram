@@ -4,12 +4,14 @@
 #include <stdio.h>
 
 static void sPhasor_updateFrequency(SignalPhasor *o, float f, double r) {
-  o->step.s = (int) (f*(4294967295.0/r));
+  o->step.s = (hv_int32_t) (f*(4294967295.0/r));
 #if HV_SIMD_SSE
   o->inc = _mm_set1_epi32(4*o->step.s);
 #elif HV_SIMD_NEON
 #error // TODO(mhroth): implement this!
 #else // HV_SIMD_NONE
+  /* o->inc = (1l<<18); 2^18 = 262144 */
+  // 100.0*(4294967295.0/48000.0) = 8947848
   o->inc = o->step.s;
 #endif
 }
@@ -17,7 +19,7 @@ static void sPhasor_updateFrequency(SignalPhasor *o, float f, double r) {
 static void sPhasor_updatePhase(SignalPhasor *o, float phase) {
   while (phase < 0.0f) phase += 1.0f; // wrap phase to [0,1]
   while (phase > 1.0f) phase -= 1.0f;
-  int p = (int) (phase * 4294967295.0);
+  hv_uint32_t p = (hv_uint32_t) (phase * 4294967295.0);
 #if HV_SIMD_SSE
   o->phase = _mm_set_epi32(3*o->step.s+p, 2*o->step.s+p, o->step.s+p, p);
 #elif HV_SIMD_NEON
@@ -46,7 +48,7 @@ void sPhasor_onMessage(HvBase *_c, SignalPhasor *o, int letIn, const HvMessage *
     float phase = msg_getFloat(m,0);
     while (phase < 0.0f) phase += 1.0f; // wrap phase to [0,1]
     while (phase > 1.0f) phase -= 1.0f;
-    int p = (int) (phase * 4294967295.0);
+    hv_uint32_t p = (hv_uint32_t) (phase * 4294967295.0);
 #if HV_SIMD_SSE
     o->phase = _mm_set1_epi32(p);
 #elif HV_SIMD_NEON

@@ -12,7 +12,7 @@
 typedef struct SignalPhasor {
   union {
     float f2sc; // float to step conversion (used for __phasor~f)
-    int s; // step value (used for __phasor_k~f)
+    hv_int32_t s; // step value (used for __phasor_k~f)
   } step;
 #if HV_SIMD_SSE
   __m128i phase; // current phase
@@ -21,7 +21,7 @@ typedef struct SignalPhasor {
 #error // TODO(mhroth): implement me!
 #else // HV_SIMD_NONE
   hv_uint32_t phase;
-  hv_uint32_t inc;
+  hv_int32_t inc;
 #endif
 } SignalPhasor;
 
@@ -112,7 +112,9 @@ static inline void __hv_phasor_k_f(SignalPhasor *o, hv_bOutf_t bOut) {
 #elif HV_SIMD_NEON
 #error // TODO(mhroth): implement this!
 #else // HV_SIMD_NEON
-  *bOut = ((float) (o->phase >> 9)) * HV_PHASOR_SCALE;
+  *bOut = ((float) (o->phase >> 9l)) * HV_PHASOR_SCALE;
+  /* o->phase += (1l<<18); */
+  /* o->phase += 8947848; */
   o->phase += o->inc;
 #endif
 }

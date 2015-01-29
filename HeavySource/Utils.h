@@ -24,6 +24,7 @@
 #elif defined (__unix__) || (__unix)
 #define HV_UNIX 1
 #include <stddef.h>
+#include <stdint.h>
 #define hv_size_t size_t
 #define hv_uint32_t uint32_t
 #define hv_uint16_t uint16_t
