@@ -7,14 +7,14 @@
 
 // The reciprocal of the maximum value represented by a 32-bit floating point
 // number’s mantissa - used to scale the wrap around point in the phasor
-#define HV_PHASOR_SCALE 0.0000001192093f // ((2^23)-1)^-1
+#define __HV_PHASOR_SCALE 0.0000001192093f // ((2^23)-1)^-1
 
 typedef struct SignalPhasor {
   union {
     float f2sc; // float to step conversion (used for __phasor~f)
-    hv_int32_t s; // step value (used for __phasor_k~f)
+    int s; // step value (used for __phasor_k~f)
   } step;
-#if HV_SIMD_SSE
+#if HV_SIMD_AVX || HV_SIMD_SSE
   __m128i phase; // current phase
   __m128i inc; // phase increment
 #elif HV_SIMD_NEON
@@ -36,8 +36,8 @@ void sPhasor_onMessage(HvBase *_c, SignalPhasor *o, int letIn, const HvMessage *
 static inline void __hv_phasor_f(SignalPhasor *o, hv_bInf_t bIn, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
   static const __m256 c = (__m256) {
-      HV_PHASOR_SCALE, HV_PHASOR_SCALE, HV_PHASOR_SCALE, HV_PHASOR_SCALE,
-      HV_PHASOR_SCALE, HV_PHASOR_SCALE, HV_PHASOR_SCALE, HV_PHASOR_SCALE };
+      __HV_PHASOR_SCALE, __HV_PHASOR_SCALE, __HV_PHASOR_SCALE, __HV_PHASOR_SCALE,
+      __HV_PHASOR_SCALE, __HV_PHASOR_SCALE, __HV_PHASOR_SCALE, __HV_PHASOR_SCALE };
   // convert frequency to step
   __m256i s256 = _mm256_cvtps_epi32(_mm256_mul_ps(bIn, _mm256_set1_ps(o->step.f2sc)));
 
@@ -67,7 +67,7 @@ static inline void __hv_phasor_f(SignalPhasor *o, hv_bInf_t bIn, hv_bOutf_t bOut
   *bOut = _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_insertf128_si256(_mm256_castsi128_si256(p), q, 1)), c);
 #elif HV_SIMD_SSE
   static const __m128 c = (__m128) {
-      HV_PHASOR_SCALE, HV_PHASOR_SCALE, HV_PHASOR_SCALE, HV_PHASOR_SCALE };
+      __HV_PHASOR_SCALE, __HV_PHASOR_SCALE, __HV_PHASOR_SCALE, __HV_PHASOR_SCALE };
   // convert frequency to step
   __m128i s = _mm_cvtps_epi32(_mm_mul_ps(bIn, _mm_set1_ps(o->step.f2sc)));
 
@@ -87,15 +87,15 @@ static inline void __hv_phasor_f(SignalPhasor *o, hv_bInf_t bIn, hv_bOutf_t bOut
 #else // HV_SIMD_NONE
   int step = (int) (bIn * o->step.f2sc);
   o->phase += step;
-  *bOut = ((float) (o->phase >> 9)) * HV_PHASOR_SCALE;
+  *bOut = ((float) (o->phase >> 9)) * __HV_PHASOR_SCALE;
 #endif
 }
 
 static inline void __hv_phasor_k_f(SignalPhasor *o, hv_bOutf_t bOut) {
 #if HV_SIMD_AVX
   static const __m256 c = (__m256) {
-      HV_PHASOR_SCALE, HV_PHASOR_SCALE, HV_PHASOR_SCALE, HV_PHASOR_SCALE,
-      HV_PHASOR_SCALE, HV_PHASOR_SCALE, HV_PHASOR_SCALE, HV_PHASOR_SCALE };
+      __HV_PHASOR_SCALE, __HV_PHASOR_SCALE, __HV_PHASOR_SCALE, __HV_PHASOR_SCALE,
+      __HV_PHASOR_SCALE, __HV_PHASOR_SCALE, __HV_PHASOR_SCALE, __HV_PHASOR_SCALE };
   __m128i inc = o->inc;
   __m128i phase = o->phase;
   __m128i p = _mm_srli_epi32(phase, 9);
@@ -105,16 +105,14 @@ static inline void __hv_phasor_k_f(SignalPhasor *o, hv_bOutf_t bOut) {
   *bOut = _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_insertf128_si256(_mm256_castsi128_si256(p), q, 1)), c);
 #elif HV_SIMD_SSE
   static const __m128 c = (__m128) {
-      HV_PHASOR_SCALE, HV_PHASOR_SCALE, HV_PHASOR_SCALE, HV_PHASOR_SCALE };
+      __HV_PHASOR_SCALE, __HV_PHASOR_SCALE, __HV_PHASOR_SCALE, __HV_PHASOR_SCALE };
   __m128i phase = o->phase;
   *bOut = _mm_mul_ps(_mm_cvtepi32_ps(_mm_srli_epi32(phase, 9)), c);
   o->phase = _mm_add_epi32(phase, o->inc);
 #elif HV_SIMD_NEON
 #error // TODO(mhroth): implement this!
 #else // HV_SIMD_NEON
-  *bOut = ((float) (o->phase >> 9l)) * HV_PHASOR_SCALE;
-  /* o->phase += (1l<<18); */
-  /* o->phase += 8947848; */
+  *bOut = ((float) (o->phase >> 9)) * __HV_PHASOR_SCALE;
   o->phase += o->inc;
 #endif
 }

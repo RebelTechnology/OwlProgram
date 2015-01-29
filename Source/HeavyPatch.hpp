@@ -5,6 +5,8 @@
 // #include "Heavy_heavy.h"
 #include "../HeavySource/Heavy_heavy.h"
 
+#define HEAVY_CHANNELS 2
+
 class HeavyPatch : public Patch {
 public:
   HeavyPatch() {
@@ -13,7 +15,7 @@ public:
     registerParameter(PARAMETER_C, "Channel-C");
     registerParameter(PARAMETER_D, "Channel-D");
     
-    context = hv_heavy_new(2, 2, getSampleRate());
+    context = hv_heavy_new(getSampleRate());
   }
   
   ~HeavyPatch() {
@@ -34,13 +36,16 @@ public:
     hv_vscheduleMessageForReceiver(context, "Channel-B", 0.0, "f", paramB);
     hv_vscheduleMessageForReceiver(context, "Channel-C", 0.0, "f", paramC);
     hv_vscheduleMessageForReceiver(context, "Channel-D", 0.0, "f", paramD);
+
+    // int nbSples = buffer.getSize()*buffer.getChannels();
+    // int nbSples = buffer.getSize()*HEAVY_CHANNELS;
+    // float* inputCopy = (float*)malloc(nbSples*sizeof(float));
+    // memcpy(inputCopy, buffer.getSamples(0), nbSples*sizeof(float));
+
+    // float** inputs = { &inputCopy, &inputCopy+getBlockSize()};
+    float* outputs[] = {buffer.getSamples(0), buffer.getSamples(1) };
     
-    int nbSples=getBlockSize()*buffer.getChannels();
-    float inputCopy[nbSples];
-    memcpy(inputCopy,buffer.getSamples(0),nbSples*sizeof(float));
-    
-    hv_heavy_process_inline(context,
-        inputCopy, buffer.getSamples(0), getBlockSize());
+    hv_heavy_process(context, outputs, outputs, getBlockSize());		     
   }
   
 private:

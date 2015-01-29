@@ -24,11 +24,10 @@
 #elif defined (__unix__) || (__unix)
 #define HV_UNIX 1
 #include <stddef.h>
-#include <stdint.h>
 #define hv_size_t size_t
-#define hv_uint32_t uint32_t
-#define hv_uint16_t uint16_t
-#define hv_int32_t int32_t
+#define hv_uint32_t unsigned int
+#define hv_uint16_t unsigned short
+#define hv_int32_t int
 #else
 #error Unsupported platform
 #endif

@@ -130,7 +130,7 @@ typedef struct Hv_heavy Hv_heavy;
  * Sample rate should be positive and in Hertz.
  * Input and output channels should be non-negative.
  */
-HV_EXPORT Hv_heavy *hv_heavy_new(int numInputChannels, int numOutputChannels, double sampleRate);
+HV_EXPORT Hv_heavy *hv_heavy_new(double sampleRate);
 
 /** Frees a patch instance. */
 HV_EXPORT void hv_heavy_free(Hv_heavy *c);

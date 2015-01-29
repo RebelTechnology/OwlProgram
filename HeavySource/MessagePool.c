@@ -87,7 +87,9 @@ void mp_freeMessage(MessagePool *mp, HvMessage *m) {
 
 HvMessage *mp_addMessage(MessagePool *mp, const HvMessage *m) {
   const hv_size_t b = msg_getNumHeapBytes(m);
-  const hv_size_t i = hv_min_max_log2((hv_uint32_t) b) - 5;
+  // determine the message list index to allocate data from based on the msg size
+  // smallest chunk size is 32 bytes
+  const hv_size_t i = hv_max_i((hv_min_max_log2((hv_uint32_t) b) - 5), 0);
 
   assert(i < MP_NUM_MESSAGE_LISTS); // how many chunk sizes do we want to support? 32, 64, 128, 256 at the moment
   MessagePoolList *ml = &mp->lists[i];

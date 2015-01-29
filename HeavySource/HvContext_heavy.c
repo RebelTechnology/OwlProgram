@@ -48,11 +48,11 @@ static HvTable *ctx_intern_getTableForHash(HvBase *const _c, hv_uint32_t h) {
  * Context Include and Implementatons
  */
 
-Hv_heavy *hv_heavy_new(int numInputChannels, int numOutputChannels, double sampleRate) {
+Hv_heavy *hv_heavy_new(double sampleRate) {
   Hv_heavy *const _c = (Hv_heavy *) hv_malloc(sizeof(Hv_heavy));
 
-  Base(_c)->numInputChannels = numInputChannels;
-  Base(_c)->numOutputChannels = numOutputChannels;
+  Base(_c)->numInputChannels = 0;
+  Base(_c)->numOutputChannels = 2;
   Base(_c)->sampleRate = sampleRate;
   Base(_c)->blockStartTimestamp = 0;
   Base(_c)->f_scheduleMessageForReceiver = &ctx_intern_scheduleMessageForReceiver;
@@ -64,7 +64,7 @@ Hv_heavy *hv_heavy_new(int numInputChannels, int numOutputChannels, double sampl
   Base(_c)->userData = NULL;
 
   Base(_c)->numBytes = sizeof(Hv_heavy);
-  Base(_c)->numBytes += sPhasor_k_init(&_c->sPhasor_CQ71c, 10.0f, sampleRate);
+  Base(_c)->numBytes += sPhasor_k_init(&_c->sPhasor_4TwCZ, 10.0f, sampleRate);
 
   // loadbang
 
@@ -131,8 +131,9 @@ int hv_heavy_process(Hv_heavy *const _c, float **const inputBuffers, float **con
 #endif // HV_NUM_OUTPUT_CHANNELS > 1
 
     // process all signal functions
-    __hv_phasor_k_f(&_c->sPhasor_CQ71c, VOf(Bf0));
+    __hv_phasor_k_f(&_c->sPhasor_4TwCZ, VOf(Bf0));
     __hv_add_f(VIf(Bf0), VIf(O0), VOf(O0));
+    __hv_add_f(VIf(Bf0), VIf(O1), VOf(O1));
 #endif // HV_NUM_OUTPUT_CHANNELS > 0
 
     // save output vars to output buffer (and update loop counters)

@@ -7,10 +7,15 @@
 #include "Utils.h"
 
 #if HV_UNIX
+#ifndef HV_SIMD_NONE
+  #include <immintrin.h>
+  #include <mm_malloc.h>
+#else
+  #include <malloc.h>
+  #include <alloca.h>
+#endif
 #include <assert.h>
 #include <math.h>
-#include <malloc.h>
-#include <alloca.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -23,8 +28,13 @@
 
 // Memory management
 #define hv_alloca(_n) alloca(_n)
-#define hv_malloc(_n) malloc(_n)
-#define hv_free(x) free(x)
+#ifndef HV_SIMD_NONE
+  #define hv_malloc(_n) _mm_malloc(_n, 32) // 32 to ensure AVX compatability (16 otherwise)
+  #define hv_free(x) _mm_free(x)
+#else
+  #define hv_malloc(_n) malloc(_n)
+  #define hv_free(_n) free(_n)
+#endif
 #define hv_realloc(a, b) realloc(a, b)
 #define hv_memcpy(a, b, c) memcpy(a, b, c)
 #define hv_memset(a, b) memset(a, 0, b)
