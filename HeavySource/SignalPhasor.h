@@ -7,7 +7,8 @@
 
 // The reciprocal of the maximum value represented by a 32-bit floating point
 // number’s mantissa - used to scale the wrap around point in the phasor
-#define __HV_PHASOR_SCALE 0.0000001192093f // ((2^23)-1)^-1
+/* #define __HV_PHASOR_SCALE 0.0000001192093f // ((2^23)-1)^-1 */
+#define __HV_PHASOR_SCALE (4.76837386e-07) // ((2^21)-1)^-1
 
 typedef struct SignalPhasor {
   union {
@@ -87,7 +88,7 @@ static inline void __hv_phasor_f(SignalPhasor *o, hv_bInf_t bIn, hv_bOutf_t bOut
 #else // HV_SIMD_NONE
   int step = (int) (bIn * o->step.f2sc);
   o->phase += step;
-  *bOut = ((float) (o->phase >> 9)) * __HV_PHASOR_SCALE;
+  *bOut = ((float) (o->phase >> 11)) * __HV_PHASOR_SCALE;
 #endif
 }
 
@@ -112,7 +113,7 @@ static inline void __hv_phasor_k_f(SignalPhasor *o, hv_bOutf_t bOut) {
 #elif HV_SIMD_NEON
 #error // TODO(mhroth): implement this!
 #else // HV_SIMD_NEON
-  *bOut = ((float) (o->phase >> 9)) * __HV_PHASOR_SCALE;
+  *bOut = ((float) (o->phase >> 11)) * __HV_PHASOR_SCALE;
   o->phase += o->inc;
 #endif
 }

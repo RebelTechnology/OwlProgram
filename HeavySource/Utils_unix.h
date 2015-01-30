@@ -11,7 +11,6 @@
   #include <immintrin.h>
   #include <mm_malloc.h>
 #else
-  #include <malloc.h>
   #include <alloca.h>
 #endif
 #include <assert.h>

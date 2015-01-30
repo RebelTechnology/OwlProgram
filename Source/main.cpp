@@ -29,7 +29,6 @@ int _exit() {
 }
 }
 */
-#include <malloc.h>
 extern char *heap_end;
 // extern int allocated_mem;
 

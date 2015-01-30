@@ -1,8 +1,8 @@
 TEMPLATEROOT = .
 
 # CFLAGS = -g 
-CFLAGS   = -O2
-# CFLAGS   = -O1
+# CFLAGS   = -O2
+CFLAGS   = -O1
 CFLAGS  += -Wall -Wcpp -DUSE_FULL_ASSERT -D__FPU_PRESENT=1 -D__FPU_USED=1
 CFLAGS  += -DEXTERNAL_SRAM
 CFLAGS += -fdata-sections -ffunction-sections -fno-omit-frame-pointer -flto
@@ -76,7 +76,7 @@ HEAVY_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(HEAVY_SRC:%.cpp=Build/%.o)
 HEAVY_FILES = $(wildcard HeavySource/*.c)
 HEAVY_OBJS += $(addprefix Build/, $(notdir $(HEAVY_FILES:.c=.o)))
 vpath %.c $(TEMPLATEROOT)/HeavySource
-CFLAGS += -D__unix__
+CFLAGS += -D__unix__ -DHV_SIMD_NONE
 
 $(BUILD)/heavy.elf : $(HEAVY_OBJS) $(OBJS) $(LDSCRIPT)
 	$(LD) $(LDFLAGS) -o $@ $(HEAVY_OBJS) $(OBJS) $(LDLIBS)
