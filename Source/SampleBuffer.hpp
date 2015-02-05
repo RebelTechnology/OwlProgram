@@ -14,6 +14,7 @@ protected:
   uint16_t size;
 public:
   void split(int16_t* input, uint16_t samples){
+    // samples is the number of halfwords, ie 16bit ints, for both channels.
 #if AUDIO_BITDEPTH == 16
     size = samples >> 1u;
     float* l = left;
