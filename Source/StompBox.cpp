@@ -17,23 +17,23 @@ Patch::Patch() : processor(getInitialisingPatchProcessor()){
 Patch::~Patch(){}
 
 void Patch::registerParameter(PatchParameterId pid, const char* name, const char* description){
-  if(smem.registerPatchParameter != NULL)
-    smem.registerPatchParameter(pid, name);
+  if(getSharedMemory()->registerPatchParameter != NULL)
+    getSharedMemory()->registerPatchParameter(pid, name);
 }
 
 double Patch::getSampleRate(){
-  return smem.audio_samplingrate;
+  return getSharedMemory()->audio_samplingrate;
 }
 
 int Patch::getBlockSize(){
   // audio_blocksize is for both channels
-  return smem.audio_blocksize/2;
+  return getSharedMemory()->audio_blocksize/2;
 }
 
 float Patch::getParameterValue(PatchParameterId pid){
   return processor->getParameterValue(pid);
-  // if(pid < smem.parameters_size)
-  //   return smem.parameters[pid]/4096.0f;
+  // if(pid < getSharedMemory()->parameters_size)
+  //   return getSharedMemory()->parameters[pid]/4096.0f;
   // return 0.0;
 }
 
@@ -50,12 +50,12 @@ AudioBuffer* Patch::createMemoryBuffer(int channels, int samples){
 void Patch::setButton(PatchButtonId bid, bool pressed){
   // processor->setButton(bid, pressed);
   if(pressed)
-    smem.buttons |= 1<<bid;
+    getSharedMemory()->buttons |= 1<<bid;
   else
-    smem.buttons &= ~(1<<bid);
+    getSharedMemory()->buttons &= ~(1<<bid);
 }
 
 bool Patch::isButtonPressed(PatchButtonId bid){
   // return processor->isButtonPressed(bid);
-  return smem.buttons & (1<<bid);
+  return getSharedMemory()->buttons & (1<<bid);
 }

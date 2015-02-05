@@ -35,7 +35,7 @@ void PatchRegistry::registerPatch(const char* name, uint8_t inputs, uint8_t outp
     names[nofPatches] = name;
     creators[nofPatches] = creator;
     nofPatches++;
-    if(smem.registerPatch != NULL)
-      smem.registerPatch(name, inputs, outputs);
+    if(getSharedMemory()->registerPatch != NULL)
+      getSharedMemory()->registerPatch(name, inputs, outputs);
   }
 }

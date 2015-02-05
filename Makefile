@@ -1,8 +1,8 @@
 TEMPLATEROOT = .
 
-# CFLAGS = -g 
+CFLAGS = -g 
 # CFLAGS   = -O2
-CFLAGS   = -O1
+# CFLAGS   = -O1
 CFLAGS  += -Wall -Wcpp -DUSE_FULL_ASSERT -D__FPU_PRESENT=1 -D__FPU_USED=1
 CFLAGS  += -DEXTERNAL_SRAM
 CFLAGS += -fdata-sections -ffunction-sections -fno-omit-frame-pointer -flto

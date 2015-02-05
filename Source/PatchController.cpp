@@ -21,7 +21,7 @@ PatchController::~PatchController(){
 }
 
 void PatchController::init(){
-  parameterValues = smem.parameters;
+  parameterValues = getSharedMemory()->parameters;
   // setActiveSlot(GREEN);
   initialisePatch(GREEN, getGreenPatchId());
   initialisePatch(RED, getRedPatchId());

@@ -39,8 +39,8 @@ void PatchProcessor::setPatch(Patch* p){
 // }
 
 // void PatchProcessor::registerParameter(PatchParameterId pid, const char* name){
-//   if(smem.registerPatchParameter != NULL)
-//     smem.registerPatchParameter(pid, name);
+//   if(getSharedMemory()->registerPatchParameter != NULL)
+//     getSharedMemory()->registerPatchParameter(pid, name);
   // if(pid < NOF_ADC_VALUES)
   //   parameterNames[pid] = name;
 // }

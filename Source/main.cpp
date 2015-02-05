@@ -6,8 +6,8 @@
 #include <string.h>
 #include "myalloc.h"
 
-__attribute__ ((section (".sharedram")))
-volatile SharedMemory smem;
+// __attribute__ ((section (".sharedram")))
+// volatile SharedMemory smem;
 
 extern void setup();
 extern void processBlock();
@@ -23,11 +23,11 @@ extern "C" void __libc_init_array();
 
 #define DEBUG_DWT
 /*
-extern "C"{
-int _exit() {
+  extern "C"{
+  int _exit() {
   return 0;
-}
-}
+  }
+  }
 */
 extern char *heap_end;
 // extern int allocated_mem;
@@ -39,16 +39,16 @@ int main(void){
      Call static constructors:   bl __libc_init_array
      call C++ static initializers?
   */
-    memset(_sbss, 0, (_ebss-_sbss));
-    __libc_init_array(); // caused reset when .data had been strippped
+  memset(_sbss, 0, (_ebss-_sbss));
+  __libc_init_array(); // caused reset when .data had been strippped
 
-    // InitMem((char*)BANK1_SRAM3, 1024*1024);
+  // InitMem((char*)BANK1_SRAM3, 1024*1024);
 
-  if(smem.checksum != sizeof(smem)){
+  if(getSharedMemory()->checksum != sizeof(SharedMemory)){
     // problem!
-    smem.status = AUDIO_ERROR_STATUS;
-    smem.error = CHECKSUM_ERROR_STATUS;
-    // smem.exitProgram();
+    getSharedMemory()->status = AUDIO_ERROR_STATUS;
+    getSharedMemory()->error = CHECKSUM_ERROR_STATUS;
+    // getSharedMemory()->exitProgram();
     // return -1;
   }
 
@@ -66,9 +66,9 @@ int main(void){
 #endif /* DEBUG_DWT */
 
   setup();
-  // smem.heap_bytes_used = allocated_mem;
+  // getSharedMemory()->heap_bytes_used = allocated_mem;
   for(;;){
-    if(smem.status == AUDIO_READY_STATUS){
+    if(getSharedMemory()->status == AUDIO_READY_STATUS){
 #ifdef DEBUG_DWT
       *DWT_CYCCNT = 0; // reset the counter
       // DWT->CYCCNT = 0; // reset the counter
@@ -76,15 +76,15 @@ int main(void){
 
       processBlock();
 #ifdef DEBUG_DWT
-      smem.cycles_per_block = *DWT_CYCCNT;
+      getSharedMemory()->cycles_per_block = *DWT_CYCCNT;
       // dwt_count = DWT->CYCCNT;
 #endif /* DEBUG_DWT */
 
-      if(smem.status == AUDIO_EXIT_STATUS)
+      if(getSharedMemory()->status == AUDIO_EXIT_STATUS)
     	return 0;
-      smem.status = AUDIO_PROCESSED_STATUS; // always check status before changing it
+      getSharedMemory()->status = AUDIO_PROCESSED_STATUS; // always check status before changing it
     }
-    if(smem.status == AUDIO_EXIT_STATUS)
+    if(getSharedMemory()->status == AUDIO_EXIT_STATUS)
       return 0;
   }
   return -1;

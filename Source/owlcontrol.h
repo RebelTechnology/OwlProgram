@@ -51,14 +51,14 @@
    }
 
    inline bool getButton(PatchButtonId bid){
-     return smem.buttons & (1<<bid);
+     return getSharedMemory()->buttons & (1<<bid);
    }
 
    inline void setButton(PatchButtonId bid, bool on){
      if(on)
-       smem.buttons |= 1<<bid;
+       getSharedMemory()->buttons |= 1<<bid;
      else
-       smem.buttons &= ~(1<<bid);
+       getSharedMemory()->buttons &= ~(1<<bid);
    }
 
    inline void debugSet(){

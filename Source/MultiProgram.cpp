@@ -20,7 +20,7 @@ void setup(){
 }
 
 void processBlock(){
-  buffer.split(smem.audio_input, smem.audio_blocksize);
+  buffer.split(getSharedMemory()->audio_input, getSharedMemory()->audio_blocksize);
   patches.process(buffer);
-  buffer.comb(smem.audio_output);
+  buffer.comb(getSharedMemory()->audio_output);
 }
