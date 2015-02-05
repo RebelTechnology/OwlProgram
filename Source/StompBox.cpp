@@ -26,7 +26,8 @@ double Patch::getSampleRate(){
 }
 
 int Patch::getBlockSize(){
-  return smem.audio_blocksize;
+  // audio_blocksize is for both channels
+  return smem.audio_blocksize/2;
 }
 
 float Patch::getParameterValue(PatchParameterId pid){
