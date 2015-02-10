@@ -85,9 +85,9 @@ Infinite_Loop:
     
     
 g_pfnVectors:
+  .word 0xDADAC0DE
   .word  _estack
   .word  main
-/*  .word 0xDADAC0DE */
 /* .string "OWL Program" */
   .word  NMI_Handler
   .word  HardFault_Handler
