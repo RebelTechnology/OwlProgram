@@ -3,6 +3,7 @@
 #include "PatchProcessor.h"
 #include "basicmaths.h"
 #include "solopatch.h"
+#include "owlcontrol.h"
 
 PatchProcessor processor;
 

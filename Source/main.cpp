@@ -2,9 +2,9 @@
 #include "SharedMemory.h"
 #include "owlcontrol.h"
 #include "stm32f4xx.h"
-
+// #include <malloc.h>
 #include <string.h>
-#include "myalloc.h"
+// #include "myalloc.h"
 
 // __attribute__ ((section (".sharedram")))
 // volatile SharedMemory smem;
@@ -66,6 +66,13 @@ int main(void){
 #endif /* DEBUG_DWT */
 
   setup();
+
+  // struct mallinfo minfo = mallinfo();
+  // getSharedMemory()->heap_bytes_used = minfo.uordblks;
+  /* ^ causes OwlWare.sysex to trip to:
+   USART6_IRQHandler () at ./Source/startup.s:142
+   142	  b  Infinite_Loop */
+
   // getSharedMemory()->heap_bytes_used = allocated_mem;
   for(;;){
     if(getSharedMemory()->status == AUDIO_READY_STATUS){
