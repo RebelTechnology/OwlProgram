@@ -25,6 +25,6 @@ defined in linker script */
 g_pfnVectors:
   .word 0xDADAC0DE       /* magic number */
   .word  _estack         /* stack pointer */
-  .word  main            /* main pointer
+  .word  main            /* main pointer */
   .word  .isr_vector     /* link base address */
   .string "OWL Program"  /* program name */
