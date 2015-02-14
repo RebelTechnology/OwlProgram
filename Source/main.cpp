@@ -14,12 +14,30 @@ extern void processBlock();
 
 extern char _sbss[];
 extern char _ebss[];
+extern char _sidata[];
+extern char _sdata[];
+extern char _edata[];
 
 extern "C" void __libc_init_array();
 // extern void __init_registers();
 // extern void __copy_rom_sections_to_ram(void);
-// extern void __call_static_initializers(void);
+// extern "C" void __init_cpp(void);
 // extern void __init_user();
+
+// /* Copy the data segment initializers from flash to SRAM */  
+//   movs  r1, #0
+//   b  LoopCopyDataInit
+// CopyDataInit:
+//   ldr  r3, =_sidata
+//   ldr  r3, [r3, r1]
+//   str  r3, [r0, r1]
+//   adds  r1, r1, #4    
+// LoopCopyDataInit:
+//   ldr  r0, =_sdata
+//   ldr  r3, =_edata
+//   adds  r2, r0, r1
+//   cmp  r2, r3
+//   bcc  CopyDataInit
 
 #define DEBUG_DWT
 /*
@@ -39,8 +57,9 @@ int main(void){
      Call static constructors:   bl __libc_init_array
      call C++ static initializers?
   */
-  memset(_sbss, 0, (_ebss-_sbss));
-  __libc_init_array(); // caused reset when .data had been strippped
+  // memset(_sbss, 0, _ebss-_sbss); // zero fill the BSS segment
+  // // memcpy(_sidata, _sdata, _sdata-_edata); // Copy the data segment initializers
+  // __libc_init_array(); // caused reset when .data had been strippped
 
   // InitMem((char*)BANK1_SRAM3, 1024*1024);
 
@@ -88,11 +107,11 @@ int main(void){
 #endif /* DEBUG_DWT */
 
       if(getSharedMemory()->status == AUDIO_EXIT_STATUS)
-    	return 0;
+    	break;
       getSharedMemory()->status = AUDIO_PROCESSED_STATUS; // always check status before changing it
     }
     if(getSharedMemory()->status == AUDIO_EXIT_STATUS)
-      return 0;
+      break;
   }
-  return -1;
+  for(;;);
 }

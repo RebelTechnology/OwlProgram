@@ -1,1 +1,1 @@
-REGISTER_PATCH(FreeVerbPatch, "FreeVerb", 1, 1);
+REGISTER_PATCH(FlangerPatch, "Flanger", 2, 2);
