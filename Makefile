@@ -11,10 +11,8 @@ CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11 $(CFLAGS)
 # LDFLAGS = -flto -Wl,--gc-sections
 # ASFLAGS  = -g
 LDLIBS   = -lm
-# LDSCRIPT = Source/sram.ld
-# LDSCRIPT = Source/sram-in-flash.ld
 LDSCRIPT = Source/flash.ld
-FIRMWARESENDER = Tools/FirmwareSender/FirmwareSender
+FIRMWARESENDER = ../FirmwareSender/bin/FirmwareSender
 
 C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c # myalloc.c
 CPP_SRC = main.cpp operators.cpp

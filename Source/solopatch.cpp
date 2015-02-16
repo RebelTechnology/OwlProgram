@@ -1,1 +1,1 @@
-REGISTER_PATCH(FlangerPatch, "Flanger", 2, 2);
+REGISTER_PATCH(FourBandsEqPatch, "FourBandsEq", 2, 2);

@@ -1,1 +1,1 @@
-#include "../Libraries/OwlPatches/FlangerPatch.hpp"
+#include "../Libraries/OwlPatches/FourBandsEqPatch.hpp"
