@@ -1,4 +1,25 @@
-/* Copyright 2014 Section6. All Rights Reserved. */
+/**
+ * Copyright (c) 2014,2015 Enzien Audio, Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, and/or
+ * sublicense copies of the Software, strictly on a non-commercial basis,
+ * and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ */
 
 #include "ControlBinop.h"
 
@@ -24,8 +45,8 @@ static float cBinop_perform_op(BinopType op, float f, const float k) {
     case HV_BINOP_BIT_AND: return (float) ((int) f & (int) k);
     case HV_BINOP_BIT_XOR: return (float) ((int) f ^ (int) k);
     case HV_BINOP_BIT_OR: return (float) ((int) f | (int) k);
-    case HV_BINOP_EQL_EQL: return (f == k) ? 1.0f : 0.0f;
-    case HV_BINOP_NOT_EQL: return (f != k) ? 1.0f : 0.0f;
+    case HV_BINOP_EQ: return (f == k) ? 1.0f : 0.0f;
+    case HV_BINOP_NEQ: return (f != k) ? 1.0f : 0.0f;
     case HV_BINOP_LOGICAL_AND: return ((f == 0.0f) || (k == 0.0f)) ? 0.0f : 1.0f;
     case HV_BINOP_LOGICAL_OR: return ((f == 0.0f) && (k == 0.0f)) ? 0.0f : 1.0f;
     case HV_BINOP_LESS_THAN: return (f < k) ? 1.0f : 0.0f;
@@ -70,8 +91,9 @@ void cBinop_k_onMessage(HvBase *_c, void *o, BinopType op, const float k,
     int letIn, const HvMessage *const m,
     void (*sendMessage)(HvBase *, int, const HvMessage *const)) {
   if (msg_isFloat(m, 0)) {
-    // Note(joe): supporting Pd's ability to perform operations of packs
+    // NOTE(joe): supporting Pd's ability to perform operations of packs
     // of floats is likely to not be supported in the future.
+    // NOTE(mhroth): Heavy does not support sending bangs to binop objects to return the previous output
     float f = ((msg_getNumElements(m) > 1) && msg_isFloat(m, 1)) ? msg_getFloat(m, 1) : k;
     HvMessage *n = HV_MESSAGE_ON_STACK(1);
     f = cBinop_perform_op(op, msg_getFloat(m, 0), f);

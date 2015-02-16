@@ -1,4 +1,25 @@
-/* Copyright 2014 Section6. All Rights Reserved. */
+/**
+ * Copyright (c) 2014,2015 Enzien Audio, Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, and/or
+ * sublicense copies of the Software, strictly on a non-commercial basis,
+ * and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ */
 
 #ifndef _HEAVY_SIGNAL_PHASOR_H_
 #define _HEAVY_SIGNAL_PHASOR_H_
@@ -7,13 +28,12 @@
 
 // The reciprocal of the maximum value represented by a 32-bit floating point
 // number’s mantissa - used to scale the wrap around point in the phasor
-/* #define __HV_PHASOR_SCALE 0.0000001192093f // ((2^23)-1)^-1 */
-#define __HV_PHASOR_SCALE (4.76837386e-07) // ((2^21)-1)^-1
+#define __HV_PHASOR_SCALE 0.0000001192093f // ((2^23)-1)^-1
 
 typedef struct SignalPhasor {
   union {
     float f2sc; // float to step conversion (used for __phasor~f)
-    int s; // step value (used for __phasor_k~f)
+    hv_int32_t s; // step value (used for __phasor_k~f)
   } step;
 #if HV_SIMD_AVX || HV_SIMD_SSE
   __m128i phase; // current phase
@@ -88,7 +108,7 @@ static inline void __hv_phasor_f(SignalPhasor *o, hv_bInf_t bIn, hv_bOutf_t bOut
 #else // HV_SIMD_NONE
   int step = (int) (bIn * o->step.f2sc);
   o->phase += step;
-  *bOut = ((float) (o->phase >> 11)) * __HV_PHASOR_SCALE;
+  *bOut = ((float) (o->phase >> 9)) * __HV_PHASOR_SCALE;
 #endif
 }
 
@@ -112,8 +132,8 @@ static inline void __hv_phasor_k_f(SignalPhasor *o, hv_bOutf_t bOut) {
   o->phase = _mm_add_epi32(phase, o->inc);
 #elif HV_SIMD_NEON
 #error // TODO(mhroth): implement this!
-#else // HV_SIMD_NEON
-  *bOut = ((float) (o->phase >> 11)) * __HV_PHASOR_SCALE;
+#else // HV_SIMD_NONE
+  *bOut = ((float) (o->phase >> 9)) * __HV_PHASOR_SCALE;
   o->phase += o->inc;
 #endif
 }

@@ -1,4 +1,25 @@
-/* Copyright 2014 Section6. All Rights Reserved. */
+/**
+ * Copyright (c) 2014,2015 Enzien Audio, Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, and/or
+ * sublicense copies of the Software, strictly on a non-commercial basis,
+ * and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ */
 
 #ifndef _HEAVY_TABLE_H_
 #define _HEAVY_TABLE_H_
@@ -27,10 +48,6 @@ void hTable_free(HvTable *o);
 int hTable_resize(HvTable *o, hv_uint32_t newLength);
 
 void hTable_onMessage(HvTable *o, int letIn, const HvMessage *const m);
-
-// writes a number of samples to the buffer with optional wrap-around
-// returns the number of samples *not* written
-//int hTable_write(HvTable *o, float *b, hv_size_t len, bool wrap);
 
 static inline float *hTable_getBuffer(HvTable *o) {
   return o->buffer;
