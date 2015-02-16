@@ -1,7 +1,7 @@
 /* Linker script for STM32F407 */
 
 /* Entry Point */
-ENTRY(main)
+ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
 _estack = 0x2001c000;    /* end of 112K RAM */

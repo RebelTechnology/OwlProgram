@@ -61,6 +61,9 @@ $(BUILD)/%.bin: $(BUILD)/%.elf
 	$(OBJCOPY) -O binary $< $@
 	@echo Successfully built OWL firmware $@
 
+$(BUILD)/%.s: $(BUILD)/%.elf
+	$(OBJDUMP) -S $< > $@
+
 clean:
 	rm -f $(BUILD)/*.o $(BUILD)/*.d $(BUILD)/*.elf $(BUILD)/*.bin $(BUILD)/*.syx $(BUILD)/*.s $(BUILD)/*.map
 

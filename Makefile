@@ -1,8 +1,9 @@
 TEMPLATEROOT = .
 
-CFLAGS = -g 
-# CFLAGS   = -O2
+CFLAGS   = -g 
+# CFLAGS   = -O0
 # CFLAGS   = -O1
+CFLAGS   = -O2
 CFLAGS  += -Wall -Wcpp -DUSE_FULL_ASSERT -D__FPU_PRESENT=1 -D__FPU_USED=1
 CFLAGS  += -DEXTERNAL_SRAM
 CFLAGS += -fdata-sections -ffunction-sections -fno-omit-frame-pointer -flto
@@ -51,6 +52,12 @@ all: multi
 $(BUILD)/solo.elf : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
 	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(LDLIBS)
 
+$(BUILD)/solo.as : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(LDLIBS)
+
+$(BUILD)/solo.map : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(LDLIBS)
+
 $(BUILD)/multi.elf : $(MULTI_OBJS) $(OBJS) $(LDSCRIPT)
 	$(LD) $(LDFLAGS) -o $@ $(MULTI_OBJS) $(OBJS) $(LDLIBS)
 
@@ -63,12 +70,14 @@ $(BUILD)/%.syx : $(BUILD)/%.bin
 solo : $(BUILD)/solo.bin
 	$(FIRMWARESENDER) -in  $< -out "OWL FS"
 
+solomap : $(BUILD)/solo.elf
+	$(LD) $(LDFLAGS) -Wl,-Map=Build/solo.map $(OBJS) $(SOLO_OBJS) $(LDLIBS)
+
 multi: $(BUILD)/multi.bin
 	$(FIRMWARESENDER) -in  $< -out "OWL FS"
 
 blinky: $(BUILD)/blinky.bin
 	$(FIRMWARESENDER) -in  $< -out "OWL FS"
-
 
 # Heavy 
 HEAVY_SRC = HeavyProgram.cpp
