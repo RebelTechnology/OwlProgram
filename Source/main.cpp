@@ -34,7 +34,7 @@ int main(void){
   memset(_sbss, 0, _ebss-_sbss); // zero fill the BSS segment
   // memcpy(_sidata, _sdata, _sdata-_edata); // Copy the data segment initializers
   __libc_init_array(); // caused reset when .data had been strippped
-#endif STARTUP_CODE
+#endif /* STARTUP_CODE */
 
 #ifdef DEBUG_DWT
   volatile unsigned int *DWT_CYCCNT = (volatile unsigned int *)0xE0001004; //address of the register
@@ -74,7 +74,7 @@ int main(void){
 #ifdef DEBUG_DWT
       *DWT_CYCCNT = 0; // reset the counter
       // DWT->CYCCNT = 0; // reset the counter
-#endif
+#endif /* DEBUG_DWT */
       processBlock();
 #ifdef DEBUG_DWT
       getSharedMemory()->cycles_per_block = *DWT_CYCCNT;
