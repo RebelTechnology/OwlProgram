@@ -1,1 +1,1 @@
-REGISTER_PATCH(FourBandsEqPatch, "FourBandsEq", 2, 2);
+REGISTER_PATCH(PhaserPatch, "Phaser", 2, 2);

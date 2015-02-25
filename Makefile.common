@@ -3,7 +3,8 @@ ELF=$(BUILD)/$(notdir $(CURDIR)).elf
 BIN=$(BUILD)/$(notdir $(CURDIR)).bin
 
 # Tool path
-TOOLROOT=/home/mars/devel/OwlWare/Tools/gcc-arm-none-eabi-4_8-2014q2/bin
+# TOOLROOT=$(HOME)/devel/OwlWare/Tools/gcc-arm-none-eabi-4_8-2014q3/bin
+TOOLROOT=$(HOME)/devel/OwlWare/Tools/gcc-arm-none-eabi-4_9-2014q4/bin
 STLINK=/home/mars/devel/OwlWare/Tools/stlink/
 
 # Tools
@@ -66,6 +67,7 @@ $(BUILD)/%.s: $(BUILD)/%.elf
 
 clean:
 	rm -f $(BUILD)/*.o $(BUILD)/*.d $(BUILD)/*.elf $(BUILD)/*.bin $(BUILD)/*.syx $(BUILD)/*.s $(BUILD)/*.map
+	find Libraries/ -name '*.o' -delete
 
 debug: $(ELF)
 	echo "target extended localhost:4242" > gdbscript

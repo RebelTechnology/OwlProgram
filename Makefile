@@ -4,15 +4,24 @@ CFLAGS   = -g
 # CFLAGS   = -O0
 # CFLAGS   = -O1
 CFLAGS   = -O2
-CFLAGS  += -Wall -Wcpp -DUSE_FULL_ASSERT -D__FPU_PRESENT=1 -D__FPU_USED=1
+CFLAGS  += -Wall -Wcpp -DUSE_FULL_ASSERT
 CFLAGS  += -DEXTERNAL_SRAM
-CFLAGS += -fdata-sections -ffunction-sections -fno-omit-frame-pointer -flto
+CFLAGS  += -nostdlib -nostartfiles -ffreestanding
+CFLAGS  += -mtune=cortex-m4
+# CFLAGS  += -fpic -pie
+# CFLAGS  += -pie
+# CFLAGS  += -mpic-data-is-text-relative
+CFLAGS += -fdata-sections -ffunction-sections -fno-omit-frame-pointer
+# CFLAGS  += -flto
 CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11 $(CFLAGS) 
-# LDFLAGS = -flto -Wl,--gc-sections
+
+# LDFLAGS = -fpic -pie
+# LDFLAGS = -flto
+LDFLAGS = -Wl,--gc-sections
 # ASFLAGS  = -g
 LDLIBS   = -lm
 LDSCRIPT = Source/flash.ld
-FIRMWARESENDER = ../FirmwareSender/bin/FirmwareSender
+FIRMWARESENDER = Tools/FirmwareSender
 
 C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c # myalloc.c
 CPP_SRC = main.cpp operators.cpp
@@ -36,10 +45,10 @@ OBJS += $(SYSCALLS)
 OBJS += # $(BUILD)/stm32f4xx_gpio.o $(BUILD)/stm32f4xx_rcc.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
-OBJS += $(DSPLIB)/SupportFunctions/arm_float_to_q31.o
-OBJS += $(DSPLIB)/SupportFunctions/arm_q31_to_float.o
-OBJS += $(DSPLIB)/SupportFunctions/arm_float_to_q15.o
-OBJS += $(DSPLIB)/SupportFunctions/arm_q15_to_float.o
+# OBJS += $(DSPLIB)/SupportFunctions/arm_float_to_q31.o
+# OBJS += $(DSPLIB)/SupportFunctions/arm_q31_to_float.o
+# OBJS += $(DSPLIB)/SupportFunctions/arm_float_to_q15.o
+# OBJS += $(DSPLIB)/SupportFunctions/arm_q15_to_float.o
 
 # include common make file
 include $(TEMPLATEROOT)/Makefile.f4

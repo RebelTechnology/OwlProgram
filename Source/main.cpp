@@ -1,4 +1,4 @@
-#define DEBUG_DWT
+// #define DEBUG_DWT /* now done by firmware */
 #define DEBUG_MEM
 // #define STARTUP_CODE
 
@@ -9,6 +9,8 @@
 #include "stm32f4xx.h"
 #ifdef DEBUG_MEM
 #include <malloc.h>
+#else
+extern "C" void* _sbrk(int incr);
 #endif /* DEBUG_MEM */
 
 extern void setup();
@@ -16,9 +18,9 @@ extern void processBlock();
 
 extern char _sbss[];
 extern char _ebss[];
-extern char _sidata[];
-extern char _sdata[];
-extern char _edata[];
+// extern char _sidata[];
+// extern char _sdata[];
+// extern char _edata[];
 
 extern "C" void __libc_init_array();
 
@@ -61,11 +63,13 @@ int main(void){
   setup();
 
 #ifdef DEBUG_MEM
-  struct mallinfo minfo = mallinfo();
-  getSharedMemory()->heap_bytes_used = minfo.uordblks;
-  /* ^ causes OwlWare.sysex to trip to:
+  struct mallinfo minfo = mallinfo(); // never returns when -O1 or -O2 ?
+  /* ^ may cause OwlWare.sysex to trip to:
    USART6_IRQHandler () at ./Source/startup.s:142
    142	  b  Infinite_Loop */
+  getSharedMemory()->heap_bytes_used = minfo.uordblks;
+#else
+  // getSharedMemory()->heap_bytes_used = (int32_t)_sbrk(0) - (int32_t)0x68000000;
 #endif /* DEBUG_MEM */
 
   for(;;){
@@ -87,5 +91,4 @@ int main(void){
     // if(getSharedMemory()->status == AUDIO_EXIT_STATUS)
     //   break;
   }
-  // for(;;);
 }
