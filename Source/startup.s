@@ -61,7 +61,8 @@ LoopFillZerobss:
     
 g_pfnVectors:
   .word 0xDADAC0DE       /* magic number */
-  .word  _estack         /* stack pointer */
-  .word  Reset_Handler   /* code entry point */
-  .word  .isr_vector     /* link base address */
+  .word Reset_Handler   /* code entry point */
+  .word .isr_vector     /* link base address */
+  .word _end            /* stack start */
+  .word _estack         /* stack end */
   .string "OWL Program"  /* program name */
