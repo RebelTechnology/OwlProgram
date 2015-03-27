@@ -1,10 +1,18 @@
 TEMPLATEROOT = .
 
-CFLAGS   = -g 
-# CFLAGS   = -O0
-# CFLAGS   = -O1
-# CFLAGS   = -O2
-CFLAGS  += -Wall -Wcpp -DUSE_FULL_ASSERT
+ifndef CONFIG
+  CONFIG=Debug
+endif
+
+ifeq ($(CONFIG),Debug)
+CFLAGS   = -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
+ASFLAGS  = -g
+endif
+
+ifeq ($(CONFIG),Release)
+CFLAGS   = -O2
+endif
+
 CFLAGS  += -DEXTERNAL_SRAM
 CFLAGS  += -nostdlib -nostartfiles -ffreestanding
 CFLAGS  += -mtune=cortex-m4
