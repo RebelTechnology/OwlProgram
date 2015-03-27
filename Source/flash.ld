@@ -4,8 +4,8 @@
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
-/* _estack = 0x2001c000;    /\* end of 112K RAM *\/ */
-_estack = 0x10010000;    /* end of CCM RAM */
+_estack = 0x2001c000;    /* end of 112K RAM */
+/* _estack = 0x10010000;    /\* end of CCM RAM *\/ */
 
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0;      /* required amount of heap  */
@@ -135,7 +135,7 @@ SECTIONS
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
     . = ALIGN(4);
-  } >CCMRAM
+  } >PATCHRAM
 
 /* /\* Shared RAM section, vars must be located here explicitly *\/ */
 /* /\* Example: int foo __attribute__ ((section (".sharedram"))); *\/ */
