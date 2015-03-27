@@ -1,1 +1,1 @@
-REGISTER_PATCH(PhaserPatch, "Phaser", 2, 2);
+REGISTER_PATCH(FreeVerbPatch, "FreeVerb", 2, 2);
