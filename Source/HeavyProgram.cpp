@@ -19,7 +19,7 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
 }
 
 void setup(){
-  REGISTER_PATCH(HeavyPatch, "Heavy", 1, 1);
+  REGISTER_PATCH(HeavyPatch, "Heavy", 2, 2);
   setLed(GREEN);
 }
 
