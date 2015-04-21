@@ -13,6 +13,7 @@ CXX=$(TOOLROOT)/arm-none-eabi-g++
 LD=$(TOOLROOT)/arm-none-eabi-gcc
 AR=$(TOOLROOT)/arm-none-eabi-ar
 AS=$(TOOLROOT)/arm-none-eabi-as
+RANLIB=$(TOOLROOT)/arm-none-eabi-ranlib
 GDB=$(TOOLROOT)/arm-none-eabi-gdb
 OBJCOPY=$(TOOLROOT)/arm-none-eabi-objcopy
 OBJDUMP=$(TOOLROOT)/arm-none-eabi-objdump

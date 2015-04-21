@@ -1,5 +1,5 @@
 // #define DEBUG_DWT /* now done by firmware */
-#define DEBUG_MEM
+// #define DEBUG_MEM
 // #define STARTUP_CODE
 
 #include <string.h>
@@ -67,7 +67,8 @@ int main(void){
   /* ^ may cause OwlWare.sysex to trip to:
    USART6_IRQHandler () at ./Source/startup.s:142
    142	  b  Infinite_Loop */
-  getSharedMemory()->heap_bytes_used = minfo.uordblks;
+  // getSharedMemory()->heap_bytes_used = minfo.uordblks;
+  getSharedMemory()->heap_bytes_used = minfo.arena;
 #else
   // getSharedMemory()->heap_bytes_used = (int32_t)_sbrk(0) - (int32_t)0x68000000;
 #endif /* DEBUG_MEM */

@@ -16,14 +16,18 @@ endif
 CFLAGS  += -DEXTERNAL_SRAM
 CFLAGS  += -nostdlib -nostartfiles -ffreestanding
 CFLAGS  += -mtune=cortex-m4
-# CFLAGS  += -fpic -pie
-# CFLAGS  += -pie
+CFLAGS  += -fpic -fpie
+CFLAGS  += -fno-builtin
+# CFLAGS  += -fpic
 # CFLAGS  += -mpic-data-is-text-relative
-CFLAGS += -fdata-sections -ffunction-sections -fno-omit-frame-pointer
+CFLAGS += -fdata-sections 
+# CFLAGS += -ffunction-sections
+# CFLAGS += -fno-omit-frame-pointer
 # CFLAGS  += -flto
 CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11 $(CFLAGS) 
 
-# LDFLAGS = -fpic -pie
+LDFLAGS = -fpic -fpie
+# LDFLAGS = -fpic
 # LDFLAGS = -flto
 LDFLAGS = -Wl,--gc-sections
 # ASFLAGS  = -g
@@ -107,3 +111,6 @@ $(BUILD)/heavy.elf : $(HEAVY_OBJS) $(OBJS) $(LDSCRIPT)
 
 heavy:  $(BUILD)/heavy.bin
 	$(FIRMWARESENDER) -in  $< -out "OWL FS"
+
+$(BUILD)/program.a : $(BUILD)/program.a($(SOLO_OBJS) $(OBJS) OwlProgram.o)
+	$(RANLIB) $(BUILD)/program.a
