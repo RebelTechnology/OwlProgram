@@ -1,5 +1,5 @@
 // #define DEBUG_DWT /* now done by firmware */
-#define DEBUG_MEM
+// #define DEBUG_MEM
 // #define STARTUP_CODE
 
 #include <string.h>
