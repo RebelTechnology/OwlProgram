@@ -24,8 +24,9 @@
 
 
 #include <fftw3.h>
+#ifdef USE_RESAMPLER
 #include <zita-resampler/resampler.h>
-
+#endif // USE_RESAMPLER
 
 class Retuner
 {
@@ -121,7 +122,9 @@ private:
     fftwf_complex   *_fftFdata;
     fftwf_plan       _fwdplan;
     fftwf_plan       _invplan;
+#ifdef USE_RESAMPLER
     Resampler        _resampler;
+#endif // USE_RESAMPLER
 };
 
 

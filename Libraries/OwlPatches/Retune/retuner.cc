@@ -41,37 +41,41 @@ Retuner::Retuner (int fsamp) :
     int   i, h;
     float t, x, y;
 
-    // if (_fsamp < 64000)
-    // {
-    //     // At 44.1 and 48 kHz resample to double rate.
-    //     _upsamp = true;
-    //     _ipsize = 4096;
-    //     _fftlen = 2048;
-    //     _frsize = 128;
-    //     _resampler.setup (1, 2, 1, 32); // 32 is medium quality.
-    //     // Prefeed some input samples to remove delay.
-    //     _resampler.inp_count = _resampler.filtlen () - 1;
-    //     _resampler.inp_data = 0;
-    //     _resampler.out_count = 0;
-    //     _resampler.out_data = 0;
-    //     _resampler.process ();
-    // }
-    // else if (_fsamp < 128000)
-    // {
+#ifdef USE_RESAMPLER
+    if (_fsamp < 64000)
+    {
+        // At 44.1 and 48 kHz resample to double rate.
+        _upsamp = true;
+        _ipsize = 4096;
+        _fftlen = 2048;
+        _frsize = 128;
+        _resampler.setup (1, 2, 1, 32); // 32 is medium quality.
+        // Prefeed some input samples to remove delay.
+        _resampler.inp_count = _resampler.filtlen () - 1;
+        _resampler.inp_data = 0;
+        _resampler.out_count = 0;
+        _resampler.out_data = 0;
+        _resampler.process ();
+    }
+    else if (_fsamp < 128000)
+    {
+#endif // USE_RESAMPLER
         // 88.2 or 96 kHz.
         _upsamp = false;
         _ipsize = 4096;
         _fftlen = 4096;
         _frsize = 256;
-    // }
-    // else
-    // {
-    //     // 192 kHz, double time domain buffers sizes.
-    //     _upsamp = false;
-    //     _ipsize = 8192;
-    //     _fftlen = 8192;
-    //     _frsize = 512;
-    // }
+#ifdef USE_RESAMPLER
+    }
+    else
+    {
+        // 192 kHz, double time domain buffers sizes.
+        _upsamp = false;
+        _ipsize = 8192;
+        _fftlen = 8192;
+        _frsize = 512;
+    }
+#endif // USE_RESAMPLER
 
     // Accepted correlation peak range, corresponding to 60..1200 Hz.
     _ifmin = _fsamp / 1200;
@@ -182,6 +186,7 @@ int Retuner::process (int nfram, float *inp, float *out)
         if (nfram < k) k = nfram;
         nfram -= k;
 
+#ifdef USE_RESAMPLER
         // At 44.1 and 48 kHz upsample by 2.
         if (_upsamp)
         {
@@ -199,6 +204,12 @@ int Retuner::process (int nfram, float *inp, float *out)
             memcpy (_ipbuff + _ipindex, inp, k * sizeof (float));
             _ipindex += k;
         }
+#else
+        // At higher sample rates apply lowpass filter.
+            // Not implemented yet, just copy.
+            memcpy (_ipbuff + _ipindex, inp, k * sizeof (float));
+            _ipindex += k;
+#endif // USE_RESAMPLER
 
         // Extra samples for interpolation.
         _ipbuff [_ipsize + 0] = _ipbuff [0];
