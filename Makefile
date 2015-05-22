@@ -26,12 +26,12 @@ CFLAGS  += -fno-builtin
 CFLAGS += -fdata-sections 
 # CFLAGS += -ffunction-sections
 # CFLAGS += -fno-omit-frame-pointer
-# CFLAGS  += -flto
+CFLAGS  += -flto
 CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11 $(CFLAGS) 
 
 LDFLAGS = -fpic -fpie
 # LDFLAGS = -fpic
-# LDFLAGS = -flto
+LDFLAGS = -flto
 LDFLAGS = -Wl,--gc-sections
 # ASFLAGS  = -g
 LDSCRIPT = Source/flash.ld
@@ -49,8 +49,8 @@ MULTI_SRC = PatchController.cpp PatchRegistry.cpp MultiProgram.cpp
 OBJS =  $(C_SRC:%.c=Build/%.o) $(CPP_SRC:%.cpp=Build/%.o)
 
 OBJS += Libraries/OwlPatches/Retune/retuner.o
-OBJS += Libraries/OwlPatches/Retune/zita-resampler/resampler.o
-OBJS += Libraries/OwlPatches/Retune/zita-resampler/resampler-table.o
+# OBJS += Libraries/OwlPatches/Retune/zita-resampler/resampler.o
+# OBJS += Libraries/OwlPatches/Retune/zita-resampler/resampler-table.o
 
 SOLO_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(SOLO_SRC:%.cpp=Build/%.o)
 MULTI_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(MULTI_SRC:%.cpp=Build/%.o)
