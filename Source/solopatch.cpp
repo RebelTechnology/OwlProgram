@@ -1,1 +1,1 @@
-REGISTER_PATCH(ComplexFourierTestPatch, "ComplexFourierTest", 2, 2);
+REGISTER_PATCH(RetunePatch, "Retune", 2, 2);

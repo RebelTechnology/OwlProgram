@@ -13,6 +13,9 @@ ifeq ($(CONFIG),Release)
 CFLAGS   = -O2
 endif
 
+CFLAGS  += -ILibraries/OwlPatches/Retune/fftw
+CFLAGS  += -ILibraries/OwlPatches/Retune/
+
 CFLAGS  += -DEXTERNAL_SRAM
 CFLAGS  += -nostdlib -nostartfiles -ffreestanding
 CFLAGS  += -mtune=cortex-m4
@@ -31,9 +34,11 @@ LDFLAGS = -fpic -fpie
 # LDFLAGS = -flto
 LDFLAGS = -Wl,--gc-sections
 # ASFLAGS  = -g
-LDLIBS   = -lm
 LDSCRIPT = Source/flash.ld
 FIRMWARESENDER = Tools/FirmwareSender
+
+LDLIBS   = -lm -lfftw3f
+LDFLAGS += -LLibraries/OwlPatches/Retune/fftw
 
 C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c # myalloc.c
 CPP_SRC = main.cpp operators.cpp
@@ -42,6 +47,10 @@ SOLO_SRC = SoloProgram.cpp
 MULTI_SRC = PatchController.cpp PatchRegistry.cpp MultiProgram.cpp
 
 OBJS =  $(C_SRC:%.c=Build/%.o) $(CPP_SRC:%.cpp=Build/%.o)
+
+OBJS += Libraries/OwlPatches/Retune/retuner.o
+OBJS += Libraries/OwlPatches/Retune/zita-resampler/resampler.o
+OBJS += Libraries/OwlPatches/Retune/zita-resampler/resampler-table.o
 
 SOLO_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(SOLO_SRC:%.cpp=Build/%.o)
 MULTI_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(MULTI_SRC:%.cpp=Build/%.o)
@@ -58,12 +67,12 @@ OBJS += # $(BUILD)/stm32f4xx_gpio.o $(BUILD)/stm32f4xx_rcc.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
 
-OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
-OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
-OBJS += $(DSPLIB)/TransformFunctions/arm_bitreversal2.o
-OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_f32.o
-OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_init_f32.o
-OBJS += $(DSPLIB)/CommonTables/arm_common_tables.o
+# OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
+# OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
+# OBJS += $(DSPLIB)/TransformFunctions/arm_bitreversal2.o
+# OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_f32.o
+# OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_init_f32.o
+# OBJS += $(DSPLIB)/CommonTables/arm_common_tables.o
 
 # OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
 # OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
