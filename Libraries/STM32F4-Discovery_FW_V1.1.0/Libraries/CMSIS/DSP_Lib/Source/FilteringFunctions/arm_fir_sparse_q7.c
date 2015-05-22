@@ -1,73 +1,65 @@
-/* ----------------------------------------------------------------------    
-* Copyright (C) 2010-2013 ARM Limited. All rights reserved.    
-*    
-* $Date:        17. January 2013
-* $Revision: 	V1.4.1
-*    
-* Project: 	    CMSIS DSP Library    
-* Title:	    arm_fir_sparse_q7.c    
-*    
-* Description:	Q7 sparse FIR filter processing function.   
-*    
+/* ----------------------------------------------------------------------   
+* Copyright (C) 2010 ARM Limited. All rights reserved.   
+*   
+* $Date:        15. July 2011  
+* $Revision: 	V1.0.10  
+*   
+* Project: 	    CMSIS DSP Library   
+* Title:	    arm_fir_sparse_q7.c   
+*   
+* Description:	Q7 sparse FIR filter processing function.  
+*   
 * Target Processor: Cortex-M4/Cortex-M3/Cortex-M0
 *  
-* Redistribution and use in source and binary forms, with or without 
-* modification, are permitted provided that the following conditions
-* are met:
-*   - Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   - Redistributions in binary form must reproduce the above copyright
-*     notice, this list of conditions and the following disclaimer in
-*     the documentation and/or other materials provided with the 
-*     distribution.
-*   - Neither the name of ARM LIMITED nor the names of its contributors
-*     may be used to endorse or promote products derived from this
-*     software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
-* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-* LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-* ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.   
+* Version 1.0.10 2011/7/15 
+*    Big Endian support added and Merged M0 and M3/M4 Source code.  
+*   
+* Version 1.0.3 2010/11/29  
+*    Re-organized the CMSIS folders and updated documentation.   
+*    
+* Version 1.0.2 2010/11/11   
+*    Documentation updated.    
+*   
+* Version 1.0.1 2010/10/05    
+*    Production release and review comments incorporated.   
+*   
+* Version 1.0.0 2010/09/20    
+*    Production release and review comments incorporated   
+*   
+* Version 0.0.7  2010/06/10    
+*    Misra-C changes done   
 * ------------------------------------------------------------------- */
 #include "arm_math.h"
 
 
-/**    
- * @ingroup groupFilters    
+/**   
+ * @ingroup groupFilters   
  */
-
-/**    
- * @addtogroup FIR_Sparse    
- * @{    
- */
-
 
 /**   
- * @brief Processing function for the Q7 sparse FIR filter.   
- * @param[in]  *S           points to an instance of the Q7 sparse FIR structure.   
- * @param[in]  *pSrc        points to the block of input data.   
- * @param[out] *pDst        points to the block of output data   
- * @param[in]  *pScratchIn  points to a temporary buffer of size blockSize.   
- * @param[in]  *pScratchOut points to a temporary buffer of size blockSize.   
- * @param[in]  blockSize    number of input samples to process per call.   
- * @return none.   
- *    
- * <b>Scaling and Overflow Behavior:</b>    
- * \par    
- * The function is implemented using a 32-bit internal accumulator.    
- * Both coefficients and state variables are represented in 1.7 format and multiplications yield a 2.14 result.    
- * The 2.14 intermediate results are accumulated in a 32-bit accumulator in 18.14 format.    
- * There is no risk of internal overflow with this approach and the full precision of intermediate multiplications is preserved.    
- * The accumulator is then converted to 18.7 format by discarding the low 7 bits.   
- * Finally, the result is truncated to 1.7 format.   
+ * @addtogroup FIR_Sparse   
+ * @{   
+ */
+
+
+/**  
+ * @brief Processing function for the Q7 sparse FIR filter.  
+ * @param[in]  *S           points to an instance of the Q7 sparse FIR structure.  
+ * @param[in]  *pSrc        points to the block of input data.  
+ * @param[out] *pDst        points to the block of output data  
+ * @param[in]  *pScratchIn  points to a temporary buffer of size blockSize.  
+ * @param[in]  *pScratchOut points to a temporary buffer of size blockSize.  
+ * @param[in]  blockSize    number of input samples to process per call.  
+ * @return none.  
+ *   
+ * <b>Scaling and Overflow Behavior:</b>   
+ * \par   
+ * The function is implemented using a 32-bit internal accumulator.   
+ * Both coefficients and state variables are represented in 1.7 format and multiplications yield a 2.14 result.   
+ * The 2.14 intermediate results are accumulated in a 32-bit accumulator in 18.14 format.   
+ * There is no risk of internal overflow with this approach and the full precision of intermediate multiplications is preserved.   
+ * The accumulator is then converted to 18.7 format by discarding the low 7 bits.  
+ * Finally, the result is truncated to 1.7 format.  
  */
 
 void arm_fir_sparse_q7(
@@ -95,7 +87,7 @@ void arm_fir_sparse_q7(
   q31_t in;
 
 
-#ifndef ARM_MATH_CM0_FAMILY
+#ifndef ARM_MATH_CM0
 
   /* Run the below code for Cortex-M4 and Cortex-M3 */
 
@@ -131,7 +123,7 @@ void arm_fir_sparse_q7(
   /* Working pointer for scratch buffer of output values */
   pScratchOut = pScr2;
 
-  /* Loop over the blockSize. Unroll by a factor of 4.    
+  /* Loop over the blockSize. Unroll by a factor of 4.   
    * Compute 4 multiplications at a time. */
   blkCnt = blockSize >> 2;
 
@@ -147,7 +139,7 @@ void arm_fir_sparse_q7(
     blkCnt--;
   }
 
-  /* If the blockSize is not a multiple of 4,    
+  /* If the blockSize is not a multiple of 4,   
    * compute the remaining samples */
   blkCnt = blockSize % 0x4u;
 
@@ -160,7 +152,7 @@ void arm_fir_sparse_q7(
     blkCnt--;
   }
 
-  /* Load the coefficient value and    
+  /* Load the coefficient value and   
    * increment the coefficient buffer for the next set of state values */
   coeff = *pCoeffs++;
 
@@ -191,7 +183,7 @@ void arm_fir_sparse_q7(
     /* Working pointer for scratch buffer of output values */
     pScratchOut = pScr2;
 
-    /* Loop over the blockSize. Unroll by a factor of 4.    
+    /* Loop over the blockSize. Unroll by a factor of 4.   
      * Compute 4 MACS at a time. */
     blkCnt = blockSize >> 2;
 
@@ -211,7 +203,7 @@ void arm_fir_sparse_q7(
       blkCnt--;
     }
 
-    /* If the blockSize is not a multiple of 4,    
+    /* If the blockSize is not a multiple of 4,   
      * compute the remaining samples */
     blkCnt = blockSize % 0x4u;
 
@@ -225,7 +217,7 @@ void arm_fir_sparse_q7(
       blkCnt--;
     }
 
-    /* Load the coefficient value and    
+    /* Load the coefficient value and   
      * increment the coefficient buffer for the next set of state values */
     coeff = *pCoeffs++;
 
@@ -243,7 +235,7 @@ void arm_fir_sparse_q7(
     tapCnt--;
   }
 
-  /* All the output values are in pScratchOut buffer.    
+  /* All the output values are in pScratchOut buffer.   
      Convert them into 1.15 format, saturate and store in the destination buffer. */
   /* Loop over the blockSize. */
   blkCnt = blockSize >> 2;
@@ -261,7 +253,7 @@ void arm_fir_sparse_q7(
     blkCnt--;
   }
 
-  /* If the blockSize is not a multiple of 4,    
+  /* If the blockSize is not a multiple of 4,   
      remaining samples are processed in the below loop */
   blkCnt = blockSize % 0x4u;
 
@@ -319,7 +311,7 @@ void arm_fir_sparse_q7(
     blkCnt--;
   }
 
-  /* Load the coefficient value and           
+  /* Load the coefficient value and          
    * increment the coefficient buffer for the next set of state values */
   coeff = *pCoeffs++;
 
@@ -363,7 +355,7 @@ void arm_fir_sparse_q7(
       blkCnt--;
     }
 
-    /* Load the coefficient value and           
+    /* Load the coefficient value and          
      * increment the coefficient buffer for the next set of state values */
     coeff = *pCoeffs++;
 
@@ -381,7 +373,7 @@ void arm_fir_sparse_q7(
     tapCnt--;
   }
 
-  /* All the output values are in pScratchOut buffer.       
+  /* All the output values are in pScratchOut buffer.      
      Convert them into 1.15 format, saturate and store in the destination buffer. */
   /* Loop over the blockSize. */
   blkCnt = blockSize;
@@ -394,10 +386,10 @@ void arm_fir_sparse_q7(
     blkCnt--;
   }
 
-#endif /*   #ifndef ARM_MATH_CM0_FAMILY */
+#endif /*   #ifndef ARM_MATH_CM0 */
 
 }
 
-/**    
- * @} end of FIR_Sparse group    
+/**   
+ * @} end of FIR_Sparse group   
  */

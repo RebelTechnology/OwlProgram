@@ -1,155 +1,178 @@
-/* ----------------------------------------------------------------------     
-* Copyright (C) 2010-2013 ARM Limited. All rights reserved.  
-*     
-* $Date:        17. January 2013
-* $Revision: 	V1.4.1
-*     
-* Project:      CMSIS DSP Library  
-* Title:		arm_sqrt_q15.c     
-*     
-* Description:	Q15 square root function.    
-*     
+/* ----------------------------------------------------------------------   
+* Copyright (C) 2010 ARM Limited. All rights reserved.   
+*   
+* $Date:        15. July 2011  
+* $Revision: 	V1.0.10  
+*   
+* Project: 	    CMSIS DSP Library   
+* Title:		arm_sqrt_q15.c   
+*   
+* Description:	Q15 square root function.  
+*   
 * Target Processor: Cortex-M4/Cortex-M3/Cortex-M0
 *  
-* Redistribution and use in source and binary forms, with or without 
-* modification, are permitted provided that the following conditions
-* are met:
-*   - Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   - Redistributions in binary form must reproduce the above copyright
-*     notice, this list of conditions and the following disclaimer in
-*     the documentation and/or other materials provided with the 
-*     distribution.
-*   - Neither the name of ARM LIMITED nor the names of its contributors
-*     may be used to endorse or promote products derived from this
-*     software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
-* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-* LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-* ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE. 
+* Version 1.0.10 2011/7/15 
+*    Big Endian support added and Merged M0 and M3/M4 Source code.  
+*   
+* Version 1.0.3 2010/11/29  
+*    Re-organized the CMSIS folders and updated documentation.   
+*    
+* Version 1.0.2 2010/11/11   
+*    Documentation updated.    
+*   
+* Version 1.0.1 2010/10/05    
+*    Production release and review comments incorporated.   
+*   
+* Version 1.0.0 2010/09/20    
+*    Production release and review comments incorporated.   
 * -------------------------------------------------------------------- */
+
 #include "arm_math.h"
 #include "arm_common_tables.h"
 
 
-/**     
- * @ingroup groupFastMath     
+/**   
+ * @ingroup groupFastMath   
  */
 
-/**     
- * @addtogroup SQRT     
- * @{     
+/**   
+ * @addtogroup SQRT   
+ * @{   
  */
 
-  /**    
-   * @brief  Q15 square root function.    
-   * @param[in]   in     input value.  The range of the input value is [0 +1) or 0x0000 to 0x7FFF.    
-   * @param[out]  *pOut  square root of input value.    
-   * @return The function returns ARM_MATH_SUCCESS if the input value is positive
-   * and ARM_MATH_ARGUMENT_ERROR if the input is negative.  For
-   * negative inputs, the function returns *pOut = 0.
+  /**  
+   * @brief  Q15 square root function.  
+   * @param[in]   in     input value.  The range of the input value is [0 +1) or 0x0000 to 0x7FFF.  
+   * @param[out]  *pOut  square root of input value.  
+   * @return The function returns ARM_MATH_SUCCESS if input value is positive value or ARM_MATH_ARGUMENT_ERROR if  
+   * <code>in</code> is negative value and returns zero output for negative values.  
    */
 
 arm_status arm_sqrt_q15(
   q15_t in,
   q15_t * pOut)
 {
-  q15_t number, temp1, var1, signBits1, half;
-  q31_t bits_val1;
-  float32_t temp_float1;
-  union
+  q31_t prevOut;
+  q15_t oneByOut;
+  uint32_t sign_bits;
+
+#ifndef ARM_MATH_CM0
+
+  /* Run the below code for Cortex-M4 and Cortex-M3 */
+
+  q31_t out;
+
+  if(in > 0)
   {
-    q31_t fracval;
-    float32_t floatval;
-  } tempconv;
+    /* run for ten iterations */
 
-  number = in;
+    /* Take initial guess as half of the input and first iteration */
+    out = ((q31_t) in >> 1u) + 0x3FFF;
 
-  /* If the input is a positive number then compute the signBits. */
-  if(number > 0)
-  {
-    signBits1 = __CLZ(number) - 17;
+    /* Calculation of reciprocal of out */
+    /* oneByOut contains reciprocal of out which is in 2.14 format   
+       and oneByOut should be upscaled by signBits */
+    sign_bits = arm_recip_q15((q15_t) out, &oneByOut, armRecipTableQ15);
 
-    /* Shift by the number of signBits1 */
-    if((signBits1 % 2) == 0)
-    {
-      number = number << signBits1;
-    }
-    else
-    {
-      number = number << (signBits1 - 1);
-    }
+    /* 0.5 * (out) */
+    out = out >> 1u;
+    /* prevOut = 0.5 * out + (in * (oneByOut << signBits))) */
+    prevOut = out + (((q15_t) (((q31_t) in * oneByOut) >> 16)) << sign_bits);
 
-    /* Calculate half value of the number */
-    half = number >> 1;
-    /* Store the number for later use */
-    temp1 = number;
+    /* Third iteration */
+    sign_bits = arm_recip_q15((q15_t) prevOut, &oneByOut, armRecipTableQ15);
+    prevOut = prevOut >> 1u;
+    out = prevOut + (((q15_t) (((q31_t) in * oneByOut) >> 16)) << sign_bits);
 
-    /*Convert to float */
-    temp_float1 = number * 3.051757812500000e-005f;
-    /*Store as integer */
-    tempconv.floatval = temp_float1;
-    bits_val1 = tempconv.fracval;
-    /* Subtract the shifted value from the magic number to give intial guess */
-    bits_val1 = 0x5f3759df - (bits_val1 >> 1);  // gives initial guess  
-    /* Store as float */
-    tempconv.fracval = bits_val1;
-    temp_float1 = tempconv.floatval;
-    /* Convert to integer format */
-    var1 = (q31_t) (temp_float1 * 16384);
+    sign_bits = arm_recip_q15((q15_t) out, &oneByOut, armRecipTableQ15);
+    out = out >> 1u;
+    prevOut = out + (((q15_t) (((q31_t) in * oneByOut) >> 16)) << sign_bits);
 
-    /* 1st iteration */
-    var1 = ((q15_t) ((q31_t) var1 * (0x3000 -
-                                     ((q15_t)
-                                      ((((q15_t)
-                                         (((q31_t) var1 * var1) >> 15)) *
-                                        (q31_t) half) >> 15))) >> 15)) << 2;
-    /* 2nd iteration */
-    var1 = ((q15_t) ((q31_t) var1 * (0x3000 -
-                                     ((q15_t)
-                                      ((((q15_t)
-                                         (((q31_t) var1 * var1) >> 15)) *
-                                        (q31_t) half) >> 15))) >> 15)) << 2;
-    /* 3rd iteration */
-    var1 = ((q15_t) ((q31_t) var1 * (0x3000 -
-                                     ((q15_t)
-                                      ((((q15_t)
-                                         (((q31_t) var1 * var1) >> 15)) *
-                                        (q31_t) half) >> 15))) >> 15)) << 2;
+    /* Fifth iteration */
+    sign_bits = arm_recip_q15((q15_t) prevOut, &oneByOut, armRecipTableQ15);
+    prevOut = prevOut >> 1u;
+    out = prevOut + (((q15_t) (((q31_t) in * oneByOut) >> 16)) << sign_bits);
 
-    /* Multiply the inverse square root with the original value */
-    var1 = ((q15_t) (((q31_t) temp1 * var1) >> 15)) << 1;
+    sign_bits = arm_recip_q15((q15_t) out, &oneByOut, armRecipTableQ15);
+    out = out >> 1u;
+    prevOut = out + (((q15_t) (((q31_t) in * oneByOut) >> 16)) << sign_bits);
 
-    /* Shift the output down accordingly */
-    if((signBits1 % 2) == 0)
-    {
-      var1 = var1 >> (signBits1 / 2);
-    }
-    else
-    {
-      var1 = var1 >> ((signBits1 - 1) / 2);
-    }
-    *pOut = var1;
+    /* Seventh iteration */
+    sign_bits = arm_recip_q15((q15_t) prevOut, &oneByOut, armRecipTableQ15);
+    prevOut = prevOut >> 1u;
+    out = prevOut + (((q15_t) (((q31_t) in * oneByOut) >> 16)) << sign_bits);
+
+    sign_bits = arm_recip_q15((q15_t) out, &oneByOut, armRecipTableQ15);
+    out = out >> 1u;
+    prevOut = out + (((q15_t) (((q31_t) in * oneByOut) >> 16)) << sign_bits);
+
+    sign_bits = arm_recip_q15((q15_t) prevOut, &oneByOut, armRecipTableQ15);
+    prevOut = prevOut >> 1u;
+    out = prevOut + (((q15_t) (((q31_t) in * oneByOut) >> 16)) << sign_bits);
+
+    /* tenth iteration */
+    sign_bits = arm_recip_q15((q15_t) out, &oneByOut, armRecipTableQ15);
+    out = out >> 1u;
+    *pOut = out + (((q15_t) (((q31_t) in * oneByOut) >> 16)) << sign_bits);
 
     return (ARM_MATH_SUCCESS);
   }
-  /* If the number is a negative number then store zero as its square root value */
+
+#else
+
+  /* Run the below code for Cortex-M0 */
+
+  q31_t out, loopVar;                            /* Temporary variable for output, loop variable */
+  if(in > 0)
+  {
+    /* run for ten iterations */
+
+    /* Take initial guess as half of the input and first iteration */
+    out = ((q31_t) in >> 1u) + 0x3FFF;
+
+    /* Calculation of reciprocal of out */
+
+    /* oneByOut contains reciprocal of out which is in 2.14 format   
+       and oneByOut should be upscaled by sign bits */
+    sign_bits = arm_recip_q15((q15_t) out, &oneByOut, armRecipTableQ15);
+
+    /* 0.5 * (out) */
+    out = out >> 1u;
+    /* prevOut = 0.5 * out + (in * oneByOut) << signbits))) */
+    prevOut = out + (((q15_t) (((q31_t) in * oneByOut) >> 16)) << sign_bits);
+
+    /* loop for third iteration to tenth iteration */
+
+    for (loopVar = 1; loopVar <= 8; loopVar++)
+    {
+
+      sign_bits = arm_recip_q15((q15_t) prevOut, &oneByOut, armRecipTableQ15);
+      /* 0.5 * (prevOut) */
+      prevOut = prevOut >> 1u;
+      /* prevOut = 0.5 * prevOut+ (in * oneByOut) << signbits))) */
+      out =
+        prevOut + (((q15_t) (((q31_t) in * oneByOut) >> 16)) << sign_bits);
+      /* prevOut      = out */
+      prevOut = out;
+
+    }
+    /* output is moved to pOut pointer */
+    *pOut = prevOut;
+
+    return (ARM_MATH_SUCCESS);
+  }
+
+#endif /* #ifndef ARM_MATH_CM0 */
+
   else
   {
+
     *pOut = 0;
     return (ARM_MATH_ARGUMENT_ERROR);
   }
+
 }
 
-/**     
- * @} end of SQRT group     
+/**   
+ * @} end of SQRT group   
  */
