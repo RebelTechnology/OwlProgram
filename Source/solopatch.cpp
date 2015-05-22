@@ -1,1 +1,1 @@
-REGISTER_PATCH(ComplexFourierTestPatch, "ComplexFourierTest", 2, 2);
+REGISTER_PATCH(KissFftPatch, "KissFft", 2, 2);
