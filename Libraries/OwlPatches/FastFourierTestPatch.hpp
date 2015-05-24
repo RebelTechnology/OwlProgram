@@ -25,16 +25,13 @@ private:
   FastFourierTransform transform;
 public:
   FastFourierTestPatch(){
-    // transform.init(getBlockSize()/2);
-    transform.init(32);
+    transform.init(getBlockSize());
   }
   void processAudio(AudioBuffer &buffer){
-    int size = buffer.getSize();
     float* in = buffer.getSamples(0);
-    // float out[getBlockSize()];
-    transform.fft(in, in);
-    // transform.fft(in, out);
-    // transform.ifft(out, in);
+    float out[getBlockSize()];
+    transform.fft(in, out);
+    transform.ifft(out, in);
   }
 };
 
