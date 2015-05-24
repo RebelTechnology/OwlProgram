@@ -21,6 +21,9 @@ class Fft{
       kRectangularWindow //"no window"
     };
     Fft(){
+      tdBuffer=NULL;
+      fdBuffer=NULL;
+      windowTable=NULL;
       initialised=false;
     }
     ~Fft(){
@@ -29,6 +32,9 @@ class Fft{
       free(windowTable);
     }
     void init(int aLength, int aWindowType){
+      free(tdBuffer);
+      free(fdBuffer);
+      free(windowTable);
       length=aLength;
       windowType=aWindowType;
       cfgFft = kiss_fft_alloc(length,0,0,0);
@@ -164,35 +170,55 @@ class KissFftPatch : public Patch {
 private:
   Fft transform;
   float *signal;
+  int previousBlockSize;
 public:
   KissFftPatch(){
-    registerParameter(PARAMETER_A, "DO_FFT");
-    registerParameter(PARAMETER_B, "GAIN");
+    init();
+  }
+  void init(){
+    registerParameter(PARAMETER_A, "GAIN");
+    registerParameter(PARAMETER_B, "TYPE"); // <=0.5: robotization, >0.5: whisperization
+    registerParameter(PARAMETER_C, "N_BINS"); // How many bins we transform 
     transform.init(getBlockSize(),Fft::kRectangularWindow);
     int size=getBlockSize();
-    signal = createMemoryBuffer(1, getBlockSize())->getSamples(0);
   }
   void processAudio(AudioBuffer &buffer){
-    float todo = getParameterValue(PARAMETER_A);
-
+    float gain = getParameterValue(PARAMETER_A);
+    float type = getParameterValue(PARAMETER_B);
+    float nBins = getParameterValue(PARAMETER_C);
     int size = buffer.getSize();
+    if (size!=previousBlockSize){
+      previousBlockSize=size; //this is useful for debugging but cannot be used in production:
+      init();
+    }
     float* left = buffer.getSamples(0);
     float* right=buffer.getSamples(1);
-    int j=0;
-    if(todo>0.5){
-      // transform.fft(left);
-      // kiss_fft_cpx* inputBuffer=transform.getTdBuffer();
-      // Fft::setReal(inputBuffer,0.0,size);
-      // Fft::setImag(inputBuffer,0.0,size);
-      // transform.ifft(signal);
-      transform.fft(left);
-      kiss_fft_cpx* cpx=transform.getFdBuffer();
-      transform.ifft(left);
+    transform.fft(left);
+    kiss_fft_cpx* cpx=transform.getFdBuffer();
+    //set to zero the bins above Nyquist
+    Fft::setImag(cpx+size/2, 0.0, size/2);
+    Fft::setReal(cpx+size/2, 0.0, size/2);
+    int end=size/2*nBins;
+    
+    for(int n=0; n<end; n++){ //we do not need to get all the way to Nyquist: probably the content above 10kHz is not going to make much difference for these effects
+      float ab=sqrtf((cpx[n].r*cpx[n].r)+(cpx[n].i*cpx[n].i));
+      if(type>0.5){//whisperization: randomize phase
+        float phase=rand()/(float)RAND_MAX*2*M_PI;
+        cpx[n].r=ab*cosf(phase);
+        cpx[n].i=ab*sinf(phase);
+      }
+      if(type<=0.5)//robotization
+        cpx[n].r=ab;
     }
+    if(type<=0.5) //robotization: set phase to zero
+      Fft::setImag(cpx, 0.0, size/2);
+    transform.ifft(left);
     for(int i=0; i<size;++i){
+      //to protect your ears: first clip
       left[i]=left[i]>1? 1 : left[i];
       left[i]=left[i]<-1? -11 : left[i];
-      left[i]*=getParameterValue(PARAMETER_B)*0.5;
+      //then apply gain
+      left[i]*=gain;
       right[i]=left[i];
     }
   }
