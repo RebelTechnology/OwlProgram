@@ -6,13 +6,15 @@ BUILD=$(TEMPLATEROOT)/Build
 
 # Code Paths
 DEVICE=$(LIBROOT)/Libraries/CMSIS/ST/STM32F4xx
-CORE=$(LIBROOT)/Libraries/CMSIS/Include
+# CORE=$(LIBROOT)/Libraries/CMSIS/Include
+# DEVICE=Libraries/STM32Cube_FW_F4_V1.5.0/Drivers/CMSIS/Device/ST/STM32F4xx/
+CORE=Libraries/STM32Cube_FW_F4_V1.5.0/Drivers/CMSIS/Include/
 PERIPH_FILE=$(LIBROOT)/Libraries/STM32F4xx_StdPeriph_Driver
 SYSTEM_FILE=$(LIBROOT)/Libraries/CMSIS/ST/STM32F4xx/Source/Templates
 STARTUP_FILE=$(LIBROOT)/Libraries/CMSIS/ST/STM32F4xx/Source/Templates/TrueSTUDIO
 DISCOVERY_FILE=$(LIBROOT)/Utilities/STM32F4-Discovery
 DEMO_FILE=$(LIBROOT)/Project/Demonstration
-DSPLIB=$(LIBROOT)/Libraries/CMSIS/DSP_Lib/Source
+DSPLIB=Libraries/STM32Cube_FW_F4_V1.5.0/Drivers/CMSIS/DSP_Lib/Source
 USB_DEVICE_FILE=$(LIBROOT)/Libraries/STM32_USB_Device_Library
 USB_HOST_FILE=$(LIBROOT)/Libraries/STM32_USB_HOST_Library
 USB_OTG_FILE=$(LIBROOT)/Libraries/STM32_USB_OTG_Driver
