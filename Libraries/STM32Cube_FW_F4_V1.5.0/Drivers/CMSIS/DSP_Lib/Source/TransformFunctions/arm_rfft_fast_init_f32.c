@@ -83,27 +83,27 @@ arm_status arm_rfft_fast_init_f32(
   /*  Initializations of structure parameters depending on the FFT length */
   switch (Sint->fftLen)
   {
-  case 2048u:
-    /*  Initializations of structure parameters for 2048 point FFT */
-    /*  Initialise the bit reversal table length */
-    Sint->bitRevLength = ARMBITREVINDEXTABLE2048_TABLE_LENGTH;
-    /*  Initialise the bit reversal table pointer */
-    Sint->pBitRevTable = (uint16_t *)armBitRevIndexTable2048;
-    /*  Initialise the Twiddle coefficient pointers */
-		Sint->pTwiddle     = (float32_t *) twiddleCoef_2048;
-		S->pTwiddleRFFT    = (float32_t *) twiddleCoef_rfft_4096;
-    break;
-  case 1024u:
-    Sint->bitRevLength = ARMBITREVINDEXTABLE1024_TABLE_LENGTH;
-    Sint->pBitRevTable = (uint16_t *)armBitRevIndexTable1024;
-		Sint->pTwiddle     = (float32_t *) twiddleCoef_1024;
-		S->pTwiddleRFFT    = (float32_t *) twiddleCoef_rfft_2048;
-    break;
+  /* case 2048u: */
+  /*   /\*  Initializations of structure parameters for 2048 point FFT *\/ */
+  /*   /\*  Initialise the bit reversal table length *\/ */
+  /*   Sint->bitRevLength = ARMBITREVINDEXTABLE2048_TABLE_LENGTH; */
+  /*   /\*  Initialise the bit reversal table pointer *\/ */
+  /*   Sint->pBitRevTable = (uint16_t *)armBitRevIndexTable2048; */
+  /*   /\*  Initialise the Twiddle coefficient pointers *\/ */
+  /* 		Sint->pTwiddle     = (float32_t *) twiddleCoef_2048; */
+  /* 		S->pTwiddleRFFT    = (float32_t *) twiddleCoef_rfft_4096; */
+  /*   break; */
+  /* case 1024u: */
+  /*   Sint->bitRevLength = ARMBITREVINDEXTABLE1024_TABLE_LENGTH; */
+  /*   Sint->pBitRevTable = (uint16_t *)armBitRevIndexTable1024; */
+  /* 		Sint->pTwiddle     = (float32_t *) twiddleCoef_1024; */
+  /* 		S->pTwiddleRFFT    = (float32_t *) twiddleCoef_rfft_2048; */
+  /*   break; */
   case 512u:
     Sint->bitRevLength = ARMBITREVINDEXTABLE_512_TABLE_LENGTH;
     Sint->pBitRevTable = (uint16_t *)armBitRevIndexTable512;
-		Sint->pTwiddle     = (float32_t *) twiddleCoef_512;
-		S->pTwiddleRFFT    = (float32_t *) twiddleCoef_rfft_1024;
+  		Sint->pTwiddle     = (float32_t *) twiddleCoef_512;
+  		S->pTwiddleRFFT    = (float32_t *) twiddleCoef_rfft_1024;
     break;
   case 256u:
     Sint->bitRevLength = ARMBITREVINDEXTABLE_256_TABLE_LENGTH;
