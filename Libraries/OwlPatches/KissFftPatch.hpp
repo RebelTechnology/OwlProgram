@@ -169,8 +169,6 @@ class Fft{
 class KissFftPatch : public Patch {
 private:
   Fft transform;
-  float *signal;
-  int previousBlockSize;
 public:
   KissFftPatch(){
     init();
@@ -179,39 +177,35 @@ public:
     registerParameter(PARAMETER_A, "GAIN");
     registerParameter(PARAMETER_B, "TYPE"); // <=0.5: robotization, >0.5: whisperization
     registerParameter(PARAMETER_C, "N_BINS"); // How many bins we transform 
-    transform.init(getBlockSize(),Fft::kRectangularWindow);
     int size=getBlockSize();
+    transform.init(size,Fft::kRectangularWindow);
   }
   void processAudio(AudioBuffer &buffer){
     float gain = getParameterValue(PARAMETER_A);
     float type = getParameterValue(PARAMETER_B);
     float nBins = getParameterValue(PARAMETER_C);
     int size = buffer.getSize();
-    if (size!=previousBlockSize){
-      previousBlockSize=size; //this is useful for debugging but cannot be used in production:
-      init();
-    }
     float* left = buffer.getSamples(0);
     float* right=buffer.getSamples(1);
     transform.fft(left);
     kiss_fft_cpx* cpx=transform.getFdBuffer();
-    //set to zero the bins above Nyquist
-    Fft::setImag(cpx+size/2, 0.0, size/2);
-    Fft::setReal(cpx+size/2, 0.0, size/2);
     int end=size/2*nBins;
-    
-    for(int n=0; n<end; n++){ //we do not need to get all the way to Nyquist: probably the content above 10kHz is not going to make much difference for these effects
+    for(int n=1; n<end; n++){ //we do not need to get all the way to Nyquist: probably the content above 10kHz is not going to make much difference for these effects
       float ab=sqrtf((cpx[n].r*cpx[n].r)+(cpx[n].i*cpx[n].i));
       if(type>0.5){//whisperization: randomize phase
         float phase=rand()/(float)RAND_MAX*2*M_PI;
         cpx[n].r=ab*cosf(phase);
         cpx[n].i=ab*sinf(phase);
+        cpx[size-n].r=cpx[n].r;
+        cpx[size-n].i=cpx[n].i;
       }
-      if(type<=0.5)//robotization
+      if(type<=0.5){//robotization
         cpx[n].r=ab;
+        cpx[size-n].r=ab;
+      }
     }
     if(type<=0.5) //robotization: set phase to zero
-      Fft::setImag(cpx, 0.0, size/2);
+      Fft::setImag(cpx, 0.0, size);
     transform.ifft(left);
     for(int i=0; i<size;++i){
       //to protect your ears: first clip
