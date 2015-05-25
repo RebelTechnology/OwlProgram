@@ -1,7 +1,7 @@
 TEMPLATEROOT = .
 
 ifndef CONFIG
-  CONFIG=Debug
+  CONFIG=Release
 endif
 
 ifeq ($(CONFIG),Debug)
