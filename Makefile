@@ -18,19 +18,24 @@ CFLAGS  += -nostdlib -nostartfiles -ffreestanding
 CFLAGS  += -mtune=cortex-m4
 CFLAGS  += -fpic -fpie
 CFLAGS  += -fno-builtin
+CFLAGS += -fdata-sections 
+# CFLAGS  +=  -munaligned-access
+# CFLAGS  +=  -mno-unaligned-access
+# CFLAGS –mlong-calls
+
 # CFLAGS  += -fpic
 # CFLAGS  += -mpic-data-is-text-relative
-CFLAGS += -fdata-sections 
 # CFLAGS += -ffunction-sections
 # CFLAGS += -fno-omit-frame-pointer
 # CFLAGS  += -flto
+
 CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11 $(CFLAGS) 
 
-LDFLAGS = -fpic -fpie
+# LDFLAGS = -fpic -fpie
+LDFLAGS = -Wl,--gc-sections
 # LDFLAGS = -fpic
 # LDFLAGS = -flto
-LDFLAGS = -Wl,--gc-sections
-# ASFLAGS  = -g
+
 LDLIBS   = -lm
 LDSCRIPT = Source/flash.ld
 FIRMWARESENDER = Tools/FirmwareSender
@@ -57,7 +62,8 @@ OBJS += $(SYSCALLS)
 OBJS += # $(BUILD)/stm32f4xx_gpio.o $(BUILD)/stm32f4xx_rcc.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
-OBJS += Libraries/kiss_fft130/kiss_fft.o
+
+# OBJS += Libraries/kiss_fft130/kiss_fft.o
 
 OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o

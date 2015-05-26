@@ -51,6 +51,18 @@ SECTIONS
     *(.glue_7t)        /* glue thumb to arm code */
 	*(.eh_frame)
 
+. = ALIGN(0x4);
+
+ /* These are for static constructors and destructors under ELF */
+ KEEP (*crtbegin.o(.ctors))
+ KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
+ KEEP (*(SORT(.ctors.*)))
+ KEEP (*crtend.o(.ctors))
+ KEEP (*crtbegin.o(.dtors))
+ KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
+ KEEP (*(SORT(.dtors.*)))
+ KEEP (*crtend.o(.dtors))
+
     KEEP (*(.init))
     KEEP (*(.fini))
 
