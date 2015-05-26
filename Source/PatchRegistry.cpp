@@ -2,7 +2,6 @@
 #include "SharedMemory.h"
 #include "basicmaths.h"
 #include "OwlPatches/includes.h"
-#include "PatchDefinition.hpp"
 
 #define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, Register<T>::construct)
 
