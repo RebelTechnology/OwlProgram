@@ -31,6 +31,7 @@ public:
     registerParameter(PARAMETER_C, "N_BINS"); // How many bins we transform 
     transform.init(getBlockSize());
     buf = createMemoryBuffer(1, getBlockSize())->getSamples(0);
+    getSharedMemory()->message = "robot says hello";
   }
   void processAudio(AudioBuffer &buffer){
     float gain = getParameterValue(PARAMETER_A);

@@ -58,6 +58,7 @@ int main(void){
     // problem!
     // getSharedMemory()->status = AUDIO_ERROR_STATUS;
     getSharedMemory()->error = CHECKSUM_ERROR_STATUS;
+    getSharedMemory()->message = "ProgramVector checksum error";
     getSharedMemory()->programStatus(AUDIO_ERROR_STATUS);
     // getSharedMemory()->exitProgram();
     // return -1;
