@@ -4,6 +4,8 @@
   .thumb
 
 .global  g_pfnVectors
+;; .global  ProgramVector
+;; .global  vector
 
 /* start address for the initialization values of the .data section. 
 defined in linker script */
@@ -61,8 +63,10 @@ LoopFillZerobss:
     
 g_pfnVectors:
   .word 0xDADAC0DE       /* magic number */
-  .word Reset_Handler   /* code entry point */
-  .word .isr_vector     /* link base address */
-  .word _end            /* stack start */
-  .word _estack         /* stack end */
+  .word .isr_vector      /* link base address */
+  .word Reset_Handler    /* code entry point */
+  .word _end             /* stack start */
+  .word _estack          /* stack end */
+  .word 0x40024000
+  /* .word ProgramVector*/    /* pointer to shared memory block */
   .string "OWL Program"  /* program name */
