@@ -26,7 +26,7 @@ private:
 
 public:
   RetunePatch() {
-    float **fourPointers;
+    float *fourPointers[4];
     AudioBuffer *retunerBuffers=createMemoryBuffer(4, 4096);
     for(int n=0; n<4; n++)
       fourPointers[n]=retunerBuffers->getSamples(n);

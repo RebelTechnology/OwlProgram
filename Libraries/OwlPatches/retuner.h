@@ -138,7 +138,7 @@ private:
     float           *_fftTwind;
     float           *_fftWcorr;
     float           *_fftTdata;
-    float           **_fftFdata;
+    float           *_fftFdata;
 #ifdef USE_RESAMPLER
     Resampler        _resampler;
 #endif // USE_RESAMPLER

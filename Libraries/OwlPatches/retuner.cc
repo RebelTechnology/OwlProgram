@@ -88,7 +88,7 @@ void Retuner::init(int fsamp, float **fourPointers){
     _fftTwind = fourPointers[0];// Window function 
     _fftWcorr = fourPointers[1];// Autocorrelation of window 
     _fftTdata = fourPointers[2];// Time domain data for FFT
-    _fftFdata = (float **)&fourPointers[3];// Frequeny domain data for FFT
+    _fftFdata = fourPointers[3];// Frequeny domain data for FFT
     // TODO:why is it +2 in the line above? see line below from previous code:
     // _fftFdata = (fftwf_complex *) fftwf_malloc ((_fftlen / 2 + 1) * sizeof (fftwf_complex));
 
@@ -113,19 +113,21 @@ void Retuner::init(int fsamp, float **fourPointers){
 
     // Compute window autocorrelation and normalise it.
     // fftwf_execute_dft_r2c (_fwdplan, _fftTwind, _fftFdata);    
-    transform.fft(_fftTwind, (float *)&_fftFdata);
+    transform.fft(_fftTwind, _fftFdata);
     h = _fftlen / 2;
-    for (i = 0; i < h; i++)
+    for (i = 0; i < h; i+=2)
     {
-        x = _fftFdata [i][0];
-        y = _fftFdata [i][1];
-        _fftFdata [i][0] = x * x + y * y;
-        _fftFdata [i][1] = 0;
+        x = _fftFdata [i];
+        y = _fftFdata [i+1];
+        // x = _fftFdata [i][0];
+        // y = _fftFdata [i][1];
+        _fftFdata [i] = x * x + y * y;
+        _fftFdata [i+1] = 0;
     }
-    _fftFdata [h][0] = 0;
-    _fftFdata [h][1] = 0;
+    // _fftFdata [h] = 0;
+    // _fftFdata [h+1] = 0;
     // fftwf_execute_dft_c2r (_invplan, _fftFdata, _fftWcorr);    
-    transform.ifft((float *)&_fftFdata, _fftWcorr); //note that this rescales while the fftw call did not. TODO: implement FastFourierTransform c2r method without rescaling
+    transform.ifft(_fftFdata, _fftWcorr); //note that this rescales while the fftw call did not. TODO: implement FastFourierTransform c2r method without rescaling
     t = _fftWcorr [0];
     for (i = 0; i < _fftlen; i++)
     {
@@ -153,10 +155,6 @@ Retuner::~Retuner (void)
 {
     delete[] _ipbuff;
     delete[] _xffunc;
-    free(_fftTwind);
-    free(_fftWcorr);
-    free(_fftTdata);
-    free(_fftFdata);
 }
 
 
@@ -164,7 +162,6 @@ int Retuner::process (int nfram, float *inp, float *out)
 {
     int    i, k, fi;
     float  ph, dp, r1, r2, dr, u1, u2, v;
-
     // Pitch shifting is done by resampling the input at the
     // required ratio, and eventually jumping forward or back
     // by one or more pitch period(s). Processing is done in
@@ -351,20 +348,20 @@ void Retuner::findcycle (void)
         j += d;
     }
     // fftwf_execute_dft_r2c (_fwdplan, _fftTdata, _fftFdata);    
-    transform.fft(_fftTdata, (float *)&_fftFdata);
+    transform.fft(_fftTdata, _fftFdata);
     f = _fsamp / (_fftlen * 3e3f);
-    for (i = 0; i < h; i++)
+    for (i = 0; i < h; i+=2)
     {
-        x = _fftFdata [i][0];
-        y = _fftFdata [i][1];
+        x = _fftFdata [i];
+        y = _fftFdata [i+1];
         m = i * f;
-        _fftFdata [i][0] = (x * x + y * y) / (1 + m * m);
-        _fftFdata [i][1] = 0;
+        _fftFdata [i] = (x * x + y * y) / (1 + m * m);
+        _fftFdata [i+1] = 0;
     }
-    _fftFdata [h][0] = 0;
-    _fftFdata [h][1] = 0;
+    // _fftFdata [h] = 0;
+    // _fftFdata [h+1] = 0;
     // fftwf_execute_dft_c2r (_invplan, _fftFdata, _fftTdata);    
-    transform.ifft((float *)&_fftFdata, _fftTdata); // this does rescale while the fftw did not
+    transform.ifft(_fftFdata, _fftTdata); // this does rescale while the fftw did not
     for(int n=0; n<_fftlen; n++) _fftTdata[n]*=_fftlen;//compensate for the rescale above 
     t = _fftTdata [0] + 0.1f;
     for (i = 0; i < h; i++)
