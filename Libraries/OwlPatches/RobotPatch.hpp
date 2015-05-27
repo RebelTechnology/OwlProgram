@@ -19,6 +19,7 @@ public:
     arm_rfft_fast_f32(&instance, in, out, 1);
   }
 };
+#include <stdio.h>
 
 class RobotPatch : public Patch {
 private:
@@ -31,22 +32,25 @@ public:
     registerParameter(PARAMETER_C, "N_BINS"); // How many bins we transform 
     transform.init(getBlockSize());
     buf = createMemoryBuffer(1, getBlockSize())->getSamples(0);
-    getSharedMemory()->message = "robot says hello";
+    debugMessage("robot hi");
   }
   void processAudio(AudioBuffer &buffer){
     float gain = getParameterValue(PARAMETER_A);
     float nBins= getParameterValue(PARAMETER_C);
-
-    float* in = buffer.getSamples(0);
-    transform.fft(in, buf);
-    int size=getBlockSize();
-    for(int n=0; n<getBlockSize()*0.5; n+=2){
-      buf[n]=sqrtf(buf[n]*buf[n]+buf[n+1]*buf[n+1]);
-      buf[n+1]=0;
-    }
-    transform.ifft(buf, in);
-    for(int n=0; n<size; n++)
-      in[n]=in[n]*0.5;
+    if(gain > 0.5)
+      debugMessage("gain: ", gain*1024);
+    if(nBins > 0.5)
+      debugMessage("gain and nBins: ", gain*1024, nBins*1024);
+    // float* in = buffer.getSamples(0);
+    // transform.fft(in, buf);
+    // int size=getBlockSize();
+    // for(int n=0; n<getBlockSize()*0.5; n+=2){
+    //   buf[n]=sqrtf(buf[n]*buf[n]+buf[n+1]*buf[n+1]);
+    //   buf[n+1]=0;
+    // }
+    // transform.ifft(buf, in);
+    // for(int n=0; n<size; n++)
+    //   in[n]=in[n]*0.5;
   }
 };
 

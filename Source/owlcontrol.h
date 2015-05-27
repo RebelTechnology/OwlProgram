@@ -8,6 +8,7 @@
 #include "gpio.h"
 #include "StompBox.h"
 #include "SharedMemory.h"
+#include "message.h"
 
 #ifdef __cplusplus
  extern "C" {

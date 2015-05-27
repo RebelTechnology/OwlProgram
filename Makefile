@@ -43,7 +43,7 @@ FIRMWARESENDER = Tools/FirmwareSender -s 240
 LDLIBS   = -lm
 
 C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c # myalloc.c
-CPP_SRC = main.cpp operators.cpp
+CPP_SRC = main.cpp operators.cpp message.cpp
 OWL_SRC = StompBox.cpp PatchProcessor.cpp
 SOLO_SRC = SoloProgram.cpp
 MULTI_SRC = PatchController.cpp PatchRegistry.cpp MultiProgram.cpp

@@ -2,8 +2,8 @@
 #include "SampleBuffer.hpp"
 #include "PatchProcessor.h"
 #include "basicmaths.h"
-#include "solopatch.h"
 #include "owlcontrol.h"
+#include "solopatch.h"
 
 PatchProcessor processor;
 
