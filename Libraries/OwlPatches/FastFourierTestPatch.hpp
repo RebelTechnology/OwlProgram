@@ -47,7 +47,7 @@ private:
   }
 public:
   FastFourierTestPatch(){
-    fftSize=128;
+    fftSize=512;
     transform.init(fftSize);
     numBuffers=8;
     tdBuffersIn=createMemoryBuffer(numBuffers, fftSize);
@@ -90,7 +90,7 @@ public:
         } else if(inPointers[k]==fftSize){//buffer full, let's do the transform
           inPointers[k]=-1;//deactivate the current buffer;
           transform.fft(tdBuffersIn->getSamples(k), fd);
-          for(int j=0; j<fftSize/2*nBins; j+=2){
+          for(int j=0; j<fftSize/2*nBins; j++){
             float ab=sqrtf(fd[j]*fd[j]+fd[j+1]*fd[j+1]); //modulus
             if(mode<0.33){//robotization
               fd[j]=ab;

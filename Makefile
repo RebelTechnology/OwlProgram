@@ -1,7 +1,7 @@
 TEMPLATEROOT = .
 
 ifndef CONFIG
-  CONFIG=Debug
+  CONFIG=Release
 endif
 
 ifeq ($(CONFIG),Debug)
@@ -66,20 +66,15 @@ OBJS += $(SYSCALLS)
 OBJS += # $(BUILD)/stm32f4xx_gpio.o $(BUILD)/stm32f4xx_rcc.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
+OBJS += Libraries/kiss_fft130/kiss_fft.o
 
-# OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
-# OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
-# OBJS += $(DSPLIB)/TransformFunctions/arm_bitreversal2.o
-# OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_f32.o
-# OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_init_f32.o
-# OBJS += $(DSPLIB)/CommonTables/arm_common_tables.o
-
-# OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
-# OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
-# OBJS += $(DSPLIB)/TransformFunctions/arm_bitreversal2.o
-# OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_f32.o
-# OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_init_f32.o
-# OBJS += $(DSPLIB)/CommonTables/arm_common_tables.o
+OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
+OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
+OBJS += $(DSPLIB)/TransformFunctions/arm_bitreversal2.o
+OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_f32.o
+OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_init_f32.o
+OBJS += $(DSPLIB)/CommonTables/arm_common_tables.o
+OBJS += $(DSPLIB)/CommonTables/arm_const_structs.o
 
 # OBJS += $(DSPLIB)/SupportFunctions/arm_float_to_q31.o
 # OBJS += $(DSPLIB)/SupportFunctions/arm_q31_to_float.o
