@@ -18,7 +18,6 @@
 //
 // -----------------------------------------------------------------------
 
-#include "arm_math.h"
 #ifndef __RETUNER_H
 #define __RETUNER_H
 
@@ -27,8 +26,8 @@
 #include <zita-resampler/resampler.h>
 #endif // USE_RESAMPLER
 
-
-
+#include "StompBox.h"
+#include "arm_math.h"
 class FastFourierTransform {
   private:
     arm_rfft_fast_instance_f32 instance;
@@ -49,9 +48,11 @@ class FastFourierTransform {
 class Retuner
 {
 public:
-
-    Retuner (int fsamp);
+    Retuner (){}
+    Retuner (int fsamp, float **fourPointers);
     ~Retuner (void);
+    
+    void init(int fsamp, float **fourPointers);
 
     int process (int nfram, float *inp, float *out);
 
@@ -137,7 +138,7 @@ private:
     float           *_fftTwind;
     float           *_fftWcorr;
     float           *_fftTdata;
-    float           *_fftFdata;
+    float           **_fftFdata;
 #ifdef USE_RESAMPLER
     Resampler        _resampler;
 #endif // USE_RESAMPLER

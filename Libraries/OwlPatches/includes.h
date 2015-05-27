@@ -4,6 +4,7 @@
 
 /*#include "GainPatch.hpp"  
 #include "ParametricEqPatch.hpp"*/
+#include "RetunePatch.hpp"
 #include "ToneFilterPatch.hpp"
 // #include "OversamplePatch.hpp"
 // #include "OversamplerPatch.hpp"
@@ -11,7 +12,7 @@
 //~ #include "CompressorPatch.hpp"
 //~ #include "PlateVerbPatch.hpp"
 // #include "OverOverPatch.hpp"
-#include "FastFourierTestPatch.hpp"
+// #include "FastFourierTestPatch.hpp"
 //~ #include "SimpleDelayPatch.hpp"
 //~ #include "PhaserPatch.hpp"
 /*#include "Contest/BiasedDelayPatch.hpp" 

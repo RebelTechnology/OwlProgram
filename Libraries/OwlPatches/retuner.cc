@@ -17,8 +17,6 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // -----------------------------------------------------------------------
-
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -29,8 +27,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-
-Retuner::Retuner (int fsamp) :
+Retuner::Retuner (int fsamp, float **fourPointers) :
     _fsamp (fsamp),
     _refpitch (440.0f),
     _notebias (0.0f),
@@ -38,7 +35,10 @@ Retuner::Retuner (int fsamp) :
     _corrgain (1.0f),
     _corroffs (0.0f),
     _notemask (0xFFF)
-{
+{   
+    init(fsamp, fourPointers);
+}
+void Retuner::init(int fsamp, float **fourPointers){
     int   i, h;
     float t, x, y;
 
@@ -85,11 +85,11 @@ Retuner::Retuner (int fsamp) :
     // Various buffers
     _ipbuff = new float[_ipsize + 3];  // Resampled or filtered input
     _xffunc = new float[_frsize];      // Crossfade function
-    _fftTwind = createMemoryBuffer(1, _fftlen)->getSamples(0);// Window function 
-    _fftWcorr = createMemoryBuffer(1, _fftlen)->getSamples(0);// Autocorrelation of window 
-    _fftTdata = createMemoryBuffer(1, _fftlen)->getSamples(0);// Time domain data for FFT
-    _fftFdata = createMemoryBuffer(1, _fftlen+2)->getSamples(0);// Frequeny domain data for FFT
-    // TODO:why is it +2 in the line above? see line below
+    _fftTwind = fourPointers[0];// Window function 
+    _fftWcorr = fourPointers[1];// Autocorrelation of window 
+    _fftTdata = fourPointers[2];// Time domain data for FFT
+    _fftFdata = (float **)&fourPointers[3];// Frequeny domain data for FFT
+    // TODO:why is it +2 in the line above? see line below from previous code:
     // _fftFdata = (fftwf_complex *) fftwf_malloc ((_fftlen / 2 + 1) * sizeof (fftwf_complex));
 
     // FFTW3 plans
@@ -113,7 +113,7 @@ Retuner::Retuner (int fsamp) :
 
     // Compute window autocorrelation and normalise it.
     // fftwf_execute_dft_r2c (_fwdplan, _fftTwind, _fftFdata);    
-    transform.fft(_ffftTwind, _fftFdata);
+    transform.fft(_fftTwind, (float *)&_fftFdata);
     h = _fftlen / 2;
     for (i = 0; i < h; i++)
     {
@@ -125,7 +125,7 @@ Retuner::Retuner (int fsamp) :
     _fftFdata [h][0] = 0;
     _fftFdata [h][1] = 0;
     // fftwf_execute_dft_c2r (_invplan, _fftFdata, _fftWcorr);    
-    transform.ifft(_fftFdata, _fftWcorr); //note that this rescales while the fftw call did not. TODO: implement FastFourierTransform c2r method without rescaling
+    transform.ifft((float *)&_fftFdata, _fftWcorr); //note that this rescales while the fftw call did not. TODO: implement FastFourierTransform c2r method without rescaling
     t = _fftWcorr [0];
     for (i = 0; i < _fftlen; i++)
     {
@@ -153,6 +153,10 @@ Retuner::~Retuner (void)
 {
     delete[] _ipbuff;
     delete[] _xffunc;
+    free(_fftTwind);
+    free(_fftWcorr);
+    free(_fftTdata);
+    free(_fftFdata);
 }
 
 
@@ -347,7 +351,7 @@ void Retuner::findcycle (void)
         j += d;
     }
     // fftwf_execute_dft_r2c (_fwdplan, _fftTdata, _fftFdata);    
-    transform.fft(_fftTdata, _fftFdata);
+    transform.fft(_fftTdata, (float *)&_fftFdata);
     f = _fsamp / (_fftlen * 3e3f);
     for (i = 0; i < h; i++)
     {
@@ -360,8 +364,8 @@ void Retuner::findcycle (void)
     _fftFdata [h][0] = 0;
     _fftFdata [h][1] = 0;
     // fftwf_execute_dft_c2r (_invplan, _fftFdata, _fftTdata);    
-    transform.ifft(_fftFdata, _fftTdata); // this does rescale while the fftw did not
-    for(int n=0; n<fftLen; n++) _fftTdata[n]*=_fftlen;//compensate for the rescale above 
+    transform.ifft((float *)&_fftFdata, _fftTdata); // this does rescale while the fftw did not
+    for(int n=0; n<_fftlen; n++) _fftTdata[n]*=_fftlen;//compensate for the rescale above 
     t = _fftTdata [0] + 0.1f;
     for (i = 0; i < h; i++)
       _fftTdata [i] /= (t * _fftWcorr [i]);

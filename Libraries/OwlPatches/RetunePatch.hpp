@@ -25,7 +25,12 @@ private:
   float offs = 0.0;
 
 public:
-  RetunePatch() : retuner(getSampleRate()) {
+  RetunePatch() {
+    float **fourPointers;
+    AudioBuffer *retunerBuffers=createMemoryBuffer(4, 4096);
+    for(int n=0; n<4; n++)
+      fourPointers[n]=retunerBuffers->getSamples(n);
+    retuner.init(getSampleRate(),fourPointers); 
     registerParameter(PARAMETER_A, "");    
     registerParameter(PARAMETER_B, "");    
     registerParameter(PARAMETER_C, "");    

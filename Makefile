@@ -13,7 +13,6 @@ ifeq ($(CONFIG),Release)
 CFLAGS   = -O2
 endif
 
-CFLAGS  += -ILibraries/OwlPatches/Retune/fftw
 CFLAGS  += -ILibraries/OwlPatches/Retune/
 
 CFLAGS  += -DEXTERNAL_SRAM
@@ -37,8 +36,7 @@ LDFLAGS = -Wl,--gc-sections
 LDSCRIPT = Source/flash.ld
 FIRMWARESENDER = Tools/FirmwareSender
 
-LDLIBS   = -lm -lfftw3f
-LDFLAGS += -LLibraries/OwlPatches/Retune/fftw
+LDLIBS   = -lm
 
 C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c # myalloc.c
 CPP_SRC = main.cpp operators.cpp
@@ -48,7 +46,7 @@ MULTI_SRC = PatchController.cpp PatchRegistry.cpp MultiProgram.cpp
 
 OBJS =  $(C_SRC:%.c=Build/%.o) $(CPP_SRC:%.cpp=Build/%.o)
 
-OBJS += Libraries/OwlPatches/Retune/retuner.o
+OBJS += Libraries/OwlPatches/retuner.o
 # OBJS += Libraries/OwlPatches/Retune/zita-resampler/resampler.o
 # OBJS += Libraries/OwlPatches/Retune/zita-resampler/resampler-table.o
 
