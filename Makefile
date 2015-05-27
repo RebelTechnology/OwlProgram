@@ -13,8 +13,6 @@ ifeq ($(CONFIG),Release)
 CFLAGS   = -O2
 endif
 
-CFLAGS  += -ILibraries/OwlPatches/Retune/
-
 CFLAGS += -DEXTERNAL_SRAM
 CFLAGS += -nostdlib -nostartfiles -ffreestanding
 CFLAGS += -mtune=cortex-m4
@@ -40,7 +38,7 @@ LDFLAGS = -flto
 
 LDLIBS   = -lm
 LDSCRIPT = Source/flash.ld
-FIRMWARESENDER = Tools/FirmwareSender
+FIRMWARESENDER = Tools/FirmwareSender -s 240
 
 LDLIBS   = -lm
 
