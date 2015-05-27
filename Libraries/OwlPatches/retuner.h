@@ -18,15 +18,33 @@
 //
 // -----------------------------------------------------------------------
 
-
+#include "arm_math.h"
 #ifndef __RETUNER_H
 #define __RETUNER_H
 
 
-#include <fftw3.h>
 #ifdef USE_RESAMPLER
 #include <zita-resampler/resampler.h>
 #endif // USE_RESAMPLER
+
+
+
+class FastFourierTransform {
+  private:
+    arm_rfft_fast_instance_f32 instance;
+  public:
+    void init(int len){
+      arm_rfft_fast_init_f32(&instance, len);
+  // Supported FFT Lengths are 32, 64, 128, 256, 512, 1024, 2048, 4096.
+    }
+    void fft(float* in, float* out){
+      arm_rfft_fast_f32(&instance, in, out, 0);
+    }
+    void ifft(float* in, float* out){
+      arm_rfft_fast_f32(&instance, in, out, 1);
+    }
+};
+
 
 class Retuner
 {
@@ -87,7 +105,7 @@ private:
     void  findcycle (void);
     void  finderror (void);
     float cubic (float *v, float a);
-
+    FastFourierTransform transform;
     int              _fsamp;
     int              _ifmin;
     int              _ifmax;
@@ -119,9 +137,7 @@ private:
     float           *_fftTwind;
     float           *_fftWcorr;
     float           *_fftTdata;
-    fftwf_complex   *_fftFdata;
-    fftwf_plan       _fwdplan;
-    fftwf_plan       _invplan;
+    float           *_fftFdata;
 #ifdef USE_RESAMPLER
     Resampler        _resampler;
 #endif // USE_RESAMPLER
