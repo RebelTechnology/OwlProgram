@@ -63,8 +63,8 @@ void Retuner::init(int fsamp, float **fourPointers){
 #endif // USE_RESAMPLER
         // 88.2 or 96 kHz.
         _upsamp = false;
-        _ipsize = 4096;
-        _fftlen = 4096;
+        _ipsize = 2048;
+        _fftlen = 2048;
         _frsize = 256;
 #ifdef USE_RESAMPLER
     }
