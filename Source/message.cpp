@@ -1,24 +1,42 @@
 
 #include "message.h"
+#include "basicmaths.h"
 #include "SharedMemory.h"
 #include <string.h>
 
 static char buffer[64];
 
+const char hexnumerals[] = "0123456789abcdef";
+
 char* itoa(int val, int base){
   static char buf[13] = {0};
-  bool neg = false;
-  if(val == 0){
-    buf[11] = '0';
-    return &buf[11];
-  }else if(val < 0){
-    neg = true;
-    val *= -1;
-  }
-  int i=11;
-  for(; val && i ; --i, val /= base)
-    buf[i] = "0123456789abcdef"[val % base];
-  if(neg)
+  int i = 11;
+  unsigned int part = abs(val);
+  do{
+    buf[i--] = hexnumerals[part % base];
+    part /= base;
+  }while(part && i);
+  if(val < 0)
+    buf[i--] = '-';
+  return &buf[i+1];
+}
+
+char* ftoa(float val, int base){
+  static char buf[16] = {0};
+  int i = 14;
+  // print 4 decimal points
+  unsigned int part = abs((int)((val-int(val))*10000));
+  do{
+    buf[i--] = hexnumerals[part % base];
+    part /= base;
+  }while(i>10);
+  buf[i--] = '.';
+  part = abs(int(val));
+  do{
+    buf[i--] = hexnumerals[part % base];
+    part /= base;
+  }while(part && i);
+  if(val < 0.0f)
     buf[i--] = '-';
   return &buf[i+1];
 }
@@ -41,5 +59,21 @@ void debugMessage(const char* msg, int a, int b){
   p = stpcpy(p, itoa(a, 10));
   p = stpcpy(p, (const char*)" ");
   p = stpcpy(p, itoa(b, 10));
+  getSharedMemory()->message = buffer;
+}
+
+void debugMessage(const char* msg, float a){
+  char* p = buffer;
+  p = stpncpy(p, msg, 48);
+  p = stpcpy(p, ftoa(a, 10));
+  getSharedMemory()->message = buffer;
+}
+
+void debugMessage(const char* msg, float a, float b){
+  char* p = buffer;
+  p = stpncpy(p, msg, 32);
+  p = stpcpy(p, ftoa(a, 10));
+  p = stpcpy(p, (const char*)" ");
+  p = stpcpy(p, ftoa(b, 10));
   getSharedMemory()->message = buffer;
 }
