@@ -77,3 +77,14 @@ void debugMessage(const char* msg, float a, float b){
   p = stpcpy(p, ftoa(b, 10));
   getSharedMemory()->message = buffer;
 }
+
+void debugAssertFailed(const char* msg, const char* location, int line){
+  char* p = buffer;
+  p = stpncpy(p, msg, 32);
+  p = stpcpy(p, (const char*)" in ");
+  p = stpncpy(p, location, 32);
+  p = stpcpy(p, (const char*)" line ");
+  p = stpcpy(p, itoa(line, 10));
+  if(getSharedMemory()->programStatus != NULL)
+    getSharedMemory()->programStatus(AUDIO_ERROR_STATUS);
+}
