@@ -14,11 +14,10 @@ CFLAGS   = -O2
 endif
 
 CFLAGS += -DEXTERNAL_SRAM
-CFLAGS += -nostdlib -nostartfiles -ffreestanding
+CFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
 CFLAGS += -mtune=cortex-m4
 CFLAGS += -fpic
 CFLAGS += -fpie
-CFLAGS += -fno-builtin
 CFLAGS += -fdata-sections 
 CFLAGS += -ffunction-sections
 # CFLAGS +=  -munaligned-access
@@ -31,18 +30,16 @@ CFLAGS += -flto
 
 CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11 $(CFLAGS) 
 
-LDFLAGS = -Wl,--gc-sections
-LDFLAGS = -fpic
-LDFLAGS = -fpie
-LDFLAGS = -flto
+LDFLAGS  = -Wl,--gc-sections
+LDFLAGS += -fpic
+LDFLAGS += -fpie
+LDFLAGS += -flto
 
 LDLIBS   = -lm
 LDSCRIPT = Source/flash.ld
 FIRMWARESENDER = Tools/FirmwareSender -s 240
 
-LDLIBS   = -lm
-
-C_SRC   = errorhandlers.c gpio.c eepromcontrol.c basicmaths.c # myalloc.c
+C_SRC   = basicmaths.c # myalloc.c eepromcontrol.c errorhandlers.c gpio.c 
 CPP_SRC = main.cpp operators.cpp message.cpp
 OWL_SRC = StompBox.cpp PatchProcessor.cpp
 SOLO_SRC = SoloProgram.cpp
@@ -69,7 +66,7 @@ OBJS += # $(BUILD)/stm32f4xx_gpio.o $(BUILD)/stm32f4xx_rcc.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
 
-OBJS += Libraries/kiss_fft130/kiss_fft.o
+# OBJS += Libraries/kiss_fft130/kiss_fft.o
 
 OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
@@ -92,37 +89,6 @@ include $(TEMPLATEROOT)/Makefile.f4
 
 all: multi
 
-# Build executable 
-$(BUILD)/solo.elf : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(LDLIBS)
-
-$(BUILD)/solo.as : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(LDLIBS)
-
-$(BUILD)/solo.map : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(LDLIBS)
-
-$(BUILD)/multi.elf : $(MULTI_OBJS) $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -o $@ $(MULTI_OBJS) $(OBJS) $(LDLIBS)
-
-$(BUILD)/blinky.elf : $(BLINKY_OBJS) $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -o $@ $(BLINKY_OBJS) $(OBJS) $(LDLIBS)
-
-$(BUILD)/%.syx : $(BUILD)/%.bin
-	$(FIRMWARESENDER) -q -in $< -save $@
-
-solo : $(BUILD)/solo.bin
-	$(FIRMWARESENDER) -in  $< -out "OWL FS"
-
-solomap : $(BUILD)/solo.elf
-	$(LD) $(LDFLAGS) -Wl,-Map=Build/solo.map $(OBJS) $(SOLO_OBJS) $(LDLIBS)
-
-multi: $(BUILD)/multi.bin
-	$(FIRMWARESENDER) -in  $< -out "OWL FS"
-
-blinky: $(BUILD)/blinky.bin
-	$(FIRMWARESENDER) -in  $< -out "OWL FS"
-
 # Heavy 
 HEAVY_SRC = HeavyProgram.cpp
 HEAVY_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(HEAVY_SRC:%.cpp=Build/%.o)
@@ -135,6 +101,36 @@ $(BUILD)/heavy.elf : $(HEAVY_OBJS) $(OBJS) $(LDSCRIPT)
 	$(LD) $(LDFLAGS) -o $@ $(HEAVY_OBJS) $(OBJS) $(LDLIBS)
 
 heavy:  $(BUILD)/heavy.bin
+	$(FIRMWARESENDER) -in  $< -out "OWL FS"
+
+# Build executable 
+$(BUILD)/solo.elf : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(LDLIBS)
+# $(BUILD)/solo.elf : $(SOLO_OBJS) $(OBJS) $(HEAVY_OBJS) $(LDSCRIPT)
+# 	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(HEAVY_OBJS) $(LDLIBS)
+
+$(BUILD)/solo.as : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(LDLIBS)
+
+$(BUILD)/solo.map : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -Wl,-Map=Build/solo.map $(OBJS) $(SOLO_OBJS) $(LDLIBS)
+
+$(BUILD)/multi.elf : $(MULTI_OBJS) $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -o $@ $(MULTI_OBJS) $(OBJS) $(LDLIBS)
+
+$(BUILD)/blinky.elf : $(BLINKY_OBJS) $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -o $@ $(BLINKY_OBJS) $(OBJS) $(LDLIBS)
+
+$(BUILD)/%.syx : $(BUILD)/%.bin
+	$(FIRMWARESENDER) -q -in $< -save $@
+
+solo : $(BUILD)/solo.bin $(BUILD)/solo.map
+	$(FIRMWARESENDER) -in  $< -out "OWL FS"
+
+multi: $(BUILD)/multi.bin
+	$(FIRMWARESENDER) -in  $< -out "OWL FS"
+
+blinky: $(BUILD)/blinky.bin
 	$(FIRMWARESENDER) -in  $< -out "OWL FS"
 
 $(BUILD)/program.a : $(BUILD)/program.a($(SOLO_OBJS) $(OBJS) OwlProgram.o)
