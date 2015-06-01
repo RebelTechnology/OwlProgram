@@ -30,7 +30,7 @@ public:
     registerParameter(PARAMETER_A, "GAIN");
     // registerParameter(PARAMETER_B, "TYPE"); // <=0.5: robotization, >0.5: whisperization
     registerParameter(PARAMETER_C, "N_BINS"); // How many bins we transform 
-    transform.init(getBlockSize());
+    // transform.init(getBlockSize());
     buf = createMemoryBuffer(1, getBlockSize())->getSamples(0);
     debugMessage("robot hi");
   }
@@ -38,9 +38,11 @@ public:
     float gain = getParameterValue(PARAMETER_A);
     float nBins= getParameterValue(PARAMETER_C);
     if(gain > 0.5)
-      debugMessage("gain: ", gain*1024);
+      debugMessage("gain: ", gain);
     if(nBins > 0.5)
-      debugMessage("gain and nBins: ", gain*1024, nBins*1024);
+      debugMessage("gain and nBins: ", gain, nBins);
+    ASSERT(getParameterValue(PARAMETER_B) < 0.5, "ARRRGH!");
+    ASSERT(getParameterValue(PARAMETER_D) < 0.5, "It went wrong");
     // float* in = buffer.getSamples(0);
     // transform.fft(in, buf);
     // int size=getBlockSize();
