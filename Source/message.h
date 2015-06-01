@@ -10,13 +10,20 @@
 /* #endif */
 /* #define ASSERT_TRUE(cond) if(!(cond)){debugAssertFailed("Assertion failed", __PRETTY_FUNCTION__, __LINE__);} */
 /* #define ASSERT_FALSE(cond) if(cond){debugAssertFailed("Assertion failed", __PRETTY_FUNCTION__, __LINE__);} */
-#define ASSERT(cond, msg) if(!(cond)){debugAssertFailed(msg, __PRETTY_FUNCTION__, __LINE__);}
+/* #define ASSERT(cond, msg) if(!(cond)){debugAssertFailed(msg, __PRETTY_FUNCTION__, __LINE__);} */
+
+#define ASSERT(cond, msg) if(!(cond)){assert_failed(msg, __PRETTY_FUNCTION__, __LINE__);}
 
 void debugMessage(const char* msg);
 void debugMessage(const char* msg, int);
 void debugMessage(const char* msg, int, int);
 void debugMessage(const char* msg, float);
 void debugMessage(const char* msg, float, float);
-void debugAssertFailed(const char* msg, const char* location, int line);
+
+void assert_failed(const char* msg, const char* location, int line);
+
+extern "C" {
+  void assert_failed(uint8_t* location, uint32_t line);
+}
 
 #endif /* __MESSAG£_H */
