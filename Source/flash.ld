@@ -33,16 +33,19 @@ SECTIONS
   /* The startup code goes first into FLASH */
   .isr_vector :
   {
-    . = ALIGN(4);
+    . = ALIGN(8);
     KEEP(*(.isr_vector)) /* Startup code */
-    . = ALIGN(4);
+    . = ALIGN(8);
   } >PATCHRAM /* AT>PATCHFLASH */
 
   /* The program code and other data goes into FLASH */
   .text :
   {
-    . = ALIGN(4);
+    . = ALIGN(8);
     _text_start = .;
+*(.text.Reset_Handler)
+*(.text.startup)
+    *(.main*)
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
@@ -66,7 +69,7 @@ SECTIONS
     KEEP (*(.init))
     KEEP (*(.fini))
 
-    . = ALIGN(4);
+    . = ALIGN(8);
     _etext = .;        /* define a global symbols at end of code */
     _text_end = .;
   } >PATCHRAM /* AT>PATCHFLASH */
@@ -102,9 +105,9 @@ SECTIONS
 
 /*   .eeprom (NOLOAD) : */
 /*     { */
-/*     . = ALIGN(4); */
+/*     . = ALIGN(8); */
 /*         *(.eeprom) */
-/*     . = ALIGN(4); */
+/*     . = ALIGN(8); */
 /*     } >EEPROM */
 
   /* used by the startup to initialize data */
@@ -113,17 +116,17 @@ SECTIONS
   /* Initialized data sections goes into RAM, load LMA copy after code */
   .data : AT ( _sidata )
   {
-    . = ALIGN(4);
+    . = ALIGN(8);
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
 
-    . = ALIGN(4);
+    . = ALIGN(8);
     _edata = .;        /* define a global symbol at data end */
   } >PATCHRAM
 
   /* Uninitialized data section */
-  . = ALIGN(4);
+  . = ALIGN(8);
   .bss :
   {
     /* This is used by the startup in order to initialize the .bss secion */
@@ -133,7 +136,7 @@ SECTIONS
     *(.bss*)
     *(COMMON)
 
-    . = ALIGN(4);
+    . = ALIGN(8);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
   } >PATCHRAM
@@ -141,38 +144,38 @@ SECTIONS
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :
   {
-    . = ALIGN(4);
+    . = ALIGN(8);
     PROVIDE ( end = . );
     PROVIDE ( _end = . );
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
-    . = ALIGN(4);
+    . = ALIGN(8);
   } >PATCHRAM
 
 /* /\* Shared RAM section, vars must be located here explicitly *\/ */
 /* /\* Example: int foo __attribute__ ((section (".sharedram"))); *\/ */
 /* .sharedram (NOLOAD) : */
 /* { */
-/*   . = ALIGN(4); */
+/*   . = ALIGN(8); */
 /*   *(.sharedram) */
-/*   . = ALIGN(4); */
+/*   . = ALIGN(8); */
 /* } >SHAREDRAM */
 
 /* CCM section, vars must be located here explicitly */
 /* Example: int foo __attribute__ ((section (".ccmdata"))); */
 /* .ccmdata (NOLOAD) : */
 /* { */
-/*   . = ALIGN(4); */
+/*   . = ALIGN(8); */
 /*   *(.ccmdata) */
-/*   . = ALIGN(4); */
+/*   . = ALIGN(8); */
 /* } >CCMRAM */
 
   /* External SRAM, used for heap memory - no variables to be allocated here! */
 .extdata (NOLOAD) :
 {
-  . = ALIGN(4);
+  . = ALIGN(8);
   *(.extdata)
-  . = ALIGN(4);
+  . = ALIGN(8);
 } >BANK1_SRAM3
 
   /* Remove information from the standard libraries */
