@@ -1,6 +1,6 @@
 #include <inttypes.h>
 
-/* #define OWLMODULAR */
+// #define OWLMODULAR
 #define FIRMWARE_VERSION             "005-pre"
 #define HARDWARE_VERSION             "OWL Rev04"
 
@@ -18,7 +18,8 @@
 #define AUDIO_FORMAT                 I2S_FORMAT_16bit
 #define AUDIO_CODEC_MASTER           true
 #define AUDIO_CHANNELS               2
-#define AUDIO_BITDEPTH               16    /* bits per sample */
+/* #define AUDIO_BITDEPTH               16    /\* bits per sample *\/ */
+#define AUDIO_BITDEPTH               24    /* bits per sample */
 #define AUDIO_SAMPLINGRATE           48000
 #define AUDIO_BLOCK_SIZE             256   /* size in samples of a single channel audio block */
 #define AUDIO_MAX_BLOCK_SIZE         1024  /* size in samples of a single channel audio block */
