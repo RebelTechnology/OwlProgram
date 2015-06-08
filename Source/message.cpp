@@ -49,6 +49,7 @@ void debugMessage(const char* msg){
 void debugMessage(const char* msg, int a){
   char* p = buffer;
   p = stpncpy(p, msg, 48);
+  p = stpcpy(p, (const char*)" ");
   p = stpcpy(p, itoa(a, 10));
   getSharedMemory()->message = buffer;
 }
@@ -56,6 +57,7 @@ void debugMessage(const char* msg, int a){
 void debugMessage(const char* msg, int a, int b){
   char* p = buffer;
   p = stpncpy(p, msg, 32);
+  p = stpcpy(p, (const char*)" ");
   p = stpcpy(p, itoa(a, 10));
   p = stpcpy(p, (const char*)" ");
   p = stpcpy(p, itoa(b, 10));
@@ -65,6 +67,7 @@ void debugMessage(const char* msg, int a, int b){
 void debugMessage(const char* msg, float a){
   char* p = buffer;
   p = stpncpy(p, msg, 48);
+  p = stpcpy(p, (const char*)" ");
   p = stpcpy(p, ftoa(a, 10));
   getSharedMemory()->message = buffer;
 }
@@ -72,6 +75,7 @@ void debugMessage(const char* msg, float a){
 void debugMessage(const char* msg, float a, float b){
   char* p = buffer;
   p = stpncpy(p, msg, 32);
+  p = stpcpy(p, (const char*)" ");
   p = stpcpy(p, ftoa(a, 10));
   p = stpcpy(p, (const char*)" ");
   p = stpcpy(p, ftoa(b, 10));
