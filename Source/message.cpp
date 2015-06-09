@@ -1,7 +1,7 @@
 
 #include "message.h"
 #include "basicmaths.h"
-#include "SharedMemory.h"
+#include "ProgramVector.h"
 #include <string.h>
 
 static char buffer[64];
@@ -43,7 +43,7 @@ char* ftoa(float val, int base){
 
 void debugMessage(const char* msg){
   strncpy(buffer, msg, 64);
-  getSharedMemory()->message = buffer;
+  getProgramVector()->message = buffer;
 }
 
 void debugMessage(const char* msg, int a){
@@ -51,7 +51,7 @@ void debugMessage(const char* msg, int a){
   p = stpncpy(p, msg, 48);
   p = stpcpy(p, (const char*)" ");
   p = stpcpy(p, itoa(a, 10));
-  getSharedMemory()->message = buffer;
+  getProgramVector()->message = buffer;
 }
 
 void debugMessage(const char* msg, int a, int b){
@@ -61,7 +61,19 @@ void debugMessage(const char* msg, int a, int b){
   p = stpcpy(p, itoa(a, 10));
   p = stpcpy(p, (const char*)" ");
   p = stpcpy(p, itoa(b, 10));
-  getSharedMemory()->message = buffer;
+  getProgramVector()->message = buffer;
+}
+
+void debugMessage(const char* msg, int a, int b, int c){
+  char* p = buffer;
+  p = stpncpy(p, msg, 32);
+  p = stpcpy(p, (const char*)" ");
+  p = stpcpy(p, itoa(a, 10));
+  p = stpcpy(p, (const char*)" ");
+  p = stpcpy(p, itoa(b, 10));
+  p = stpcpy(p, (const char*)" ");
+  p = stpcpy(p, itoa(c, 10));
+  getProgramVector()->message = buffer;
 }
 
 void debugMessage(const char* msg, float a){
@@ -69,7 +81,7 @@ void debugMessage(const char* msg, float a){
   p = stpncpy(p, msg, 48);
   p = stpcpy(p, (const char*)" ");
   p = stpcpy(p, ftoa(a, 10));
-  getSharedMemory()->message = buffer;
+  getProgramVector()->message = buffer;
 }
 
 void debugMessage(const char* msg, float a, float b){
@@ -79,7 +91,19 @@ void debugMessage(const char* msg, float a, float b){
   p = stpcpy(p, ftoa(a, 10));
   p = stpcpy(p, (const char*)" ");
   p = stpcpy(p, ftoa(b, 10));
-  getSharedMemory()->message = buffer;
+  getProgramVector()->message = buffer;
+}
+
+void debugMessage(const char* msg, float a, float c, float b){
+  char* p = buffer;
+  p = stpncpy(p, msg, 32);
+  p = stpcpy(p, (const char*)" ");
+  p = stpcpy(p, ftoa(a, 10));
+  p = stpcpy(p, (const char*)" ");
+  p = stpcpy(p, ftoa(b, 10));
+  p = stpcpy(p, (const char*)" ");
+  p = stpcpy(p, ftoa(c, 10));
+  getProgramVector()->message = buffer;
 }
 
 void assert_failed(const char* msg, const char* location, int line){
@@ -89,9 +113,9 @@ void assert_failed(const char* msg, const char* location, int line){
   p = stpncpy(p, location, 32);
   p = stpcpy(p, (const char*)" line ");
   p = stpcpy(p, itoa(line, 10));
-  getSharedMemory()->message = buffer;
-  if(getSharedMemory()->programStatus != NULL)
-    getSharedMemory()->programStatus(AUDIO_ERROR_STATUS);
+  getProgramVector()->message = buffer;
+  if(getProgramVector()->programStatus != NULL)
+    getProgramVector()->programStatus(AUDIO_ERROR_STATUS);
 }
 
 void assert_failed(uint8_t* location, uint32_t line){

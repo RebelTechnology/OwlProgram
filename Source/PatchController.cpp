@@ -2,7 +2,7 @@
 #include "owlcontrol.h"
 // #include "CodecController.h"
 #include "MemoryBuffer.hpp"
-#include "SharedMemory.h"
+#include "ProgramVector.h"
 #include "PatchRegistry.h"
 #include "PatchProcessor.h"
 
@@ -21,7 +21,7 @@ PatchController::~PatchController(){
 }
 
 void PatchController::init(){
-  parameterValues = getSharedMemory()->parameters;
+  parameterValues = getProgramVector()->parameters;
   // setActiveSlot(GREEN);
   initialisePatch(GREEN, getGreenPatchId());
   initialisePatch(RED, getRedPatchId());

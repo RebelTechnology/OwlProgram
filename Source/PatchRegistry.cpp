@@ -1,5 +1,5 @@
 #include "PatchRegistry.h"
-#include "SharedMemory.h"
+#include "ProgramVector.h"
 #include "basicmaths.h"
 #include "OwlPatches/includes.h"
 
@@ -35,7 +35,7 @@ void PatchRegistry::registerPatch(const char* name, uint8_t inputs, uint8_t outp
     names[nofPatches] = name;
     creators[nofPatches] = creator;
     nofPatches++;
-    if(getSharedMemory()->registerPatch != NULL)
-      getSharedMemory()->registerPatch(name, inputs, outputs);
+    if(getProgramVector()->registerPatch != NULL)
+      getProgramVector()->registerPatch(name, inputs, outputs);
   }
 }

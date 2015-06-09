@@ -16,9 +16,10 @@
 
 void debugMessage(const char* msg);
 void debugMessage(const char* msg, int);
-void debugMessage(const char* msg, int, int);
+void debugMessage(const char* msg, int, int, int);
 void debugMessage(const char* msg, float);
 void debugMessage(const char* msg, float, float);
+void debugMessage(const char* msg, float, float, float);
 
 void assert_failed(const char* msg, const char* location, int line);
 

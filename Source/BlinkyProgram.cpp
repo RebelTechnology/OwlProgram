@@ -27,13 +27,13 @@ void blinky(){
 }
 
 void copyBlock(){
-  for(int i=0; i<getSharedMemory()->audio_blocksize; ++i)
-    getSharedMemory()->audio_output[i] = getSharedMemory()->audio_input[i];
+  for(int i=0; i<getProgramVector()->audio_blocksize; ++i)
+    getProgramVector()->audio_output[i] = getProgramVector()->audio_input[i];
 }
 
 void clearBlock(){
-  for(int i=0; i<getSharedMemory()->audio_blocksize; ++i)
-    getSharedMemory()->audio_output[i] = 0;
+  for(int i=0; i<getProgramVector()->audio_blocksize; ++i)
+    getProgramVector()->audio_output[i] = 0;
 }
 
 void processBlock(){

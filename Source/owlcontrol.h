@@ -7,7 +7,7 @@
 #include "device.h"
 #include "gpio.h"
 #include "StompBox.h"
-#include "SharedMemory.h"
+#include "ProgramVector.h"
 #include "message.h"
 
 #ifdef __cplusplus
@@ -52,14 +52,14 @@
    }
 
    inline bool getButton(PatchButtonId bid){
-     return getSharedMemory()->buttons & (1<<bid);
+     return getProgramVector()->buttons & (1<<bid);
    }
 
    inline void setButton(PatchButtonId bid, bool on){
      if(on)
-       getSharedMemory()->buttons |= 1<<bid;
+       getProgramVector()->buttons |= 1<<bid;
      else
-       getSharedMemory()->buttons &= ~(1<<bid);
+       getProgramVector()->buttons &= ~(1<<bid);
    }
 
    inline void debugSet(){

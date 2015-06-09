@@ -4,7 +4,7 @@
 
 #include <string.h>
 #include <inttypes.h>
-#include "SharedMemory.h"
+#include "ProgramVector.h"
 #include "owlcontrol.h"
 #include "stm32f4xx.h"
 #ifdef DEBUG_MEM
@@ -25,7 +25,7 @@ extern char _ebss[];
 extern "C" void __libc_init_array();
 
 // extern "C" {
-//   SharedMemory ProgramVector;
+//   ProgramVector ProgramVector;
 // }
 
 #define BANK1_SRAM3 0x68000000
@@ -54,13 +54,13 @@ int main(void){
   // }
 #endif /* DEBUG_DWT */
 
-  if(getSharedMemory()->checksum != sizeof(SharedMemory)){
+  if(getProgramVector()->checksum != sizeof(ProgramVector)){
     // problem!
-    // getSharedMemory()->status = AUDIO_ERROR_STATUS;
-    getSharedMemory()->error = CHECKSUM_ERROR_STATUS;
-    getSharedMemory()->message = "ProgramVector checksum error";
-    getSharedMemory()->programStatus(AUDIO_ERROR_STATUS);
-    // getSharedMemory()->exitProgram();
+    // getProgramVector()->status = AUDIO_ERROR_STATUS;
+    getProgramVector()->error = CHECKSUM_ERROR_STATUS;
+    getProgramVector()->message = "ProgramVector checksum error";
+    getProgramVector()->programStatus(AUDIO_ERROR_STATUS);
+    // getProgramVector()->exitProgram();
     // return -1;
   }
 
@@ -71,29 +71,29 @@ int main(void){
   /* ^ may cause OwlWare.sysex to trip to:
    USART6_IRQHandler () at ./Source/startup.s:142
    142	  b  Infinite_Loop */
-  // getSharedMemory()->heap_bytes_used = minfo.uordblks;
-  getSharedMemory()->heap_bytes_used = minfo.arena;
+  // getProgramVector()->heap_bytes_used = minfo.uordblks;
+  getProgramVector()->heap_bytes_used = minfo.arena;
 #else
-  // getSharedMemory()->heap_bytes_used = (int32_t)_sbrk(0) - (int32_t)0x68000000;
+  // getProgramVector()->heap_bytes_used = (int32_t)_sbrk(0) - (int32_t)0x68000000;
 #endif /* DEBUG_MEM */
 
   for(;;){
-    getSharedMemory()->programReady();
-    // if(getSharedMemory()->status == AUDIO_READY_STATUS){
+    getProgramVector()->programReady();
+    // if(getProgramVector()->status == AUDIO_READY_STATUS){
 #ifdef DEBUG_DWT
       *DWT_CYCCNT = 0; // reset the counter
       // DWT->CYCCNT = 0; // reset the counter
 #endif /* DEBUG_DWT */
       processBlock();
 #ifdef DEBUG_DWT
-      getSharedMemory()->cycles_per_block = *DWT_CYCCNT;
+      getProgramVector()->cycles_per_block = *DWT_CYCCNT;
       // dwt_count = DWT->CYCCNT;
 #endif /* DEBUG_DWT */
-      // if(getSharedMemory()->status == AUDIO_EXIT_STATUS)
+      // if(getProgramVector()->status == AUDIO_EXIT_STATUS)
       // 	break;
-      // getSharedMemory()->status = AUDIO_PROCESSED_STATUS; // always check status before changing it
+      // getProgramVector()->status = AUDIO_PROCESSED_STATUS; // always check status before changing it
     // }
-    // if(getSharedMemory()->status == AUDIO_EXIT_STATUS)
+    // if(getProgramVector()->status == AUDIO_EXIT_STATUS)
     //   break;
   }
 }

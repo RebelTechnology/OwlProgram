@@ -1,4 +1,4 @@
-#include "SharedMemory.h"
+#include "ProgramVector.h"
 #include "SampleBuffer.hpp"
 #include "PatchProcessor.h"
 #include "basicmaths.h"
@@ -14,8 +14,8 @@ PatchProcessor* getInitialisingPatchProcessor(){
 #define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
 
 void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){
-  if(getSharedMemory()->registerPatch != NULL)
-    getSharedMemory()->registerPatch(name, inputs, outputs);
+  if(getProgramVector()->registerPatch != NULL)
+    getProgramVector()->registerPatch(name, inputs, outputs);
   processor.setPatch(patch);
 }
 
@@ -26,8 +26,8 @@ void setup(){
 SampleBuffer buffer;
 
 void processBlock(){
-  buffer.split(getSharedMemory()->audio_input, getSharedMemory()->audio_blocksize);
-  processor.setParameterValues(getSharedMemory()->parameters);
+  buffer.split(getProgramVector()->audio_input, getProgramVector()->audio_blocksize);
+  processor.setParameterValues(getProgramVector()->parameters);
   processor.patch->processAudio(buffer);
-  buffer.comb(getSharedMemory()->audio_output);
+  buffer.comb(getProgramVector()->audio_output);
 }

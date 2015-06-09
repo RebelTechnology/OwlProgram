@@ -1,6 +1,6 @@
 #include <string.h>
 #include <inttypes.h>
-#include "SharedMemory.h"
+#include "ProgramVector.h"
 #include "stm32f4xx.h"
 #ifdef DEBUG_MEM
 #include <malloc.h>
@@ -13,12 +13,12 @@ extern "C" {
 }
 
 void program_run(void){
-  if(getSharedMemory()->checksum != sizeof(SharedMemory)){
+  if(getProgramVector()->checksum != sizeof(ProgramVector)){
     // problem!
-    // getSharedMemory()->status = AUDIO_ERROR_STATUS;
-    getSharedMemory()->error = CHECKSUM_ERROR_STATUS;
-    getSharedMemory()->programStatus(AUDIO_ERROR_STATUS);
-    // getSharedMemory()->exitProgram();
+    // getProgramVector()->status = AUDIO_ERROR_STATUS;
+    getProgramVector()->error = CHECKSUM_ERROR_STATUS;
+    getProgramVector()->programStatus(AUDIO_ERROR_STATUS);
+    // getProgramVector()->exitProgram();
     // return -1;
   }
 
@@ -29,18 +29,18 @@ void program_run(void){
   /* ^ may cause OwlWare.sysex to trip to:
    USART6_IRQHandler () at ./Source/startup.s:142
    142	  b  Infinite_Loop */
-  // getSharedMemory()->heap_bytes_used = minfo.uordblks;
-  getSharedMemory()->heap_bytes_used = minfo.arena;
+  // getProgramVector()->heap_bytes_used = minfo.uordblks;
+  getProgramVector()->heap_bytes_used = minfo.arena;
 #endif /* DEBUG_MEM */
 
   for(;;){
-    getSharedMemory()->programReady();
-    // if(getSharedMemory()->status == AUDIO_READY_STATUS){
+    getProgramVector()->programReady();
+    // if(getProgramVector()->status == AUDIO_READY_STATUS){
       program_processBlock();
   }
 }
 
-#include "SharedMemory.h"
+#include "ProgramVector.h"
 #include "SampleBuffer.hpp"
 #include "PatchProcessor.h"
 #include "basicmaths.h"
@@ -56,8 +56,8 @@ PatchProcessor* getInitialisingPatchProcessor(){
 #define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
 
 void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){
-  if(getSharedMemory()->registerPatch != NULL)
-    getSharedMemory()->registerPatch(name, inputs, outputs);
+  if(getProgramVector()->registerPatch != NULL)
+    getProgramVector()->registerPatch(name, inputs, outputs);
   processor.setPatch(patch);
 }
 
@@ -68,8 +68,8 @@ void program_setup(){
 SampleBuffer buffer;
 
 void program_processBlock(){
-  buffer.split(getSharedMemory()->audio_input, getSharedMemory()->audio_blocksize);
-  processor.setParameterValues(getSharedMemory()->parameters);
+  buffer.split(getProgramVector()->audio_input, getProgramVector()->audio_blocksize);
+  processor.setParameterValues(getProgramVector()->parameters);
   processor.patch->processAudio(buffer);
-  buffer.comb(getSharedMemory()->audio_output);
+  buffer.comb(getProgramVector()->audio_output);
 }

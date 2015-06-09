@@ -49,36 +49,36 @@ private:
 
 public:  
   uint16_t getParameter(int pid){
-      return getSharedMemory()->parameters[pid];
+      return getProgramVector()->parameters[pid];
   }
   void setParameter(int pid, uint16_t value){
-    getSharedMemory()->parameters[pid] = value;
+    getProgramVector()->parameters[pid] = value;
   }
   float getParameterValue(PatchParameterId pid){
-    if(pid < getSharedMemory()->parameters_size)
-      return getSharedMemory()->parameters[pid]/4096.0f;
+    if(pid < getProgramVector()->parameters_size)
+      return getProgramVector()->parameters[pid]/4096.0f;
     return 0.0f;
   }
   bool isButtonPressed(PatchButtonId bid){
-    return getSharedMemory()->buttons & (1<<bid);
+    return getProgramVector()->buttons & (1<<bid);
   }
   void setButton(PatchButtonId bid, bool on){
     if(on)
-      getSharedMemory()->buttons |= 1<<bid;
+      getProgramVector()->buttons |= 1<<bid;
     else
-      getSharedMemory()->buttons &= ~(1<<bid);
+      getProgramVector()->buttons &= ~(1<<bid);
   }
   PatchModeId getPatchMode(){
-    return (PatchModeId)getSharedMemory()->parameters[PATCH_MODE_PARAMETER_ID];
+    return (PatchModeId)getProgramVector()->parameters[PATCH_MODE_PARAMETER_ID];
   }
   void setPatchMode(PatchModeId mode){
-    getSharedMemory()->parameters[PATCH_MODE_PARAMETER_ID] = mode;
+    getProgramVector()->parameters[PATCH_MODE_PARAMETER_ID] = mode;
   }
   uint16_t getGreenPatchId(){
-    return getSharedMemory()->parameters[GREEN_PATCH_PARAMETER_ID];
+    return getProgramVector()->parameters[GREEN_PATCH_PARAMETER_ID];
   }
   uint16_t getRedPatchId(){
-    return getSharedMemory()->parameters[RED_PATCH_PARAMETER_ID];
+    return getProgramVector()->parameters[RED_PATCH_PARAMETER_ID];
   }
 };
 

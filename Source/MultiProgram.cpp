@@ -3,7 +3,7 @@
 #include "device.h"
 #include "gpio.h"
 #include "owlcontrol.h"
-#include "SharedMemory.h"
+#include "ProgramVector.h"
 #include "SampleBuffer.hpp"
 #include "PatchRegistry.h"
 #include "PatchController.h"
@@ -20,7 +20,7 @@ void setup(){
 }
 
 void processBlock(){
-  buffer.split(getSharedMemory()->audio_input, getSharedMemory()->audio_blocksize);
+  buffer.split(getProgramVector()->audio_input, getProgramVector()->audio_blocksize);
   patches.process(buffer);
-  buffer.comb(getSharedMemory()->audio_output);
+  buffer.comb(getProgramVector()->audio_output);
 }

@@ -3,7 +3,7 @@
 #include "MemoryBuffer.hpp"
 #include "device.h"
 #include <string.h>
-#include "SharedMemory.h"
+#include "ProgramVector.h"
 
 // #include "OpenWareMidiControl.h"
 
@@ -39,8 +39,8 @@ void PatchProcessor::setPatch(Patch* p){
 // }
 
 // void PatchProcessor::registerParameter(PatchParameterId pid, const char* name){
-//   if(getSharedMemory()->registerPatchParameter != NULL)
-//     getSharedMemory()->registerPatchParameter(pid, name);
+//   if(getProgramVector()->registerPatchParameter != NULL)
+//     getProgramVector()->registerPatchParameter(pid, name);
   // if(pid < NOF_ADC_VALUES)
   //   parameterNames[pid] = name;
 // }
