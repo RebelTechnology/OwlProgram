@@ -51,37 +51,6 @@
 #endif
    }
 
-   inline bool getButton(PatchButtonId bid){
-     return getProgramVector()->buttons & (1<<bid);
-   }
-
-   inline void setButton(PatchButtonId bid, bool on){
-     if(on)
-       getProgramVector()->buttons |= 1<<bid;
-     else
-       getProgramVector()->buttons &= ~(1<<bid);
-   }
-
-   inline void debugSet(){
-     setPin(GPIOB, GPIO_Pin_1); // PB1, DEBUG LED
-   }
-
-   inline void debugClear(){
-     clearPin(GPIOB, GPIO_Pin_1); // PB1, DEBUG LED
-   }
-
-   inline void debugToggle(){
-     togglePin(GPIOB, GPIO_Pin_1); // PB1, DEBUG LED
-   }
-
-   inline bool isStompSwitchPressed(){
-     return getPin(SWITCH_A_PORT, SWITCH_A_PIN);
-   }
-
-   inline bool isPushButtonPressed(){
-     return !getPin(SWITCH_B_PORT, SWITCH_B_PIN);
-   }
-
 #ifdef __cplusplus
 }
 #endif

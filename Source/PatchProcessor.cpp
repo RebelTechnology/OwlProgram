@@ -5,8 +5,6 @@
 #include <string.h>
 #include "ProgramVector.h"
 
-// #include "OpenWareMidiControl.h"
-
 PatchProcessor::PatchProcessor() 
   : patch(NULL), bufferCount(0) {}
 
@@ -28,29 +26,6 @@ void PatchProcessor::setPatch(Patch* p){
   patch = p;
 }
 
-
-// void PatchProcessor::setPatch(uint8_t patchIndex){
-//   clear();
-//   if(patchIndex < registry.getNumberOfPatches())
-//     index = patchIndex;
-//   else
-//     index = 0;
-//   patch = registry.create(index);
-// }
-
-// void PatchProcessor::registerParameter(PatchParameterId pid, const char* name){
-//   if(getProgramVector()->registerPatchParameter != NULL)
-//     getProgramVector()->registerPatchParameter(pid, name);
-  // if(pid < NOF_ADC_VALUES)
-  //   parameterNames[pid] = name;
-// }
-
-// const char* PatchProcessor::getParameterName(PatchParameterId pid){
-//   if(pid < NOF_ADC_VALUES)
-//     return parameterNames[pid];
-//   return NULL;
-// }
-
 AudioBuffer* PatchProcessor::createMemoryBuffer(int channels, int size){
   MemoryBuffer* buf = new ManagedMemoryBuffer(channels, size);
   if(buf == NULL)
@@ -67,31 +42,20 @@ float PatchProcessor::getParameterValue(PatchParameterId pid){
     return 0.0f;
 }
 
-// __attribute__ ((section (".coderam")))
 void PatchProcessor::setParameterValues(uint16_t *params){
   /* Implements an exponential moving average (leaky integrator) to smooth ADC values
    * y(n) = (1-alpha)*y(n-1) + alpha*y(n)
    * with alpha=0.5, fs=48k, bs=128, then w0 ~= 18hz
    */
-  for(int i=0; i<NOF_ADC_VALUES; ++i)
-    if(abs(params[i]-parameterValues[i]) > 16){
-      // 16 = half a midi step (4096/128=32)  
-#ifdef OWLMODULAR
-    parameterValues[i] = (parameterValues[i] + 0x1000 - params[i]) >> 1;
-#else
-    parameterValues[i] = (parameterValues[i] + params[i]) >> 1;
-#endif
-    }
+  if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE){
+    for(int i=0; i<NOF_ADC_VALUES; ++i)
+      if(abs(params[i]-parameterValues[i]) > 8)
+	// invert parameter values for OWL Modular
+	parameterValues[i] = (parameterValues[i] + 0x1000 - params[i]) >> 1;
+  }else{
+    for(int i=0; i<NOF_ADC_VALUES; ++i)
+      if(abs(params[i]-parameterValues[i]) > 16)
+	// 16 = half a midi step (4096/128=32)  
+	parameterValues[i] = (parameterValues[i] + params[i]) >> 1;
+  }
 }
-
-// void PatchProcessor::process(AudioBuffer& buffer){
-//   patch->processAudio(buffer);
-// }
-
-// int PatchProcessor::getBlockSize(){
-//   return patch->getBlockSize();
-// }
-
-// double PatchProcessor::getSampleRate(){
-//   return patch->getSampleRate();
-// }

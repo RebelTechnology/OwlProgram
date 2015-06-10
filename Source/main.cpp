@@ -1,12 +1,9 @@
-// #define DEBUG_DWT /* now done by firmware */
-#define DEBUG_MEM
-// #define STARTUP_CODE
-
 #include <string.h>
 #include <inttypes.h>
 #include "ProgramVector.h"
 #include "owlcontrol.h"
 #include "stm32f4xx.h"
+#include "device.h"
 #ifdef DEBUG_MEM
 #include <malloc.h>
 #else

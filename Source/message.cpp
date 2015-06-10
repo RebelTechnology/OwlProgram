@@ -94,7 +94,7 @@ void debugMessage(const char* msg, float a, float b){
   getProgramVector()->message = buffer;
 }
 
-void debugMessage(const char* msg, float a, float c, float b){
+void debugMessage(const char* msg, float a, float b, float c){
   char* p = buffer;
   p = stpncpy(p, msg, 32);
   p = stpcpy(p, (const char*)" ");
