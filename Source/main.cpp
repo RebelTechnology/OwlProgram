@@ -22,7 +22,8 @@ extern char _ebss[];
 extern "C" void __libc_init_array();
 
 // extern "C" {
-//   ProgramVector ProgramVector;
+//   ProgramVector pv;
+//   const void* ProgramVectorPointer = &pv;
 // }
 
 #define BANK1_SRAM3 0x68000000

@@ -34,6 +34,7 @@ SECTIONS
   .isr_vector :
   {
     . = ALIGN(8);
+    _startprog = ABSOLUTE(.);         /* define a global symbol at program start */
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(8);
   } >PATCHRAM /* AT>PATCHFLASH */
@@ -70,7 +71,7 @@ SECTIONS
     KEEP (*(.fini))
 
     . = ALIGN(8);
-    _etext = .;        /* define a global symbols at end of code */
+    _etext = .;        /* define a global symbol at end of code */
     _text_end = .;
   } >PATCHRAM /* AT>PATCHFLASH */
   _text_load = LOADADDR (.text);
@@ -129,6 +130,7 @@ SECTIONS
   . = ALIGN(8);
   .bss :
   {
+    _endprog = ABSOLUTE(.);         /* define a global symbol at program end */
     /* This is used by the startup in order to initialize the .bss secion */
     _sbss = .;         /* define a global symbol at bss start */
     __bss_start__ = _sbss;

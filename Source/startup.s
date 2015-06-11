@@ -61,12 +61,15 @@ LoopFillZerobss:
 .type  g_pfnVectors, %object
 .size  g_pfnVectors, .-g_pfnVectors    
     
+
 g_pfnVectors:
   .word 0xDADAC0DE       /* magic number */
-  .word .isr_vector      /* link base address */
+  .word _startprog 	 /* link base address */
+  .word _endprog      
   .word Reset_Handler    /* code entry point */
   .word _end             /* stack start */
   .word _estack          /* stack end */
   .word 0x40024000
-  /* .word ProgramVector*/    /* pointer to shared memory block */
+  /* .word pv    /* pointer to shared memory block */
+  /* .word ProgramVectorPointer    /* pointer to shared memory block */
   .string "OWL Program"  /* program name */
