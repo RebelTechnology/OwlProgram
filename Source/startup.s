@@ -7,6 +7,7 @@
 ;; .global  ProgramVector
 ;; .global  vector
 
+
 /* start address for the initialization values of the .data section. 
 defined in linker script */
 .word  _sidata
@@ -60,16 +61,16 @@ LoopFillZerobss:
 .section  .isr_vector,"a",%progbits
 .type  g_pfnVectors, %object
 .size  g_pfnVectors, .-g_pfnVectors    
-    
+
 
 g_pfnVectors:
-  .word 0xDADAC0DE       /* magic number */
+  .word 0xdadac0de       /* magic */
   .word _startprog 	 /* link base address */
-  .word _endprog      
+  .word _endprog         /* end of program */
   .word Reset_Handler    /* code entry point */
   .word _end             /* stack start */
   .word _estack          /* stack end */
-  .word 0x40024000
+  .word 0x40024000       /* program vector address */
   /* .word pv    /* pointer to shared memory block */
   /* .word ProgramVectorPointer    /* pointer to shared memory block */
-  .string "OWL Program"  /* program name */
+  .include "progname.s"

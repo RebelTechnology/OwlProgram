@@ -9,8 +9,10 @@
 
 class SampleBuffer : public AudioBuffer {
 protected:
-  float left[AUDIO_MAX_BLOCK_SIZE];
-  float right[AUDIO_MAX_BLOCK_SIZE];
+  // FloatArray left;//[AUDIO_MAX_BLOCK_SIZE];
+  // FloatArray right;//[AUDIO_MAX_BLOCK_SIZE];
+  float* left;//[AUDIO_MAX_BLOCK_SIZE];
+  float* right;//[AUDIO_MAX_BLOCK_SIZE];
   uint16_t size;
 public:
   void split(int16_t* input, uint16_t blocksize){
@@ -124,8 +126,8 @@ public:
     memset(left, 0, getSize()*sizeof(float));
     memset(right, 0, getSize()*sizeof(float));
   }
-  inline float* getSamples(int channel){
-    return channel == 0 ? left : right;
+  inline FloatArray getSamples(int channel){
+    return channel == 0 ? FloatArray(left, size) : FloatArray(right, size);
   }
   inline int getChannels(){
     return AUDIO_CHANNELS;

@@ -5,6 +5,7 @@
 #include "device.h"
 #include "ProgramVector.h"
 #include "PatchProcessor.h"
+#include "basicmaths.h"
 
 AudioBuffer::~AudioBuffer(){}
 
@@ -57,3 +58,11 @@ bool Patch::isButtonPressed(PatchButtonId bid){
   // return processor->isButtonPressed(bid);
   return getProgramVector()->buttons & (1<<bid);
 }
+
+// float ComplexArray::mag(const int i){
+//   return sqrtf(data[i].re*data[i].re + data[i].im*data[i].im);
+// }
+
+// void ComplexArray::getMagnitudeValues(FloatArray& dest){
+//   arm_cmplx_mag_f32((float*)data, dest, sz);
+// }

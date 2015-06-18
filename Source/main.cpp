@@ -21,6 +21,8 @@ extern char _ebss[];
 
 extern "C" void __libc_init_array();
 
+ProgramVector* getProgramVector() { return ((ProgramVector*)((uint32_t)0x40024000)); }
+
 // extern "C" {
 //   ProgramVector pv;
 //   const void* ProgramVectorPointer = &pv;

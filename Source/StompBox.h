@@ -20,13 +20,74 @@ enum PatchButtonId {
   RED_BUTTON
 };
 
+class FloatArray {
+private:
+  float* data;
+  int sz;
+public:
+ FloatArray(float* d, int s) :
+  data(d), sz(s) {}
+  int size(){
+    return sz;
+  }
+  float getMinValue();
+  float getMaxValue();
+  int getMinIndex();
+  int getMaxIndex();
+  float getPeakValue();
+  int getPeakIndex();
+  float getDb();
+  void reverse();
+  void rectify();
+  FloatArray subarray(int offset, int length);
+  float& operator [](const int index){
+    return data[index];
+  }
+  operator float*() {
+    return data;
+  }
+};
+
 class AudioBuffer {
 public:
   virtual ~AudioBuffer();
-  virtual float* getSamples(int channel) = 0;
+  virtual FloatArray getSamples(int channel) = 0;
   virtual int getChannels() = 0;
   virtual int getSize() = 0;
   virtual void clear() = 0;
+};
+
+struct ComplexNumber {
+  float re;
+  float im;
+};
+
+class ComplexArray {
+private:
+  ComplexNumber* data;
+  int sz;
+public:
+  ComplexArray(ComplexNumber* d, int s) :
+    data(d), sz(s) {}
+  float re(const int i){
+    return data[i].re;
+  }
+  float im(const int i){
+    return data[i].im;
+  }
+  float mag(const int i);
+  int size(){
+    return sz;
+  }
+  float getPeakMagnitudeValue();
+  int getPeakMagnitudeIndex();
+  void getMagnitudeValues(FloatArray& buf);
+  ComplexNumber& operator [](const int i){
+    return data[i];
+  }
+  operator ComplexNumber*() {
+    return data;
+  }
 };
 
 class Patch {
@@ -40,6 +101,8 @@ public:
   int getBlockSize();
   double getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
+  FloatArray createFloatArray(int size);
+  ComplexArray createComplexArray(int size);
 public:
   virtual void processAudio(AudioBuffer& output) = 0;
 private:

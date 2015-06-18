@@ -14,9 +14,9 @@ public:
   void clear(){
     memset(buffer, 0, size*channels*sizeof(float));
   }
-  float* getSamples(int channel){
+  FloatArray getSamples(int channel){
     // assert_param(channel < channels);
-    return buffer+channel*size;
+    return FloatArray(buffer+channel*size, size);
   }
   int getChannels(){
     return channels;
