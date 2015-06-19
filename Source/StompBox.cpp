@@ -187,7 +187,15 @@ float FloatArray::getVariance(){
 void FloatArray::scale(float factor){
   arm_scale_f32 ( (float*)data, factor, (float*)data, sz);
 }
-
-
-
 float FloatArray::getDb(){};
+
+#define DWT_CYCCNT ((volatile unsigned int *)0xE0001004)
+
+float Patch::getElapsedBlockTime(){
+  return (*DWT_CYCCNT)/getBlockSize()/3500.0;
+}
+
+int Patch::getElapsedCycles(){
+  return *DWT_CYCCNT;
+}
+

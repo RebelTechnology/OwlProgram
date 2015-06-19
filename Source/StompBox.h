@@ -131,6 +131,8 @@ public:
   AudioBuffer* createMemoryBuffer(int channels, int samples);
   FloatArray createFloatArray(int size);
   ComplexFloatArray createComplexFloatArray(int size);
+  float getElapsedBlockTime();
+  int getElapsedCycles();
 public:
   virtual void processAudio(AudioBuffer& output) = 0;
 private:
