@@ -3,18 +3,13 @@
 #define FIRMWARE_VERSION             "005-pre"
 #define HARDWARE_VERSION             "OWL Rev04"
 
-/* #define SERIAL_PORT                  1 */
-
 #define DEBUG_AUDIO
 #define DEBUG_MEM
 /* #define DEBUG_DWT */
 /* #define STARTUP_CODE */
 
-#define GREEN_PATCH                  0
-#define RED_PATCH                    1
-
 #define AUDIO_BIGEND
-#define AUDIO_SATURATE_SAMPLES // SATURATE adds almost 500 cycles to 24-bit mode
+/* #define AUDIO_SATURATE_SAMPLES // SATURATE adds almost 500 cycles to 24-bit mode */
 #define AUDIO_CHANNELS               2
 #define AUDIO_BITDEPTH               24    /* bits per sample */
 #define AUDIO_MAX_BLOCK_SIZE         512
