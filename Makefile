@@ -103,7 +103,7 @@ heavy:  $(BUILD)/heavy.bin
 	$(FIRMWARESENDER) -in  $< -out "OWL FS"
 
 # Build executable 
-$(BUILD)/solo.elf : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
+$(BUILD)/solo.elf : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT) Source/progname.s
 	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(LDLIBS)
 # $(BUILD)/solo.elf : $(SOLO_OBJS) $(OBJS) $(HEAVY_OBJS) $(LDSCRIPT)
 # 	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(HEAVY_OBJS) $(LDLIBS)

@@ -2,6 +2,7 @@
 
 PATCH=$1
 echo Generating patch $PATCH
+echo '.string "'$PATCH'"' > Source/progname.s
 echo '#include "../Libraries/OwlPatches/'$PATCH'Patch.hpp"' > Source/solopatch.h
 echo 'REGISTER_PATCH('$PATCH'Patch, "'$PATCH'", 2, 2);' > Source/solopatch.cpp
 # make solo

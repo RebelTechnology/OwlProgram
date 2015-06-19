@@ -1,1 +1,1 @@
-.string "Dynamo"
+.string "LotkaVolterra"
