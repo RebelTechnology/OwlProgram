@@ -2,43 +2,51 @@
 #define __FastFourierTestPatch_hpp__
 
 #include "StompBox.h"
-
-class FastFourierTransform {
-private:
-  arm_rfft_fast_instance_f32 instance;
-
-public:
-  void init(int len){
-    void* args[] = {(void*)&instance, (void*)&len};
-    getProgramVector()->serviceCall(OWL_SERVICE_ARM_RFFT_FAST_INIT_F32, args, 2);
-    // arm_rfft_fast_init_f32(&instance, len);
-// Supported FFT Lengths are 32, 64, 128, 256, 512, 1024, 2048, 4096.
-  }
-  void fft(float* in, float* out){
-    arm_rfft_fast_f32(&instance, in, out, 0);
-  }
-  void ifft(float* in, float* out){
-    arm_rfft_fast_f32(&instance, in, out, 1);
-  }
-};
+#include "FastFourierTransform.hpp"
 
 class FastFourierTestPatch : public Patch {
 private:
   FastFourierTransform transform;
+  ComplexFloatArray ca;
+  int fftSize;
+  float *window;
+  float *iWindow;
+  int count;
 public:
-  FastFourierTestPatch(){
+  FastFourierTestPatch() : 
+    ca(NULL,0)
+  {
+    count=0;
     registerParameter(PARAMETER_A, "Gain");
     transform.init(getBlockSize());
+    fftSize=getBlockSize();
+    float *values=createMemoryBuffer(1, fftSize*2)->getSamples(0);
+    ca.setData((ComplexFloat *)values);
+    ca.setSize(fftSize);
+    window=createMemoryBuffer(1, fftSize)->getSamples(0);
+    Window::window(Window::kHammingWindow, window, fftSize);
+    iWindow=createMemoryBuffer(1, fftSize)->getSamples(0);
+    for(int n=0; n<fftSize; n++){
+      iWindow[n]=1/window[n];
+    }
   }
   void processAudio(AudioBuffer &buffer){
     float gain = getParameterValue(PARAMETER_A)*2;
-    float* in = buffer.getSamples(0);
+    float* buf = buffer.getSamples(0);
     int size = buffer.getSize();
-    float buf[size];
-    transform.fft(in, buf);
-    for(int i=0; i<size; i++)
-      buf[i] *= gain;
-    transform.ifft(buf, in);
+/*
+  a very expensive pass-through! 
+*/
+
+    Window::applyWindow(buf, window, buf, fftSize);
+    transform.fft(buf, ca);
+    for(int i=0; i<fftSize; i++){
+      ca[i].re *= gain;
+      ca[i].im *= gain;
+    }
+    transform.ifft(ca, buf);
+    Window::applyWindow(buf, iWindow, fftSize);
+    count++;
   }
 };
 

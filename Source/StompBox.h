@@ -86,11 +86,20 @@ public:
   void getMagnitudeValues(FloatArray& buf);
   void getRealValues(FloatArray& buf);
   void getImaginaryValues(FloatArray& buf);
+  void setSize(int aSize){
+    sz=aSize;
+  }
+  void setData(ComplexFloat* aData){
+    data=aData;
+  }
   ComplexFloat& operator [](const int i){
     return data[i];
   }
   operator ComplexFloat*() {
     return data;
+  }
+  operator float*() {
+    return (float *)data;
   }
 };
 
