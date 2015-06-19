@@ -88,8 +88,7 @@ public:
   void getMagnitudeValues(FloatArray& buf);
   float mag2(const int i);
   void getMagnitudeSquaredValues(FloatArray& buf);
-  float conj(const int i);
-  void getComplexConjugateValues(FloatArray& buf);
+  void getComplexConjugateValues(ComplexFloatArray& buf);
   void complexDotProduct(ComplexFloatArray& operand2, ComplexFloat& result);
   void complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result);
   void complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result);

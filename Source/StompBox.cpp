@@ -79,12 +79,16 @@ void ComplexFloatArray::complexDotProduct(ComplexFloatArray& operand2, ComplexFl
   arm_cmplx_dot_prod_f32 ( (float*)data, (float*)operand2, sz, &(result.re), &(result.im) );
 };
 void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result){
-  int minSize= min(sz,operand2.getSize()); //TODO: shall we take this out and allow it to segfault?
+  int minSize=min(sz,operand2.getSize()); //TODO: shall we take this out and allow it to segfault?
   arm_cmplx_mult_cmplx_f32 ( (float*)data, (float*)operand2, (float*)result, minSize );  
 };
+void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray& buf){
+  int minSize= min(sz,buf.getSize()); //TODO: shall we take this out and allow it to segfault?
+  arm_cmplx_conj_f32( (float*)data, (float*)buf, minSize );  
+}
 void ComplexFloatArray::complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result){
   int minSize= min(sz,operand2.getSize()); //TODO: shall we take this out and allow it to segfault?
-  arm_cmplx_mult_cmplx_f32 ( (float*)data, (float*)operand2, (float*)result, minSize );  
+  arm_cmplx_mult_real_f32 ( (float*)data, (float*)operand2, (float*)result, minSize );  
 };
 int ComplexFloatArray::getMaxMagnitudeIndex(){ //this is probably slower than getMagnitudeSquaredValues() and getMaxIndex() on it
   float maxMag=-1;
@@ -92,16 +96,22 @@ int ComplexFloatArray::getMaxMagnitudeIndex(){ //this is probably slower than ge
   for(int n=0; n<sz; n++){
     float magnitude=mag2(n); //uses mag2 which is faster
     if(magnitude>maxMag){
-      maxMag=max(maxMag, magnitude);
+      maxMag=magnitude;
       maxInd=n;
-    };
+    }
   }
+  return maxInd;
 };
 float ComplexFloatArray::getMaxMagnitudeValue(){ //this is probably slower than getMagnitudeSquaredValues() and getMaxValue() on it
   float maxMag=-1;
   for(int n=0; n<sz; n++){
-    maxMag=max(maxMag,mag2(n));
+    float mag=this->mag2(n);
+    if(mag>maxMag){
+      maxMag=mag;
+    }
   }
+  maxMag=sqrtf(maxMag);
+  return maxMag;
 };
 void ComplexFloatArray::getRealValues(FloatArray& buf){
   for(int n=0; n<sz; n++){
@@ -187,7 +197,7 @@ float FloatArray::getVariance(){
 void FloatArray::scale(float factor){
   arm_scale_f32 ( (float*)data, factor, (float*)data, sz);
 }
-float FloatArray::getDb(){};
+
 
 #define DWT_CYCCNT ((volatile unsigned int *)0xE0001004)
 
