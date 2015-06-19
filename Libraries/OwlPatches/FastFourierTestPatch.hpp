@@ -9,9 +9,9 @@ private:
 
 public:
   void init(int len){
-    // void* args[] = {(void*)&instance, (void*)&len};
-    // getProgramVector()->serviceCall(OWL_SERVICE_ARM_RFFT_FAST_INIT_F32, args, 2);
-    arm_rfft_fast_init_f32(&instance, len);
+    void* args[] = {(void*)&instance, (void*)&len};
+    getProgramVector()->serviceCall(OWL_SERVICE_ARM_RFFT_FAST_INIT_F32, args, 2);
+    // arm_rfft_fast_init_f32(&instance, len);
 // Supported FFT Lengths are 32, 64, 128, 256, 512, 1024, 2048, 4096.
   }
   void fft(float* in, float* out){
@@ -31,13 +31,13 @@ public:
     transform.init(getBlockSize());
   }
   void processAudio(AudioBuffer &buffer){
-    float gain = getParameterValue(PARAMETER_A);
+    float gain = getParameterValue(PARAMETER_A)*2;
     float* in = buffer.getSamples(0);
     int size = buffer.getSize();
     float buf[size];
     transform.fft(in, buf);
-    // for(int i=0; i<size; i++)
-    //   buf[i] *= gain;
+    for(int i=0; i<size; i++)
+      buf[i] *= gain;
     transform.ifft(buf, in);
   }
 };

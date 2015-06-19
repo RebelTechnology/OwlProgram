@@ -31,11 +31,11 @@ MEMORY
 SECTIONS
 {
   /* The startup code goes first into FLASH */
-  .isr_vector :
+  .program_header :
   {
     . = ALIGN(8);
     _startprog = ABSOLUTE(.);         /* define a global symbol at program start */
-    KEEP(*(.isr_vector)) /* Startup code */
+    KEEP(*(.program_header)) /* Startup code */
     . = ALIGN(8);
   } >PATCHRAM /* AT>PATCHFLASH */
 
