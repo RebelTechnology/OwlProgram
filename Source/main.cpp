@@ -22,8 +22,6 @@ extern void setup();
 extern void processBlock();
 ProgramVector* getProgramVector() { return ((ProgramVector*)((uint32_t)0x40024000)); }
 
-ProgramVector* getProgramVector() { return ((ProgramVector*)((uint32_t)0x40024000)); }
-
 // extern "C" {
 //   ProgramVector pv;
 //   const void* ProgramVectorPointer = &pv;

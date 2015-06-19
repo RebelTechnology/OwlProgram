@@ -26,7 +26,7 @@ private:
   int sz;
 public:
  FloatArray(float* d, int s) :
-  data(d), sz(s) {}
+   data(d), sz(s) {}
   int size(){
     return sz;
   }
@@ -52,22 +52,23 @@ class AudioBuffer {
 public:
   virtual ~AudioBuffer();
   virtual FloatArray getSamples(int channel) = 0;
+  // virtual float* getSamples(int channel) = 0;
   virtual int getChannels() = 0;
   virtual int getSize() = 0;
   virtual void clear() = 0;
 };
 
-struct ComplexNumber {
+struct ComplexFloat {
   float re;
   float im;
 };
 
-class ComplexArray {
+class ComplexFloatArray {
 private:
-  ComplexNumber* data;
+  ComplexFloat* data;
   int sz;
 public:
-  ComplexArray(ComplexNumber* d, int s) :
+  ComplexFloatArray(ComplexFloat* d, int s) :
     data(d), sz(s) {}
   float re(const int i){
     return data[i].re;
@@ -81,11 +82,14 @@ public:
   }
   float getPeakMagnitudeValue();
   int getPeakMagnitudeIndex();
+  ComplexFloatArray subarray(int offset, int length);
   void getMagnitudeValues(FloatArray& buf);
-  ComplexNumber& operator [](const int i){
+  void getRealValues(FloatArray& buf);
+  void getImaginaryValues(FloatArray& buf);
+  ComplexFloat& operator [](const int i){
     return data[i];
   }
-  operator ComplexNumber*() {
+  operator ComplexFloat*() {
     return data;
   }
 };
@@ -102,7 +106,7 @@ public:
   double getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
   FloatArray createFloatArray(int size);
-  ComplexArray createComplexArray(int size);
+  ComplexFloatArray createComplexFloatArray(int size);
 public:
   virtual void processAudio(AudioBuffer& output) = 0;
 private:
