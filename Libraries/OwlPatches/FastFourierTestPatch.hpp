@@ -2,7 +2,7 @@
 #define __FastFourierTestPatch_hpp__
 
 #include "StompBox.h"
-#include "FastFourierTranform.hpp"
+#include "FastFourierTransform.hpp"
 
 class FastFourierTestPatch : public Patch {
 private:
@@ -10,6 +10,7 @@ private:
   ComplexFloatArray ca;
   int fftSize;
   float *window;
+  float *iWindow;
   int count;
 public:
   FastFourierTestPatch() : 
@@ -24,13 +25,17 @@ public:
     ca.setSize(fftSize);
     window=createMemoryBuffer(1, fftSize)->getSamples(0);
     Window::window(Window::kHammingWindow, window, fftSize);
+    iWindow=createMemoryBuffer(1, fftSize)->getSamples(0);
+    for(int n=0; n<fftSize; n++){
+      iWindow[n]=1/window[n];
+    }
   }
   void processAudio(AudioBuffer &buffer){
     float gain = getParameterValue(PARAMETER_A)*2;
     float* buf = buffer.getSamples(0);
     int size = buffer.getSize();
 /*
-  lame example of how to apply your window destroying the signal: requires overlap and add
+  a very expensive pass-through! 
 */
 
     Window::applyWindow(buf, window, buf, fftSize);
@@ -40,7 +45,7 @@ public:
       ca[i].im *= gain;
     }
     transform.ifft(ca, buf);
-    Window::applyWindow(buf, window, fftSize);
+    Window::applyWindow(buf, iWindow, fftSize);
     count++;
   }
 };
