@@ -59,6 +59,18 @@ bool Patch::isButtonPressed(PatchButtonId bid){
   return getProgramVector()->buttons & (1<<bid);
 }
 
+// volatile unsigned int *DWT_CYCCNT = (volatile unsigned int *)0xE0001004; //address of the register
+
+#define DWT_CYCCNT ((volatile unsigned int *)0xE0001004)
+
+float Patch::getElapsedBlockTime(){
+  return (*DWT_CYCCNT)/getBlockSize()/3500.0;
+}
+
+int Patch::getElapsedCycles(){
+  return *DWT_CYCCNT;
+}
+
 // float ComplexArray::mag(const int i){
 //   return sqrtf(data[i].re*data[i].re + data[i].im*data[i].im);
 // }
