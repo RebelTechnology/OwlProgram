@@ -68,6 +68,13 @@ OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
 OBJS += $(DSPLIB)/CommonTables/arm_common_tables.o
 
+OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_conj_f32.o
+OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_dot_prod_f32.o
+OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mag_f32.o
+OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mag_squared_f32.o
+OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mult_cmplx_f32.o
+OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mult_real_f32.o
+
 OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_bitreversal2.o

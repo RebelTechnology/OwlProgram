@@ -27,18 +27,26 @@ private:
 public:
  FloatArray(float* d, int s) :
    data(d), sz(s) {}
-  int size(){
+  int getSize(){
     return sz;
   }
+  void getMin(float* value, long unsigned int* index);
+  void getMax(float* value, long unsigned int* index);
   float getMinValue();
   float getMaxValue();
   int getMinIndex();
   int getMaxIndex();
-  float getPeakValue();
-  int getPeakIndex();
   float getDb();
-  void reverse();
-  void rectify();
+  void rectify(FloatArray& destination);
+  void rectify(); //in place
+  void reverse(FloatArray& destination);
+  void reverse(); //in place
+  float getRms();
+  float getMean();
+  float getPower();
+  float getStandardDeviation();
+  float getVariance();
+  void scale(float factor);
   FloatArray subarray(int offset, int length);
   float& operator [](const int index){
     return data[index];
@@ -77,13 +85,19 @@ public:
     return data[i].im;
   }
   float mag(const int i);
-  int size(){
+  void getMagnitudeValues(FloatArray& buf);
+  float mag2(const int i);
+  void getMagnitudeSquaredValues(FloatArray& buf);
+  void getComplexConjugateValues(ComplexFloatArray& buf);
+  void complexDotProduct(ComplexFloatArray& operand2, ComplexFloat& result);
+  void complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result);
+  void complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result);
+  int getSize(){
     return sz;
   }
-  float getPeakMagnitudeValue();
-  int getPeakMagnitudeIndex();
+  float getMaxMagnitudeValue();
+  int getMaxMagnitudeIndex();
   ComplexFloatArray subarray(int offset, int length);
-  void getMagnitudeValues(FloatArray& buf);
   void getRealValues(FloatArray& buf);
   void getImaginaryValues(FloatArray& buf);
   void setSize(int aSize){
