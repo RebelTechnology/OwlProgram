@@ -23,6 +23,7 @@ CFLAGS += -ffunction-sections
 # CFLAGS +=  -munaligned-access
 CFLAGS +=  -mno-unaligned-access
 # CFLAGS += –mlong-calls
+CFLAGS += -ILibSource
 
 # CFLAGS += -mpic-data-is-text-relative
 CFLAGS += -fno-omit-frame-pointer
@@ -39,13 +40,17 @@ LDLIBS   = -lm
 LDSCRIPT = Source/flash.ld
 FIRMWARESENDER = Tools/FirmwareSender -s 240
 
-C_SRC   = basicmaths.c # myalloc.c eepromcontrol.c errorhandlers.c gpio.c 
+C_SRC   = # basicmaths.c myalloc.c eepromcontrol.c errorhandlers.c gpio.c 
 CPP_SRC = main.cpp operators.cpp message.cpp
 OWL_SRC = StompBox.cpp PatchProcessor.cpp
 SOLO_SRC = SoloProgram.cpp
 MULTI_SRC = PatchController.cpp PatchRegistry.cpp MultiProgram.cpp
 
 OBJS =  $(C_SRC:%.c=Build/%.o) $(CPP_SRC:%.cpp=Build/%.o)
+
+OBJS += LibSource/FloatArray.o
+OBJS += LibSource/ComplexFloatArray.o
+OBJS += LibSource/basicmaths.o
 
 # OBJS += Libraries/OwlPatches/retuner.o
 # OBJS += Libraries/OwlPatches/Retune/zita-resampler/resampler.o

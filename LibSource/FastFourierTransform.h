@@ -1,3 +1,5 @@
+#ifndef __FastFourierTransform_h__
+#define __FastFourierTransform_h__
 
 class FastFourierTransform {
 private:
@@ -16,3 +18,5 @@ public:
    arm_rfft_fast_f32(&instance, (float *)in, out, 1);
   }
 };
+
+#endif // __FastFourierTransform_h__

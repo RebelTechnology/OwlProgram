@@ -2,8 +2,6 @@
 #define __FastFourierTestPatch_hpp__
 
 #include "StompBox.h"
-#include "Window.hpp"
-#include "FastFourierTransform.hpp"
 
 class FastFourierTestPatch : public Patch {
 private:

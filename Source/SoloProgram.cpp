@@ -3,6 +3,10 @@
 #include "PatchProcessor.h"
 #include "basicmaths.h"
 #include "owlcontrol.h"
+#include "FloatArray.h"
+#include "ComplexFloatArray.h"
+#include "FastFourierTransform.h"
+#include "Window.hpp"
 #include "solopatch.h"
 
 PatchProcessor processor;

@@ -2,6 +2,7 @@
 #define __StompBox_h__
 
 #include <string>
+#include "FloatArray.h"
 class PatchProcessor;
 
 enum PatchParameterId {
@@ -20,42 +21,6 @@ enum PatchButtonId {
   RED_BUTTON
 };
 
-class FloatArray {
-private:
-  float* data;
-  int sz;
-public:
- FloatArray(float* d, int s) :
-   data(d), sz(s) {}
-  int getSize(){
-    return sz;
-  }
-  void getMin(float* value, long unsigned int* index);
-  void getMax(float* value, long unsigned int* index);
-  float getMinValue();
-  float getMaxValue();
-  int getMinIndex();
-  int getMaxIndex();
-  float getDb();
-  void rectify(FloatArray& destination);
-  void rectify(); //in place
-  void reverse(FloatArray& destination);
-  void reverse(); //in place
-  float getRms();
-  float getMean();
-  float getPower();
-  float getStandardDeviation();
-  float getVariance();
-  void scale(float factor);
-  FloatArray subarray(int offset, int length);
-  float& operator [](const int index){
-    return data[index];
-  }
-  operator float*() {
-    return data;
-  }
-};
-
 class AudioBuffer {
 public:
   virtual ~AudioBuffer();
@@ -64,58 +29,9 @@ public:
   virtual int getChannels() = 0;
   virtual int getSize() = 0;
   virtual void clear() = 0;
+  static AudioBuffer* createMemoryBuffer(int channels, int samples);
 };
 
-struct ComplexFloat {
-  float re;
-  float im;
-};
-
-class ComplexFloatArray {
-private:
-  ComplexFloat* data;
-  int sz;
-public:
-  ComplexFloatArray(ComplexFloat* d, int s) :
-    data(d), sz(s) {}
-  float re(const int i){
-    return data[i].re;
-  }
-  float im(const int i){
-    return data[i].im;
-  }
-  float mag(const int i);
-  void getMagnitudeValues(FloatArray& buf);
-  float mag2(const int i);
-  void getMagnitudeSquaredValues(FloatArray& buf);
-  void getComplexConjugateValues(ComplexFloatArray& buf);
-  void complexDotProduct(ComplexFloatArray& operand2, ComplexFloat& result);
-  void complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result);
-  void complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result);
-  int getSize(){
-    return sz;
-  }
-  float getMaxMagnitudeValue();
-  int getMaxMagnitudeIndex();
-  ComplexFloatArray subarray(int offset, int length);
-  void getRealValues(FloatArray& buf);
-  void getImaginaryValues(FloatArray& buf);
-  void setSize(int aSize){
-    sz=aSize;
-  }
-  void setData(ComplexFloat* aData){
-    data=aData;
-  }
-  ComplexFloat& operator [](const int i){
-    return data[i];
-  }
-  operator ComplexFloat*() {
-    return data;
-  }
-  operator float*() {
-    return (float *)data;
-  }
-};
 
 class Patch {
 public:
@@ -128,8 +44,6 @@ public:
   int getBlockSize();
   double getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
-  FloatArray createFloatArray(int size);
-  ComplexFloatArray createComplexFloatArray(int size);
   float getElapsedBlockTime();
   int getElapsedCycles();
 public:
