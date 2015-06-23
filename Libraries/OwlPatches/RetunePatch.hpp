@@ -31,16 +31,20 @@ public:
     for(int n=0; n<4; n++)
       fourPointers[n]=retunerBuffers->getSamples(n);
     retuner.init(getSampleRate(),fourPointers); 
-    registerParameter(PARAMETER_A, "");    
-    registerParameter(PARAMETER_B, "");    
-    registerParameter(PARAMETER_C, "");    
-    registerParameter(PARAMETER_D, "");    
+    registerParameter(PARAMETER_A, "Notes");    
+    registerParameter(PARAMETER_B, "Tune");    
+    registerParameter(PARAMETER_C, "Bias");
+    registerParameter(PARAMETER_D, "Corr");
   }
 
+  volatile unsigned int *DWT_CYCCNT = (volatile unsigned int *)0xE0001004; //address of the register
+  int dwtmax = 0;
   void processAudio(AudioBuffer &buffer){
-    float gain = getParameterValue(PARAMETER_A)*2;
+    notemask = (uint16_t)(getParameterValue(PARAMETER_A)*0xfff);
+    tune = getParameterValue(PARAMETER_B)*440.0+220.0;
+    bias = getParameterValue(PARAMETER_C);
+    corr = getParameterValue(PARAMETER_D);
     int size = buffer.getSize();
-
     retuner.set_notemask(notemask);
     retuner.set_refpitch(tune);
     retuner.set_notebias(bias);
@@ -49,11 +53,14 @@ public:
     retuner.set_corroffs(offs);
 
     float* input = buffer.getSamples(0);
-    float* output = input;
-    // float output[size];
+    float output[size];
     // memset(output, 0, size*sizeof(float));
     retuner.process(size, input, output);
-    // memcpy(input, output, size*sizeof(float));
+    memcpy(input, output, size*sizeof(float));
+    if(*DWT_CYCCNT > dwtmax){
+      dwtmax = *DWT_CYCCNT;
+      debugMessage("dwt", dwtmax/getBlockSize());
+    }
   }
 };
 
