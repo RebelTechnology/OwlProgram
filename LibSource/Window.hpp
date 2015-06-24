@@ -10,7 +10,7 @@
  * this solution can be handy as it requires less memory (no window array required))
  * applyTriangularWindow(float *signal, int size)
  */
-class Window {
+class Window : public FloatArray {
 public:
   typedef enum WindowType {
     HammingWindow,
@@ -19,6 +19,24 @@ public:
     TriangularWindow,
     RectangularWindow // no window
   } WindowType;
+  Window(){}
+  Window(float* win, int size) : FloatArray(win, size) {}
+  void apply(float *signalIn){
+    Window::applyWindow(signalIn, getData(), getSize());
+  }
+  void apply(float *signalIn, float *signalOut){
+    Window::applyWindow(signalIn, getData(), signalOut, getSize());
+  }
+  void invert(){
+    float* data = getData();
+    for(int n=0; n<getSize(); n++)
+      data[n] = 1/data[n];
+  }
+  static Window create(WindowType type, int size){
+    Window win(new float[size], size);
+    win.window(type, win, size);
+    return win;
+  }
   static void window(WindowType type, float *window, int size){
     switch(type){
     case HannWindow:

@@ -89,11 +89,15 @@ OBJS += $(DSPLIB)/CommonTables/arm_const_structs.o
 
 OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df1_init_f32.o
 OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df1_f32.o
+OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df2T_init_f32.o
+OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df2T_f32.o
 
 OBJS += $(DSPLIB)/SupportFunctions/arm_float_to_q31.o
 OBJS += $(DSPLIB)/SupportFunctions/arm_q31_to_float.o
 OBJS += $(DSPLIB)/SupportFunctions/arm_float_to_q15.o
 OBJS += $(DSPLIB)/SupportFunctions/arm_q15_to_float.o
+
+OBJS += $(DSPLIB)/BasicMathFunctions/arm_scale_f32.o
 
 # include common make file
 include $(TEMPLATEROOT)/Makefile.f4

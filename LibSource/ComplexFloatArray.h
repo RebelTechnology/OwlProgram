@@ -54,7 +54,7 @@ public:
   operator float*() {
     return (float *)data;
   }
-  static ComplexFloatArray createComplexFloatArray(int size);
+  static ComplexFloatArray create(int size);
 };
 
 #endif // __ComplexFloatArray_h__

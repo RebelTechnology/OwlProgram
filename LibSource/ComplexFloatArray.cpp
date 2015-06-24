@@ -1,10 +1,6 @@
 #include "ComplexFloatArray.h"
 #include "basicmaths.h"
 
-ComplexFloatArray ComplexFloatArray::createComplexFloatArray(int size){
-  return ComplexFloatArray((ComplexFloat*)(new float[size*2]), size);
-}
-
 float ComplexFloatArray::mag(const int i){
   float result;
   arm_cmplx_mag_f32((float*)&(data[i]), &result,1);
@@ -78,4 +74,8 @@ void ComplexFloatArray::getImaginaryValues(FloatArray& buf){
   for(int n=0; n<sz; n++){
     buf[n]=data[n].im;
   }
+}
+
+ComplexFloatArray ComplexFloatArray::create(int size){
+  return ComplexFloatArray(new ComplexFloat[size], size);
 }

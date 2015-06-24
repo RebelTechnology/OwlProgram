@@ -7,6 +7,7 @@
 #include "ComplexFloatArray.h"
 #include "FastFourierTransform.h"
 #include "Window.hpp"
+#include "BiquadFilter.hpp"
 #include "solopatch.h"
 
 PatchProcessor processor;

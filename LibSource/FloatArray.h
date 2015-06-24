@@ -6,14 +6,14 @@
 class FloatArray {
 private:
   float* data;
-  int sz;
+  int size;
 public:
  FloatArray() :
-   data(NULL), sz(0) {}
+   data(NULL), size(0) {}
  FloatArray(float* d, int s) :
-   data(d), sz(s) {}
+   data(d), size(s) {}
   int getSize(){
-    return sz;
+    return size;
   }
   void getMin(float* value, long unsigned int* index);
   void getMax(float* value, long unsigned int* index);
@@ -36,10 +36,13 @@ public:
   float& operator [](const int index){
     return data[index];
   }
-  operator float*() {
+  operator float*(){
     return data;
   }
-  static FloatArray createFloatArray(int size);
+  float* getData(){
+    return data;
+  }
+  static FloatArray create(int size);
 };
 
 #endif // __FloatArray_h__

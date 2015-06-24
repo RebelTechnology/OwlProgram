@@ -49,9 +49,8 @@ int main(void){
 #endif /* DEBUG_DWT */
 
   if(getProgramVector()->checksum != sizeof(ProgramVector)){
-    // problem!
     getProgramVector()->error = CHECKSUM_ERROR_STATUS;
-    getProgramVector()->message = "ProgramVector checksum error";
+    getProgramVector()->message = (char*)"ProgramVector checksum error";
     getProgramVector()->programStatus(AUDIO_ERROR_STATUS);
     return -1;
   }
