@@ -13,6 +13,9 @@ ifeq ($(CONFIG),Release)
 CFLAGS   = -O2
 endif
 
+PATCHNAME ?= "OWL Patch"
+SLOT ?= 0
+
 CFLAGS += -DEXTERNAL_SRAM
 CFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
 CFLAGS += -mtune=cortex-m4
@@ -23,7 +26,6 @@ CFLAGS += -ffunction-sections
 # CFLAGS +=  -munaligned-access
 CFLAGS +=  -mno-unaligned-access
 # CFLAGS += –mlong-calls
-CFLAGS += -ILibSource
 
 # CFLAGS += -mpic-data-is-text-relative
 CFLAGS += -fno-omit-frame-pointer
@@ -40,35 +42,17 @@ LDLIBS   = -lm
 LDSCRIPT = Source/flash.ld
 FIRMWARESENDER = Tools/FirmwareSender -s 240
 
-C_SRC   = # basicmaths.c myalloc.c eepromcontrol.c errorhandlers.c gpio.c 
-CPP_SRC = main.cpp operators.cpp message.cpp
-OWL_SRC = StompBox.cpp PatchProcessor.cpp
-SOLO_SRC = SoloProgram.cpp
-MULTI_SRC = PatchController.cpp PatchRegistry.cpp MultiProgram.cpp
+C_SRC   = basicmaths.c
+CPP_SRC = main.cpp operators.cpp message.cpp StompBox.cpp PatchProcessor.cpp 
+CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp
+CPP_SRC += PatchProgram.cpp
 
 OBJS =  $(C_SRC:%.c=Build/%.o) $(CPP_SRC:%.cpp=Build/%.o)
 
-OBJS += LibSource/FloatArray.o
-OBJS += LibSource/ComplexFloatArray.o
-OBJS += LibSource/basicmaths.o
-
-# OBJS += Libraries/OwlPatches/retuner.o
-# OBJS += Libraries/OwlPatches/Retune/zita-resampler/resampler.o
-# OBJS += Libraries/OwlPatches/Retune/zita-resampler/resampler-table.o
-# OBJS += Libraries/kiss_fft130/kiss_fft.o
-
-SOLO_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(SOLO_SRC:%.cpp=Build/%.o)
-MULTI_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(MULTI_SRC:%.cpp=Build/%.o)
-BLINKY_OBJS = $(BUILD)/BlinkyProgram.o 
-
 # object files
 OBJS += $(BUILD)/stm32f4xx_flash.o
-# OBJS += $(PERIPH) 
-OBJS += $(BUILD)/startup.o # no system_hse.o: clocks and ram set by loader
-#OBJS += $(USB_DEVICE) $(USB_OTG)
+OBJS += $(BUILD)/startup.o
 OBJS += $(SYSCALLS)
-#OBJS += $(BUILD)/misc.o
-OBJS += # $(BUILD)/stm32f4xx_gpio.o $(BUILD)/stm32f4xx_rcc.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
 OBJS += $(DSPLIB)/CommonTables/arm_common_tables.o
@@ -102,51 +86,60 @@ OBJS += $(DSPLIB)/BasicMathFunctions/arm_scale_f32.o
 # include common make file
 include $(TEMPLATEROOT)/Makefile.f4
 
-all: multi
-
 # Heavy 
-HEAVY_SRC = HeavyProgram.cpp
-HEAVY_OBJS = $(OWL_SRC:%.cpp=Build/%.o) $(HEAVY_SRC:%.cpp=Build/%.o)
-HEAVY_FILES = $(wildcard HeavySource/*.c)
-HEAVY_OBJS += $(addprefix Build/, $(notdir $(HEAVY_FILES:.c=.o)))
-vpath %.c $(TEMPLATEROOT)/HeavySource
 CFLAGS += -D__unix__ -DHV_SIMD_NONE
 
-$(BUILD)/heavy.elf : $(HEAVY_OBJS) $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -o $@ $(HEAVY_OBJS) $(OBJS) $(LDLIBS)
+PATCHSOURCE = $(TEMPLATEROOT)/PatchSource
+LIBSOURCE = $(TEMPLATEROOT)/LibSource
+CFLAGS += -ILibSource
+CFLAGS += -I$(BUILD)
+CFLAGS += -ILibraries/OwlPatches
+PATCH_C_SRC = $(wildcard $(PATCHSOURCE)/*.c) 
+PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
+PATCH_OBJS += $(addprefix Build/, $(notdir $(PATCH_C_SRC:.c=.o)))
+PATCH_OBJS += $(addprefix Build/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
+vpath %.cpp $(LIBSOURCE)
+vpath %.c $(LIBSOURCE)
+vpath %.s $(LIBSOURCE)
+vpath %.cpp $(PATCHSOURCE)
+vpath %.c $(PATCHSOURCE)
+vpath %.s $(PATCHSOURCE)
 
-heavy:  $(BUILD)/heavy.bin
-	$(FIRMWARESENDER) -in  $< -out "OWL FS"
+all: patch
+
+.PHONY: prep clean upload store
+
+$(BUILD)/progname.s:
+	echo '.string "'$(PATCHNAME)'"' > $@
+
+$(BUILD)/patch.h:
+	echo '#include "'$(PATCHNAME)'Patch.hpp"' > $@
+
+$(BUILD)/patch.cpp:
+	echo 'REGISTER_PATCH('$(PATCHNAME)'Patch, "'$(PATCHNAME)'", 2, 2);' > $@
+
+prep: $(BUILD)/patch.h $(BUILD)/patch.cpp $(BUILD)/progname.s
+	echo Building patch $(PATCHNAME)
 
 # Build executable 
-$(BUILD)/solo.elf : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT) Source/progname.s
-	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(LDLIBS)
-# $(BUILD)/solo.elf : $(SOLO_OBJS) $(OBJS) $(HEAVY_OBJS) $(LDSCRIPT)
-# 	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(HEAVY_OBJS) $(LDLIBS)
+$(BUILD)/patch.elf : prep $(PATCH_OBJS) $(OBJS) $(LDSCRIPT) 
+	$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
 
-$(BUILD)/solo.as : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -o $@ $(SOLO_OBJS) $(OBJS) $(LDLIBS)
+$(BUILD)/patch.as : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
 
-$(BUILD)/solo.map : $(SOLO_OBJS) $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -Wl,-Map=Build/solo.map $(OBJS) $(SOLO_OBJS) $(LDLIBS)
-
-$(BUILD)/multi.elf : $(MULTI_OBJS) $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -o $@ $(MULTI_OBJS) $(OBJS) $(LDLIBS)
-
-$(BUILD)/blinky.elf : $(BLINKY_OBJS) $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -o $@ $(BLINKY_OBJS) $(OBJS) $(LDLIBS)
+$(BUILD)/patch.map : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -Wl,-Map=Build/patch.map $(OBJS) $(PATCH_OBJS) $(LDLIBS)
 
 $(BUILD)/%.syx : $(BUILD)/%.bin
 	$(FIRMWARESENDER) -q -in $< -save $@
 
-solo : $(BUILD)/solo.bin $(BUILD)/solo.map
+patch: $(BUILD)/patch.bin
+
+sysex: $(BUILD)/%.syx
+
+upload: $(BUILD)/patch.bin
 	$(FIRMWARESENDER) -in  $< -out "OWL FS"
 
-multi: $(BUILD)/multi.bin
-	$(FIRMWARESENDER) -in  $< -out "OWL FS"
-
-blinky: $(BUILD)/blinky.bin
-	$(FIRMWARESENDER) -in  $< -out "OWL FS"
-
-$(BUILD)/program.a : $(BUILD)/program.a($(SOLO_OBJS) $(OBJS) OwlProgram.o)
-	$(RANLIB) $(BUILD)/program.a
+store: $(BUILD)/patch.bin
+	$(FIRMWARESENDER) -in  $< -out "OWL FS" -store $(SLOT)

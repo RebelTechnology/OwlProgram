@@ -67,7 +67,7 @@ $(BUILD)/%.s: $(BUILD)/%.elf
 	$(OBJDUMP) -S $< > $@
 
 clean:
-	rm -f $(BUILD)/*.o $(BUILD)/*.d $(BUILD)/*.elf $(BUILD)/*.bin $(BUILD)/*.syx $(BUILD)/*.s $(BUILD)/*.map
+	rm -f $(BUILD)/*
 	find Libraries/ -name '*.o' -delete
 
 debug: $(ELF)

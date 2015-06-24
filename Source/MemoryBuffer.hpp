@@ -1,7 +1,6 @@
 #include "StompBox.h"
 #include <string.h>
 #include <stdlib.h>
-#include "myalloc.h"
 
 class MemoryBuffer : public AudioBuffer {
 protected:
