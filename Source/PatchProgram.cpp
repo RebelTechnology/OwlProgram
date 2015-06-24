@@ -8,7 +8,7 @@
 #include "FastFourierTransform.h"
 #include "Window.hpp"
 #include "BiquadFilter.hpp"
-#include "solopatch.h"
+#include "patch.h"
 
 PatchProcessor processor;
 
@@ -25,7 +25,7 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
 }
 
 void setup(){
-#include "solopatch.cpp"
+#include "patch.cpp"
 }
 
 SampleBuffer buffer;
