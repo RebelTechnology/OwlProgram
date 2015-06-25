@@ -111,7 +111,7 @@ all: patch
 # include common make file
 include $(BUILDROOT)/common.mk
 
-.PHONY: prep clean realclean run store online
+.PHONY: prep clean realclean run store online docs
 
 prep:
 	@echo Building patch $(PATCHNAME)
@@ -141,6 +141,9 @@ run: prep $(BUILD)/patch.bin
 
 store: prep $(BUILD)/patch.bin
 	$(FIRMWARESENDER) -in $(BUILD)/patch.bin -out $(OWLDEVICE) -store $(SLOT)
+
+docs:
+	doxygen Doxyfile
 
 online:
 	echo "$(ONLINE_INCLUDES)" > $(BUILD)/patch.h
