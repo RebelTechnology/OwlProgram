@@ -1,7 +1,6 @@
 #include <cstddef>
 #include <string.h>
 #include "StompBox.h"
-#include "owlcontrol.h"
 #include "device.h"
 #include "ProgramVector.h"
 #include "PatchProcessor.h"

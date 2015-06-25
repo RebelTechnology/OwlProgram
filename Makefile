@@ -54,9 +54,8 @@ CPP_SRC += PatchProgram.cpp
 OBJS =  $(C_SRC:%.c=Build/%.o) $(CPP_SRC:%.cpp=Build/%.o)
 
 # object files
-OBJS += $(BUILD)/stm32f4xx_flash.o
 OBJS += $(BUILD)/startup.o
-OBJS += $(SYSCALLS)
+OBJS += $(BUILD)/libnosys_gnu.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
 OBJS += $(DSPLIB)/CommonTables/arm_common_tables.o
@@ -87,10 +86,7 @@ OBJS += $(DSPLIB)/SupportFunctions/arm_q15_to_float.o
 
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_scale_f32.o
 
-# include common make file
-include $(TEMPLATEROOT)/Makefile.f4
-
-# Heavy 
+# Heavy defines
 CFLAGS += -D__unix__ -DHV_SIMD_NONE
 
 PATCHSOURCE = $(TEMPLATEROOT)/PatchSource
@@ -111,7 +107,10 @@ vpath %.s $(PATCHSOURCE)
 
 all: patch
 
-.PHONY: prep clean run store online
+# include common make file
+include $(TEMPLATEROOT)/common.mk
+
+.PHONY: prep clean realclean run store online
 
 prep:
 	@echo Building patch $(PATCHNAME)
@@ -137,10 +136,10 @@ patch: prep $(BUILD)/patch.bin
 sysex: prep $(BUILD)/patch.syx
 
 run: prep $(BUILD)/patch.bin
-	$(FIRMWARESENDER) -in  $< -out "OWL FS" -run
+	$(FIRMWARESENDER) -in $(BUILD)/patch.bin -out "OWL FS" -run
 
 store: prep $(BUILD)/patch.bin
-	$(FIRMWARESENDER) -in  $< -out "OWL FS" -store $(SLOT)
+	$(FIRMWARESENDER) -in $(BUILD)/patch.bin -out "OWL FS" -store $(SLOT)
 
 online:
 	echo "$(ONLINE_INCLUDES)" > $(BUILD)/patch.h

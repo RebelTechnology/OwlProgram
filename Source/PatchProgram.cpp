@@ -2,7 +2,7 @@
 #include "SampleBuffer.hpp"
 #include "PatchProcessor.h"
 #include "basicmaths.h"
-#include "owlcontrol.h"
+#include "message.h"
 #include "FloatArray.h"
 #include "ComplexFloatArray.h"
 #include "FastFourierTransform.h"

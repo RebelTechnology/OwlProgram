@@ -1,8 +1,6 @@
 #include <string.h>
 #include <inttypes.h>
 #include "ProgramVector.h"
-#include "owlcontrol.h"
-#include "stm32f4xx.h"
 #include "device.h"
 
 #ifdef DEBUG_MEM
