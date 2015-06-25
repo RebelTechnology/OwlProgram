@@ -40,14 +40,6 @@ SECTIONS
     . = ALIGN(8);
   } >PATCHRAM /* AT>PATCHFLASH */
 
-  .pv (NOLOAD) :
-  {
-    . = ALIGN(8);
-    _programvector = ABSOLUTE(.);
-      *(.pv)
-    . = ALIGN(8);
-  } >NVRAM
-
   /* The program code and other data goes into FLASH */
   .text :
   {
@@ -146,14 +138,21 @@ SECTIONS
     *(.bss)
     *(.bss*)
     *(COMMON)
-
     . = ALIGN(8);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
   } >PATCHRAM
 
+  .pv (NOLOAD) :
+  {
+    . = ALIGN(8);
+    _programvector = ABSOLUTE(.);
+      *(.pv)
+    . = ALIGN(8);
+  } >PATCHRAM
+
   /* User_heap_stack section, used to check that there is enough RAM left */
-  ._user_heap_stack :
+  ._user_heap_stack (NOLOAD) :
   {
     . = ALIGN(8);
     PROVIDE ( end = . );
