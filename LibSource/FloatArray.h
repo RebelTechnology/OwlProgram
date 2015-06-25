@@ -38,7 +38,7 @@ public:
   void multiply(FloatArray other);
   void convolve(FloatArray other, FloatArray destination);
   void convolve(FloatArray other, FloatArray destination, int offset, int samples);
-  void correlation(FloatArray other, FloatArray destination);
+  void correlate(FloatArray other, FloatArray destination);
   void setAll(float value);
   FloatArray subarray(int offset, int length);
   void copyTo(FloatArray other);

@@ -156,7 +156,7 @@ void FloatArray::convolve(FloatArray other, FloatArray destination, int offset, 
 /*
  * Length 2 * max(srcALen, srcBLen) - 1.
  */
-void FloatArray::correlation(FloatArray other, FloatArray destination){
+void FloatArray::correlate(FloatArray other, FloatArray destination){
   ASSERT(destination.size >= 2 * max(size, other.size)-1, "Destination array too small");
   arm_correlate_f32(data, size, other.data, other.size, destination);
 }
