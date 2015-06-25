@@ -58,37 +58,100 @@ bool Patch::isButtonPressed(PatchButtonId bid){
   // return processor->isButtonPressed(bid);
   return getProgramVector()->buttons & (1<<bid);
 }
-
 float ComplexFloatArray::mag(const int i){
   float result;
+#ifdef ARM_CORTEX
   arm_cmplx_mag_f32((float*)&(data[i]), &result,1);
+#else
+  result=sqrtf(mag2(i));
+#endif
   return result;
 }
 void ComplexFloatArray::getMagnitudeValues(FloatArray& dest){
+#ifdef ARM_CORTEX
   arm_cmplx_mag_f32((float*)data, (float*)dest, sz);
+#else
+  for(int i=0; i<sz; i++){
+    dest[i]=mag(i);
+  }
+#endif
 }
 float ComplexFloatArray::mag2(const int i){
   float result;
+#ifdef ARM_CORTEX
   arm_cmplx_mag_squared_f32((float*)&(data[i]), &result, 1);
+#else
+  float re=data[i].re;
+  float im=data[i].im;
+  result=re*re+im*im;
+#endif  
   return result;
 }
 void ComplexFloatArray::getMagnitudeSquaredValues(FloatArray& dest){
+#ifdef ARM_CORTEX
   arm_cmplx_mag_squared_f32((float*)data, (float*)dest, sz);
+#else
+  for(int i=0; i<sz; i++){
+    dest[i]=mag2(i);
+  }
+#endif  
 }
 void ComplexFloatArray::complexDotProduct(ComplexFloatArray& operand2, ComplexFloat& result){
+#ifdef ARM_CORTEX
   arm_cmplx_dot_prod_f32 ( (float*)data, (float*)operand2, sz, &(result.re), &(result.im) );
+#else
+  float *pSrcA=(float*)data;
+  float *pSrcB=(float*)operand2;
+  float realResult=0;    
+  float imagResult=0;    
+  for(int n=0; n<sz; n++) {    
+      realResult += pSrcA[(2*n)+0]*pSrcB[(2*n)+0] - pSrcA[(2*n)+1]*pSrcB[(2*n)+1];    
+      imagResult += pSrcA[(2*n)+0]*pSrcB[(2*n)+1] + pSrcA[(2*n)+1]*pSrcB[(2*n)+0];    
+  }
+  result.re=realResult;
+  result.im=imagResult;
+#endif  
 };
 void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result){
   int minSize=min(sz,operand2.getSize()); //TODO: shall we take this out and allow it to segfault?
+#ifdef ARM_CORTEX
   arm_cmplx_mult_cmplx_f32 ( (float*)data, (float*)operand2, (float*)result, minSize );  
+#else
+  float *pSrcA=(float*)data;
+  float *pSrcB=(float*)operand2;
+  float *pDst=(float*)result;
+  for(int n=0; n<minSize; n++) {        
+    pDst[(2*n)+0] = pSrcA[(2*n)+0] * pSrcB[(2*n)+0] - pSrcA[(2*n)+1] * pSrcB[(2*n)+1];        
+    pDst[(2*n)+1] = pSrcA[(2*n)+0] * pSrcB[(2*n)+1] + pSrcA[(2*n)+1] * pSrcB[(2*n)+0];        
+  }        
+#endif  
 };
 void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray& buf){
   int minSize= min(sz,buf.getSize()); //TODO: shall we take this out and allow it to segfault?
+#ifdef ARM_CORTEX
   arm_cmplx_conj_f32( (float*)data, (float*)buf, minSize );  
+#else
+  float *pSrc=(float*)data;
+  float *pDst=(float *)buf;
+  for(int n=0; n<sz; n++) {        
+    pDst[(2*n)+0] = pSrc[(2*n)+0];     // real part        
+    pDst[(2*n)+1] = -pSrc[(2*n)+1];    // imag part        
+}   
+#endif  
 }
 void ComplexFloatArray::complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result){
   int minSize= min(sz,operand2.getSize()); //TODO: shall we take this out and allow it to segfault?
+#ifdef ARM_CORTEX
   arm_cmplx_mult_real_f32 ( (float*)data, (float*)operand2, (float*)result, minSize );  
+#else
+  float *pSrcCmplx=(float*)data;
+  float *pSrcReal=(float*)operand2;
+  float *pCmplxDst=(float*)result;
+  for(int n=0; n<sz; n++) {        
+      pCmplxDst[(2*n)+0] = pSrcCmplx[(2*n)+0] * pSrcReal[n];        
+      pCmplxDst[(2*n)+1] = pSrcCmplx[(2*n)+1] * pSrcReal[n];        
+  }        
+#endif
 };
 int ComplexFloatArray::getMaxMagnitudeIndex(){ //this is probably slower than getMagnitudeSquaredValues() and getMaxIndex() on it
   float maxMag=-1;
@@ -125,7 +188,18 @@ void ComplexFloatArray::getImaginaryValues(FloatArray& buf){
 };
 
 void FloatArray::getMin(float* value, long unsigned int* index){
+#ifdef ARM_CORTEX  
   arm_min_f32((float *)data, sz, value, index);
+#else
+  *value=data[0];
+  for(int n=1; n<sz; n++){
+    float currentValue=data[n];
+    if(currentValue<*value){
+      *value=currentValue;
+      *index=n;
+    }
+  }
+#endif
 };
 float FloatArray::getMinValue(){
   float value;
@@ -140,7 +214,18 @@ int FloatArray::getMinIndex(){
   return index;
 };
 void FloatArray::getMax(float* value, long unsigned int* index){
+#ifdef ARM_CORTEX  
   arm_max_f32((float *)data, sz, value, index);
+#else
+  *value=data[0];
+  for(int n=1; n<sz; n++){
+    float currentValue=data[n];
+    if(currentValue>*value){
+      *value=currentValue;
+      *index=n;
+    }
+  }
+#endif
 };
 float FloatArray::getMaxValue(){
   float value;
@@ -156,9 +241,15 @@ int FloatArray::getMaxIndex(){
 };
 void FloatArray::rectify(FloatArray& destination){ //this is actually "copy data with rectifify"
   int minSize= min(sz,destination.getSize()); //TODO: shall we take this out and allow it to segfault?
+#ifdef ARM_CORTEX  
   arm_abs_f32( (float*)data, (float*)destination, sz);
+#else
+  for(int n=0; n<minSize; n++){
+    destination[n]=abs(data[n]);
+  }
+#endif  
 };
-void FloatArray::rectify(){//in place //TODO: rewrite this so that it calls the overloaded method
+void FloatArray::rectify(){//in place
   rectify(*this);
 };
 void FloatArray::reverse(FloatArray& destination){ //this is actually "copy data with reverse"
@@ -166,36 +257,77 @@ void FloatArray::reverse(FloatArray& destination){ //this is actually "copy data
     destination[n]=data[sz-n-1];
   }
 }
-void FloatArray::reverse(){//in place //TODO: rewrite this so that it calls the overloaded method
+void FloatArray::reverse(){//in place
   reverse(*this);
 }
 float FloatArray::getRms(){
   float result;
+#ifdef ARM_CORTEX  
   arm_rms_f32 ((float *)data, sz, &result);
+#else
+  result=0;
+  float *pSrc=(float *)data;
+  for(int n=0; n<sz; n++){
+    result+=pSrc[n]*pSrc[n];
+  }
+  result=sqrtf(result/sz);
+#endif
   return result;
 };
 float FloatArray::getMean(){
   float result;
+#ifdef ARM_CORTEX  
   arm_mean_f32 ((float *)data, sz, &result);
+#else
+  result=0;
+  float *pSrc=(float *)data;
+  for(int n=0; n<sz; n++){
+    result+=pSrc[n];
+  }
+  result=sqrtf(result/sz);
+#endif
   return result;
 };
 float FloatArray::getPower(){
   float result;
+#ifdef ARM_CORTEX  
   arm_power_f32 ((float *)data, sz, &result);
+#else
+  result=0;
+  float *pSrc=(float *)data;
+  for(int n=0; n<sz; n++){
+    result+=pSrc[n]*pSrc[n];
+  }
+#endif
   return result;
 };
 float FloatArray::getStandardDeviation(){
   float result;
+#ifdef ARM_CORTEX  
   arm_std_f32 ((float *)data, sz, &result);
+#else
+#endif
   return result;
 };
 float FloatArray::getVariance(){
   float result;
-  arm_var_f32 ((float *)data, sz, &result);
+#ifdef ARM_CORTEX  
+  arm_var_f32((float *)data, sz, &result);
+#else
+  float sumOfSquares=getPower();
+  float sum=getMean();
+  result=sqrtf((sumOfSquares - sum*sum/sz) / (sz - 1));
+#endif
   return result;
 };
 void FloatArray::scale(float factor){
+#ifdef ARM_CORTEX  
   arm_scale_f32 ( (float*)data, factor, (float*)data, sz);
+#else
+  for(int n=0; n<sz; n++){
+    data[n]*=factor;
+  }
+#endif
 }
 
 
