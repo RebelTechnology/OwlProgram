@@ -3,11 +3,10 @@
 
 #include "FloatArray.h"
 
-/** Direct Form 1 Cascaded Biquad Filter 
- * Implemented using CMSIS DSP Library
- * Each cascaded stage implements a second order filter
-
-direct form I is best for fixed point processors, while direct form II transposed is best for floating point implementations
+/** 
+ * Cascaded Biquad Filter.
+ * Implemented using CMSIS DSP Library, Direct Form 2 Transposed.
+ * Each cascaded stage implements a second order filter.
  */
 class BiquadFilter {
 private:
