@@ -69,5 +69,5 @@ g_pfnVectors:
   .word Reset_Handler    /* code entry point */
   .word _end             /* stack start */
   .word _estack          /* stack end */
-  .word 0x40024000       /* program vector address */
+  .word _programvector
   .include "progname.s"

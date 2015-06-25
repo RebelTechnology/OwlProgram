@@ -18,12 +18,13 @@ extern "C" void __libc_init_array();
 
 extern void setup();
 extern void processBlock();
-ProgramVector* getProgramVector() { return ((ProgramVector*)((uint32_t)0x40024000)); }
+// ProgramVector* getProgramVector() { return ((ProgramVector*)((uint32_t)0x40024000)); }
 
 // extern "C" {
-//   ProgramVector pv;
+ProgramVector programVector __attribute__ ((section (".pv")));
 //   const void* ProgramVectorPointer = &pv;
 // }
+ProgramVector* getProgramVector() { return &programVector; }
 
 #define BANK1_SRAM3 0x68000000
 int main(void){

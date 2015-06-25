@@ -71,7 +71,7 @@ $(BUILD)/%.s: $(BUILD)/%.elf
 	$(OBJDUMP) -S $< > $@
 
 clean:
-	rm -f $(BUILD)/*
+	rm -rf $(BUILD)/*
 
 realclean: clean
 	find Libraries/ -name '*.o' -delete

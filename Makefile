@@ -97,6 +97,8 @@ OBJS += $(DSPLIB)/SupportFunctions/arm_float_to_q31.o
 OBJS += $(DSPLIB)/SupportFunctions/arm_q31_to_float.o
 OBJS += $(DSPLIB)/SupportFunctions/arm_float_to_q15.o
 OBJS += $(DSPLIB)/SupportFunctions/arm_q15_to_float.o
+OBJS += $(DSPLIB)/SupportFunctions/arm_copy_f32.o
+OBJS += $(DSPLIB)/SupportFunctions/arm_fill_f32.o
 
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_abs_f32.o
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_add_f32.o
@@ -105,6 +107,14 @@ OBJS += $(DSPLIB)/BasicMathFunctions/arm_mult_f32.o
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_negate_f32.o
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_scale_f32.o
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_sub_f32.o
+
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_max_f32.o
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_mean_f32.o
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_min_f32.o
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_power_f32.o
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_rms_f32.o
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_std_f32.o
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_var_f32.o
 
 # Heavy defines
 CFLAGS += -D__unix__ -DHV_SIMD_NONE
@@ -150,6 +160,9 @@ $(BUILD)/patch.map : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
 
 $(BUILD)/%.syx : $(BUILD)/%.bin
 	$(FIRMWARESENDER) -q -in $< -save $@
+
+$(BUILD)/%Patch.hpp: PatchSource/%.dsp
+	cd $(BUILD) && faust2owl ../$<
 
 patch: prep $(BUILD)/patch.bin
 

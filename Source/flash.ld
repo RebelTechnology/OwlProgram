@@ -18,9 +18,10 @@ MEMORY
   EEPROM (rw)      : ORIGIN = 0x08004000, LENGTH = 16K    /* Sector 1 */
   FIRMWARE (rx)    : ORIGIN = 0x08008000, LENGTH = 224K   /* Sector 2 */
   PATCHFLASH (rx)  : ORIGIN = 0x08040000, LENGTH = 128K   /* Sector 6 */ /* total Flash memory is 1Mb */
-  CCMRAM (rwx)     : ORIGIN = 0x10000000, LENGTH = 64K    /* total CCM is 64kb */
+  CCMRAM (rw)      : ORIGIN = 0x10000000, LENGTH = 64K    /* total CCM is 64kb */
   LOADERRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 32K    /* 32k for the main firmware */
   PATCHRAM (rwx)   : ORIGIN = 0x20008000, LENGTH = 80K    /* total RAM is 112kb */
+  NVRAM (rw)       : ORIGIN = 0x40024000, LENGTH = 8K
   BANK1_SRAM1 (rx) : ORIGIN = 0x60000000, LENGTH = 0K
   BANK1_SRAM2 (rx) : ORIGIN = 0x64000000, LENGTH = 0K
   BANK1_SRAM3 (rx) : ORIGIN = 0x68000000, LENGTH = 1M
@@ -39,13 +40,21 @@ SECTIONS
     . = ALIGN(8);
   } >PATCHRAM /* AT>PATCHFLASH */
 
+  .pv (NOLOAD) :
+  {
+    . = ALIGN(8);
+    _programvector = ABSOLUTE(.);
+      *(.pv)
+    . = ALIGN(8);
+  } >NVRAM
+
   /* The program code and other data goes into FLASH */
   .text :
   {
     . = ALIGN(8);
     _text_start = .;
-*(.text.Reset_Handler)
-*(.text.startup)
+    *(.text.Reset_Handler)
+    *(.text.startup)
     *(.main*)
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
