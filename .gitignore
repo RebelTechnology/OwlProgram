@@ -26,7 +26,3 @@
 *.exe
 *.out
 *.app
-
-Source/solopatch.cpp
-Source/solopatch.h
-Source/progname.s

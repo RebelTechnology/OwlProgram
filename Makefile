@@ -92,8 +92,8 @@ CFLAGS += -D__unix__ -DHV_SIMD_NONE
 PATCHSOURCE = $(TEMPLATEROOT)/PatchSource
 LIBSOURCE = $(TEMPLATEROOT)/LibSource
 CFLAGS += -ILibSource
+CFLAGS += -IPatchSource
 CFLAGS += -I$(BUILD)
-CFLAGS += -ILibraries/OwlPatches
 PATCH_C_SRC = $(wildcard $(PATCHSOURCE)/*.c) 
 PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
 PATCH_OBJS += $(addprefix Build/, $(notdir $(PATCH_C_SRC:.c=.o)))
