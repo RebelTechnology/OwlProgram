@@ -1,4 +1,4 @@
-TEMPLATEROOT = .
+BUILDROOT = .
 
 ifndef CONFIG
   CONFIG=Release
@@ -13,12 +13,13 @@ ifeq ($(CONFIG),Release)
 CFLAGS   = -O2
 endif
 
-PATCHNAME ?= "Template"
-PATCHCLASS ?= $(PATCHNAME)Patch
-PATCHFILE ?= $(PATCHNAME)Patch.hpp
-SLOT ?= 0
-PATCHIN ?= 2
-PATCHOUT ?= 2
+PATCHNAME   ?= "Template"
+PATCHCLASS  ?= $(PATCHNAME)Patch
+PATCHFILE   ?= $(PATCHNAME)Patch.hpp
+PATCHIN     ?= 2
+PATCHOUT    ?= 2
+SLOT        ?= 0
+OWLDEVICE   ?= "OWL-MIDI"
 
 CFLAGS += -DEXTERNAL_SRAM
 CFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
@@ -89,8 +90,8 @@ OBJS += $(DSPLIB)/BasicMathFunctions/arm_scale_f32.o
 # Heavy defines
 CFLAGS += -D__unix__ -DHV_SIMD_NONE
 
-PATCHSOURCE = $(TEMPLATEROOT)/PatchSource
-LIBSOURCE = $(TEMPLATEROOT)/LibSource
+PATCHSOURCE = $(BUILDROOT)/PatchSource
+LIBSOURCE = $(BUILDROOT)/LibSource
 CFLAGS += -ILibSource
 CFLAGS += -IPatchSource
 CFLAGS += -I$(BUILD)
@@ -108,7 +109,7 @@ vpath %.s $(PATCHSOURCE)
 all: patch
 
 # include common make file
-include $(TEMPLATEROOT)/common.mk
+include $(BUILDROOT)/common.mk
 
 .PHONY: prep clean realclean run store online
 
@@ -136,10 +137,10 @@ patch: prep $(BUILD)/patch.bin
 sysex: prep $(BUILD)/patch.syx
 
 run: prep $(BUILD)/patch.bin
-	$(FIRMWARESENDER) -in $(BUILD)/patch.bin -out "OWL FS" -run
+	$(FIRMWARESENDER) -in $(BUILD)/patch.bin -out $(OWLDEVICE) -run
 
 store: prep $(BUILD)/patch.bin
-	$(FIRMWARESENDER) -in $(BUILD)/patch.bin -out "OWL FS" -store $(SLOT)
+	$(FIRMWARESENDER) -in $(BUILD)/patch.bin -out $(OWLDEVICE) -store $(SLOT)
 
 online:
 	echo "$(ONLINE_INCLUDES)" > $(BUILD)/patch.h
