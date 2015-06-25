@@ -31,8 +31,18 @@ public:
   float getPower();
   float getStandardDeviation();
   float getVariance();
+  void negate();
   void scale(float factor);
+  void add(FloatArray other);
+  void subtract(FloatArray other);
+  void multiply(FloatArray other);
+  void convolve(FloatArray other, FloatArray destination);
+  void convolve(FloatArray other, FloatArray destination, int offset, int samples);
+  void correlation(FloatArray other, FloatArray destination);
+  void setAll(float value);
   FloatArray subarray(int offset, int length);
+  void copyTo(FloatArray other);
+  void copyFrom(FloatArray other);
   float& operator [](const int index){
     return data[index];
   }
@@ -43,6 +53,7 @@ public:
     return data;
   }
   static FloatArray create(int size);
+  static void destroy(FloatArray array);
 };
 
 #endif // __FloatArray_h__
