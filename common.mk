@@ -2,12 +2,12 @@
 BUILD=$(TEMPLATEROOT)/Build
 
 # Code Paths
-DSPLIB=Libraries/STM32Cube_FW_F4_V1.5.0/Drivers/CMSIS/DSP_Lib/Source
+DSPLIB=Libraries/CMSIS/DSP_Lib/Source
 
 # Tool path
 TOOLROOT=Tools/gcc-arm-none-eabi-4_9-2015q1/bin
 
-CORE=Libraries/STM32Cube_FW_F4_V1.5.0/Drivers/CMSIS/Include/
+CORE=Libraries/CMSIS/Include/
 
 # Tools
 CC=$(TOOLROOT)/arm-none-eabi-gcc
