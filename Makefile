@@ -13,8 +13,12 @@ ifeq ($(CONFIG),Release)
 CFLAGS   = -O2
 endif
 
-PATCHNAME ?= "OWL Patch"
+PATCHNAME ?= "Test"
+PATCHCLASS ?= $(PATCHNAME)Patch
+PATCHFILE ?= $(PATCHNAME)Patch.hpp
 SLOT ?= 0
+PATCHIN ?= 2
+PATCHOUT ?= 2
 
 CFLAGS += -DEXTERNAL_SRAM
 CFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
@@ -40,7 +44,7 @@ LDFLAGS += -flto
 
 LDLIBS   = -lm
 LDSCRIPT = Source/flash.ld
-FIRMWARESENDER = Tools/FirmwareSender -s 240
+FIRMWARESENDER = Tools/FirmwareSender
 
 C_SRC   = basicmaths.c
 CPP_SRC = main.cpp operators.cpp message.cpp StompBox.cpp PatchProcessor.cpp 
@@ -107,22 +111,16 @@ vpath %.s $(PATCHSOURCE)
 
 all: patch
 
-.PHONY: prep clean upload store
+.PHONY: prep clean run store online
 
-$(BUILD)/progname.s:
-	echo '.string "'$(PATCHNAME)'"' > $@
-
-$(BUILD)/patch.h:
-	echo '#include "'$(PATCHNAME)'Patch.hpp"' > $@
-
-$(BUILD)/patch.cpp:
-	echo 'REGISTER_PATCH('$(PATCHNAME)'Patch, "'$(PATCHNAME)'", 2, 2);' > $@
-
-prep: $(BUILD)/patch.h $(BUILD)/patch.cpp $(BUILD)/progname.s
-	echo Building patch $(PATCHNAME)
+prep:
+	@echo Building patch $(PATCHNAME)
+	echo '.string "'$(PATCHNAME)'"' > $(BUILD)/progname.s
+	echo "#include \"$(PATCHFILE)\"" > $(BUILD)/patch.h
+	echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $(BUILD)/patch.cpp
 
 # Build executable 
-$(BUILD)/patch.elf : prep $(PATCH_OBJS) $(OBJS) $(LDSCRIPT) 
+$(BUILD)/patch.elf : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT) 
 	$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
 
 $(BUILD)/patch.as : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
@@ -134,12 +132,19 @@ $(BUILD)/patch.map : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
 $(BUILD)/%.syx : $(BUILD)/%.bin
 	$(FIRMWARESENDER) -q -in $< -save $@
 
-patch: $(BUILD)/patch.bin
+patch: prep $(BUILD)/patch.bin
 
-sysex: $(BUILD)/%.syx
+sysex: prep $(BUILD)/patch.syx
 
-upload: $(BUILD)/patch.bin
-	$(FIRMWARESENDER) -in  $< -out "OWL FS"
+run: prep $(BUILD)/patch.bin
+	$(FIRMWARESENDER) -in  $< -out "OWL FS" -run
 
-store: $(BUILD)/patch.bin
+store: prep $(BUILD)/patch.bin
 	$(FIRMWARESENDER) -in  $< -out "OWL FS" -store $(SLOT)
+
+online:
+	echo "$(ONLINE_INCLUDES)" > $(BUILD)/patch.h
+	echo "$(ONLINE_REGISTER)" > $(BUILD)/patch.cpp
+	echo '.string "OnlineCompiler"' > $(BUILD)/progname.s
+	make $(BUILD)/patch.syx
+	cp $(BUILD)/patch.syx $(BUILD)/online.syx

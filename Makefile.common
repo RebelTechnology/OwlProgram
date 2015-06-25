@@ -61,7 +61,7 @@ $(BUILD)/%.s: %.cpp
 
 $(BUILD)/%.bin: $(BUILD)/%.elf
 	$(OBJCOPY) -O binary $< $@
-	@echo Successfully built OWL firmware $@
+	@echo Successfully built OWL binary $@
 
 $(BUILD)/%.s: $(BUILD)/%.elf
 	$(OBJDUMP) -S $< > $@
