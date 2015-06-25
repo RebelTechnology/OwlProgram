@@ -13,7 +13,7 @@ ifeq ($(CONFIG),Release)
 CFLAGS   = -O2
 endif
 
-PATCHNAME ?= "Test"
+PATCHNAME ?= "Template"
 PATCHCLASS ?= $(PATCHNAME)Patch
 PATCHFILE ?= $(PATCHNAME)Patch.hpp
 SLOT ?= 0
