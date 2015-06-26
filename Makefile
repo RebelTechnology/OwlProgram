@@ -120,10 +120,12 @@ OBJS += $(DSPLIB)/StatisticsFunctions/arm_var_f32.o
 # Heavy defines
 CFLAGS += -D__unix__ -DHV_SIMD_NONE
 
-PATCHSOURCE = $(BUILDROOT)/PatchSource
 LIBSOURCE = $(BUILDROOT)/LibSource
-CFLAGS += -ILibSource
-CFLAGS += -IPatchSource
+PATCHSOURCE = $(BUILDROOT)/PatchSource
+TESTPATCHES = $(BUILDROOT)/TestPatches
+CFLAGS += -I$(LIBSOURCE)
+CFLAGS += -I$(PATCHSOURCE)
+CFLAGS += -I$(TESTPATCHES)
 CFLAGS += -I$(BUILD)
 PATCH_C_SRC = $(wildcard $(PATCHSOURCE)/*.c) 
 PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
