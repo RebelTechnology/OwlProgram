@@ -1,9 +1,5 @@
 #include <inttypes.h>
 
-#define FIRMWARE_VERSION             "005-pre"
-#define HARDWARE_VERSION             "OWL Rev04"
-
-#define DEBUG_AUDIO
 #define DEBUG_MEM
 /* #define DEBUG_DWT */
 /* #define STARTUP_CODE */

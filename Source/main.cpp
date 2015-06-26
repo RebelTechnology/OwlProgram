@@ -2,6 +2,7 @@
 #include <inttypes.h>
 #include "ProgramVector.h"
 #include "device.h"
+#include "main.h"
 
 #ifdef DEBUG_MEM
 #include <malloc.h>
@@ -16,17 +17,9 @@ extern char _edata[];
 extern "C" void __libc_init_array();
 #endif /* STARTUP_CODE */
 
-extern void setup();
-extern void processBlock();
-// ProgramVector* getProgramVector() { return ((ProgramVector*)((uint32_t)0x40024000)); }
-
-// extern "C" {
 ProgramVector programVector __attribute__ ((section (".pv")));
-//   const void* ProgramVectorPointer = &pv;
-// }
 ProgramVector* getProgramVector() { return &programVector; }
 
-#define BANK1_SRAM3 0x68000000
 int main(void){
 #ifdef STARTUP_CODE
   memcpy(_sidata, _sdata, _sdata-_edata); // Copy the data segment initializers
@@ -40,11 +33,6 @@ int main(void){
   volatile unsigned int *SCB_DEMCR = (volatile unsigned int *)0xE000EDFC; //address of the register
   *SCB_DEMCR = *SCB_DEMCR | 0x01000000;
   *DWT_CONTROL = *DWT_CONTROL | 1 ; // enable the counter
-  // if(!(CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk)) {
-  //   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-  //   DWT->CYCCNT = 0;
-  //   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-  // }
 #endif /* DEBUG_DWT */
 
   if(getProgramVector()->checksum != sizeof(ProgramVector)){

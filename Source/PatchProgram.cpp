@@ -9,6 +9,7 @@
 #include "Window.hpp"
 #include "BiquadFilter.hpp"
 #include "patch.h"
+#include "main.h"
 
 PatchProcessor processor;
 
