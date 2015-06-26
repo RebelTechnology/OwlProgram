@@ -1,20 +1,30 @@
 <!DOCTYPE html>
 <html>
-    <head>
-      <title>OpenWareLaboratory</title>
-      <meta charset="UTF-8">
-      <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
-      <!-- <link href="css/custom.css" rel="stylesheet"> -->
-    </head>
+  <head>
+    <title>OpenWareLaboratory</title>
+    <meta charset="UTF-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <!-- <link href="css/custom.css" rel="stylesheet"> -->
+  </head>
 
-    <body>
+  <body>
     
     <div class="center">
-      <h1>OWL Patch<h1>
-	  <div>
-	  Play <input type="button" onclick="patch.play(); return false;"/>
-	  Pause <input type="button" onclick="patch.pause(); return false;"/>
-	  </div>
+      <h1>OWL Patch</h1>
+      <div>
+	Play <input type="button" onclick="patch.play(); return false;"/>
+	Pause <input type="button" onclick="patch.pause(); return false;"/>
+      </div>
+      <div id="patchname"></div>
+      <div id="p1"></div>
+      <input type="range" min="0" max="1" step="0.001" onchange="patch.update(0, this.value)"/>
+      <div id="p2"></div>
+      <input type="range" min="0" max="1" step="0.001" onchange="patch.update(1, this.value)"/>
+      <div id="p3"></div>
+      <input type="range" min="0" max="1" step="0.001" onchange="patch.update(2, this.value)"/>
+      <div id="p4"></div>
+      <input type="range" min="0" max="1" step="0.001" onchange="patch.update(3, this.value)"/>
+    </div>
     </div>
 
     <script src="../Build/patch.js"></script>
@@ -26,9 +36,14 @@
       patch.update(2, 0.5);
       patch.update(3, 0.5);
       patch.update(4, 0.5);
+      document.getElementById("patchname").innerHTML = "<h2>"+patch.getPatchName()+"</h2>";
+      document.getElementById("p1").innerHTML = "<h3>"+patch.getParameterName(0)+"</h3>";
+      document.getElementById("p2").innerHTML = "<h3>"+patch.getParameterName(1)+"</h3>";
+      document.getElementById("p3").innerHTML = "<h3>"+patch.getParameterName(2)+"</h3>";
+      document.getElementById("p4").innerHTML = "<h3>"+patch.getParameterName(3)+"</h3>";
       <!-- patch.update("Volume", 0.1); -->
       <!-- patch.play(); -->
     </script>
-    </body>
+  </body>
 
 </html>

@@ -100,8 +100,8 @@ void WEB_processBlock(float** inputs, float** outputs){
   PatchProcessor* processor = getInitialisingPatchProcessor();
   processor->setParameterValues(getProgramVector()->parameters);
   processor->patch->processAudio(buffer);
-  // memcpy(outputs[0], inputs[0], blocksize*sizeof(float));
-  // memcpy(outputs[1], inputs[1], blocksize*sizeof(float));
+  memcpy(outputs[0], inputs[0], blocksize*sizeof(float));
+  memcpy(outputs[1], inputs[1], blocksize*sizeof(float));
 }
 
 char* WEB_getMessage(){

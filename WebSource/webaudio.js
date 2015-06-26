@@ -63,7 +63,6 @@ owl.dsp = function () {
             var dspOutput = HEAPF32.subarray(dspOutChans[i] >> 2, (dspOutChans[i] + that.vectorsize * that.ptrsize) >> 2);
 
             for (j = 0; j < output.length; j++) {
-		// output[j] = dspInput[j];
 		output[j] = dspOutput[j];
             }
 	}
@@ -88,6 +87,14 @@ owl.dsp = function () {
     };
 
     // Bind to Web Audio
+
+    that.getParameterName = function(pid){
+	return WEB_getParameterName(pid);
+    }
+
+    that.getPatchName = function(){
+	return WEB_getPatchName();
+    }
 
     that.play = function () {
 	that.scriptProcessor.connect(owl.context.destination);
