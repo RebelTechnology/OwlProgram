@@ -21,6 +21,7 @@ PATCHOUT    ?= 2
 SLOT        ?= 0
 OWLDEVICE   ?= "OWL-MIDI"
 
+CFLAGS += -DARM_CORTEX
 CFLAGS += -DEXTERNAL_SRAM
 CFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
 CFLAGS += -mtune=cortex-m4
@@ -28,9 +29,9 @@ CFLAGS += -fpic
 CFLAGS += -fpie
 CFLAGS += -fdata-sections 
 CFLAGS += -ffunction-sections
-# CFLAGS +=  -munaligned-access
+# CFLAGS += -munaligned-access
 CFLAGS +=  -mno-unaligned-access
-# CFLAGS += –mlong-calls
+# CFLAGS += -mlong-calls
 
 # CFLAGS += -mpic-data-is-text-relative
 CFLAGS += -fno-omit-frame-pointer
@@ -60,6 +61,7 @@ OBJS += $(BUILD)/libnosys_gnu.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
 OBJS += $(DSPLIB)/CommonTables/arm_common_tables.o
+OBJS += $(DSPLIB)/CommonTables/arm_const_structs.o
 
 OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_conj_f32.o
 OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_dot_prod_f32.o
@@ -73,7 +75,6 @@ OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_bitreversal2.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_init_f32.o
-OBJS += $(DSPLIB)/CommonTables/arm_const_structs.o
 
 OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df1_init_f32.o
 OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df1_f32.o

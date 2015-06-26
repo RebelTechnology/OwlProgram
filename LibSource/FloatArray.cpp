@@ -3,7 +3,19 @@
 #include "message.h"
 
 void FloatArray::getMin(float* value, long unsigned int* index){
+#ifdef ARM_CORTEX  
   arm_min_f32((float *)data, size, value, index);
+#else
+  *value=data[0];
+  *index=0;
+  for(int n=1; n<size; n++){
+    float currentValue=data[n];
+    if(currentValue<*value){
+      *value=currentValue;
+      *index=n;
+    }
+  }
+#endif
 }
 
 float FloatArray::getMinValue(){
@@ -21,7 +33,19 @@ int FloatArray::getMinIndex(){
 }
 
 void FloatArray::getMax(float* value, long unsigned int* index){
+#ifdef ARM_CORTEX  
   arm_max_f32((float *)data, size, value, index);
+#else
+  *value=data[0];
+  *index=0;
+  for(int n=1; n<size; n++){
+    float currentValue=data[n];
+    if(currentValue>*value){
+      *value=currentValue;
+      *index=n;
+    }
+  }
+#endif
 }
 
 float FloatArray::getMaxValue(){
@@ -39,56 +63,114 @@ int FloatArray::getMaxIndex(){
 }
 
 void FloatArray::rectify(FloatArray& destination){ //this is actually "copy data with rectifify"
-  ASSERT(destination.size >= size, "Destination array too small");
+  int minSize= min(size,destination.getSize()); //TODO: shall we take this out and allow it to segfault?
+#ifdef ARM_CORTEX  
   arm_abs_f32( (float*)data, (float*)destination, size);
+#else
+  for(int n=0; n<minSize; n++){
+    destination[n]=abs(data[n]);
+  }
+#endif  
 }
 
-void FloatArray::rectify(){//in place //TODO: rewrite this so that it calls the overloaded method
+void FloatArray::rectify(){//in place
   rectify(*this);
 }
 
 void FloatArray::reverse(FloatArray& destination){ //this is actually "copy data with reverse"
-  ASSERT(destination.size >= size, "Destination array too small");
-  for(int n=0; n<size; n++)
+  if(destination==*this){ //make sure it is not called "in-place"
+    reverse();
+    return;
+  }
+  for(int n=0; n<size; n++){
     destination[n]=data[size-n-1];
+  }
 }
 
-void FloatArray::reverse(){//in place //TODO: rewrite this so that it calls the overloaded method
-  reverse(*this);
+void FloatArray::reverse(){//in place
+  for(int n=0; n<size/2; n++){
+    float temp=data[n];
+    data[n]=data[size-n-1];
+    data[size-n-1]=temp;
+  }
 }
 
 float FloatArray::getRms(){
   float result;
+#ifdef ARM_CORTEX  
   arm_rms_f32 ((float *)data, size, &result);
+#else
+  result=0;
+  float *pSrc=(float *)data;
+  for(int n=0; n<size; n++){
+    result+=pSrc[n]*pSrc[n];
+  }
+  result=sqrtf(result/size);
+#endif
   return result;
 }
 
 float FloatArray::getMean(){
   float result;
+#ifdef ARM_CORTEX  
   arm_mean_f32 ((float *)data, size, &result);
+#else
+  result=0;
+  for(int n=0; n<size; n++){
+    result+=data[n];
+  }
+  result=result/size;
+#endif
   return result;
 }
 
 float FloatArray::getPower(){
   float result;
+#ifdef ARM_CORTEX  
   arm_power_f32 ((float *)data, size, &result);
+#else
+  result=0;
+  float *pSrc=(float *)data;
+  for(int n=0; n<size; n++){
+    result+=pSrc[n]*pSrc[n];
+  }
+#endif
   return result;
 }
 
 float FloatArray::getStandardDeviation(){
   float result;
+#ifdef ARM_CORTEX  
   arm_std_f32 ((float *)data, size, &result);
+#else
+  result=sqrtf(getVariance());
+#endif
   return result;
 }
 
 float FloatArray::getVariance(){
   float result;
-  arm_var_f32 ((float *)data, size, &result);
+#ifdef ARM_CORTEX  
+  arm_var_f32((float *)data, size, &result);
+#else
+  float sumOfSquares=getPower();
+  float sum=0;
+  for(int n=0; n<size; n++){
+    sum+=data[n];
+  }
+  result=(sumOfSquares - sum*sum/size) / (size - 1);
+#endif
   return result;
 }
 
 void FloatArray::scale(float factor){
+#ifdef ARM_CORTEX  
   arm_scale_f32 ( (float*)data, factor, (float*)data, size);
+#else
+  for(int n=0; n<size; n++){
+    data[n]*=factor;
+  }
+#endif
 }
 
 FloatArray FloatArray::create(int size){
@@ -102,19 +184,16 @@ void FloatArray::destroy(FloatArray array){
 void FloatArray::copyTo(FloatArray other){
   ASSERT(other.size >= size, "Destination array too small");
   arm_copy_f32(data, other.data, size);
-  // memcpy(other.data, data, size);
+  // memcpy(other.data, data, size*sizeof(float));
 }
 
 void FloatArray::copyFrom(FloatArray other){
-  ASSERT(other.size >= size, "Source array too small");
-  arm_copy_f32(other.data, data, size);
-  // memcpy(data, other.data, size);
+  ASSERT(size >= other.size, "Destination array too small");
+  arm_copy_f32(other.data, data, other.size);
 }
 
 void FloatArray::setAll(float value){
   arm_fill_f32(value, data, size);
-  // for(int i=0; i<size; i++)
-  //   data[i] = value;
 }
 
 void FloatArray::add(FloatArray other){
@@ -154,7 +233,7 @@ void FloatArray::convolve(FloatArray other, FloatArray destination, int offset, 
 }
 
 /*
- * Length 2 * max(srcALen, srcBLen) - 1.
+ * @destination must have a minimum size of 2*max(srcALen, srcBLen)-1.
  */
 void FloatArray::correlate(FloatArray other, FloatArray destination){
   ASSERT(destination.size >= 2 * max(size, other.size)-1, "Destination array too small");
