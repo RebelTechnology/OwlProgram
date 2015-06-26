@@ -13,6 +13,7 @@ ifeq ($(CONFIG),Release)
 CFLAGS   = -O2
 endif
 
+#CFLAGS += -DARM_CORTEX
 CFLAGS += -DEXTERNAL_SRAM
 CFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
 CFLAGS += -mtune=cortex-m4

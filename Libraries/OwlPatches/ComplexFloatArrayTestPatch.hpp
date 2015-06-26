@@ -18,8 +18,8 @@ private:
         debugMessage(message, n);
       else
         debugMessage(message);
-      ASSERT(condition, message); //this actually the program to exit and the LED to turn red
-      //but if you comment out the line above you can get nice acoustic feedback instead
+      ASSERT(condition, message); //this actually causes the program to exit and the LED to turn red
+      //but if you comment out the line above you can get nice acoustic feedback instead (sinewave for success, noise for error)
       failed++;
     } else {
       passed++;

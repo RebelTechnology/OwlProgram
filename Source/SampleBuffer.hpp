@@ -5,8 +5,9 @@
 #include <string.h>
 #include "StompBox.h"
 #include "device.h"
+#ifdef ARM_CORTEX
 #include "arm_math.h"
-
+#endif //ARM_CORTEX
 class SampleBuffer : public AudioBuffer {
 protected:
   // FloatArray left;//[AUDIO_MAX_BLOCK_SIZE];
