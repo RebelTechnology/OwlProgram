@@ -6,13 +6,22 @@
 #include "main.h"
 #include "PatchProcessor.h"
 
-ProgramVector programVector;
+/*
+ * http://thealphanerd.io/blog/from-faust-to-webaudio/
+ */
+
+static ProgramVector programVector;
 ProgramVector* getProgramVector() { return &programVector; }
+extern PatchProcessor* getInitialisingPatchProcessor();
 
 extern "C"{
+  /* ASM exported functions */
   void WEB_setup(long fs, int bs);
-  void WEB_setParameter(int pid, float value);
   void WEB_processBlock(float** inputs, float** outputs);
+  void WEB_setParameter(int pid, float value);
+  char* WEB_getMessage();
+  char* WEB_getPatchName();
+  char* WEB_getParameterName(int pid);
 }
 
 extern "C"{
@@ -23,9 +32,11 @@ extern "C"{
   int serviceCall(int service, void** params, int len);
 }
 
-#define NOF_PARAMETERS 32
-uint16_t parameters[NOF_PARAMETERS];
+#define NOF_PARAMETERS 16
 static int blocksize;
+static char* patchName = NULL;
+static uint16_t parameters[NOF_PARAMETERS];
+static char* parameterNames[NOF_PARAMETERS];
 
 void WEB_setParameter(int pid, float value){
   if(pid < NOF_PARAMETERS)
@@ -33,6 +44,10 @@ void WEB_setParameter(int pid, float value){
 }
 
 void WEB_setup(long fs, int bs){
+  for(int i=0; i<NOF_PARAMETERS; ++i){
+    parameters[i] = 0;
+    parameterNames[i] = NULL;
+  }
   blocksize = bs;
   // set up programvector with sample rate, blocksize, callbacks et c
   ProgramVector* pv = getProgramVector();
@@ -79,8 +94,6 @@ public:
   }
 };
 
-extern PatchProcessor* getInitialisingPatchProcessor();
-
 void WEB_processBlock(float** inputs, float** outputs){
   MemoryBuffer buffer(inputs, 2, blocksize);
   PatchProcessor* processor = getInitialisingPatchProcessor();
@@ -90,9 +103,29 @@ void WEB_processBlock(float** inputs, float** outputs){
   memcpy(outputs[1], inputs[1], blocksize*sizeof(float));
 }
 
-void registerPatch(const char* name, uint8_t inputChannels, uint8_t outputChannels){}
+char* WEB_getMessage(){
+  return getProgramVector()->message;
+}
 
-void registerPatchParameter(uint8_t id, const char* name){}
+char* WEB_getPatchName(){
+  return patchName;
+}
+
+char* WEB_getParameterName(int pid){
+  if(pid<NOF_PARAMETERS)
+    return parameterNames[pid];
+  else
+    return NULL;
+}
+
+void registerPatch(const char* name, uint8_t inputChannels, uint8_t outputChannels){
+  patchName = (char*)name;
+}
+
+void registerPatchParameter(uint8_t pid, const char* name){
+  if(pid<NOF_PARAMETERS)
+    parameterNames[pid] = (char*)name;
+}
 
 void programReady(){}
 
