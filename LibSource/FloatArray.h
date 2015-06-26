@@ -15,8 +15,11 @@ public:
   int getSize(){
     return size;
   }
-  void getMin(float* value, long unsigned int* index);
-  void getMax(float* value, long unsigned int* index);
+  void clear(){
+    setAll(0);
+  }
+  void getMin(float* value, int* index);
+  void getMax(float* value, int* index);
   float getMinValue();
   float getMaxValue();
   int getMinIndex();
@@ -41,8 +44,12 @@ public:
   void correlate(FloatArray other, FloatArray destination);
   void setAll(float value);
   FloatArray subarray(int offset, int length);
-  void copyTo(FloatArray other);
-  void copyFrom(FloatArray other);
+  void copyTo(FloatArray destination);
+  void copyFrom(FloatArray source);
+  void copyTo(float* destination, int length);
+  void copyFrom(float* source, int length);
+  void insert(FloatArray source, int offset, int length);
+  void move(int fromIndex, int toIndex, int length);
   float& operator [](const int index){
     return data[index];
   }

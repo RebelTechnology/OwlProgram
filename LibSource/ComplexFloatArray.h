@@ -11,12 +11,12 @@ struct ComplexFloat {
 class ComplexFloatArray {
 private:
   ComplexFloat* data;
-  int sz;
+  int size;
 public:
   ComplexFloatArray() :
-    data(NULL), sz(0) {}
+    data(NULL), size(0) {}
   ComplexFloatArray(ComplexFloat* d, int s) :
-    data(d), sz(s) {}
+    data(d), size(s) {}
   float re(const int i){
     return data[i].re;
   }
@@ -32,15 +32,16 @@ public:
   void complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result);
   void complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result);
   int getSize(){
-    return sz;
+    return size;
   }
   float getMaxMagnitudeValue();
   int getMaxMagnitudeIndex();
   ComplexFloatArray subarray(int offset, int length);
   void getRealValues(FloatArray& buf);
   void getImaginaryValues(FloatArray& buf);
+  void scale(float factor);
   void setSize(int aSize){
-    sz = aSize;
+    size = aSize;
   }
   void setData(ComplexFloat* aData){
     data = aData;

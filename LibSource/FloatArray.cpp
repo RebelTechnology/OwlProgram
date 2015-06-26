@@ -2,9 +2,11 @@
 #include "basicmaths.h"
 #include "message.h"
 
-void FloatArray::getMin(float* value, long unsigned int* index){
-#ifdef ARM_CORTEX  
-  arm_min_f32((float *)data, size, value, index);
+void FloatArray::getMin(float* value, int* index){
+#ifdef ARM_CORTEX
+  unsigned long idx;
+  arm_min_f32(data, size, value, &idx);
+  *index = (int)idx;
 #else
   *value=data[0];
   *index=0;
@@ -20,21 +22,23 @@ void FloatArray::getMin(float* value, long unsigned int* index){
 
 float FloatArray::getMinValue(){
   float value;
-  long unsigned int index;
+  int index;
   getMin(&value, &index);
   return value;
 }
 
 int FloatArray::getMinIndex(){
   float value;
-  long unsigned int index;
+  int index;
   getMin(&value, &index);
   return index;
 }
 
-void FloatArray::getMax(float* value, long unsigned int* index){
+void FloatArray::getMax(float* value, int* index){
 #ifdef ARM_CORTEX  
-  arm_max_f32((float *)data, size, value, index);
+  unsigned long idx;
+  arm_max_f32(data, size, value, &idx);
+  *index = (int)idx;
 #else
   *value=data[0];
   *index=0;
@@ -50,14 +54,14 @@ void FloatArray::getMax(float* value, long unsigned int* index){
 
 float FloatArray::getMaxValue(){
   float value;
-  long unsigned int index;
+  int index;
   getMax(&value, &index);
   return value;
 }
 
 int FloatArray::getMaxIndex(){
   float value;
-  long unsigned int index;
+  int index;
   getMax(&value, &index);
   return index;
 }
@@ -98,12 +102,12 @@ void FloatArray::reverse(){//in place
 float FloatArray::getRms(){
   float result;
 #ifdef ARM_CORTEX  
-  arm_rms_f32 ((float *)data, size, &result);
+  arm_rms_f32 (data, size, &result);
 #else
   result=0;
-  float *pSrc=(float *)data;
+  float *pSrc= data;
   for(int n=0; n<size; n++){
-    result+=pSrc[n]*pSrc[n];
+    result += pSrc[n]*pSrc[n];
   }
   result=sqrtf(result/size);
 #endif
@@ -113,7 +117,7 @@ float FloatArray::getRms(){
 float FloatArray::getMean(){
   float result;
 #ifdef ARM_CORTEX  
-  arm_mean_f32 ((float *)data, size, &result);
+  arm_mean_f32 (data, size, &result);
 #else
   result=0;
   for(int n=0; n<size; n++){
@@ -127,12 +131,12 @@ float FloatArray::getMean(){
 float FloatArray::getPower(){
   float result;
 #ifdef ARM_CORTEX  
-  arm_power_f32 ((float *)data, size, &result);
+  arm_power_f32 (data, size, &result);
 #else
   result=0;
-  float *pSrc=(float *)data;
+  float *pSrc = data;
   for(int n=0; n<size; n++){
-    result+=pSrc[n]*pSrc[n];
+    result += pSrc[n]*pSrc[n];
   }
 #endif
   return result;
@@ -141,7 +145,7 @@ float FloatArray::getPower(){
 float FloatArray::getStandardDeviation(){
   float result;
 #ifdef ARM_CORTEX  
-  arm_std_f32 ((float *)data, size, &result);
+  arm_std_f32 (data, size, &result);
 #else
   result=sqrtf(getVariance());
 #endif
@@ -151,7 +155,7 @@ float FloatArray::getStandardDeviation(){
 float FloatArray::getVariance(){
   float result;
 #ifdef ARM_CORTEX  
-  arm_var_f32((float *)data, size, &result);
+  arm_var_f32(data, size, &result);
 #else
   float sumOfSquares=getPower();
   float sum=0;
@@ -165,31 +169,45 @@ float FloatArray::getVariance(){
 
 void FloatArray::scale(float factor){
 #ifdef ARM_CORTEX  
-  arm_scale_f32 ( (float*)data, factor, (float*)data, size);
+  arm_scale_f32(data, factor, data, size);
 #else
-  for(int n=0; n<size; n++){
+  for(int n=0; n<size; n++)
     data[n]*=factor;
-  }
 #endif
 }
 
-FloatArray FloatArray::create(int size){
-  return FloatArray(new float[size], size);
+FloatArray FloatArray::subarray(int offset, int length){
+  ASSERT(size >= offset+length, "Array too small");
+  return FloatArray(data+offset, length);
 }
 
-void FloatArray::destroy(FloatArray array){
-  delete array.data;
+void FloatArray::copyTo(FloatArray destination){
+  copyTo(destination, min(size, destination.getSize()));
 }
 
-void FloatArray::copyTo(FloatArray other){
-  ASSERT(other.size >= size, "Destination array too small");
-  arm_copy_f32(data, other.data, size);
+void FloatArray::copyFrom(FloatArray source){
+  copyFrom(source, min(size, source.getSize()));
+}
+
+void FloatArray::copyTo(float* other, int length){
+  ASSERT(size >= length, "Array too small");
+  arm_copy_f32(data, other, length);
   // memcpy(other.data, data, size*sizeof(float));
 }
 
-void FloatArray::copyFrom(FloatArray other){
-  ASSERT(size >= other.size, "Destination array too small");
-  arm_copy_f32(other.data, data, other.size);
+void FloatArray::copyFrom(float* other, int length){
+  ASSERT(size >= length, "Array too small");
+  arm_copy_f32(other, data, length);
+}
+
+void FloatArray::insert(FloatArray source, int offset, int samples){
+  ASSERT(size >= offset+samples, "Array too small");
+  arm_copy_f32(source.data, data+offset, samples);  
+}
+
+void FloatArray::move(int fromIndex, int toIndex, int samples){
+  ASSERT(size >= toIndex+samples, "Array too small");
+  memmove(data+toIndex, data+fromIndex, samples*sizeof(float));
 }
 
 void FloatArray::setAll(float value){
@@ -238,4 +256,12 @@ void FloatArray::convolve(FloatArray other, FloatArray destination, int offset, 
 void FloatArray::correlate(FloatArray other, FloatArray destination){
   ASSERT(destination.size >= 2 * max(size, other.size)-1, "Destination array too small");
   arm_correlate_f32(data, size, other.data, other.size, destination);
+}
+
+FloatArray FloatArray::create(int size){
+  return FloatArray(new float[size], size);
+}
+
+void FloatArray::destroy(FloatArray array){
+  delete array.data;
 }
