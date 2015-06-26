@@ -21,9 +21,9 @@ CFLAGS += -fpic
 CFLAGS += -fpie
 CFLAGS += -fdata-sections 
 CFLAGS += -ffunction-sections
-# CFLAGS +=  -munaligned-access
+# CFLAGS += -munaligned-access
 CFLAGS +=  -mno-unaligned-access
-# CFLAGS += –mlong-calls
+# CFLAGS += -mlong-calls
 
 # CFLAGS += -mpic-data-is-text-relative
 CFLAGS += -fno-omit-frame-pointer
@@ -69,12 +69,23 @@ OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
 OBJS += $(DSPLIB)/CommonTables/arm_common_tables.o
 
+OBJS += $(DSPLIB)/BasicMathFunctions/arm_abs_f32.o
+OBJS += $(DSPLIB)/BasicMathFunctions/arm_scale_f32.o
+
 OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_conj_f32.o
 OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_dot_prod_f32.o
 OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mag_f32.o
 OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mag_squared_f32.o
 OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mult_cmplx_f32.o
 OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mult_real_f32.o
+
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_min_f32.o
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_max_f32.o
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_var_f32.o
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_std_f32.o
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_rms_f32.o
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_power_f32.o
+OBJS += $(DSPLIB)/StatisticsFunctions/arm_mean_f32.o
 
 OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
