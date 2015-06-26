@@ -192,6 +192,7 @@ void FloatArray::getMin(float* value, long unsigned int* index){
   arm_min_f32((float *)data, sz, value, index);
 #else
   *value=data[0];
+  *index=0;
   for(int n=1; n<sz; n++){
     float currentValue=data[n];
     if(currentValue<*value){
@@ -218,6 +219,7 @@ void FloatArray::getMax(float* value, long unsigned int* index){
   arm_max_f32((float *)data, sz, value, index);
 #else
   *value=data[0];
+  *index=0;
   for(int n=1; n<sz; n++){
     float currentValue=data[n];
     if(currentValue>*value){
@@ -253,12 +255,20 @@ void FloatArray::rectify(){//in place
   rectify(*this);
 };
 void FloatArray::reverse(FloatArray& destination){ //this is actually "copy data with reverse"
+  if(destination==*this){ //make sure it is not called "in-place"
+    reverse();
+    return;
+  }
   for(int n=0; n<sz; n++){
     destination[n]=data[sz-n-1];
   }
 }
 void FloatArray::reverse(){//in place
-  reverse(*this);
+  for(int n=0; n<sz/2; n++){
+    float temp=data[n];
+    data[n]=data[sz-n-1];
+    data[sz-n-1]=temp;
+  }
 }
 float FloatArray::getRms(){
   float result;
@@ -280,11 +290,10 @@ float FloatArray::getMean(){
   arm_mean_f32 ((float *)data, sz, &result);
 #else
   result=0;
-  float *pSrc=(float *)data;
   for(int n=0; n<sz; n++){
-    result+=pSrc[n];
+    result+=data[n];
   }
-  result=sqrtf(result/sz);
+  result=result/sz;
 #endif
   return result;
 };
@@ -306,6 +315,7 @@ float FloatArray::getStandardDeviation(){
 #ifdef ARM_CORTEX  
   arm_std_f32 ((float *)data, sz, &result);
 #else
+  result=sqrtf(getVariance());
 #endif
   return result;
 };
@@ -315,8 +325,11 @@ float FloatArray::getVariance(){
   arm_var_f32((float *)data, sz, &result);
 #else
   float sumOfSquares=getPower();
-  float sum=getMean();
-  result=sqrtf((sumOfSquares - sum*sum/sz) / (sz - 1));
+  float sum=0;
+  for(int n=0; n<sz; n++){
+    sum+=data[n];
+  }
+  result=(sumOfSquares - sum*sum/sz) / (sz - 1);
 #endif
   return result;
 };
