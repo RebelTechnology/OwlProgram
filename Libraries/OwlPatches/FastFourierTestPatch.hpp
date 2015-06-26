@@ -2,6 +2,7 @@
 #define __FastFourierTestPatch_hpp__
 
 #include "StompBox.h"
+#include "Window.hpp"
 #include "FastFourierTransform.hpp"
 
 class FastFourierTestPatch : public Patch {
@@ -20,12 +21,12 @@ public:
     registerParameter(PARAMETER_A, "Gain");
     transform.init(getBlockSize());
     fftSize=getBlockSize();
-    float *values=createMemoryBuffer(1, fftSize*2)->getSamples(0);
+    float *values = createMemoryBuffer(1, fftSize*2)->getSamples(0);
     ca.setData((ComplexFloat *)values);
     ca.setSize(fftSize);
-    window=createMemoryBuffer(1, fftSize)->getSamples(0);
-    Window::window(Window::kHammingWindow, window, fftSize);
-    iWindow=createMemoryBuffer(1, fftSize)->getSamples(0);
+    window = createMemoryBuffer(1, fftSize)->getSamples(0);
+    Window::window(Window::HammingWindow, window, fftSize);
+    iWindow = createMemoryBuffer(1, fftSize)->getSamples(0);
     for(int n=0; n<fftSize; n++){
       iWindow[n]=1/window[n];
     }
@@ -34,10 +35,6 @@ public:
     float gain = getParameterValue(PARAMETER_A)*2;
     float* buf = buffer.getSamples(0);
     int size = buffer.getSize();
-/*
-  a very expensive pass-through! 
-*/
-
     Window::applyWindow(buf, window, buf, fftSize);
     transform.fft(buf, ca);
     for(int i=0; i<fftSize; i++){

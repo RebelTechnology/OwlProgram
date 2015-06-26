@@ -111,7 +111,8 @@ void ComplexFloatArray::complexDotProduct(ComplexFloatArray& operand2, ComplexFl
   result.re=realResult;
   result.im=imagResult;
 #endif  
-};
+}
+
 void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result){
   int minSize=min(sz,operand2.getSize()); //TODO: shall we take this out and allow it to segfault?
 #ifdef ARM_CORTEX
@@ -125,7 +126,8 @@ void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray& operan
     pDst[(2*n)+1] = pSrcA[(2*n)+0] * pSrcB[(2*n)+1] + pSrcA[(2*n)+1] * pSrcB[(2*n)+0];        
   }        
 #endif  
-};
+}
+
 void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray& buf){
   int minSize= min(sz,buf.getSize()); //TODO: shall we take this out and allow it to segfault?
 #ifdef ARM_CORTEX
@@ -139,6 +141,7 @@ void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray& buf){
 }   
 #endif  
 }
+
 void ComplexFloatArray::complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result){
   int minSize= min(sz,operand2.getSize()); //TODO: shall we take this out and allow it to segfault?
 #ifdef ARM_CORTEX
@@ -152,7 +155,8 @@ void ComplexFloatArray::complexByRealMultiplication(FloatArray& operand2, Comple
       pCmplxDst[(2*n)+1] = pSrcCmplx[(2*n)+1] * pSrcReal[n];        
   }        
 #endif
-};
+}
+
 int ComplexFloatArray::getMaxMagnitudeIndex(){ //this is probably slower than getMagnitudeSquaredValues() and getMaxIndex() on it
   float maxMag=-1;
   int maxInd=-1;
@@ -164,7 +168,8 @@ int ComplexFloatArray::getMaxMagnitudeIndex(){ //this is probably slower than ge
     }
   }
   return maxInd;
-};
+}
+
 float ComplexFloatArray::getMaxMagnitudeValue(){ //this is probably slower than getMagnitudeSquaredValues() and getMaxValue() on it
   float maxMag=-1;
   for(int n=0; n<sz; n++){
@@ -175,17 +180,19 @@ float ComplexFloatArray::getMaxMagnitudeValue(){ //this is probably slower than 
   }
   maxMag=sqrtf(maxMag);
   return maxMag;
-};
+}
+
 void ComplexFloatArray::getRealValues(FloatArray& buf){
   for(int n=0; n<sz; n++){
     buf[n]=data[n].re;
   }
-};
+}
+
 void ComplexFloatArray::getImaginaryValues(FloatArray& buf){
   for(int n=0; n<sz; n++){
     buf[n]=data[n].im;
   }
-};
+}
 
 void FloatArray::getMin(float* value, long unsigned int* index){
 #ifdef ARM_CORTEX  
@@ -201,19 +208,22 @@ void FloatArray::getMin(float* value, long unsigned int* index){
     }
   }
 #endif
-};
+}
+
 float FloatArray::getMinValue(){
   float value;
   long unsigned int index;
   getMin(&value, &index);
   return value;
-};
+}
+
 int FloatArray::getMinIndex(){
   float value;
   long unsigned int index;
   getMin(&value, &index);
   return index;
-};
+}
+
 void FloatArray::getMax(float* value, long unsigned int* index){
 #ifdef ARM_CORTEX  
   arm_max_f32((float *)data, sz, value, index);
@@ -228,19 +238,22 @@ void FloatArray::getMax(float* value, long unsigned int* index){
     }
   }
 #endif
-};
+}
+
 float FloatArray::getMaxValue(){
   float value;
   long unsigned int index;
   getMax(&value, &index);
   return value;
-};
+}
+
 int FloatArray::getMaxIndex(){
   float value;
   long unsigned int index;
   getMax(&value, &index);
   return index;
-};
+}
+
 void FloatArray::rectify(FloatArray& destination){ //this is actually "copy data with rectifify"
   int minSize= min(sz,destination.getSize()); //TODO: shall we take this out and allow it to segfault?
 #ifdef ARM_CORTEX  
@@ -250,10 +263,12 @@ void FloatArray::rectify(FloatArray& destination){ //this is actually "copy data
     destination[n]=abs(data[n]);
   }
 #endif  
-};
+}
+
 void FloatArray::rectify(){//in place
   rectify(*this);
-};
+}
+
 void FloatArray::reverse(FloatArray& destination){ //this is actually "copy data with reverse"
   if(destination==*this){ //make sure it is not called "in-place"
     reverse();
@@ -263,6 +278,7 @@ void FloatArray::reverse(FloatArray& destination){ //this is actually "copy data
     destination[n]=data[sz-n-1];
   }
 }
+
 void FloatArray::reverse(){//in place
   for(int n=0; n<sz/2; n++){
     float temp=data[n];
@@ -270,6 +286,7 @@ void FloatArray::reverse(){//in place
     data[sz-n-1]=temp;
   }
 }
+
 float FloatArray::getRms(){
   float result;
 #ifdef ARM_CORTEX  
@@ -283,7 +300,8 @@ float FloatArray::getRms(){
   result=sqrtf(result/sz);
 #endif
   return result;
-};
+}
+
 float FloatArray::getMean(){
   float result;
 #ifdef ARM_CORTEX  
@@ -296,7 +314,8 @@ float FloatArray::getMean(){
   result=result/sz;
 #endif
   return result;
-};
+}
+
 float FloatArray::getPower(){
   float result;
 #ifdef ARM_CORTEX  
@@ -309,7 +328,8 @@ float FloatArray::getPower(){
   }
 #endif
   return result;
-};
+}
+
 float FloatArray::getStandardDeviation(){
   float result;
 #ifdef ARM_CORTEX  
@@ -318,7 +338,8 @@ float FloatArray::getStandardDeviation(){
   result=sqrtf(getVariance());
 #endif
   return result;
-};
+}
+
 float FloatArray::getVariance(){
   float result;
 #ifdef ARM_CORTEX  
@@ -332,7 +353,8 @@ float FloatArray::getVariance(){
   result=(sumOfSquares - sum*sum/sz) / (sz - 1);
 #endif
   return result;
-};
+}
+
 void FloatArray::scale(float factor){
 #ifdef ARM_CORTEX  
   arm_scale_f32 ( (float*)data, factor, (float*)data, sz);
@@ -343,7 +365,6 @@ void FloatArray::scale(float factor){
 #endif
 }
 
-
 #define DWT_CYCCNT ((volatile unsigned int *)0xE0001004)
 
 float Patch::getElapsedBlockTime(){
@@ -353,4 +374,3 @@ float Patch::getElapsedBlockTime(){
 int Patch::getElapsedCycles(){
   return *DWT_CYCCNT;
 }
-
