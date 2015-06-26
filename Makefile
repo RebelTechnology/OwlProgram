@@ -188,4 +188,4 @@ online:
 	cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
 web: $(PATCH_OBJS) $(OBJS)
-	emcc -ISource -IPatchSource -ILibSource -IBuild -ITestPatches Source/PatchProgram.cpp -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage']" Source/PatchProcessor.cpp Source/web.cpp Source/operators.cpp Source/message.cpp LibSource/StompBox.cpp -o Build/web.js
+	emcc -g -ISource -IPatchSource -ILibSource -IBuild -ITestPatches Source/PatchProgram.cpp -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage']" Source/PatchProcessor.cpp Source/web.cpp Source/operators.cpp Source/message.cpp LibSource/StompBox.cpp -o Build/patch.js

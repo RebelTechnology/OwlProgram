@@ -16,7 +16,7 @@ extern PatchProcessor* getInitialisingPatchProcessor();
 
 extern "C"{
   /* ASM exported functions */
-  void WEB_setup(long fs, int bs);
+  int WEB_setup(long fs, int bs);
   void WEB_processBlock(float** inputs, float** outputs);
   void WEB_setParameter(int pid, float value);
   char* WEB_getMessage();
@@ -43,7 +43,7 @@ void WEB_setParameter(int pid, float value){
     parameters[pid] = value*4096;
 }
 
-void WEB_setup(long fs, int bs){
+int WEB_setup(long fs, int bs){
   for(int i=0; i<NOF_PARAMETERS; ++i){
     parameters[i] = 0;
     parameterNames[i] = NULL;
@@ -70,19 +70,17 @@ void WEB_setup(long fs, int bs){
   pv->serviceCall = serviceCall;
   pv->message = NULL;
   setup();
+  return fs;
 }
 
-class MemoryBuffer : public AudioBuffer {
+class MemBuffer : public AudioBuffer {
 protected:
   float** buffer;
   int channels;
   int size;
 public:
-  MemoryBuffer(float** buf, int ch, int sz): buffer(buf), channels(ch), size(sz) {}
-  virtual ~MemoryBuffer(){}
-  void clear(){
-    // memset(buffer, 0, size*channels*sizeof(float));
-  }
+  MemBuffer(float** buf, int ch, int sz): buffer(buf), channels(ch), size(sz) {}
+  ~MemBuffer(){}
   FloatArray getSamples(int channel){
     return FloatArray(buffer[channel], size);
   }
@@ -92,15 +90,18 @@ public:
   int getSize(){
     return size;
   }
+  void clear(){
+    // memset(buffer, 0, size*channels*sizeof(float));
+  }
 };
 
 void WEB_processBlock(float** inputs, float** outputs){
-  MemoryBuffer buffer(inputs, 2, blocksize);
+  MemBuffer buffer(inputs, 2, blocksize);
   PatchProcessor* processor = getInitialisingPatchProcessor();
   processor->setParameterValues(getProgramVector()->parameters);
   processor->patch->processAudio(buffer);
-  memcpy(outputs[0], inputs[0], blocksize*sizeof(float));
-  memcpy(outputs[1], inputs[1], blocksize*sizeof(float));
+  // memcpy(outputs[0], inputs[0], blocksize*sizeof(float));
+  // memcpy(outputs[1], inputs[1], blocksize*sizeof(float));
 }
 
 char* WEB_getMessage(){
