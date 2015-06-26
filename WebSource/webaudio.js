@@ -16,11 +16,10 @@ var WEB_getParameterName = Module.cwrap('WEB_getParameterName', 'string', 'numbe
 
 owl.dsp = function () {
     var that = {};
-    
     that.model = {
 	playing: false
     };
-    that.vectorsize = 256;      
+    that.vectorsize = 2048;      
     // that.ptr = DSP_constructor(owl.context.sampleRate);
     console.log("setup[fs "+owl.context.sampleRate+"][bs "+that.vectorsize+"]");
     var fs = WEB_setup(owl.context.sampleRate, that.vectorsize);
@@ -28,10 +27,8 @@ owl.dsp = function () {
     console.log("patchname: "+WEB_getPatchName());
     for (i = 0; i < 5; i++)
 	console.log("parameter "+i+": "+WEB_getParameterName(i));
-	
 
     // Bind to C++ Member Functions
-
     that.getNumInputs = function () {
 	return 2; // DSP_getNumInputs(that.ptr);
     };
