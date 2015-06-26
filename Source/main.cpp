@@ -16,8 +16,8 @@ extern char _edata[];
 extern "C" void __libc_init_array();
 #endif /* STARTUP_CODE */
 
-extern void setup();
-extern void processBlock();
+extern "C" void setup();
+extern "C" void processBlock();
 // ProgramVector* getProgramVector() { return ((ProgramVector*)((uint32_t)0x40024000)); }
 
 // extern "C" {
