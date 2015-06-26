@@ -10,8 +10,10 @@
  */
 class BiquadFilter {
 private:
+#ifdef ARM_CORTEX
   // arm_biquad_casd_df1_inst_f32 df1;
   arm_biquad_cascade_df2T_instance_f32 df2;
+#endif /* ARM_CORTEX */
 
   float* coefficients; // stages*5
   float* state; // stages*4 for df1, stages*2 for df2
@@ -27,8 +29,10 @@ private:
    */
 protected:
   void init(){
+#ifdef ARM_CORTEX
     // arm_biquad_cascade_df1_init_f32(&df1, stages, coefficients, state);
     arm_biquad_cascade_df2T_init_f32(&df2, stages, coefficients, state);
+#endif /* ARM_CORTEX */
   }
 public:
   BiquadFilter(float* coefs, float* ste, int sgs) :
@@ -38,14 +42,18 @@ public:
 
   /* perform in-place processing */
   void process(float* buf, int size){
+#ifdef ARM_CORTEX
     // arm_biquad_cascade_df1_f32(&df1, buf, buf, size);
     arm_biquad_cascade_df2T_f32(&df2, buf, buf, size);
+#endif /* ARM_CORTEX */
   }
 
   /* process into output, leaving input intact */
   void process(float* input, float* output, int size){
+#ifdef ARM_CORTEX
     // arm_biquad_cascade_df1_f32(&df1, input, output, size);
     arm_biquad_cascade_df2T_f32(&df2, input, output, size);
+#endif /* ARM_CORTEX */
   }
 
   void process(FloatArray in){
