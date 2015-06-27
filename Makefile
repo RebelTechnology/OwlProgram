@@ -53,9 +53,38 @@ CPP_SRC = main.cpp operators.cpp message.cpp StompBox.cpp PatchProcessor.cpp
 CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp
 CPP_SRC += PatchProgram.cpp
 
-OBJS =  $(C_SRC:%.c=Build/%.o) $(CPP_SRC:%.cpp=Build/%.o)
+LIBSOURCE = $(BUILDROOT)/LibSource
+PATCHSOURCE = $(BUILDROOT)/PatchSource
+TESTPATCHES = $(BUILDROOT)/TestPatches
+CFLAGS += -I$(LIBSOURCE)
+CFLAGS += -I$(PATCHSOURCE)
+CFLAGS += -I$(TESTPATCHES)
+CFLAGS += -I$(BUILD)
+CFLAGS += -IOwlPatches
+PATCH_C_SRC = $(wildcard $(PATCHSOURCE)/*.c) 
+PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
+PATCH_OBJS += $(addprefix Build/, $(notdir $(PATCH_C_SRC:.c=.o)))
+PATCH_OBJS += $(addprefix Build/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
+vpath %.cpp $(LIBSOURCE)
+vpath %.c $(LIBSOURCE)
+vpath %.s $(LIBSOURCE)
+vpath %.cpp $(PATCHSOURCE)
+vpath %.c $(PATCHSOURCE)
+vpath %.s $(PATCHSOURCE)
+
+# Heavy
+CFLAGS += -D__unix__ -DHV_SIMD_NONE
+
+# emscripten
+EMCC       = emcc
+EMCCFLAGS ?= -std=c++11 -fno-rtti -fno-exceptions
+EMCCFLAGS += -IOwlPatches -ISource -IPatchSource -ILibSource -IBuild -ITestPatches
+EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage']"
+EMCC_SRC   = Source/PatchProgram.cpp Source/PatchProcessor.cpp WebSource/web.cpp Source/operators.cpp Source/message.cpp LibSource/StompBox.cpp $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 
 # object files
+OBJS =  $(C_SRC:%.c=Build/%.o) $(CPP_SRC:%.cpp=Build/%.o)
+
 OBJS += $(BUILD)/startup.o
 OBJS += $(BUILD)/libnosys_gnu.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
@@ -74,7 +103,6 @@ OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_bitreversal2.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_f32.o
-# OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_init_f32.o
 
 OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df1_init_f32.o
 OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df1_f32.o
@@ -116,27 +144,6 @@ OBJS += $(DSPLIB)/StatisticsFunctions/arm_power_f32.o
 OBJS += $(DSPLIB)/StatisticsFunctions/arm_rms_f32.o
 OBJS += $(DSPLIB)/StatisticsFunctions/arm_std_f32.o
 OBJS += $(DSPLIB)/StatisticsFunctions/arm_var_f32.o
-
-# Heavy defines
-CFLAGS += -D__unix__ -DHV_SIMD_NONE
-
-LIBSOURCE = $(BUILDROOT)/LibSource
-PATCHSOURCE = $(BUILDROOT)/PatchSource
-TESTPATCHES = $(BUILDROOT)/TestPatches
-CFLAGS += -I$(LIBSOURCE)
-CFLAGS += -I$(PATCHSOURCE)
-CFLAGS += -I$(TESTPATCHES)
-CFLAGS += -I$(BUILD)
-PATCH_C_SRC = $(wildcard $(PATCHSOURCE)/*.c) 
-PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
-PATCH_OBJS += $(addprefix Build/, $(notdir $(PATCH_C_SRC:.c=.o)))
-PATCH_OBJS += $(addprefix Build/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
-vpath %.cpp $(LIBSOURCE)
-vpath %.c $(LIBSOURCE)
-vpath %.s $(LIBSOURCE)
-vpath %.cpp $(PATCHSOURCE)
-vpath %.c $(PATCHSOURCE)
-vpath %.s $(PATCHSOURCE)
 
 all: patch
 
@@ -188,4 +195,4 @@ online:
 	cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
 web: prep $(PATCH_C_SRC) $(PATCH_CPP_SRC)
-	emcc -ISource -IPatchSource -ILibSource -IBuild -ITestPatches Source/PatchProgram.cpp -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage']" Source/PatchProcessor.cpp WebSource/web.cpp Source/operators.cpp Source/message.cpp LibSource/StompBox.cpp $(PATCH_CPP_SRC) $(PATCH_C_SRC) -o Build/patch.js
+	$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o Build/patch.js
