@@ -48,8 +48,6 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-   /* float fastPow(float a, float b); */
-   /* float fastSqrt(float a); */
   inline float arm_sqrt(float in){
     float out;
 #ifdef ARM_CORTEX
@@ -59,6 +57,13 @@
 #endif
     return out;
   }
+
+   // fast approximations
+   float fastlog2f(float x);
+   float fastpowf(float a, float b);
+   float fastsqrt1(float a);
+   float fastsqrt2(float a);
+   float fastsqrt3(float a);
 
 #ifdef __cplusplus
 }
@@ -74,4 +79,5 @@
 #define sqrt(x) arm_sqrt(x)
 #define sqrtf(x) arm_sqrt(x)
 #endif //ARM_CORTEX
+
 #endif // __basicmaths_h__
