@@ -9,10 +9,10 @@ if (!owl.context)
 }
 
 var WEB_setup = Module.cwrap('WEB_setup', 'number', ['number', 'number']);
-var WEB_processBlock = Module.cwrap('WEB_processBlock', null, ['number', 'number']);
-var WEB_setParameter = Module.cwrap('WEB_setParameter', null, ['number', 'number']);
-var WEB_getPatchName = Module.cwrap('WEB_getPatchName', 'string', null);
-var WEB_getParameterName = Module.cwrap('WEB_getParameterName', 'string', 'number');
+var WEB_processBlock = Module.cwrap('WEB_processBlock', 'number', ['number', 'number']);
+var WEB_setParameter = Module.cwrap('WEB_setParameter', 'number', ['number', 'number']);
+var WEB_getPatchName = Module.cwrap('WEB_getPatchName', 'string', []);
+var WEB_getParameterName = Module.cwrap('WEB_getParameterName', 'string', ['number']);
 
 owl.dsp = function () {
     var that = {};
