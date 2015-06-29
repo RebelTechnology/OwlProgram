@@ -40,12 +40,6 @@ public:
   void getRealValues(FloatArray& buf);
   void getImaginaryValues(FloatArray& buf);
   void scale(float factor);
-  void setSize(int aSize){
-    size = aSize;
-  }
-  void setData(ComplexFloat* aData){
-    data = aData;
-  }
   ComplexFloat& operator [](const int i){
     return data[i];
   }
