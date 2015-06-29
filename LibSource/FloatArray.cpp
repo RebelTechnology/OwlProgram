@@ -218,12 +218,21 @@ void FloatArray::copyFrom(float* other, int length){
   arm_copy_f32(other, data, length);
   #endif /* ARM_CORTEX */
 }
-
-void FloatArray::insert(FloatArray source, int offset, int samples){
-  ASSERT(size >= offset+samples, "Array too small");
+/*
+ * Copies @samples samples starting from sample @sourceOffset of @source to @destinationOffset in the current FloatArray
+ */
+void FloatArray::insert(FloatArray source, int sourceOffset, int destinationOffset, int samples){
+  ASSERT(size >= destinationOffset+samples, "Array too small");
+  ASSERT(source.size >= sourceOffset+samples, "Array too small");
   #ifdef ARM_CORTEX
-  arm_copy_f32(source.data, data+offset, samples);  
+  arm_copy_f32(source.data+sourceOffset, data+destinationOffset, samples);  
   #endif /* ARM_CORTEX */
+}
+/*
+ * Copies @samples samples from the beginning of @source to @destinationOffset in the current FloatArray
+ */
+void FloatArray::insert(FloatArray source, int destinationOffset, int samples){
+  insert(source, 0, destinationOffset, samples);
 }
 
 void FloatArray::move(int fromIndex, int toIndex, int samples){
@@ -315,36 +324,43 @@ void FloatArray::noise(){
   }
 }
 /**
- * Perform the convolution of this FloatArray with @other, putting the result in @destination.
+ * Perform the convolution of this FloatArray with @operand2, putting the result in @destination.
  * @destination must have a minimum size of this+other-1.
  */
-void FloatArray::convolve(FloatArray other, FloatArray destination){
-  ASSERT(destination.size >= size + other.size -1, "Destination array too small");
+void FloatArray::convolve(FloatArray operand2, FloatArray destination){
+  ASSERT(destination.size >= size + operand2.size -1, "Destination array too small");
 #ifdef ARM_CORTEX
-  arm_conv_f32(data, size, other.data, other.size, destination);
+  arm_conv_f32(data, size, operand2.data, operand2.size, destination);
 #endif /* ARM_CORTEX */
 }
 
 /**
  * Perform partial convolution: start at @offset and compute @samples points
  */
-void FloatArray::convolve(FloatArray other, FloatArray destination, int offset, int samples){
+void FloatArray::convolve(FloatArray operand2, FloatArray destination, int offset, int samples){
   ASSERT(destination.size >= samples, "Destination array too small");
 #ifdef ARM_CORTEX
-  arm_conv_partial_f32(data, size, other.data, other.size, destination, offset, samples);
+  arm_conv_partial_f32(data, size, operand2.data, operand2.size, destination, offset, samples);
 #endif /* ARM_CORTEX */
 }
 
 /*
  * @destination must have a minimum size of 2*max(srcALen, srcBLen)-1.
  */
-void FloatArray::correlate(FloatArray other, FloatArray destination){
-  ASSERT(destination.size >= 2 * max(size, other.size)-1, "Destination array too small");
-#ifdef ARM_CORTEX
-  arm_correlate_f32(data, size, other.data, other.size, destination);
-#endif /* ARM_CORTEX */
+void FloatArray::correlate(FloatArray operand2, FloatArray destination){ 
+  destination.setAll(0);
+  correlateInitialized(operand2, destination);
 }
-
+/*
+ * @destination must have a minimum size of 2*max(srcALen, srcBLen)-1.
+ * @destination must have been initialized to 0
+ */
+void FloatArray::correlateInitialized(FloatArray operand2, FloatArray destination){
+  ASSERT(destination.size >= size+operand2.size-1, "Destination array too small"); //TODO: change CMSIS docs, which state a different size
+#ifdef ARM_CORTEX
+  arm_correlate_f32(data, size, operand2.data, operand2.size, destination);
+#endif /* ARM_CORTEX */  
+}
 FloatArray FloatArray::create(int size){
   return FloatArray(new float[size], size);
 }
