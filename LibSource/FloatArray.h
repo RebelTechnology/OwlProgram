@@ -31,16 +31,25 @@ public:
   void reverse(); //in place
   void reciprocal(FloatArray& destination);
   void reciprocal(); //in place
+  void negate(FloatArray& destination);
+  void negate(); //in place
+  void noise();
   float getRms();
   float getMean();
   float getPower();
   float getStandardDeviation();
   float getVariance();
-  void negate();
+  void scale(float factor, FloatArray destination);
   void scale(float factor);
-  void add(FloatArray other);
-  void subtract(FloatArray other);
-  void multiply(FloatArray other);
+  void add(FloatArray operand2, FloatArray destination);
+  void add(FloatArray operand2); //in-place
+  void add(float scalar);
+  void subtract(FloatArray operand2, FloatArray destination);
+  void subtract(FloatArray operand2); //in-place
+  void subtract(float scalar);
+  void multiply(FloatArray operand2, FloatArray destination);
+  void multiply(FloatArray operand2); //in-place
+  void multiply(float scalar);
   void convolve(FloatArray other, FloatArray destination);
   void convolve(FloatArray other, FloatArray destination, int offset, int samples);
   void correlate(FloatArray other, FloatArray destination);
