@@ -19,7 +19,7 @@ private:
   float* state; // stages*4 for df1, stages*2 for df2
   int stages;
   /*
-   * The coefficients are stored in the array <code>pCoeffs</code> in the following order:
+   * The coefficients are stored in the array <code>coefficients</code> in the following order:
    * <pre>
    *     {b10, b11, b12, a11, a12, b20, b21, b22, a21, a22, ...}
    * </pre>
@@ -85,7 +85,7 @@ public:
   }
 
   void setLowPass(float fc, float q){
-    float omega = M_PI*fc;
+    float omega = M_PI*fc/2;
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
     coefficients[0] = K * K * norm;
@@ -97,7 +97,7 @@ public:
   }
 
   void setHighPass(float fc, float q){
-    float omega = M_PI*fc;
+    float omega = M_PI*fc/2;
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
     coefficients[0] = 1 * norm;
@@ -109,7 +109,7 @@ public:
   }
 
   void setBandPass(float fc, float q){
-    float omega = M_PI*fc;
+    float omega = M_PI*fc/2;
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
     coefficients[0] = K / q * norm;
@@ -121,7 +121,7 @@ public:
   }
 
   void setNotch(float fc, float q){
-    float omega = M_PI*fc;
+    float omega = M_PI*fc/2;
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
     coefficients[0] = (1 + K * K) * norm;
@@ -133,7 +133,7 @@ public:
   }
 
   void setPeak(float fc, float q, float gain){
-    float omega = M_PI*fc;
+    float omega = M_PI*fc/2;
     float K = tanf(omega);
     float V = abs(gain-0.5)*60 + 1; // Gain
     float norm;
@@ -157,7 +157,7 @@ public:
   }
 
   void setLowShelf(float fc, float gain){
-    float omega = M_PI*fc;
+    float omega = M_PI*fc/2;
     float K = tanf(omega);
     float V = abs(gain-0.5)*60 + 1; // Gain
     float norm;
@@ -180,7 +180,7 @@ public:
   }
 
   void setHighShelf(float fc, float gain){
-    float omega = M_PI*fc;
+    float omega = M_PI*fc/2;
     float K = tanf(omega);
     float V = abs(gain-0.5)*60 + 1; // Gain
     float norm;
