@@ -253,9 +253,9 @@ void FloatArray::add(FloatArray operand2){ //in-place
 }
 
 void FloatArray::add(float scalar){
- for(int n=0; n<size; n++){
+  for(int n=0; n<size; n++){
    data[n]+=scalar;
- } 
+  } 
 }
 
 void FloatArray::subtract(FloatArray operand2, FloatArray destination){ //allows in-place
@@ -295,9 +295,9 @@ void FloatArray::multiply(FloatArray operand2){ //in-place
 }
 
 void FloatArray::multiply(float scalar){
- for(int n=0; n<size; n++){
+  for(int n=0; n<size; n++){
    data[n]*=scalar;
- } 
+  } 
 }
 
 void FloatArray::negate(FloatArray& destination){//allows in-place
