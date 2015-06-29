@@ -8,7 +8,7 @@ _estack = 0x2001c000;    /* end of 112K RAM */
 /* _estack = 0x10010000;    /\* end of CCM RAM *\/ */
 
 /* Generate a link error if heap and stack don't fit into RAM */
-_Min_Heap_Size = 0;      /* required amount of heap  */
+_Min_Heap_Size  = 0x000; /* required amount of heap  */
 _Min_Stack_Size = 0x800; /* required amount of stack */
 
 /* Specify the memory areas */
@@ -21,7 +21,7 @@ MEMORY
   CCMRAM (rw)      : ORIGIN = 0x10008000, LENGTH = 32K    /* total CCM is 64kb */
   LOADERRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 48K
   PATCHRAM (rwx)   : ORIGIN = 0x2000c000, LENGTH = 64K    /* total RAM is 112kb */
-  NVRAM (rw)       : ORIGIN = 0x40024000, LENGTH = 8K
+  NVRAM (rw)       : ORIGIN = 0x40024000, LENGTH = 4K
   BANK1_SRAM1 (rx) : ORIGIN = 0x60000000, LENGTH = 0K
   BANK1_SRAM2 (rx) : ORIGIN = 0x64000000, LENGTH = 0K
   BANK1_SRAM3 (rx) : ORIGIN = 0x68000000, LENGTH = 1M
@@ -55,34 +55,30 @@ SECTIONS
     *(.glue_7)         /* glue arm to thumb code */
     *(.glue_7t)        /* glue thumb to arm code */
 	*(.eh_frame)
-
-. = ALIGN(0x4);
-
- /* These are for static constructors and destructors under ELF */
- KEEP (*crtbegin.o(.ctors))
- KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
- KEEP (*(SORT(.ctors.*)))
- KEEP (*crtend.o(.ctors))
- KEEP (*crtbegin.o(.dtors))
- KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
- KEEP (*(SORT(.dtors.*)))
- KEEP (*crtend.o(.dtors))
-
+    . = ALIGN(8);
+    /* These are for static constructors and destructors under ELF */
+    KEEP (*crtbegin.o(.ctors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
+    KEEP (*(SORT(.ctors.*)))
+    KEEP (*crtend.o(.ctors))
+    KEEP (*crtbegin.o(.dtors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
+    KEEP (*(SORT(.dtors.*)))
+    KEEP (*crtend.o(.dtors))
     KEEP (*(.init))
     KEEP (*(.fini))
-
     . = ALIGN(8);
     _etext = .;        /* define a global symbol at end of code */
     _text_end = .;
   } >PATCHRAM /* AT>PATCHFLASH */
-  _text_load = LOADADDR (.text);
 
-   .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >PATCHRAM /* AT>PATCHFLASH */
-    .ARM : {
+  _text_load = LOADADDR (.text);
+  .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >PATCHRAM /* AT>PATCHFLASH */
+  .ARM : {
     __exidx_start = .;
-      *(.ARM.exidx*)
-      __exidx_end = .;
-    } >PATCHRAM /* AT>PATCHFLASH */
+    *(.ARM.exidx*)
+    __exidx_end = .;
+  } >PATCHRAM /* AT>PATCHFLASH */
 
   .preinit_array     :
   {
@@ -105,13 +101,6 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >PATCHRAM /* AT>PATCHFLASH */
 
-/*   .eeprom (NOLOAD) : */
-/*     { */
-/*     . = ALIGN(8); */
-/*         *(.eeprom) */
-/*     . = ALIGN(8); */
-/*     } >EEPROM */
-
   /* used by the startup to initialize data */
   _sidata = .;
 
@@ -122,7 +111,6 @@ SECTIONS
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
-
     . = ALIGN(8);
     _edata = .;        /* define a global symbol at data end */
   } >PATCHRAM
@@ -162,31 +150,22 @@ SECTIONS
     . = ALIGN(8);
   } >PATCHRAM
 
-/* /\* Shared RAM section, vars must be located here explicitly *\/ */
-/* /\* Example: int foo __attribute__ ((section (".sharedram"))); *\/ */
-/* .sharedram (NOLOAD) : */
-/* { */
-/*   . = ALIGN(8); */
-/*   *(.sharedram) */
-/*   . = ALIGN(8); */
-/* } >SHAREDRAM */
-
-/* CCM section, vars must be located here explicitly */
-/* Example: int foo __attribute__ ((section (".ccmdata"))); */
-/* .ccmdata (NOLOAD) : */
-/* { */
-/*   . = ALIGN(8); */
-/*   *(.ccmdata) */
-/*   . = ALIGN(8); */
-/* } >CCMRAM */
+  /* CCM section, vars must be located here explicitly */
+  /* Example: int foo __attribute__ ((section (".ccmdata"))); */
+  .ccmdata (NOLOAD) :
+  {
+    . = ALIGN(8);
+    *(.ccmdata)
+    . = ALIGN(8);
+  } >CCMRAM
 
   /* External SRAM, used for heap memory - no variables to be allocated here! */
-.extdata (NOLOAD) :
-{
-  . = ALIGN(8);
-  *(.extdata)
-  . = ALIGN(8);
-} >BANK1_SRAM3
+  .extdata (NOLOAD) :
+  {
+    . = ALIGN(8);
+    *(.extdata)
+    . = ALIGN(8);
+  } >BANK1_SRAM3
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
