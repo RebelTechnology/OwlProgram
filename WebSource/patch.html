@@ -12,8 +12,10 @@
     <div class="center">
       <h1>OWL Patch</h1>
       <div>
-	Play <input type="button" onclick="patch.play(); return false;"/>
-	Stop <input type="button" onclick="patch.pause(); return false;"/>
+	<p><input type="button" onclick="patch.play(); return false;"/>Play</p>
+	<p><input type="button" onclick="patch.pause(); return false;"/>Stop</p>
+	<p><input type="button" onclick="getMessage(); return false;"/>Message</p>
+	<p><input type="button" onclick="getStatus(); return false;"/>Status</p>
       </div>
       <div id="patchname"></div>
       <div id="p1"></div>
@@ -25,11 +27,10 @@
       <div id="p4"></div>
       <input type="range" min="0" max="1" step="0.001" onchange="patch.update(3, this.value)"/>
     </div>
-    </div>
 
-    <script src="../Build/patch.js"></script>
-    <script src="webaudio.js"></script>
-    <script>
+    <script type="text/javascript" src="../Build/patch.js"></script>
+    <script type="text/javascript" src="webaudio.js"></script>
+    <script type="text/javascript">
       var patch = owl.dsp();
       patch.update(0, 0.5);
       patch.update(1, 0.5);
@@ -43,7 +44,21 @@
       document.getElementById("p4").innerHTML = "<h3>"+patch.getParameterName(3)+"</h3>";
       <!-- patch.update("Volume", 0.1); -->
       <!-- patch.play(); -->
+      var getMessage = function(){
+          var msg = patch.getMessage();
+	  if(msg)
+  	    console.log("Program message: "+msg);
+	  document.getElementById("message").innerHTML = msg;
+      };
+      var getStatus = function(){
+	  document.getElementById("status").innerHTML = patch.getStatus();
+      };
     </script>
+
+      <div>
+	<p id="message"></p>
+	<p id="status"></p>
+      </div>
   </body>
 
 </html>

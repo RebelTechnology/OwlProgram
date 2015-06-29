@@ -1,3 +1,6 @@
+/*
+ * http://thealphanerd.io/blog/from-faust-to-webaudio/
+ */
 
 var owl = owl || {};
 
@@ -13,6 +16,8 @@ var WEB_processBlock = Module.cwrap('WEB_processBlock', 'number', ['number', 'nu
 var WEB_setParameter = Module.cwrap('WEB_setParameter', 'number', ['number', 'number']);
 var WEB_getPatchName = Module.cwrap('WEB_getPatchName', 'string', []);
 var WEB_getParameterName = Module.cwrap('WEB_getParameterName', 'string', ['number']);
+var WEB_getMessage = Module.cwrap('WEB_getMessage', 'string', []);
+var WEB_getStatus = Module.cwrap('WEB_getStatus', 'string', []);
 
 owl.dsp = function () {
     var that = {};
@@ -20,11 +25,8 @@ owl.dsp = function () {
 	playing: false
     };
     that.vectorsize = 2048;      
-    // that.ptr = DSP_constructor(owl.context.sampleRate);
     console.log("setup[fs "+owl.context.sampleRate+"][bs "+that.vectorsize+"]");
-    var fs = WEB_setup(owl.context.sampleRate, that.vectorsize);
-    console.log("setup "+fs);
-    console.log("patchname: "+WEB_getPatchName());
+    WEB_setup(owl.context.sampleRate, that.vectorsize);
     for (i = 0; i < 5; i++)
 	console.log("parameter "+i+": "+WEB_getParameterName(i));
 
@@ -36,6 +38,14 @@ owl.dsp = function () {
     that.getNumOutputs = function () {
 	return 2; //DSP_getNumOutputs(that.ptr);
     };
+
+    that.getMessage = function() {
+	return WEB_getMessage();
+    }
+
+    that.getStatus = function() {
+	return WEB_getStatus();
+    }
 
     that.compute = function (e) {
 	var dspOutChans = HEAP32.subarray(that.outs >> 2, (that.outs + that.numOut * that.ptrsize) >> 2);
@@ -51,14 +61,11 @@ owl.dsp = function () {
             }
 	}
 
-	// console.log("process block");
 	WEB_processBlock(that.ins, that.outs);
 
-	for (i = 0; i < that.numOut; i++)
-	{
+	for(i = 0; i < that.numOut; i++){
             var output = e.outputBuffer.getChannelData(i);
             var dspOutput = HEAPF32.subarray(dspOutChans[i] >> 2, (dspOutChans[i] + that.vectorsize * that.ptrsize) >> 2);
-
             for (j = 0; j < output.length; j++) {
 		output[j] = dspOutput[j];
             }
@@ -66,25 +73,17 @@ owl.dsp = function () {
 	return that;
     };
 
-    // that.destroy = function () {
-    //   DSP_destructor(that.ptr);
-    //   return that;
-    // };
-
     // Connect to another node
     that.connect = function (node) {
-	if (node.scriptProcessor)
-	{
+	if(node.scriptProcessor){
             that.scriptProcessor.connect(node.scriptProcessor);
-	}
-	else {
+	}else{
             that.scriptProcessor.connect(node);
 	}
 	return that;
     };
 
     // Bind to Web Audio
-
     that.getParameterName = function(pid){
 	return WEB_getParameterName(pid);
     }
@@ -123,7 +122,7 @@ owl.dsp = function () {
 
     that.init = function () {
 	var i;
-	that.ptrsize = 4; //assuming pointer in emscripten are 32bits
+	that.ptrsize = 4; // assuming pointer in emscripten are 32bits
 	// that.vectorsize = 2048;
 	that.samplesize = 4;
 

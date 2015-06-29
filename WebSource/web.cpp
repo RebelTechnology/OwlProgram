@@ -4,15 +4,24 @@
 #include "StompBox.h"
 #include "device.h"
 #include "main.h"
+#include "message.h"
 #include "PatchProcessor.h"
+#include "malloc.h"
+#include <math.h>
+#include <time.h>
 
-/*
- * http://thealphanerd.io/blog/from-faust-to-webaudio/
- */
+#define NO_ERROR         0x00
+#define HARDFAULT_ERROR  0x10
+#define BUS_ERROR        0x20
+#define MEM_ERROR        0x30
+#define NMI_ERROR        0x40
+#define USAGE_ERROR      0x50
+#define PROGRAM_ERROR    0x60
 
 static ProgramVector programVector;
 ProgramVector* getProgramVector() { return &programVector; }
 extern PatchProcessor* getInitialisingPatchProcessor();
+extern char* itoa(int val, int base);
 
 extern "C"{
   /* ASM exported functions */
@@ -20,6 +29,7 @@ extern "C"{
   void WEB_processBlock(float** inputs, float** outputs);
   void WEB_setParameter(int pid, float value);
   char* WEB_getMessage();
+  char* WEB_getStatus();
   char* WEB_getPatchName();
   char* WEB_getParameterName(int pid);
 }
@@ -30,6 +40,11 @@ extern "C"{
   void programReady();
   void programStatus(ProgramVectorAudioStatus status);
   int serviceCall(int service, void** params, int len);
+}
+
+unsigned long systicks(){
+  // return clock() / (CLOCKS_PER_SEC / 1000);
+  return clock();
 }
 
 #define NOF_PARAMETERS 16
@@ -70,7 +85,12 @@ int WEB_setup(long fs, int bs){
   pv->serviceCall = serviceCall;
   pv->message = NULL;
   setup();
-  return fs;
+
+  struct mallinfo minfo = mallinfo();
+  // getProgramVector()->heap_bytes_used = minfo.uordblks;
+  pv->heap_bytes_used = minfo.arena;
+
+  return 0;
 }
 
 class MemBuffer : public AudioBuffer {
@@ -96,16 +116,72 @@ public:
 };
 
 void WEB_processBlock(float** inputs, float** outputs){
+  unsigned long now = systicks();
+  ProgramVector* pv = getProgramVector();
   MemBuffer buffer(inputs, 2, blocksize);
   PatchProcessor* processor = getInitialisingPatchProcessor();
-  processor->setParameterValues(getProgramVector()->parameters);
+  processor->setParameterValues(pv->parameters);
   processor->patch->processAudio(buffer);
   memcpy(outputs[0], inputs[0], blocksize*sizeof(float));
   memcpy(outputs[1], inputs[1], blocksize*sizeof(float));
+  pv->cycles_per_block = systicks()-now;
 }
 
 char* WEB_getMessage(){
-  return getProgramVector()->message;
+  char* msg = getProgramVector()->message;
+  // getProgramVector()->message = NULL;
+  return msg;
+}
+
+char* WEB_getStatus(){
+  static char buffer[64];
+  char* p = buffer;
+  ProgramVector* pv = getProgramVector();
+  if(pv == NULL)
+    return (char*)"Missing program vector";
+  uint8_t err = pv->error;
+  switch(err & 0xf0){
+  case NO_ERROR: {
+    // p = stpcpy(p, (const char*)"No error");
+    p = stpcpy(p, (const char*)"CPU ");
+    float percent = (pv->cycles_per_block/pv->audio_blocksize) / (float)3500;
+    p = stpcpy(p, itoa(ceilf(percent*100), 10));
+    p = stpcpy(p, (const char*)"% Heap ");
+    percent = pv->heap_bytes_used/(float)(1024*1024);
+    p = stpcpy(p, itoa(ceilf(percent*100), 10));
+    p = stpcpy(p, (const char*)"%");
+    break;
+  }
+  case MEM_ERROR:
+    p = stpcpy(p, (const char*)"Memory Error 0x");
+    p = stpcpy(p, itoa(err, 16));
+    break;
+  case BUS_ERROR:
+    p = stpcpy(p, (const char*)"Bus Error 0x");
+    p = stpcpy(p, itoa(err, 16));
+    break;
+  case USAGE_ERROR:
+    p = stpcpy(p, (const char*)"Usage Error 0x");
+    p = stpcpy(p, itoa(err, 16));
+    break;
+  case NMI_ERROR:
+    p = stpcpy(p, (const char*)"Non-maskable Interrupt 0x");
+    p = stpcpy(p, itoa(err, 16));
+    break;
+  case HARDFAULT_ERROR:
+    p = stpcpy(p, (const char*)"HardFault Error 0x");
+    p = stpcpy(p, itoa(err, 16));
+    break;
+  case PROGRAM_ERROR:
+    p = stpcpy(p, (const char*)"Missing or Invalid Program 0x");
+    p = stpcpy(p, itoa(err, 16));
+    break;
+  default:
+    p = stpcpy(p, (const char*)"Unknown Error 0x");
+    p = stpcpy(p, itoa(err, 16));
+    break;
+  }
+  return buffer;
 }
 
 char* WEB_getPatchName(){

@@ -77,10 +77,10 @@ CFLAGS += -D__unix__ -DHV_SIMD_NONE
 
 # emscripten
 EMCC       = emcc
-EMCCFLAGS ?= -std=c++11 -fno-rtti -fno-exceptions
+EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11 
 EMCCFLAGS += -IOwlPatches -ISource -IPatchSource -ILibSource -IBuild -ITestPatches
-EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage']"
-EMCC_SRC   = Source/PatchProgram.cpp Source/PatchProcessor.cpp WebSource/web.cpp Source/operators.cpp Source/message.cpp LibSource/StompBox.cpp $(PATCH_CPP_SRC) $(PATCH_C_SRC)
+EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus']"
+EMCC_SRC   = Source/PatchProgram.cpp Source/PatchProcessor.cpp WebSource/web.cpp Source/operators.cpp Source/message.cpp LibSource/StompBox.cpp LibSource/basicmaths.c $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 
 # object files
 OBJS =  $(C_SRC:%.c=Build/%.o) $(CPP_SRC:%.cpp=Build/%.o)
