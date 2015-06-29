@@ -35,9 +35,17 @@ int main(void){
   *DWT_CONTROL = *DWT_CONTROL | 1 ; // enable the counter
 #endif /* DEBUG_DWT */
 
-  if(getProgramVector()->checksum != sizeof(ProgramVector)){
+  if(getProgramVector()->checksum != sizeof(ProgramVector)){    
     getProgramVector()->error = CHECKSUM_ERROR_STATUS;
     getProgramVector()->message = (char*)"ProgramVector checksum error";
+    getProgramVector()->programStatus(AUDIO_ERROR_STATUS);
+    return -1;
+  }
+
+  if(getProgramVector()->audio_blocksize <= 0 || 
+     getProgramVector()->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){
+    getProgramVector()->error = CONFIGURATION_ERROR_STATUS;
+    getProgramVector()->message = (char*)"Invalid blocksize";
     getProgramVector()->programStatus(AUDIO_ERROR_STATUS);
     return -1;
   }
