@@ -1,6 +1,7 @@
 #include "FloatArray.h"
 #include "basicmaths.h"
 #include "message.h"
+#include <string.h>
 
 void FloatArray::getMin(float* value, int* index){
 #ifdef ARM_CORTEX
@@ -201,18 +202,24 @@ void FloatArray::copyFrom(FloatArray source){
 
 void FloatArray::copyTo(float* other, int length){
   ASSERT(size >= length, "Array too small");
+  #ifdef ARM_COMPLEX
   arm_copy_f32(data, other, length);
+  #endif /* ARM_COMPLEX */
   // memcpy(other.data, data, size*sizeof(float));
 }
 
 void FloatArray::copyFrom(float* other, int length){
   ASSERT(size >= length, "Array too small");
+  #ifdef ARM_COMPLEX
   arm_copy_f32(other, data, length);
+  #endif /* ARM_COMPLEX */
 }
 
 void FloatArray::insert(FloatArray source, int offset, int samples){
   ASSERT(size >= offset+samples, "Array too small");
+  #ifdef ARM_COMPLEX
   arm_copy_f32(source.data, data+offset, samples);  
+  #endif /* ARM_COMPLEX */
 }
 
 void FloatArray::move(int fromIndex, int toIndex, int samples){
@@ -221,26 +228,36 @@ void FloatArray::move(int fromIndex, int toIndex, int samples){
 }
 
 void FloatArray::setAll(float value){
+  #ifdef ARM_COMPLEX
   arm_fill_f32(value, data, size);
+  #endif /* ARM_COMPLEX */
 }
 
 void FloatArray::add(FloatArray other){
   ASSERT(other.size == size, "Arrays must be same size");
+  #ifdef ARM_COMPLEX
   arm_add_f32(data, other.data, data, size);
+  #endif /* ARM_COMPLEX */
 }
 
 void FloatArray::subtract(FloatArray other){
   ASSERT(other.size == size, "Arrays must be same size");
+  #ifdef ARM_COMPLEX
   arm_sub_f32(data, other.data, data, size);
+  #endif /* ARM_COMPLEX */
 }
 
 void FloatArray::multiply(FloatArray other){
   ASSERT(other.size == size, "Arrays must be same size");
+  #ifdef ARM_COMPLEX
   arm_mult_f32(data, other.data, data, size);
+  #endif /* ARM_COMPLEX */
 }
 
 void FloatArray::negate(){
+  #ifdef ARM_COMPLEX
   arm_negate_f32(data, data, size);
+  #endif /* ARM_COMPLEX */
 }
 
 /**
@@ -249,7 +266,9 @@ void FloatArray::negate(){
  */
 void FloatArray::convolve(FloatArray other, FloatArray destination){
   ASSERT(destination.size >= size + other.size -1, "Destination array too small");
+#ifdef ARM_COMPLEX
   arm_conv_f32(data, size, other.data, other.size, destination);
+#endif /* ARM_COMPLEX */
 }
 
 /**
@@ -257,7 +276,9 @@ void FloatArray::convolve(FloatArray other, FloatArray destination){
  */
 void FloatArray::convolve(FloatArray other, FloatArray destination, int offset, int samples){
   ASSERT(destination.size >= samples, "Destination array too small");
+#ifdef ARM_COMPLEX
   arm_conv_partial_f32(data, size, other.data, other.size, destination, offset, samples);
+#endif /* ARM_COMPLEX */
 }
 
 /*
@@ -265,7 +286,9 @@ void FloatArray::convolve(FloatArray other, FloatArray destination, int offset, 
  */
 void FloatArray::correlate(FloatArray other, FloatArray destination){
   ASSERT(destination.size >= 2 * max(size, other.size)-1, "Destination array too small");
+#ifdef ARM_COMPLEX
   arm_correlate_f32(data, size, other.data, other.size, destination);
+#endif /* ARM_COMPLEX */
 }
 
 FloatArray FloatArray::create(int size){
