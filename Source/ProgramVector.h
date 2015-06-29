@@ -45,7 +45,8 @@ typedef enum {
    } ProgramVector;
 
 #define CHECKSUM_ERROR_STATUS      -10
-#define OUT_OF_VECTOR_ERROR_STATUS -20
+#define OUT_OF_MEMORY_ERROR_STATUS -20
+#define CONFIGURATION_ERROR_STATUS -30
 
 /* #define getProgramVector() ((ProgramVector*)(uint32_t)0x40024000) */
    ProgramVector* getProgramVector();
