@@ -50,6 +50,7 @@ public:
     return (float *)data;
   }
   static ComplexFloatArray create(int size);
+  static void destroy(ComplexFloatArray);
 };
 
 #endif // __ComplexFloatArray_h__

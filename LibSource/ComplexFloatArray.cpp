@@ -155,3 +155,7 @@ void ComplexFloatArray::scale(float factor){
 ComplexFloatArray ComplexFloatArray::create(int size){
   return ComplexFloatArray(new ComplexFloat[size], size);
 }
+
+void ComplexFloatArray::destroy(ComplexFloatArray array){
+  delete array.data;
+}
