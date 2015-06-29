@@ -29,6 +29,8 @@ public:
   void rectify(); //in place
   void reverse(FloatArray& destination);
   void reverse(); //in place
+  void reciprocal(FloatArray& destination);
+  void reciprocal(); //in place
   float getRms();
   float getMean();
   float getPower();

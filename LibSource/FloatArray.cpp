@@ -99,6 +99,16 @@ void FloatArray::reverse(){//in place
   }
 }
 
+void FloatArray::reciprocal(FloatArray& destination){
+  float* data = getData();
+  for(int n=0; n<getSize(); n++)
+    destination[n] = 1/data[n];
+}
+
+void FloatArray::reciprocal(){//in place
+  reciprocal(*this);
+}
+
 float FloatArray::getRms(){
   float result;
 #ifdef ARM_CORTEX  

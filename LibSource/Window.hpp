@@ -27,11 +27,6 @@ public:
   void apply(float *signalIn, float *signalOut){
     Window::applyWindow(signalIn, getData(), signalOut, getSize());
   }
-  void invert(){
-    float* data = getData();
-    for(int n=0; n<getSize(); n++)
-      data[n] = 1/data[n];
-  }
   static Window create(WindowType type, int size){
     Window win(new float[size], size);
     win.window(type, win, size);
