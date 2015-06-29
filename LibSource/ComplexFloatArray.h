@@ -49,6 +49,9 @@ public:
   operator float*() {
     return (float *)data;
   }
+  ComplexFloat* getData(){
+    return data;
+  }
   static ComplexFloatArray create(int size);
   static void destroy(ComplexFloatArray);
 };
