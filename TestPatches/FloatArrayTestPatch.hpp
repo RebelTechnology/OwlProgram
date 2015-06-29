@@ -98,7 +98,7 @@ public:
     //statistics
     //min
     float refValue=fa[0];
-    long unsigned int refIndex=0;
+    int refIndex=0;
     for(int n=1; n<sz; n++){ //find reference min value and index
       if(fa[n]<refValue){
         refValue=fa[n];
@@ -106,7 +106,7 @@ public:
       }
     }
     float value;
-    long unsigned int index;
+    int index;
     fa.getMin(&value, &index);
     assert(value==refValue,"getMin() value");
     assert(index==refIndex,"getMin() index");
