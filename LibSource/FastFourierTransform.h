@@ -7,6 +7,10 @@ class FastFourierTransform {
 private:
   arm_rfft_fast_instance_f32 instance;
 public:
+  FastFourierTransform(){};
+  FastFourierTransform(int len){
+    init(len);
+  }
   void init(int len){
     ASSERT(len==32 || len ==64 || len==128 || len==256 || len==512 || len==1024 || len==2048 || len==4096, "Wrong fft size");
     void* args[] = {(void*)&instance, (void*)&len};
@@ -40,16 +44,20 @@ private:
   ComplexFloat *data;
   int size;
 public:
+  FastFourierTransform(){};
   FastFourierTransform(){
     data=NULL;
+  }
+  FastFourierTransform(int len){
+    init(len);
   }
   ~FastFourierTransform(){
     free(data);
   }
   void init(int len){
     ASSERT(len==32 || len ==64 || len==128 || len==256 || len==512 || len==1024 || len==2048 || len==4096, "Wrong fft size");
-    cfgfft = kiss_fft_alloc(len, 0 ,0,0 );
-    cfgifft = kiss_fft_alloc(len, 1 ,0,0 );
+    cfgfft = kiss_fft_alloc(len, 0 , 0, 0);
+    cfgifft = kiss_fft_alloc(len, 1,0, 0);
     size=len;
     data=(ComplexFloat *)malloc(sizeof(ComplexFloat)*getSize());
     temp=ComplexFloatArray(data, getSize());
