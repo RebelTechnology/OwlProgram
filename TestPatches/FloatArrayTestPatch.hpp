@@ -323,6 +323,10 @@ public:
       for(int n=0; n<size+size2-1; n++){
         assert(destinationReference[n]==destination[n], "correlateInitialized()");
       }
+      FloatArray::destroy(operand2);
+      FloatArray::destroy(operand2Backup);
+      FloatArray::destroy(destination);
+      FloatArray::destroy(destinationReference);
     }
     // test insert
     {
