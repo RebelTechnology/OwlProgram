@@ -1,7 +1,6 @@
 #ifndef __FastFourierTransform_h__
 #define __FastFourierTransform_h__
 
-
 #ifdef ARM_CORTEX
 class FastFourierTransform {
 private:
@@ -12,7 +11,7 @@ public:
     init(len);
   }
   void init(int len){
-    ASSERT(len==32 || len ==64 || len==128 || len==256 || len==512 || len==1024 || len==2048 || len==4096, "Wrong fft size");
+    ASSERT(len==32 || len ==64 || len==128 || len==256 || len==512 || len==1024 || len==2048 || len==4096, "Unsupported FFT size");
     void* args[] = {(void*)&instance, (void*)&len};
     getProgramVector()->serviceCall(OWL_SERVICE_ARM_RFFT_FAST_INIT_F32, args, 2);
     // arm_rfft_fast_init_f32(&instance, len);
@@ -44,10 +43,7 @@ private:
   ComplexFloat *data;
   int size;
 public:
-  FastFourierTransform(){};
-  FastFourierTransform(){
-    data=NULL;
-  }
+  FastFourierTransform() : data(NULL), size(0){}
   FastFourierTransform(int len){
     init(len);
   }
@@ -55,7 +51,7 @@ public:
     free(data);
   }
   void init(int len){
-    ASSERT(len==32 || len ==64 || len==128 || len==256 || len==512 || len==1024 || len==2048 || len==4096, "Wrong fft size");
+    ASSERT(len==32 || len ==64 || len==128 || len==256 || len==512 || len==1024 || len==2048 || len==4096, "Unsupported FFT size");
     cfgfft = kiss_fft_alloc(len, 0 , 0, 0);
     cfgifft = kiss_fft_alloc(len, 1,0, 0);
     size=len;
@@ -85,4 +81,5 @@ public:
   }
 };
 #endif /* ifndef ARM_CORTEX */
+
 #endif // __FastFourierTransform_h__
