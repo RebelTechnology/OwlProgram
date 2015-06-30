@@ -69,7 +69,7 @@ public:
   float& operator [](const int index) const{
     return data[index];
   }
-  bool operator == (const FloatArray& other) const{
+  bool equals(const FloatArray& other) const{
     if(size!=other.getSize()){
       return false;
     }
@@ -79,9 +79,6 @@ public:
       }
     }
     return true;
-  }
-  bool operator != (const FloatArray& other) const{
-    return !(*this==other);
   }
   operator float*(){
     return data;
