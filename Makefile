@@ -82,7 +82,9 @@ EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11
 EMCCFLAGS += -IOwlPatches -ISource -IPatchSource -ILibSource -I$(BUILD) -ITestPatches
 EMCCFLAGS += -ILibraries/KissFFT
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus']"
-EMCC_SRC   = Source/PatchProgram.cpp Source/PatchProcessor.cpp WebSource/web.cpp Source/operators.cpp Source/message.cpp LibSource/StompBox.cpp LibSource/basicmaths.c 
+EMCC_SRC   = Source/PatchProgram.cpp Source/PatchProcessor.cpp Source/operators.cpp Source/message.cpp 
+EMCC_SRC  += WebSource/web.cpp 
+EMCC_SRC  += LibSource/basicmaths.c LibSource/StompBox.cpp LibSource/FloatArray.cpp LibSource/ComplexFloatArray.cpp
 EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
 

@@ -189,6 +189,8 @@ public:
 #ifdef ARM_CORTEX
     // arm_biquad_cascade_df1_f32(&df1, buf, buf, size);
     arm_biquad_cascade_df2T_f32(&df2, buf, buf, size);
+#else
+    ASSERT(false, "todo!");
 #endif /* ARM_CORTEX */
   }
 
@@ -197,6 +199,8 @@ public:
 #ifdef ARM_CORTEX
     // arm_biquad_cascade_df1_f32(&df1, input, output, size);
     arm_biquad_cascade_df2T_f32(&df2, input, output, size);
+#else
+    ASSERT(false, "todo!");
 #endif /* ARM_CORTEX */
   }
 
