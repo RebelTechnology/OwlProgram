@@ -2,8 +2,7 @@
 #define __HeavyPatch_hpp__
 
 #include "StompBox.h"
-// #include "Heavy_heavy.h"
-#include "../HeavySource/Heavy_heavy.h"
+#include "Heavy_heavy.h"
 
 #define HEAVY_CHANNELS 2
 
