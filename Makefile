@@ -20,6 +20,7 @@ PATCHIN     ?= 2
 PATCHOUT    ?= 2
 SLOT        ?= 0
 OWLDEVICE   ?= "OWL-MIDI"
+BUILD       ?= $(BUILDROOT)/Build
 
 CFLAGS += -DARM_CORTEX
 CFLAGS += -DEXTERNAL_SRAM
@@ -78,7 +79,7 @@ CFLAGS += -D__unix__ -DHV_SIMD_NONE
 # emscripten
 EMCC       = emcc
 EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11 
-EMCCFLAGS += -IOwlPatches -ISource -IPatchSource -ILibSource -IBuild -ITestPatches
+EMCCFLAGS += -IOwlPatches -ISource -IPatchSource -ILibSource -I$(BUILD) -ITestPatches
 EMCCFLAGS += -ILibraries/KissFFT
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus']"
 EMCC_SRC   = Source/PatchProgram.cpp Source/PatchProcessor.cpp WebSource/web.cpp Source/operators.cpp Source/message.cpp LibSource/StompBox.cpp LibSource/basicmaths.c 
@@ -198,4 +199,4 @@ online:
 	cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
 web: prep $(PATCH_C_SRC) $(PATCH_CPP_SRC)
-	$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o Build/patch.js
+	$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)patch.js

@@ -1,6 +1,3 @@
-# Build path
-BUILD=$(BUILDROOT)/Build
-
 # Code Paths
 DSPLIB=Libraries/CMSIS/DSP_Lib/Source
 
