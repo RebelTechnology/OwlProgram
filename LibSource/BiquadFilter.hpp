@@ -3,11 +3,144 @@
 
 #include "FloatArray.h"
 
+class FilterStage {
+public:
+  FloatArray coefficients;
+  FloatArray state;
+
+  FilterStage(FloatArray co, FloatArray st) : coefficients(co), state(st){}
+
+  void setLowPass(float fc, float q){
+    setLowPass(coefficients, fc, q);
+  }
+
+  void setHighPass(float fc, float q);
+  void setBandPass(float fc, float q);
+  void setNotch(float fc, float q);
+  void setPeak(float fc, float q, float gain);
+  void setLowShelf(float fc, float gain);
+  void setHighShelf(float fc, float gain);
+
+  static void setLowPass(float* coefficients, float fc, float q){
+    float omega = M_PI*fc/2;
+    float K = tanf(omega);
+    float norm = 1 / (1 + K / q + K * K);
+    coefficients[0] = K * K * norm;
+    coefficients[1] = 2 * coefficients[0];
+    coefficients[2] = coefficients[0];
+    coefficients[3] = - 2 * (K * K - 1) * norm;
+    coefficients[4] = - (1 - K / q + K * K) * norm;
+  }
+
+  static void setHighPass(float* coefficients, float fc, float q){
+    float omega = M_PI*fc/2;
+    float K = tanf(omega);
+    float norm = 1 / (1 + K / q + K * K);
+    coefficients[0] = 1 * norm;
+    coefficients[1] = -2 * coefficients[0];
+    coefficients[2] = coefficients[0];
+    coefficients[3] = - 2 * (K * K - 1) * norm;
+    coefficients[4] = - (1 - K / q + K * K) * norm;
+  }
+
+  static void setBandPass(float* coefficients, float fc, float q){
+    float omega = M_PI*fc/2;
+    float K = tanf(omega);
+    float norm = 1 / (1 + K / q + K * K);
+    coefficients[0] = K / q * norm;
+    coefficients[1] = 0;
+    coefficients[2] = -coefficients[0];
+    coefficients[3] = - 2 * (K * K - 1) * norm;
+    coefficients[4] = - (1 - K / q + K * K) * norm;
+  }
+
+  static void setNotch(float* coefficients, float fc, float q){
+    float omega = M_PI*fc/2;
+    float K = tanf(omega);
+    float norm = 1 / (1 + K / q + K * K);
+    coefficients[0] = (1 + K * K) * norm;
+    coefficients[1] = 2 * (K * K - 1) * norm;
+    coefficients[2] = coefficients[0];
+    coefficients[3] = - coefficients[1];
+    coefficients[4] = - (1 - K / q + K * K) * norm;
+  }
+
+  static void setPeak(float* coefficients, float fc, float q, float gain){
+    float omega = M_PI*fc/2;
+    float K = tanf(omega);
+    float V = abs(gain-0.5)*60 + 1; // Gain
+    float norm;
+    if (gain >= 0.5) {
+      norm = 1 / (1 + 1/q * K + K * K);
+      coefficients[0] = (1 + V/q * K + K * K) * norm;
+      coefficients[1] = 2 * (K * K - 1) * norm;
+      coefficients[2] = (1 - V/q * K + K * K) * norm;
+      coefficients[3] = - coefficients[1];
+      coefficients[4] = - (1 - 1/q * K + K * K) * norm;
+    }
+    else {
+      norm = 1 / (1 + V/q * K + K * K);
+      coefficients[0] = (1 + 1/q * K + K * K) * norm;
+      coefficients[1] = 2 * (K * K - 1) * norm;
+      coefficients[2] = (1 - 1/q * K + K * K) * norm;
+      coefficients[3] = - coefficients[1];
+      coefficients[4] = - (1 - V/q * K + K * K) * norm;
+    }
+  }
+
+  static void setLowShelf(float* coefficients, float fc, float gain){
+    float omega = M_PI*fc/2;
+    float K = tanf(omega);
+    float V = abs(gain-0.5)*60 + 1; // Gain
+    float norm;
+    if(gain >= 0.5) {
+      norm = 1 / (1 + M_SQRT2 * K + K * K);
+      coefficients[0] = (1 + sqrtf(2*V) * K + V * K * K) * norm;
+      coefficients[1] = 2 * (V * K * K - 1) * norm;
+      coefficients[2] = (1 - sqrtf(2*V) * K + V * K * K) * norm;
+      coefficients[3] = - 2 * (K * K - 1) * norm;
+      coefficients[4] = - (1 - M_SQRT2 * K + K * K) * norm;
+    } else {
+      norm = 1 / (1 + sqrtf(2*V) * K + V * K * K);
+      coefficients[0] = (1 + M_SQRT2 * K + K * K) * norm;
+      coefficients[1] = 2 * (K * K - 1) * norm;
+      coefficients[2] = (1 - M_SQRT2 * K + K * K) * norm;
+      coefficients[3] = - 2 * (V * K * K - 1) * norm;
+      coefficients[4] = - (1 - sqrtf(2*V) * K + V * K * K) * norm;
+    }
+  }
+
+  static void setHighShelf(float* coefficients, float fc, float gain){
+    float omega = M_PI*fc/2;
+    float K = tanf(omega);
+    float V = abs(gain-0.5)*60 + 1; // Gain
+    float norm;
+    if(gain >= 0.5) {
+      norm = 1 / (1 + M_SQRT2 * K + K * K);
+      coefficients[0] = (V + sqrtf(2*V) * K + K * K) * norm;
+      coefficients[1] = 2 * (K * K - V) * norm;
+      coefficients[2] = (V - sqrtf(2*V) * K + K * K) * norm;
+      coefficients[3] = - 2 * (K * K - 1) * norm;
+      coefficients[4] = - (1 - M_SQRT2 * K + K * K) * norm;
+    } else {
+      norm = 1 / (V + sqrtf(2*V) * K + K * K);
+      coefficients[0] = (1 + M_SQRT2 * K + K * K) * norm;
+      coefficients[1] = 2 * (K * K - 1) * norm;
+      coefficients[2] = (1 - M_SQRT2 * K + K * K) * norm;
+      coefficients[3] = - 2 * (K * K - V) * norm;
+      coefficients[4] = - (V - sqrtf(2*V) * K + K * K) * norm;
+    }
+  }
+
+};
+
 /** 
  * Cascaded Biquad Filter.
  * Implemented using CMSIS DSP Library, Direct Form 2 Transposed.
  * Each cascaded stage implements a second order filter.
  */
+#define BIQUAD_COEFFICIENTS_PER_STAGE    5
+#define BIQUAD_STATE_VARIABLES_PER_STAGE 2
 class BiquadFilter {
 private:
 #ifdef ARM_CORTEX
@@ -38,6 +171,17 @@ public:
   BiquadFilter(float* coefs, float* ste, int sgs) :
     coefficients(coefs), state(ste), stages(sgs) {
     init();
+  }
+
+  int getStages(){
+    return stages;
+  }
+
+  FilterStage getFilterStage(int stage){
+    ASSERT(stage < stages, "Invalid filter stage index");
+    FloatArray c(coefficients+BIQUAD_COEFFICIENTS_PER_STAGE*stage, BIQUAD_COEFFICIENTS_PER_STAGE);
+    FloatArray s(state+BIQUAD_STATE_VARIABLES_PER_STAGE*stage, BIQUAD_STATE_VARIABLES_PER_STAGE);
+    return FilterStage(c, s);
   }
 
   /* perform in-place processing */
@@ -72,9 +216,23 @@ public:
     return output;
   }
 
+  void setLowPass(float fc, float q){
+    FilterStage::setLowPass(coefficients, fc, q);
+    copyCoefficients();
+  }
+
+  void setHighPass(float fc, float q){
+    FilterStage::setHighPass(coefficients, fc, q);
+    copyCoefficients();
+  }
+
+  void setBandPass(float fc, float q);
+  void setNotch(float fc, float q);
+  void setPeak(float fc, float q, float gain);
+  void setLowShelf(float fc, float gain);
+  void setHighShelf(float fc, float gain);
+
   void copyCoefficients(){
-    coefficients[3] = - coefficients[3];
-    coefficients[4] = - coefficients[4];
     for(int i=1; i<stages; ++i){
       coefficients[0+i*5] = coefficients[0];
       coefficients[1+i*5] = coefficients[1];
@@ -82,124 +240,6 @@ public:
       coefficients[3+i*5] = coefficients[3];
       coefficients[4+i*5] = coefficients[4];
     }
-  }
-
-  void setLowPass(float fc, float q){
-    float omega = M_PI*fc/2;
-    float K = tanf(omega);
-    float norm = 1 / (1 + K / q + K * K);
-    coefficients[0] = K * K * norm;
-    coefficients[1] = 2 * coefficients[0];
-    coefficients[2] = coefficients[0];
-    coefficients[3] = 2 * (K * K - 1) * norm;
-    coefficients[4] = (1 - K / q + K * K) * norm;
-    copyCoefficients();
-  }
-
-  void setHighPass(float fc, float q){
-    float omega = M_PI*fc/2;
-    float K = tanf(omega);
-    float norm = 1 / (1 + K / q + K * K);
-    coefficients[0] = 1 * norm;
-    coefficients[1] = -2 * coefficients[0];
-    coefficients[2] = coefficients[0];
-    coefficients[3] = 2 * (K * K - 1) * norm;
-    coefficients[4] = (1 - K / q + K * K) * norm;
-    copyCoefficients();
-  }
-
-  void setBandPass(float fc, float q){
-    float omega = M_PI*fc/2;
-    float K = tanf(omega);
-    float norm = 1 / (1 + K / q + K * K);
-    coefficients[0] = K / q * norm;
-    coefficients[1] = 0;
-    coefficients[2] = -coefficients[0];
-    coefficients[3] = 2 * (K * K - 1) * norm;
-    coefficients[4] = (1 - K / q + K * K) * norm;
-    copyCoefficients();
-  }
-
-  void setNotch(float fc, float q){
-    float omega = M_PI*fc/2;
-    float K = tanf(omega);
-    float norm = 1 / (1 + K / q + K * K);
-    coefficients[0] = (1 + K * K) * norm;
-    coefficients[1] = 2 * (K * K - 1) * norm;
-    coefficients[2] = coefficients[0];
-    coefficients[3] = coefficients[1];
-    coefficients[4] = (1 - K / q + K * K) * norm;
-    copyCoefficients();
-  }
-
-  void setPeak(float fc, float q, float gain){
-    float omega = M_PI*fc/2;
-    float K = tanf(omega);
-    float V = abs(gain-0.5)*60 + 1; // Gain
-    float norm;
-    if (gain >= 0.5) {
-      norm = 1 / (1 + 1/q * K + K * K);
-      coefficients[0] = (1 + V/q * K + K * K) * norm;
-      coefficients[1] = 2 * (K * K - 1) * norm;
-      coefficients[2] = (1 - V/q * K + K * K) * norm;
-      coefficients[3] = coefficients[1];
-      coefficients[4] = (1 - 1/q * K + K * K) * norm;
-    }
-    else {
-      norm = 1 / (1 + V/q * K + K * K);
-      coefficients[0] = (1 + 1/q * K + K * K) * norm;
-      coefficients[1] = 2 * (K * K - 1) * norm;
-      coefficients[2] = (1 - 1/q * K + K * K) * norm;
-      coefficients[3] = coefficients[1];
-      coefficients[4] = (1 - V/q * K + K * K) * norm;
-    }
-    copyCoefficients();
-  }
-
-  void setLowShelf(float fc, float gain){
-    float omega = M_PI*fc/2;
-    float K = tanf(omega);
-    float V = abs(gain-0.5)*60 + 1; // Gain
-    float norm;
-    if(gain >= 0.5) {
-      norm = 1 / (1 + M_SQRT2 * K + K * K);
-      coefficients[0] = (1 + sqrtf(2*V) * K + V * K * K) * norm;
-      coefficients[1] = 2 * (V * K * K - 1) * norm;
-      coefficients[2] = (1 - sqrtf(2*V) * K + V * K * K) * norm;
-      coefficients[3] = 2 * (K * K - 1) * norm;
-      coefficients[4] = (1 - M_SQRT2 * K + K * K) * norm;
-    } else {
-      norm = 1 / (1 + sqrtf(2*V) * K + V * K * K);
-      coefficients[0] = (1 + M_SQRT2 * K + K * K) * norm;
-      coefficients[1] = 2 * (K * K - 1) * norm;
-      coefficients[2] = (1 - M_SQRT2 * K + K * K) * norm;
-      coefficients[3] = 2 * (V * K * K - 1) * norm;
-      coefficients[4] = (1 - sqrtf(2*V) * K + V * K * K) * norm;
-    }
-    copyCoefficients();
-  }
-
-  void setHighShelf(float fc, float gain){
-    float omega = M_PI*fc/2;
-    float K = tanf(omega);
-    float V = abs(gain-0.5)*60 + 1; // Gain
-    float norm;
-    if(gain >= 0.5) {
-      norm = 1 / (1 + M_SQRT2 * K + K * K);
-      coefficients[0] = (V + sqrtf(2*V) * K + K * K) * norm;
-      coefficients[1] = 2 * (K * K - V) * norm;
-      coefficients[2] = (V - sqrtf(2*V) * K + K * K) * norm;
-      coefficients[3] = 2 * (K * K - 1) * norm;
-      coefficients[4] = (1 - M_SQRT2 * K + K * K) * norm;
-    } else {
-      norm = 1 / (V + sqrtf(2*V) * K + K * K);
-      coefficients[0] = (1 + M_SQRT2 * K + K * K) * norm;
-      coefficients[1] = 2 * (K * K - 1) * norm;
-      coefficients[2] = (1 - M_SQRT2 * K + K * K) * norm;
-      coefficients[3] = 2 * (K * K - V) * norm;
-      coefficients[4] = (V - sqrtf(2*V) * K + K * K) * norm;
-    }
-    copyCoefficients();
   }
 
   static BiquadFilter* create(int stages){
