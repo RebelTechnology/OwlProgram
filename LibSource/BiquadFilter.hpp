@@ -184,16 +184,6 @@ public:
     return FilterStage(c, s);
   }
 
-  /* perform in-place processing */
-  void process(float* buf, int size){
-#ifdef ARM_CORTEX
-    // arm_biquad_cascade_df1_f32(&df1, buf, buf, size);
-    arm_biquad_cascade_df2T_f32(&df2, buf, buf, size);
-#else
-    ASSERT(false, "todo!");
-#endif /* ARM_CORTEX */
-  }
-
   /* process into output, leaving input intact */
   void process(float* input, float* output, int size){
 #ifdef ARM_CORTEX
@@ -204,8 +194,13 @@ public:
 #endif /* ARM_CORTEX */
   }
 
+  /* perform in-place processing */
+  void process(float* buf, int size){
+    process(buf, buf, size);
+  }
+
   void process(FloatArray in){
-    process(in, in.getSize());
+    process(in, in, in.getSize());
   }
 
   void process(FloatArray in, FloatArray out){
