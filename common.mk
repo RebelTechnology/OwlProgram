@@ -5,7 +5,7 @@ BUILD=$(BUILDROOT)/Build
 DSPLIB=Libraries/CMSIS/DSP_Lib/Source
 
 # Tool path
-TOOLROOT=Tools/gcc-arm-none-eabi-4_9-2015q1/bin
+TOOLROOT=Tools/gcc-arm-none-eabi-4_9-2014q4/bin
 
 CMSIS=Libraries/CMSIS/Include/
 

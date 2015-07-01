@@ -63,8 +63,8 @@ CFLAGS += -I$(BUILD)
 CFLAGS += -IOwlPatches
 PATCH_C_SRC = $(wildcard $(PATCHSOURCE)/*.c) 
 PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
-PATCH_OBJS += $(addprefix Build/, $(notdir $(PATCH_C_SRC:.c=.o)))
-PATCH_OBJS += $(addprefix Build/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
+PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_C_SRC:.c=.o)))
+PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
 vpath %.cpp $(LIBSOURCE)
 vpath %.c $(LIBSOURCE)
 vpath %.s $(LIBSOURCE)
@@ -78,7 +78,7 @@ CFLAGS += -D__unix__ -DHV_SIMD_NONE
 # emscripten
 EMCC       = emcc
 EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11 
-EMCCFLAGS += -IOwlPatches -ISource -IPatchSource -ILibSource -IBuild -ITestPatches
+EMCCFLAGS += -IOwlPatches -ISource -IPatchSource -ILibSource -I$(BUILD) -ITestPatches
 EMCCFLAGS += -ILibraries/KissFFT
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus']"
 EMCC_SRC   = Source/PatchProgram.cpp Source/PatchProcessor.cpp WebSource/web.cpp Source/operators.cpp Source/message.cpp LibSource/StompBox.cpp LibSource/basicmaths.c 
@@ -86,7 +86,7 @@ EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
 
 # object files
-OBJS =  $(C_SRC:%.c=Build/%.o) $(CPP_SRC:%.cpp=Build/%.o)
+OBJS =  $(C_SRC:%.c=$(BUILD)/%.o) $(CPP_SRC:%.cpp=$(BUILD)/%.o)
 
 OBJS += $(BUILD)/startup.o
 OBJS += $(BUILD)/libnosys_gnu.o
@@ -169,7 +169,7 @@ $(BUILD)/patch.as : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
 	$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
 
 $(BUILD)/patch.map : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -Wl,-Map=Build/patch.map $(OBJS) $(PATCH_OBJS) $(LDLIBS)
+	$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/patch.map $(OBJS) $(PATCH_OBJS) $(LDLIBS)
 
 $(BUILD)/%.syx : $(BUILD)/%.bin
 	$(FIRMWARESENDER) -q -in $< -save $@
@@ -198,4 +198,4 @@ online:
 	cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
 web: prep $(PATCH_C_SRC) $(PATCH_CPP_SRC)
-	$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o Build/patch.js
+	$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
