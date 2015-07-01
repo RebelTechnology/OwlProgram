@@ -13,6 +13,7 @@ import tempfile
 import time
 import urlparse
 import zipfile
+import sys
 
 def __zip_dir(in_dir, zip_path, file_filter=None):
     zf = zipfile.ZipFile(zip_path, mode="w", compression=zipfile.ZIP_DEFLATED)
@@ -198,7 +199,7 @@ def main():
         shutil.rmtree(temp_dir) # clean up the temporary directory
         for error in r_json["errors"]:
             print "ERROR:", error["detail"]
-        return
+        sys.exit(-1)
 
     # update the api token, if present
     if "token" in reply_json.get("meta",{}) and not args.x:

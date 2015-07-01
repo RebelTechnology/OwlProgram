@@ -2,7 +2,7 @@
 #define __HeavyPatch_hpp__
 
 #include "StompBox.h"
-#include "Heavy_heavy.h"
+#include "Heavy_owl.h"
 
 #define HEAVY_CHANNELS 2
 
@@ -14,11 +14,11 @@ public:
     registerParameter(PARAMETER_C, "Channel-C");
     registerParameter(PARAMETER_D, "Channel-D");
     
-    context = hv_heavy_new(getSampleRate());
+    context = hv_owl_new(getSampleRate());
   }
   
   ~HeavyPatch() {
-    hv_heavy_free(context);
+    hv_owl_free(context);
   }
   
   void processAudio(AudioBuffer &buffer) {
@@ -44,11 +44,11 @@ public:
     // float** inputs = { &inputCopy, &inputCopy+getBlockSize()};
     float* outputs[] = {buffer.getSamples(0), buffer.getSamples(1) };
     
-    hv_heavy_process(context, outputs, outputs, getBlockSize());		     
+    hv_owl_process(context, outputs, outputs, getBlockSize());		     
   }
   
 private:
-  Hv_heavy *context;
+  Hv_owl *context;
 };
 
 #endif // __HeavyPatch_hpp__

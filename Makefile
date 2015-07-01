@@ -38,8 +38,6 @@ CFLAGS +=  -mno-unaligned-access
 CFLAGS += -fno-omit-frame-pointer
 CFLAGS += -flto
 
-CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11 $(CFLAGS) 
-
 LDFLAGS  = -Wl,--gc-sections
 LDFLAGS += -fpic
 LDFLAGS += -fpie
@@ -54,9 +52,9 @@ CPP_SRC = main.cpp operators.cpp message.cpp StompBox.cpp PatchProcessor.cpp
 CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp
 CPP_SRC += PatchProgram.cpp
 
-LIBSOURCE = $(BUILDROOT)/LibSource
-PATCHSOURCE = $(BUILDROOT)/PatchSource
-TESTPATCHES = $(BUILDROOT)/TestPatches
+PATCHSOURCE ?= $(BUILDROOT)/PatchSource
+LIBSOURCE    = $(BUILDROOT)/LibSource
+TESTPATCHES  = $(BUILDROOT)/TestPatches
 CFLAGS += -I$(LIBSOURCE)
 CFLAGS += -I$(PATCHSOURCE)
 CFLAGS += -I$(TESTPATCHES)
@@ -74,95 +72,43 @@ vpath %.c $(PATCHSOURCE)
 vpath %.s $(PATCHSOURCE)
 
 # Heavy
-CFLAGS += -D__unix__ -DHV_SIMD_NONE
+HEAVYFILE ?= $(PATCHNAME).pd
+HEAVYNAME  = owl
+HEAVYDIR   = $(BUILD)/HeavySource
+CFLAGS    += -I$(HEAVYDIR)
+CFLAGS    += -D__unix__ -DHV_SIMD_NONE
+vpath %.c $(HEAVYDIR)
 
 # emscripten
 EMCC       = emcc
 EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11 
-EMCCFLAGS += -IOwlPatches -ISource -IPatchSource -ILibSource -I$(BUILD) -ITestPatches
+EMCCFLAGS += -IOwlPatches -ISource -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILD) -I$(TESTPATCHES)
 EMCCFLAGS += -ILibraries/KissFFT
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus']"
 EMCC_SRC   = Source/PatchProgram.cpp Source/PatchProcessor.cpp Source/operators.cpp Source/message.cpp 
 EMCC_SRC  += WebSource/web.cpp 
-EMCC_SRC  += LibSource/basicmaths.c LibSource/StompBox.cpp LibSource/FloatArray.cpp LibSource/ComplexFloatArray.cpp
+EMCC_SRC  += $(LIBSOURCE)/basicmaths.c $(LIBSOURCE)/StompBox.cpp $(LIBSOURCE)/FloatArray.cpp $(LIBSOURCE)/ComplexFloatArray.cpp
 EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
+
+CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11 $(CFLAGS) 
 
 # object files
 OBJS =  $(C_SRC:%.c=$(BUILD)/%.o) $(CPP_SRC:%.cpp=$(BUILD)/%.o)
 
-OBJS += $(BUILD)/startup.o
-OBJS += $(BUILD)/libnosys_gnu.o
-OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
-OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
-OBJS += $(DSPLIB)/CommonTables/arm_common_tables.o
-OBJS += $(DSPLIB)/CommonTables/arm_const_structs.o
-
-OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_conj_f32.o
-OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_dot_prod_f32.o
-OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mag_f32.o
-OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mag_squared_f32.o
-OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mult_cmplx_f32.o
-OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mult_real_f32.o
-
-OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
-OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
-OBJS += $(DSPLIB)/TransformFunctions/arm_bitreversal2.o
-OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_f32.o
-
-OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df1_init_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df1_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df2T_init_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df2T_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_correlate_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_conv_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_conv_partial_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_lms_init_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_lms_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_lms_norm_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_lms_norm_init_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_fir_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_fir_init_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_fir_decimate_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_fir_decimate_init_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_fir_interpolate_f32.o
-OBJS += $(DSPLIB)/FilteringFunctions/arm_fir_interpolate_init_f32.o
-
-OBJS += $(DSPLIB)/SupportFunctions/arm_float_to_q31.o
-OBJS += $(DSPLIB)/SupportFunctions/arm_q31_to_float.o
-OBJS += $(DSPLIB)/SupportFunctions/arm_float_to_q15.o
-OBJS += $(DSPLIB)/SupportFunctions/arm_q15_to_float.o
-OBJS += $(DSPLIB)/SupportFunctions/arm_copy_f32.o
-OBJS += $(DSPLIB)/SupportFunctions/arm_fill_f32.o
-
-OBJS += $(DSPLIB)/BasicMathFunctions/arm_abs_f32.o
-OBJS += $(DSPLIB)/BasicMathFunctions/arm_add_f32.o
-OBJS += $(DSPLIB)/BasicMathFunctions/arm_dot_prod_f32.o
-OBJS += $(DSPLIB)/BasicMathFunctions/arm_mult_f32.o
-OBJS += $(DSPLIB)/BasicMathFunctions/arm_negate_f32.o
-OBJS += $(DSPLIB)/BasicMathFunctions/arm_scale_f32.o
-OBJS += $(DSPLIB)/BasicMathFunctions/arm_sub_f32.o
-
-OBJS += $(DSPLIB)/StatisticsFunctions/arm_max_f32.o
-OBJS += $(DSPLIB)/StatisticsFunctions/arm_mean_f32.o
-OBJS += $(DSPLIB)/StatisticsFunctions/arm_min_f32.o
-OBJS += $(DSPLIB)/StatisticsFunctions/arm_power_f32.o
-OBJS += $(DSPLIB)/StatisticsFunctions/arm_rms_f32.o
-OBJS += $(DSPLIB)/StatisticsFunctions/arm_std_f32.o
-OBJS += $(DSPLIB)/StatisticsFunctions/arm_var_f32.o
-
 all: patch
 
 # include common make file
+include $(BUILDROOT)/libs.mk
 include $(BUILDROOT)/common.mk
 
-.PHONY: prep clean realclean run store online docs
+.PHONY: clean realclean run store online docs
 
 prep:
 	@echo Building patch $(PATCHNAME)
-	echo '.string "'$(PATCHNAME)'"' > $(BUILD)/progname.s
-	echo "#include \"$(PATCHFILE)\"" > $(BUILD)/patch.h
-	echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $(BUILD)/patch.cpp
+	@echo '.string "'$(PATCHNAME)'"' > $(BUILD)/progname.s
+	@echo "#include \"$(PATCHFILE)\"" > $(BUILD)/patch.h
+	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $(BUILD)/patch.cpp
 
 # Build executable 
 $(BUILD)/patch.elf : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT) 
@@ -177,7 +123,7 @@ $(BUILD)/patch.map : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
 $(BUILD)/%.syx : $(BUILD)/%.bin
 	$(FIRMWARESENDER) -q -in $< -save $@
 
-$(BUILD)/%Patch.hpp: PatchSource/%.dsp
+$(BUILD)/%Patch.hpp: $(PATCHSOURCE)/%.dsp
 	cd $(BUILD) && faust2owl ../$<
 
 patch: prep $(BUILD)/patch.bin
@@ -194,11 +140,24 @@ docs:
 	doxygen Doxyfile
 
 online:
-	echo "$(ONLINE_INCLUDES)" > $(BUILD)/patch.h
-	echo "$(ONLINE_REGISTER)" > $(BUILD)/patch.cpp
-	echo '.string "OnlineCompiler"' > $(BUILD)/progname.s
-	make $(BUILD)/patch.syx
-	cp $(BUILD)/patch.syx $(BUILD)/online.syx
+	@echo "$(ONLINE_INCLUDES)" > $(BUILD)/patch.h
+	@echo "$(ONLINE_REGISTER)" > $(BUILD)/patch.cpp
+	@echo '.string "OnlineCompiler"' > $(BUILD)/progname.s
+	@make $(BUILD)/patch.syx
+	@cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
 web: prep $(PATCH_C_SRC) $(PATCH_CPP_SRC)
 	$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
+
+$(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
+	@mkdir -p $(BUILD)/HeavySource
+	@cp -f $(PATCHSOURCE)/*.pd $(BUILD)/HeavySource
+	@cp -f $< $@
+
+$(HEAVYDIR)/Heavy_owl.h: $(BUILD)/HeavySource/_main.pd
+	python ./Tools/Heavy/uploader.py $(BUILD)/HeavySource -g c -n $(HEAVYNAME) -o $(HEAVYDIR)
+
+heavy: $(HEAVYDIR)/Heavy_owl.h
+	$(eval HEAVY_SRC = $(wildcard $(HEAVYDIR)/*.c) )
+	$(eval PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(HEAVY_SRC:.c=.o))) )
+	make $(PATCH_OBJS)
