@@ -69,19 +69,19 @@ public:
     assert(&fa[0]==data, "[] operator");
     assert((float *)fa==data, "(float *) operator");
     
-    //test == operator
+    //test equals
     {
       tempFa1.setAll(1);
       tempFa2.setAll(0);
-      assert(tempFa1!=tempFa2, "!= operator, all values are different");
+      assert(!tempFa1.equals(tempFa2), "not equals, all values are different");
       tempFa1.noise();
       tempFa2.copyFrom(tempFa1);
-      assert(tempFa1==tempFa2, "== operator");
+      assert(tempFa1.equals(tempFa2), "equals");
       tempFa2[size-1]-=1;
-      assert(tempFa1!=tempFa2, "!= operator, one value is different");
+      assert(!tempFa1.equals(tempFa2), "not equals, one value is different");
       FloatArray temp=FloatArray::create(size-1);
       temp.copyFrom(tempFa2);
-      assert(temp!=tempFa2, "!= operator, size is different");
+      assert(!temp.equals(tempFa2), "not equals, size is different");
       FloatArray::destroy(temp);
     }
     
