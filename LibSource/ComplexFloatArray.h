@@ -54,6 +54,15 @@ public:
   }
   static ComplexFloatArray create(int size);
   static void destroy(ComplexFloatArray);
+  void copyFrom(FloatArray source);
+  void copyFrom(ComplexFloatArray source);
+  void copyFrom(ComplexFloat* other, int length);
+  void copyTo(FloatArray destination);
+  void copyTo(ComplexFloatArray destination);
+  void copyTo(ComplexFloat* other, int length);
+  void setAll(ComplexFloat value);
+  void setAll(float value);
+  void setAll(float valueRe, float valueIm);
 };
 
 #endif // __ComplexFloatArray_h__

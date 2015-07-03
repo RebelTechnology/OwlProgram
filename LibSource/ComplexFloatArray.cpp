@@ -1,5 +1,6 @@
 #include "ComplexFloatArray.h"
 #include "basicmaths.h"
+#include "message.h"
 
 float ComplexFloatArray::mag(const int i){
   float result;
@@ -158,4 +159,62 @@ ComplexFloatArray ComplexFloatArray::create(int size){
 
 void ComplexFloatArray::destroy(ComplexFloatArray array){
   delete array.data;
+}
+
+/* Copies real values from a FloatArray, sets imaginary values to 0
+ */
+void ComplexFloatArray::copyFrom(FloatArray source){
+  for(int n=0; n<min(size,source.getSize()); n++){
+    data[n].re=source[n];
+    data[n].im=0;
+  }
+}
+
+/* Copies real part to a FloatArray */
+void ComplexFloatArray::copyTo(FloatArray destination){
+  for(int n=0; n<min(size,destination.getSize()); n++){
+    destination[n]=data[n].re;
+  }
+}
+
+/*BEGIN -- methods copied and adapted from ComplexFloatArray.cpp*/
+void ComplexFloatArray::copyTo(ComplexFloatArray destination){
+  copyTo(destination, min(size, destination.getSize()));
+}
+
+void ComplexFloatArray::copyFrom(ComplexFloatArray source){
+  copyFrom(source, min(size, source.getSize()));
+}
+
+void ComplexFloatArray::copyTo(ComplexFloat* other, int length){
+  ASSERT(size >= length, "Array too small");
+  #ifdef ARM_CORTEX
+  arm_copy_f32((float *)data, (float *)other, length*2); //note the *2 multiplier which accounts for real and imaginary parts
+  #endif /* ARM_CORTEX */
+  // memcpy(other.data, data, size*sizeof(float)*2);
+}
+
+void ComplexFloatArray::copyFrom(ComplexFloat* other, int length){
+  ASSERT(size >= length, "Array too small");
+  #ifdef ARM_CORTEX
+  arm_copy_f32((float *)other, (float *)data, length *2);  //note the *2 multiplier which accounts for real and imaginary parts
+  #endif /* ARM_CORTEX */
+}
+void ComplexFloatArray::setAll(float value){
+  #ifdef ARM_CORTEX
+  arm_fill_f32(value, (float *)data, size *2 ); //note the *2 multiplier which accounts for real and imaginary parts
+  #endif /* ARM_CORTEX */
+}
+/*END -- methods copied and adapted from ComplexFloatArray.cpp*/
+void ComplexFloatArray::setAll(ComplexFloat value){
+  for(int n=0; n<size; n++){
+    data[n].re=value.re;
+    data[n].im=value.im;
+  }
+}
+void ComplexFloatArray::setAll(float valueRe, float valueIm){
+  ComplexFloat value;
+  value.re=valueRe;
+  value.im=valueIm;
+  setAll(value);
 }

@@ -31,25 +31,25 @@ public:
     success=true;
     passed=0;
     failed=0;
-    int sz=100;
-    ComplexFloat data[sz];
-    ComplexFloat backupData[sz];
-    for(int n=0; n<sz; n++){ //initialize array
-      float value= n<sz/2 ? n : sz-n; 
+    int size=100;
+    ComplexFloat data[size];
+    ComplexFloat backupData[size];
+    for(int n=0; n<size; n++){ //initialize array
+      float value= n<size/2 ? n : size-n; 
       data[n].re=backupData[n].re=value;
       data[n].im=backupData[n].im=-value;
     }
-    ComplexFloatArray cfa(data,sz);
-    ComplexFloatArray backupcf(backupData,sz);
-    ComplexFloat tempcData[sz]; 
-    ComplexFloatArray tempc(tempcData,sz);
-    ComplexFloat tempc2Data[sz]; 
-    ComplexFloatArray tempc2(tempc2Data,sz);
-    float tempfData[sz]; 
-    FloatArray tempf(tempfData,sz);
+    ComplexFloatArray cfa(data,size);
+    ComplexFloatArray backupcf(backupData,size);
+    ComplexFloat tempcData[size]; 
+    ComplexFloatArray tempc(tempcData,size);
+    ComplexFloat tempc2Data[size]; 
+    ComplexFloatArray tempc2(tempc2Data,size);
+    float tempfData[size]; 
+    FloatArray tempf(tempfData,size);
         
-    assert(cfa.getSize()==sz,"ComplexFloatArray.getSize()");
-    for(int n=0; n<sz; n++){ 
+    assert(cfa.getSize()==size,"ComplexFloatArray.getSize()");
+    for(int n=0; n<size; n++){ 
       //checking cast and indexing operators
       assert(cfa[n].re==data[n].re,"ComplexFloat& operator []");
       assert(cfa[n].im==data[n].im,"ComplexFloat& operator []");
@@ -66,39 +66,39 @@ public:
       assert(cfa.mag2(n)==f[2*n]*f[2*n]+f[2*n+1]*f[2*n+1],"mag2");
     }
     cfa.getMagnitudeValues(tempf);
-    for(int n=0; n<sz; n++){
+    for(int n=0; n<size; n++){
       assert(tempf[n]==sqrtf(cfa[n].re*cfa[n].re+cfa[n].im*cfa[n].im),"getMagnitudeValues", n);
     }
     cfa.getMagnitudeSquaredValues(tempf);
-    for(int n=0; n<sz; n++){
+    for(int n=0; n<size; n++){
       assert(tempf[n]==cfa[n].re*cfa[n].re+cfa[n].im*cfa[n].im,"getMagnitudeSquaredValues");
     }
     cfa.getComplexConjugateValues(tempc);
-    for(int n=0; n<sz; n++){
+    for(int n=0; n<size; n++){
       assert(tempc[n].re==cfa[n].re,"getComplexConjugateValues-real");
       assert(tempc[n].im==-cfa[n].im,"getComplexConjugateValues-imag");
     }
     cfa.complexByComplexMultiplication(tempc, tempc2);
-    for(int n=0; n<sz; n++){
+    for(int n=0; n<size; n++){
       assert(tempc2[n].re==cfa[n].re*tempc[n].re - cfa[n].im*tempc[n].im,"complexByComplexMultiplication-real");
       assert(tempc2[n].im==cfa[n].re*tempc[n].im + cfa[n].im*tempc[n].re,"complexByComplexMultiplication-imag");
     }
     cfa.complexByRealMultiplication(tempf, tempc2);
-    for(int n=0; n<sz; n++){
+    for(int n=0; n<size; n++){
       assert(tempc2[n].re==cfa[n].re*tempf[n],"complexByRealMultiplication-real");
       assert(tempc2[n].im==cfa[n].im*tempf[n],"complexByRealMultiplication-imag");
     }
     
   //ComplexDotProduct
     ComplexFloat tempcf;
-    for(int n=0; n<sz; n++){
+    for(int n=0; n<size; n++){
       tempcData[n].re=backupData[n].re=n*2;
       tempcData[n].im=backupData[n].im=-(n*2+1);
     }
     cfa.complexDotProduct(tempc, tempcf);
     float realResult=0;
     float imagResult=0;
-    for(int n=0; n<sz; n++) {    
+    for(int n=0; n<size; n++) {    
       realResult += cfa[n].re*tempc[n].re - cfa[n].im*tempc[n].im;
       imagResult += cfa[n].re*tempc[n].im + cfa[n].im*tempc[n].re;
     }
@@ -107,7 +107,7 @@ public:
 
     float maxMagVal=-1;
     int maxMagInd=-1;
-    for(int n=0; n<sz; n++){
+    for(int n=0; n<size; n++){
       if(cfa.mag(n)>maxMagVal){
         maxMagVal=cfa.mag(n);
         maxMagInd=n;
@@ -117,13 +117,74 @@ public:
     assert(maxMagInd==cfa.getMaxMagnitudeIndex(),"getMaxMagnitudeIndex()");
     
     cfa.getRealValues(tempf);
-    for(int n=0; n<sz; n++){
+    for(int n=0; n<size; n++){
       assert(tempf[n]==cfa[n].re,"getRealValues");
     }
     cfa.getImaginaryValues(tempf);
-    for(int n=0; n<sz; n++){
+    for(int n=0; n<size; n++){
       assert(tempf[n]==cfa[n].im,"getImaginaryValues");
     }
+    
+    //test setAll
+    // test setAll(float)
+    {
+      for(int n=0; n<size; n++){
+        tempc[n].re=1;
+        tempc[n].im=1;
+      }
+      float allValue=0.1;
+      tempc.setAll(allValue);
+      for(int n=0; n<size; n++){
+        assert(tempc[n].re==allValue, "setAll(float) real");
+        assert(tempc[n].im==allValue, "setAll(float) imag");
+      }
+    }
+      // test setAll(float, float)
+    {
+      float allValueRe=0.3;
+      float allValueIm=-0.3;
+      tempc.setAll(allValueRe, allValueIm);
+      for(int n=0; n<size; n++){
+        assert(tempc[n].re==allValueRe, "setAll(float, float) real");
+        assert(tempc[n].im==allValueIm, "setAll(float, float) imag");
+      }
+    }
+      // test setAll(ComplexFloat)
+    {
+      ComplexFloat allValue;
+      allValue.re=0.4;
+      allValue.im=-0.1;
+      tempc.setAll(allValue);
+      for(int n=0; n<size; n++){
+        assert(tempc[n].re==allValue.re, "setAll(ComplexFloat) real");
+        assert(tempc[n].im==allValue.im, "setAll(ComplexFloat) imag");
+      }
+    }
+    
+    //test copyFrom
+    //test copyFrom(FloatArray)
+    tempc.setAll(0);
+    tempc.copyFrom(tempf);
+    for(int n=0; n<size; n++){
+      assert(tempf[n]==tempc[n].re, "copyFrom(FloatArray)");
+    }
+    //test copyFrom(ComplexFloatArray)
+    tempc.setAll(0);
+    tempc.copyFrom(cfa);
+    for(int n=0; n<size; n++){
+      assert(cfa[n].re==tempc[n].re, "copyFrom(ComplexFloatArray), real");
+      assert(cfa[n].im==tempc[n].im, "copyFrom(ComplexFloatArray), imag");
+    }
+    //test copyFrom(ComplexFloat *, int)
+    tempc.setAll(0);
+    tempc.copyFrom(cfa.getData(), cfa.getSize());
+    for(int n=0; n<size; n++){
+      assert(cfa[n].re==tempc[n].re, "copyFrom(ComplexFloat*, int), real");
+      assert(cfa[n].im==tempc[n].im, "copyFrom(ComplexFloat*, int), imag");
+    }
+    
+    
+    
 /*
     ComplexFloatArray subarray(int offset, int length);
 */
