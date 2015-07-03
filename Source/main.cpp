@@ -1,6 +1,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include "ProgramVector.h"
+#include "ServiceCall.h"
 #include "device.h"
 #include "main.h"
 
