@@ -160,4 +160,6 @@ $(HEAVYDIR)/Heavy_owl.h: $(BUILD)/HeavySource/_main.pd
 heavy: $(HEAVYDIR)/Heavy_owl.h
 	$(eval HEAVY_SRC = $(wildcard $(HEAVYDIR)/*.c) )
 	$(eval PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(HEAVY_SRC:.c=.o))) )
+	$(eval PATCHCLASS = HeavyPatch)
+	$(eval PATCHFILE = HeavyPatch.hpp)
 	make $(PATCH_OBJS)
