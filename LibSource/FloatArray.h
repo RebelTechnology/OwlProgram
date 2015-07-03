@@ -41,6 +41,9 @@ public:
   float getVariance();
   void scale(float factor, FloatArray destination);
   void scale(float factor);
+  void clip();
+  void clip(float max);
+  void clip(float max, float newMax);
   void add(FloatArray operand2, FloatArray destination);
   void add(FloatArray operand2); //in-place
   void add(float scalar);

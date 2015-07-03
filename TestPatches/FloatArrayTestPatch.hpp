@@ -142,7 +142,26 @@ public:
         assert(tempFa1[n]==fa[n]*factor, "scale() in-place");
       }
     }
-    
+    //test clip
+    {
+      tempFa1.copyFrom(fa);
+      float clip=0.5;
+      tempFa1.clip(clip);
+      for(int n=0; n<size; n++){
+        assert(abs(tempFa1[n])<=clip, "clip");
+      }
+      tempFa1.copyFrom(fa);
+      tempFa1.scale(3);
+      tempFa1.clip();
+      for(int n=0; n<size; n++){
+        assert(abs(tempFa1[n])<=1, "clip to 1");
+      }
+      fa.scale(3, tempFa1);
+      tempFa1.clip(0.1, 0.5);
+      for(int n=0; n<size; n++){
+        assert(abs(tempFa1[n])<=0.5, "clip and scale");
+      }
+    }
     //test negate
     tempFa1.copyFrom(fa);
     tempFa1.negate(); //in-place
