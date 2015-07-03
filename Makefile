@@ -102,7 +102,7 @@ all: patch
 include $(BUILDROOT)/libs.mk
 include $(BUILDROOT)/common.mk
 
-.PHONY: clean realclean run store online docs
+.PHONY: clean realclean prep run store online docs
 
 prep:
 	@echo Building patch $(PATCHNAME)
