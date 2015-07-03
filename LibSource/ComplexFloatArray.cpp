@@ -188,22 +188,36 @@ void ComplexFloatArray::copyFrom(ComplexFloatArray source){
 
 void ComplexFloatArray::copyTo(ComplexFloat* other, int length){
   ASSERT(size >= length, "Array too small");
-  #ifdef ARM_CORTEX
-  arm_copy_f32((float *)data, (float *)other, length*2); //note the *2 multiplier which accounts for real and imaginary parts
-  #endif /* ARM_CORTEX */
-  // memcpy(other.data, data, size*sizeof(float)*2);
+#ifdef ARM_CORTEX
+  arm_copy_f32((float *)data, (float *)other, length*sizeof(ComplexFloat)/sizeof(float));
+#else
+  for(int n=0; n<length; n++){
+    other[n].re=data[n].re;
+    other[n].im=data[n].im;
+  }
+#endif /* ARM_CORTEX */
 }
 
 void ComplexFloatArray::copyFrom(ComplexFloat* other, int length){
   ASSERT(size >= length, "Array too small");
-  #ifdef ARM_CORTEX
-  arm_copy_f32((float *)other, (float *)data, length *2);  //note the *2 multiplier which accounts for real and imaginary parts
-  #endif /* ARM_CORTEX */
+#ifdef ARM_CORTEX
+  arm_copy_f32((float *)other, (float *)data, length*sizeof(ComplexFloat)/sizeof(float));  //note the *2 multiplier which accounts for real and imaginary parts
+#else
+  for(int n=0; n<length; n++){
+    data[n].re=other[n].re;
+    data[n].im=other[n].im;
+  }
+#endif /* ARM_CORTEX */
 }
 void ComplexFloatArray::setAll(float value){
-  #ifdef ARM_CORTEX
+#ifdef ARM_CORTEX
   arm_fill_f32(value, (float *)data, size *2 ); //note the *2 multiplier which accounts for real and imaginary parts
-  #endif /* ARM_CORTEX */
+#else
+  ComplexFloat val;
+  val.re=value;
+  val.im=value;
+  setAll(val);
+#endif /* ARM_CORTEX */
 }
 /*END -- methods copied and adapted from ComplexFloatArray.cpp*/
 void ComplexFloatArray::setAll(ComplexFloat value){
