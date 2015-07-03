@@ -33,7 +33,8 @@
 
 class ResampleTestPatch : public Patch {
 public:
-  Resample resample;
+  Upsample upsample;
+  Downsample downsample;
   FloatArray up;
   FloatArray temp;
   int factor;
@@ -45,36 +46,22 @@ public:
     factor=4;
     numTaps=8;
     int blockSize=getBlockSize();
-    resample.init(factor, numTaps, blockSize);
+    upsample.init(factor, numTaps, blockSize);
+    downsample.init(factor, numTaps, blockSize*factor);
     up=FloatArray::create(factor*blockSize);
-    temp=FloatArray::create(blockSize);
   }
   ~ResampleTestPatch(){
     FloatArray::destroy(up);
   }
   void processAudio(AudioBuffer &buffer){
+    FloatArray samples=buffer.getSamples(0);
     if(getParameterValue(PARAMETER_A)<0.5){
+      // debugMessage("oversample",downsample.getCoefficients()[3]);
       return;
     }
-    FloatArray samples=buffer.getSamples(0);
-    resample.up(samples,up);
-    // for(int n=0; n<getBlockSize(); n++){ //upsample withour filtering 
-      // for(int k=0; k<factor; k++)
-        // up[n]=samples[n+k];
-    // }
-    // resample.down(up, samples);
-    for(int n=0; n<getBlockSize(); n++){ //downsample without filtering
-        samples[n]=up[n*factor];
-    }
-    // samples.scale(getParameterValue(PARAMETER_B)*0.00000000000000000001);
-    samples.scale(getParameterValue(PARAMETER_B)*0.00001);
-    for(int n=0; n<getBlockSize(); n++){
-      if(samples[n]>1)
-        samples[n]=1;
-      if(samples[n]<-1)
-        samples[n]=-1;
-    }
-    samples.scale(getParameterValue(PARAMETER_C));
+    // debugMessage("oversample",downsample.getCoefficients()[0],downsample.getCoefficients()[1],downsample.getCoefficients()[2]);
+    upsample.up(samples,up);
+    downsample.down(up, samples);
   }
 };
 
