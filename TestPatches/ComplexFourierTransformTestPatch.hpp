@@ -10,7 +10,7 @@ private:
   int failed;
   int fftsize;
   ComplexFourierTransform fftArm;
-  ComplexFourierTransformGeneric fftGeneric;
+  // ComplexFourierTransform fftGeneric;
   bool assertt(float first, float second, const char *message){ //assert with tolerance
     bool cond=false;
     float tol=0.0000001;
@@ -46,7 +46,7 @@ public:
     // failed=0;
     fftsize=getBlockSize();
     fftArm.init(fftsize);
-    fftGeneric.init(fftsize);
+    // fftGeneric.init(fftsize);
     inout=ComplexFloatArray::create(fftsize);
     
   };
@@ -55,8 +55,8 @@ public:
     inout.copyFrom(samples); //copies only real values 
     if(getParameterValue(PARAMETER_A)>0.5){
       debugMessage("generic");
-      fftGeneric.fft(inout);
-      fftGeneric.ifft(inout);
+      // fftGeneric.fft(inout);
+      // fftGeneric.ifft(inout);
     } else {
       debugMessage("arm");
       fftArm.fft(inout);
