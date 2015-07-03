@@ -300,13 +300,14 @@ public:
         assert(operand2[n]==operand2Backup[n], "partial convolve() operand2 modified"); //check that the source array has not been modified
       }
       for(int n=offset; n<offset+samples; n++){
-        assert(destinationReference[n]==destination[n], "partial convolution");
+        assert(destinationReference[n]==destination[n-offset], "partial convolution result");
       }
       //test correlate
+      operand2Backup.copyFrom(operand2);
       fa.correlate(operand2, destination);
       for(int n=0; n<size; n++){
         assert(fa[n]==backupData[n], " convolve() source modified"); //check that the source array has not been modified
-        assert(operand2[n]==operand2Backup[n], "partial convolve() operand2 modified"); //check that the source array has not been modified
+        assert(operand2[n]==operand2Backup[n], "correlate() operand2 modified"); //check that the source array has not been modified
       }
       //correlation is the same as a convolution where one of the signals is flipped in time
       //so we flip in time operand2

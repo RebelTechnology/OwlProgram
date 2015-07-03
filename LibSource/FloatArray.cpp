@@ -206,17 +206,20 @@ void FloatArray::copyFrom(FloatArray source){
 
 void FloatArray::copyTo(float* other, int length){
   ASSERT(size >= length, "Array too small");
-  #ifdef ARM_CORTEX
+#ifdef ARM_CORTEX
   arm_copy_f32(data, other, length);
-  #endif /* ARM_CORTEX */
-  // memcpy(other.data, data, size*sizeof(float));
+#else
+  memcpy((void *)other, (void *)getData(), length*sizeof(float));
+#endif /* ARM_CORTEX */
 }
 
 void FloatArray::copyFrom(float* other, int length){
   ASSERT(size >= length, "Array too small");
-  #ifdef ARM_CORTEX
+#ifdef ARM_CORTEX
   arm_copy_f32(other, data, length);
-  #endif /* ARM_CORTEX */
+#else
+  memcpy((void *)getData(), (void *)other, length*sizeof(float));
+#endif /* ARM_CORTEX */
 }
 /*
  * Copies @samples samples starting from sample @sourceOffset of @source to @destinationOffset in the current FloatArray
@@ -224,9 +227,11 @@ void FloatArray::copyFrom(float* other, int length){
 void FloatArray::insert(FloatArray source, int sourceOffset, int destinationOffset, int samples){
   ASSERT(size >= destinationOffset+samples, "Array too small");
   ASSERT(source.size >= sourceOffset+samples, "Array too small");
-  #ifdef ARM_CORTEX
+#ifdef ARM_CORTEX
   arm_copy_f32(source.data+sourceOffset, data+destinationOffset, samples);  
-  #endif /* ARM_CORTEX */
+#else
+  memcpy((void*)(getData()+destinationOffset), (void*)(source.getData()+sourceOffset), samples*sizeof(float));
+#endif /* ARM_CORTEX */
 }
 /*
  * Copies @samples samples from the beginning of @source to @destinationOffset in the current FloatArray
@@ -241,20 +246,28 @@ void FloatArray::move(int fromIndex, int toIndex, int samples){
 }
 
 void FloatArray::setAll(float value){
-  #ifdef ARM_CORTEX
+#ifdef ARM_CORTEX
   arm_fill_f32(value, data, size);
-  #endif /* ARM_CORTEX */
+#else
+  for(int n=0; n<size; n++){
+    data[n]=value;
+  }
+#endif /* ARM_CORTEX */
 }
 
 void FloatArray::add(FloatArray operand2, FloatArray destination){ //allows in-place
   ASSERT(operand2.size == size &&  destination.size==size, "Arrays must be same size");
-  #ifdef ARM_CORTEX
+#ifdef ARM_CORTEX
   /* despite not explicitely documented in the CMSIS documentation,
       this has been tested to behave properly even when pSrcA==pDst
       void 	arm_add_f32 (float32_t *pSrcA, float32_t *pSrcB, float32_t *pDst, uint32_t blockSize)
   */
-  arm_add_f32(data, operand2.data, destination.data, size); 
-  #endif /* ARM_CORTEX */
+  arm_add_f32(data, operand2.data, destination.data, size);
+#else
+  for(int n=0; n<size; n++){
+    destination[n]=data[n]+operand2[n];
+  }
+#endif /* ARM_CORTEX */
 }
 
 void FloatArray::add(FloatArray operand2){ //in-place
@@ -275,6 +288,10 @@ void FloatArray::subtract(FloatArray operand2, FloatArray destination){ //allows
       void 	arm_sub_f32 (float32_t *pSrcA, float32_t *pSrcB, float32_t *pDst, uint32_t blockSize)
   */
   arm_sub_f32(data, operand2.data, destination.data, size);
+  #else
+  for(int n=0; n<size; n++){
+    destination[n]=data[n]-operand2[n];
+  }
   #endif /* ARM_CORTEX */
 }
 
@@ -296,6 +313,11 @@ void FloatArray::multiply(FloatArray operand2, FloatArray destination){ //allows
       void 	arm_mult_f32 (float32_t *pSrcA, float32_t *pSrcB, float32_t *pDst, uint32_t blockSize)
   */
     arm_mult_f32(data, operand2.data, destination, size);
+  #else
+  for(int n=0; n<size; n++){
+    destination[n]=data[n]*operand2[n];
+  }
+
   #endif /* ARM_CORTEX */
 }
 
@@ -312,6 +334,10 @@ void FloatArray::multiply(float scalar){
 void FloatArray::negate(FloatArray& destination){//allows in-place
   #ifdef ARM_CORTEX
   arm_negate_f32(data, destination.getData(), size); 
+  #else
+  for(int n=0; n<size; n++){
+    destination[n]=-data[n];
+  }
   #endif /* ARM_CORTEX */
 }
 void FloatArray::negate(){
@@ -331,6 +357,17 @@ void FloatArray::convolve(FloatArray operand2, FloatArray destination){
   ASSERT(destination.size >= size + operand2.size -1, "Destination array too small");
 #ifdef ARM_CORTEX
   arm_conv_f32(data, size, operand2.data, operand2.size, destination);
+#else
+  int size2=operand2.getSize();
+  for (int n=0; n<size+size2-1; n++){
+    int n1=n;
+    destination[n] =0;
+    for(int k=0; k<size2; k++){
+      if(n1>=0 && n1<size)
+        destination[n]+=data[n1]*operand2[k];
+      n1--;
+    }
+  }
 #endif /* ARM_CORTEX */
 }
 
@@ -341,6 +378,20 @@ void FloatArray::convolve(FloatArray operand2, FloatArray destination, int offse
   ASSERT(destination.size >= samples, "Destination array too small");
 #ifdef ARM_CORTEX
   arm_conv_partial_f32(data, size, operand2.data, operand2.size, destination, offset, samples);
+#else
+  /*
+  This implementation is just a copy/paste/edit from the overloaded method
+  */
+  int size2=operand2.getSize();
+  for (int n=offset; n<offset+samples; n++){
+    int n1=n;
+    destination[n-offset] =0;
+    for(int k=0; k<size2; k++){
+      if(n1>=0 && n1<size)
+        destination[n-offset]+=data[n1]*operand2[k];
+      n1--;
+    }
+  }
 #endif /* ARM_CORTEX */
 }
 
@@ -359,6 +410,14 @@ void FloatArray::correlateInitialized(FloatArray operand2, FloatArray destinatio
   ASSERT(destination.size >= size+operand2.size-1, "Destination array too small"); //TODO: change CMSIS docs, which state a different size
 #ifdef ARM_CORTEX
   arm_correlate_f32(data, size, operand2.data, operand2.size, destination);
+#else
+  //correlation is the same as a convolution where one of the signals is flipped in time
+  //so we flip in time operand2 
+  operand2.reverse();
+  //and convolve it with fa to obtain the correlation
+  convolve(operand2, destination);
+  //and we flip back operand2, so that the input is not modified
+  operand2.reverse();
 #endif /* ARM_CORTEX */  
 }
 FloatArray FloatArray::create(int size){
