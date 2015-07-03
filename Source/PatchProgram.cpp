@@ -9,6 +9,7 @@
 #include "FastFourierTransform.h"
 #include "Window.hpp"
 #include "BiquadFilter.hpp"
+#include "Resample.h"
 #include "patch.h"
 #include "main.h"
 
