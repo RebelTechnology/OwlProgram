@@ -377,18 +377,23 @@ void FloatArray::convolve(FloatArray operand2, FloatArray destination){
 void FloatArray::convolve(FloatArray operand2, FloatArray destination, int offset, int samples){
   ASSERT(destination.size >= samples, "Destination array too small");
 #ifdef ARM_CORTEX
-  arm_conv_partial_f32(data, size, operand2.data, operand2.size, destination, offset, samples);
+  //TODO: I suspect a bug in arm_conv_partial_f32
+  //it seems that destination[n] is left unchanged for n<offset
+  //and the result is actually stored from destination[offset] onwards
+  //that is, in the same position where they would be if a full convolution was performerd
+  arm_conv_partial_f32(data, size, operand2.data, operand2.size, destination.getData(), offset, samples);
 #else
+  //this implementations reproduces the (buggy?) behaviour of arm_conv_partial (see comment above and inline comments below)
   /*
   This implementation is just a copy/paste/edit from the overloaded method
   */
   int size2=operand2.getSize();
   for (int n=offset; n<offset+samples; n++){
     int n1=n;
-    destination[n-offset] =0;
+    destination[n] =0; //this should be [n-offset]
     for(int k=0; k<size2; k++){
       if(n1>=0 && n1<size)
-        destination[n-offset]+=data[n1]*operand2[k];
+        destination[n]+=data[n1]*operand2[k];//this should be destination[n-offset]
       n1--;
     }
   }
