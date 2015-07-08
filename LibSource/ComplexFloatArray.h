@@ -2,10 +2,41 @@
 #define __ComplexFloatArray_h__
 
 #include "FloatArray.h"
+#include "basicmaths.h"
 
 struct ComplexFloat {
   float re;
   float im;
+  float getMagnitude(){
+    return sqrtf(re*re+im*im);  
+  }
+  float getPhase(){
+    return atan2(im,re);
+  }
+  void setPhase(float phase){
+    setPhase(phase, *this);
+  }
+  /*
+    setPhase(float phase, ComplexFloat input) sets the phase to match @phase and the magnitude to match the magnitude of @input
+  */
+  void setPhase(float phase, ComplexFloat input){
+    float magnitude=input.getMagnitude();
+    setPolar(magnitude, phase);
+  }
+  void setMagnitude(float magnitude){
+    setMagnitude(magnitude, *this);
+  }
+  /*
+    setMagnitude(float magnitude, ComplexFloat input) sets the magnitude to match @magnitude and the phase to match the phase of @input
+  */
+  void setMagnitude(float magnitude, ComplexFloat input){
+    float phase=input.getPhase();
+    setPolar(magnitude, phase);
+  }
+  void setPolar(float magnitude, float phase){
+    re=magnitude*cosf(phase);
+    im=magnitude*sinf(phase);
+  }
 };
 
 class ComplexFloatArray {
@@ -31,7 +62,7 @@ public:
   void complexDotProduct(ComplexFloatArray& operand2, ComplexFloat& result);
   void complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result);
   void complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result);
-  int getSize(){
+  int getSize() const{
     return size;
   }
   float getMaxMagnitudeValue();
@@ -43,6 +74,9 @@ public:
   ComplexFloat& operator [](const int i){
     return data[i];
   }
+  ComplexFloat& operator [](const int i) const{
+    return data[i];
+  }
   operator ComplexFloat*() {
     return data;
   }
@@ -51,6 +85,17 @@ public:
   }
   ComplexFloat* getData(){
     return data;
+  }
+  bool equals(const ComplexFloatArray& other) const{
+    if(size!=other.getSize()){
+      return false;
+    }
+    for(int n=0; n<size; n++){
+      if(data[n].re!=other[n].re || data[n].im!=other[n].im){
+        return false;
+      }
+    }
+    return true;
   }
   static ComplexFloatArray create(int size);
   static void destroy(ComplexFloatArray);
@@ -63,6 +108,16 @@ public:
   void setAll(ComplexFloat value);
   void setAll(float value);
   void setAll(float valueRe, float valueIm);
+  void setPolar(FloatArray magnitude, FloatArray phase);
+  void setPolar(FloatArray magnitude, FloatArray phase, int offset, int count);
+  void setPhase(FloatArray phase);
+  void setPhase(FloatArray phase, int offset, int count);
+  void setPhase(FloatArray phase, ComplexFloatArray destination);
+  void setPhase(FloatArray phase, int offset, int count, ComplexFloatArray destination);
+  void setMagnitude(FloatArray magnitude);
+  void setMagnitude(FloatArray magnitude, int offset, int count);
+  void setMagnitude(FloatArray magnitude, ComplexFloatArray destination);
+  void setMagnitude(FloatArray magnitude, int offset, int count, ComplexFloatArray destination);
 };
 
 #endif // __ComplexFloatArray_h__

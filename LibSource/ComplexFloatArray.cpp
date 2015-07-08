@@ -232,3 +232,47 @@ void ComplexFloatArray::setAll(float valueRe, float valueIm){
   value.im=valueIm;
   setAll(value);
 }
+
+void ComplexFloatArray::setPolar(FloatArray magnitude, FloatArray phase){
+  setPolar(magnitude, phase, 0, size);
+}
+void ComplexFloatArray::setPolar(FloatArray magnitude, FloatArray phase, int offset, int count){
+  for(int n=offset; n<count+offset; n++){
+    data[n].setPolar(magnitude[n], phase[n]);
+  }
+}
+void ComplexFloatArray::setPhase(FloatArray phase){
+  setPhase(phase, 0, size);
+}
+void ComplexFloatArray::setPhase(FloatArray phase, int offset, int count){
+  for(int n=offset; n<count+offset; n++){
+    data[n].setPhase(phase[n]);
+  }
+}
+void ComplexFloatArray::setPhase(FloatArray phase, ComplexFloatArray destination){
+  setPhase(phase, 0, size, destination);
+}
+void ComplexFloatArray::setPhase(FloatArray phase, int offset, int count, ComplexFloatArray destination){
+  ASSERT(destination.getSize()>=count+offset, "Wrong size");
+  for(int n=offset; n<count+offset; n++){
+    destination.getData()[n].setPhase(phase[n], getData()[n]);
+  }
+}
+void ComplexFloatArray::setMagnitude(FloatArray magnitude){
+  setMagnitude(magnitude, 0, size);
+}
+void ComplexFloatArray::setMagnitude(FloatArray magnitude, int offset, int count){
+  setMagnitude(magnitude, offset, count, *this);
+}
+void ComplexFloatArray::setMagnitude(FloatArray magnitude, ComplexFloatArray destination){
+  setMagnitude(magnitude, 0, size, destination);
+}
+void ComplexFloatArray::setMagnitude(FloatArray magnitude, int offset, int count, ComplexFloatArray destination){
+  ASSERT(getSize()==magnitude.getSize(),"wrong size0");
+  ASSERT(getSize()==destination.getSize(),"wrong size1");
+  ASSERT(offset+count<=destination.getSize(), "Wrong size2");
+  ASSERT(offset+count<=getSize(), "Wrong size3");
+  for(int n=offset; n<count+offset; n++){
+    destination.getData()[n].setMagnitude(magnitude[n], getData()[n]);
+  }
+}
