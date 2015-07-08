@@ -15,6 +15,10 @@ public:
   int getSize() const{
     return size;
   }
+  int getSize(){
+    return size;
+  }
+
   void clear(){
     setAll(0);
   }
@@ -34,6 +38,7 @@ public:
   void negate(FloatArray& destination);
   void negate(); //in place
   void noise();
+  void noise(float min, float max);
   float getRms();
   float getMean();
   float getPower();

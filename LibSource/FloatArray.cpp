@@ -365,10 +365,18 @@ void FloatArray::negate(){
 }
 
 void FloatArray::noise(){
+  noise(-1, 1);
+}
+void FloatArray::noise(float min, float max){
+  float amplitude=abs(max-min);
+  float offset=min;
+  ASSERT(getSize()>10, "10<getSize");
+  ASSERT(size==getSize(), "getSize");
   for(int n=0; n<size; n++){
-    data[n]=rand()/(float)RAND_MAX *2 -1;
+    data[n]=(rand()/(float)RAND_MAX) * amplitude + offset;
   }
 }
+
 /**
  * Perform the convolution of this FloatArray with @operand2, putting the result in @destination.
  * @destination must have a minimum size of this+other-1.

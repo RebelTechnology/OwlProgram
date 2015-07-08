@@ -14,13 +14,13 @@ private:
     if(abs(second-first)<tol){
       cond=true;
     }
-    assert(cond, message);
+    return assert(cond, message);
   }
   bool assertt(float first, float second, const char *message){ //assert with tolerance of 0.0000001
-    assertt(first, second, message,  0.0000001);
+    return assertt(first, second, message,  0.0000001);
   }
   bool assert(bool condition,const char * message){
-    assert(condition, message, -1);
+    return assert(condition, message, -1);
   }
   bool assert(bool condition,const char * message, int n){
     if(condition==false && success==true){ //only hit this the first time, so only the first failed assertion gets displayed
