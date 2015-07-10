@@ -1,8 +1,8 @@
 /* ---------------------------------------------------------------------- 
 * Copyright (C) 2010-2014 ARM Limited. All rights reserved. 
 * 
-* $Date:        31. July 2014 
-* $Revision: 	V1.4.4
+* $Date:        19. March 2015 
+* $Revision: 	V.1.4.5
 * 
 * Project: 	    CMSIS DSP Library 
 * Title:	    arm_const_structs.c 
@@ -71,7 +71,7 @@ const arm_cfft_instance_f32 arm_cfft_sR_f32_len512 = {
 const arm_cfft_instance_f32 arm_cfft_sR_f32_len1024 = {
 	1024, twiddleCoef_1024, armBitRevIndexTable1024, ARMBITREVINDEXTABLE1024_TABLE_LENGTH
 };
-/*
+
 const arm_cfft_instance_f32 arm_cfft_sR_f32_len2048 = {
 	2048, twiddleCoef_2048, armBitRevIndexTable2048, ARMBITREVINDEXTABLE2048_TABLE_LENGTH
 };
@@ -79,7 +79,7 @@ const arm_cfft_instance_f32 arm_cfft_sR_f32_len2048 = {
 const arm_cfft_instance_f32 arm_cfft_sR_f32_len4096 = {
 	4096, twiddleCoef_4096, armBitRevIndexTable4096, ARMBITREVINDEXTABLE4096_TABLE_LENGTH
 };
-*/
+
 //Fixed-point structs
 
 const arm_cfft_instance_q31 arm_cfft_sR_q31_len16 = {
