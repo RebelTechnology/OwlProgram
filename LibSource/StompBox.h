@@ -21,6 +21,11 @@ enum PatchButtonId {
   RED_BUTTON
 };
 
+enum PatchChannelId {
+  LEFT_CHANNEL = 0,
+  RIGHT_CHANNEL = 1
+};
+
 class AudioBuffer {
 public:
   virtual ~AudioBuffer();
@@ -29,7 +34,7 @@ public:
   virtual int getChannels() = 0;
   virtual int getSize() = 0;
   virtual void clear() = 0;
-  static AudioBuffer* createMemoryBuffer(int channels, int samples);
+  static AudioBuffer* create(int channels, int samples);
 };
 
 
