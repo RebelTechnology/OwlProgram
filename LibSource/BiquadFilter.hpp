@@ -7,6 +7,9 @@ class FilterStage {
 public:
   FloatArray coefficients;
   FloatArray state;
+  static const float BESSEL_Q;
+  static const float SALLEN_KEY_Q;
+  static const float BUTTERWORTH_Q;
 
   FilterStage(FloatArray co, FloatArray st) : coefficients(co), state(st){}
 
@@ -253,5 +256,9 @@ public:
     delete filter;
   }
 };
+
+const float FilterStage::BESSEL_Q = 1/sqrtf(3); // 1/sqrt(3)
+const float FilterStage::SALLEN_KEY_Q = 0.5f; // 1/2
+const float FilterStage::BUTTERWORTH_Q = 1/sqrtf(2); // 1/sqrt(2)
 
 #endif // __BiquadFilter_h__
