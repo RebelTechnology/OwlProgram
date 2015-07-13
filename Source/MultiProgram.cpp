@@ -1,8 +1,5 @@
 #include <inttypes.h>
-#include "stm32f4xx.h"
 #include "device.h"
-#include "gpio.h"
-#include "owlcontrol.h"
 #include "ProgramVector.h"
 #include "SampleBuffer.hpp"
 #include "PatchRegistry.h"
