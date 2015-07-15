@@ -228,11 +228,26 @@ public:
     copyCoefficients();
   }
 
-  void setBandPass(float fc, float q);
-  void setNotch(float fc, float q);
-  void setPeak(float fc, float q, float gain);
-  void setLowShelf(float fc, float gain);
-  void setHighShelf(float fc, float gain);
+  void setBandPass(float fc, float q){
+    FilterStage::setBandPass(coefficients, fc, q);
+    copyCoefficients();
+  }
+  void setNotch(float fc, float q){
+    FilterStage::setNotch(coefficients, fc, q);
+    copyCoefficients();
+  }
+  void setPeak(float fc, float q, float gain){
+    FilterStage::setPeak(coefficients, fc, q, gain);
+    copyCoefficients();
+  }
+  void setLowShelf(float fc, float gain){
+    FilterStage::setLowShelf(coefficients, fc, gain);
+    copyCoefficients();
+  }
+  void setHighShelf(float fc, float gain){
+    FilterStage::setHighShelf(coefficients, fc, gain);
+    copyCoefficients();
+  }
 
   void copyCoefficients(){
     for(int i=1; i<stages; ++i){
