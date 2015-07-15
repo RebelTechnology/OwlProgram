@@ -5,12 +5,12 @@ ifndef CONFIG
 endif
 
 ifeq ($(CONFIG),Debug)
-CFLAGS   = -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
+CPPFLAGS   = -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
 ASFLAGS  = -g
 endif
 
 ifeq ($(CONFIG),Release)
-CFLAGS   = -O2
+CPPFLAGS   = -O2
 endif
 
 PATCHNAME   ?= "Template"
@@ -22,29 +22,29 @@ SLOT        ?= 0
 OWLDEVICE   ?= "OWL-MIDI"
 BUILD       ?= $(BUILDROOT)/Build
 
-CFLAGS += -DARM_CORTEX
-CFLAGS += -DEXTERNAL_SRAM
-CFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
-CFLAGS += -mtune=cortex-m4
-CFLAGS += -fpic
-CFLAGS += -fpie
-CFLAGS += -fdata-sections 
-CFLAGS += -ffunction-sections
-# CFLAGS += -munaligned-access
-CFLAGS +=  -mno-unaligned-access
-# CFLAGS += -mlong-calls
+CPPFLAGS += -DARM_CORTEX
+CPPFLAGS += -DEXTERNAL_SRAM
+CPPFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
+CPPFLAGS += -mtune=cortex-m4
+CPPFLAGS += -fpic
+CPPFLAGS += -fpie
+CPPFLAGS += -fdata-sections 
+CPPFLAGS += -ffunction-sections
+# CPPFLAGS += -munaligned-access
+CPPFLAGS +=  -mno-unaligned-access
+# CPPFLAGS += -mlong-calls
 
-# CFLAGS += -mpic-data-is-text-relative
-CFLAGS += -fno-omit-frame-pointer
-CFLAGS += -flto
+# CPPFLAGS += -mpic-data-is-text-relative
+CPPFLAGS += -fno-omit-frame-pointer
+CPPFLAGS += -flto
 
 LDFLAGS  = -Wl,--gc-sections
 LDFLAGS += -fpic
 LDFLAGS += -fpie
 LDFLAGS += -flto
 
-LDLIBS   = -lm
-LDSCRIPT = Source/flash.ld
+LDLIBS   ?= -lm
+LDSCRIPT ?= Source/flash.ld
 FIRMWARESENDER = Tools/FirmwareSender
 
 C_SRC   = basicmaths.c
@@ -55,11 +55,11 @@ CPP_SRC += PatchProgram.cpp
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
 LIBSOURCE    = $(BUILDROOT)/LibSource
 TESTPATCHES  = $(BUILDROOT)/TestPatches
-CFLAGS += -I$(LIBSOURCE)
-CFLAGS += -I$(PATCHSOURCE)
-CFLAGS += -I$(TESTPATCHES)
-CFLAGS += -I$(BUILD)
-CFLAGS += -IOwlPatches
+CPPFLAGS += -I$(LIBSOURCE)
+CPPFLAGS += -I$(PATCHSOURCE)
+CPPFLAGS += -I$(TESTPATCHES)
+CPPFLAGS += -I$(BUILD)
+CPPFLAGS += -IOwlPatches
 PATCH_C_SRC = $(wildcard $(PATCHSOURCE)/*.c) 
 PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_C_SRC:.c=.o)))
@@ -75,8 +75,8 @@ vpath %.s $(PATCHSOURCE)
 HEAVYFILE ?= $(PATCHNAME).pd
 HEAVYNAME  = owl
 HEAVYDIR   = $(BUILD)/HeavySource
-CFLAGS    += -I$(HEAVYDIR)
-CFLAGS    += -D__unix__ -DHV_SIMD_NONE
+CPPFLAGS    += -I$(HEAVYDIR)
+CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
 vpath %.c $(HEAVYDIR)
 
 # emscripten
@@ -91,10 +91,11 @@ EMCC_SRC  += $(LIBSOURCE)/basicmaths.c $(LIBSOURCE)/StompBox.cpp $(LIBSOURCE)/Fl
 EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
 
-CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11 $(CFLAGS) 
+CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11
 
 # object files
 OBJS =  $(C_SRC:%.c=$(BUILD)/%.o) $(CPP_SRC:%.cpp=$(BUILD)/%.o)
+PREP = $(BUILD)/progname.s $(BUILD)/patch.h $(BUILD)/patch.cpp
 
 all: patch
 
@@ -111,20 +112,24 @@ prep:
 	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $(BUILD)/patch.cpp
 
 # Build executable 
-$(BUILD)/patch.elf : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT) 
+$(BUILD)/patch.elf : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT) $(PREP)
 	$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
 
-$(BUILD)/patch.as : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
+$(BUILD)/patch.as : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT) $(PREP)
 	$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
 
-$(BUILD)/patch.map : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
+$(BUILD)/patch.map : $(PATCH_OBJS) $(OBJS) $(LDSCRIPT) $(PREP)
 	$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/patch.map $(OBJS) $(PATCH_OBJS) $(LDLIBS)
 
 $(BUILD)/%.syx : $(BUILD)/%.bin
 	$(FIRMWARESENDER) -q -in $< -save $@
 
 $(BUILD)/%Patch.hpp: $(PATCHSOURCE)/%.dsp
-	cd $(BUILD) && faust2owl ../$<
+	@cd $(BUILD) && faust2owl ../$<
+
+size: $(BUILD)/patch.elf $(BUILD)/patch.bin
+	@$(SIZE) $(BUILD)/patch.elf
+	@ls -s --block-size=1 $(BUILD)/patch.bin
 
 patch: prep $(BUILD)/patch.bin
 

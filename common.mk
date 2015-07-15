@@ -16,6 +16,7 @@ RANLIB=$(TOOLROOT)/arm-none-eabi-ranlib
 GDB=$(TOOLROOT)/arm-none-eabi-gdb
 OBJCOPY=$(TOOLROOT)/arm-none-eabi-objcopy
 OBJDUMP=$(TOOLROOT)/arm-none-eabi-objdump
+SIZE=$(TOOLROOT)/arm-none-eabi-size
 
 # Set up search path
 vpath %.cpp $(BUILDROOT)/Source
@@ -33,9 +34,8 @@ INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(DEVICE) -I$(CMSIS) -I$(PERIPH_FILE)/inc
 INC_FLAGS += -I$(DEVICE)/Include -I$(CMSIS)
 INC_FLAGS += -I$(USB_DEVICE_FILE)/Core/inc -I$(USB_DEVICE_FILE)/Class/cdc/inc
 INC_FLAGS += -I$(USB_OTG_FILE)/inc
-CFLAGS += $(ARCH_FLAGS) $(INC_FLAGS) $(DEF_FLAGS)
+CPPFLAGS += $(ARCH_FLAGS) $(INC_FLAGS) $(DEF_FLAGS)
 CFLAGS += -fno-builtin -std=c99
-CXXFLAGS += $(ARCH_FLAGS) $(INC_FLAGS) $(DEF_FLAGS)
 LDFLAGS += -T$(LDSCRIPT) $(ARCH_FLAGS)
 
 # Build executable 
@@ -44,21 +44,21 @@ $(ELF) : $(OBJS) $(LDSCRIPT)
 
 # compile and generate dependency info
 $(BUILD)/%.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@
-	$(CC) -MM -MT"$@" $(CFLAGS) $< > $(@:.o=.d)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+	$(CC) -MM -MT"$@" $(CPPFLAGS) $(CFLAGS) $< > $(@:.o=.d)
 
 $(BUILD)/%.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $< -o $@
-	$(CXX) -MM -MT"$@" $(CXXFLAGS) $< > $(@:.o=.d)
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+	$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) $< > $(@:.o=.d)
 
 $(BUILD)/%.o: %.s
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 
 $(BUILD)/%.s: %.c
-	$(CC) -S $(CFLAGS) $< -o $@
+	$(CC) -S $(CPPFLAGS) $(CFLAGS) $< -o $@
 
 $(BUILD)/%.s: %.cpp
-	$(CXX) -S $(CXXFLAGS) $< -o $@
+	$(CXX) -S $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 
 $(BUILD)/%.bin: $(BUILD)/%.elf
 	$(OBJCOPY) -O binary $< $@
