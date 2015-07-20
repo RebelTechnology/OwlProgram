@@ -28,8 +28,8 @@ public:
     coefficients.copyFrom(newCoefficients);
   }
   
-  float* getCoefficients(){
-    return (float*)coefficients;
+  FloatArray getCoefficients(){
+    return coefficients;
   }
   static void setLowPass(float* coefficients, float fc, float q){
     float omega = M_PI*fc/2;
@@ -200,6 +200,9 @@ public:
     return stages;
   }
 
+  static int getNumCoefficientsPerStage(){
+    return BIQUAD_COEFFICIENTS_PER_STAGE;
+  }
   FilterStage getFilterStage(int stage){
     ASSERT(stage < stages, "Invalid filter stage index");
     FloatArray c(coefficients+BIQUAD_COEFFICIENTS_PER_STAGE*stage, BIQUAD_COEFFICIENTS_PER_STAGE);
