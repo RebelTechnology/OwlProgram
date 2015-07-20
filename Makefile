@@ -168,7 +168,7 @@ online:
 	@make $(BUILD)/patch.syx
 	@cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
-web: $(EMCC_SRC) $(BUILD)/progname.s $(BUILD)/patch.h $(BUILD)/patch.cpp
+web: $(EMCC_SRC) $(BUILD)/patch.h $(BUILD)/patch.cpp
 	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
