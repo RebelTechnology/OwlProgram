@@ -23,7 +23,14 @@ public:
   void setPeak(float fc, float q, float gain);
   void setLowShelf(float fc, float gain);
   void setHighShelf(float fc, float gain);
-
+  void setCoefficients(FloatArray newCoefficients){
+    ASSERT(coefficients.getSize()==newCoefficients.getSize(), "wrong size");
+    coefficients.copyFrom(newCoefficients);
+  }
+  
+  float* getCoefficients(){
+    return (float*)coefficients;
+  }
   static void setLowPass(float* coefficients, float fc, float q){
     float omega = M_PI*fc/2;
     float K = tanf(omega);
@@ -150,7 +157,6 @@ private:
   // arm_biquad_casd_df1_inst_f32 df1;
   arm_biquad_cascade_df2T_instance_f32 df2;
 #endif /* ARM_CORTEX */
-
   float* coefficients; // stages*5
   float* state; // stages*4 for df1, stages*2 for df2
   int stages;
@@ -163,6 +169,15 @@ private:
    * <code>b2x</code> and <code>a2x</code> are the coefficients for the second stage,
    * and so on.  The <code>coeffs</code> array must contain a total of <code>5*stages</code> values.   
    */
+  void copyCoefficients(){
+    for(int i=1; i<stages; ++i){
+      coefficients[0+i*5] = coefficients[0];
+      coefficients[1+i*5] = coefficients[1];
+      coefficients[2+i*5] = coefficients[2];
+      coefficients[3+i*5] = coefficients[3];
+      coefficients[4+i*5] = coefficients[4];
+    }
+  }
 protected:
   void init(){
 #ifdef ARM_CORTEX
@@ -175,6 +190,7 @@ public:
     coefficients(coefs), state(ste), stages(sgs) {
     init();
   }
+  BiquadFilter(){};
 
   int getStages(){
     return stages;
@@ -249,16 +265,15 @@ public:
     copyCoefficients();
   }
 
-  void copyCoefficients(){
-    for(int i=1; i<stages; ++i){
-      coefficients[0+i*5] = coefficients[0];
-      coefficients[1+i*5] = coefficients[1];
-      coefficients[2+i*5] = coefficients[2];
-      coefficients[3+i*5] = coefficients[3];
-      coefficients[4+i*5] = coefficients[4];
-    }
+  void setCoefficientsPointer(FloatArray newCoefficients){ //sets coefficients to point to a given pointer
+    ASSERT(BIQUAD_COEFFICIENTS_PER_STAGE*stages==newCoefficients.getSize(), "wrong size");
+    coefficients=newCoefficients;
   }
-
+  void setCoefficients(FloatArray newCoefficients){//copies coefficients to all stages
+    ASSERT(newCoefficients.getSize()==BIQUAD_COEFFICIENTS_PER_STAGE, "wrong size");
+    getFilterStage(0).setCoefficients(newCoefficients);
+    copyCoefficients(); //set all the other stages
+  }
   static BiquadFilter* create(int stages){
     return new BiquadFilter(new float[stages*5], new float[stages*2], stages);
     // for df1: state requires stages*4
