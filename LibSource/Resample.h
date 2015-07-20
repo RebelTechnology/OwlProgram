@@ -1,81 +1,76 @@
-#ifndef __Resample_h__
-#define __Resample_h__
-
-class Upsample{
-  arm_fir_interpolate_instance_f32 upInstance;
-  FloatArray downCoefficients;
-  FloatArray upStates;
-  int blockSize;
-public:
-  Upsample(){};
-  Upsample(int factor, int numTaps, int aBlockSize){
-    init(factor, numTaps, aBlockSize);
-  }
-  void init(int factor, int numTaps, int aBlockSize){
-    blockSize=aBlockSize;
-    numTaps=(numTaps/factor)*numTaps; //make sure that numState is a multiple of factor
-    downCoefficients=FloatArray::create(numTaps);
-    /*hardcoded coefficents from matlab, does not work*/
-    downCoefficients[0]=0.011733;
-    downCoefficients[1]=0.052308;
-    downCoefficients[2]=0.164578;
-    downCoefficients[3]=0.271380;
-    downCoefficients[4]=0.271380;
-    downCoefficients[5]=0.164578;
-    downCoefficients[6]=0.052308;
-    downCoefficients[7]=0.011733;
-
-    upStates=FloatArray::create((numTaps/factor)+blockSize-1);
-    int ret=arm_fir_interpolate_init_f32(&upInstance, factor, numTaps, downCoefficients, upStates, blockSize);
-    ASSERT(ARM_MATH_SUCCESS==ret, "init arm_fir_interpolate_init_f32");
-  }
-  void up(FloatArray in, FloatArray out){
-    // ASSERT(in.getSize()<=upInstance.L*out.getSize(), "input ");
-    arm_fir_interpolate_f32(&upInstance, in.getData(), out.getData(), in.getSize());
-  }
-  int getBlockSize(){
-    return upInstance.L;
-  }
-};
-
-class Downsample{
+#include "BiquadFilter.hpp"
+#
+/**
+   Implements 4x oversampling
+*/  
+class Downsample {
 private:
-  arm_fir_decimate_instance_f32 downInstance;
-  FloatArray downCoefficients; //comment / uncomment these two lines to cause disruptions
-  FloatArray downStates; //comment / uncomment these two lines to cause disruptions
-  int blockSize;
+  BiquadFilter *downfilter;
+  int factor;
+  int stages;
 public:
-  Downsample(){}
-  Downsample(int factor, int numTaps, int aBlockSize){
-    init(factor, numTaps, aBlockSize);
+  Downsample(){
+    // two filters: same coefficients, different state variables
+    factor=4;
+    stages=1;
+    init();
   }
-  void init(int factor, int numTaps, int aBlockSize){
-    blockSize=aBlockSize;
-    numTaps=(numTaps/factor)*numTaps; //make sure that numState is a multiple of factor
-    downCoefficients=FloatArray::create(numTaps);
-    /*hardcoded coefficents from matlab, does not work*/
-    downCoefficients[0]=0.011733;
-    downCoefficients[1]=0.052308;
-    downCoefficients[2]=0.164578;
-    downCoefficients[3]=0.271380;
-    downCoefficients[4]=0.271380;
-    downCoefficients[5]=0.164578;
-    downCoefficients[6]=0.052308;
-    downCoefficients[7]=0.011733;
-    downStates=FloatArray::create(numTaps+blockSize-1);
-    int ret=arm_fir_decimate_init_f32(&downInstance, numTaps, factor, downCoefficients, downStates, blockSize);
-    // ASSERT(ARM_MATH_SUCCESS==ret, "init arm_fir_decimate_init_f32"); 
+  void init(){
+    downfilter=BiquadFilter::create(stages);
+    // [B, A]=cheby1(2, 2, 0.25); matlabToC([B, -A(2:end)])
+    static float coeffs[5]={0.07609109, 0.15218218, 0.07609109, +1.16511283,  -0.54828486};
+    for(int n=0; n<3; n++){
+      coeffs[n]*=factor; //compensate for the gain loss due to zero-stuffing
+    }
+    downfilter->setCoefficients(FloatArray(coeffs,5));
   }
-  void down(FloatArray in, FloatArray out){
-    ASSERT(in.getSize()==getBlockSize(), "input ");
-    arm_fir_decimate_f32(&downInstance, in.getData(), out.getData(), in.getSize());
+  float* getCoefficients(int stage){
+    return downfilter->getFilterStage(stage).getCoefficients();
   }
-  int getBlockSize(){
-    return blockSize;
-  }
-  float *getCoefficients(){
-    return downCoefficients;
+  void down(FloatArray input, FloatArray output){
+    ASSERT(input.getSize()==output.getSize()*factor, "wrong size");
+    downfilter->process(input, input.getSize());
+    float* p = (float*)input;
+    for(int i=0; i<input.getSize(); ++i){
+      output[i] = *p;
+      p += 4;
+    }
   }
 };
 
-#endif // __Resample_h__
+  
+class Upsample {
+private:
+  BiquadFilter *upfilter;
+  int factor;
+  int stages;
+public:
+  Upsample(){
+    factor=4;
+    stages=1;
+    init();
+  }
+  void init(){
+    upfilter=BiquadFilter::create(stages);
+    // [B, A]=cheby1(2, 2, 0.25); matlabToC([B, -A(2:end)])
+    static float coeffs[5]={0.07609109, 0.15218218, 0.07609109, +1.16511283, -0.54828486};
+    for(int n=0; n<3; n++){
+      coeffs[n]*=factor; //compensate for the gain loss due to zero-stuffing
+    }
+    upfilter->setCoefficients(FloatArray(coeffs,5));
+  }
+  float* getCoefficients(int stage){
+    return upfilter->getFilterStage(stage).getCoefficients();
+  }
+  void up(FloatArray input, FloatArray output){
+    ASSERT(input.getSize()*factor==output.getSize(), "wrong size");
+    float* p = output;
+    for(int i=0; i<input.getSize(); ++i){
+      *p++ = input[i];
+      *p++ = 0;
+      *p++ = 0;
+      *p++ = 0;
+    }
+    upfilter->process(output, output.getSize());
+  }
+};
