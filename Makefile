@@ -105,8 +105,6 @@ OBJS  = $(C_SRC:%.c=$(BUILD)/%.o) $(CPP_SRC:%.cpp=$(BUILD)/%.o)
 OBJS += $(BUILD)/startup.o
 OBJS += $(BUILD)/libnosys_gnu.o
 
-PREP_DEP = $(BUILD)/progname.s $(BUILD)/patch.h $(BUILD)/patch.cpp
-
 all: patch
 
 # include common make file
@@ -170,7 +168,7 @@ online:
 	@make $(BUILD)/patch.syx
 	@cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
-web: prep $(PATCH_C_SRC) $(PATCH_CPP_SRC)
+web: $(EMCC_SRC) $(BUILD)/progname.s $(BUILD)/patch.h $(BUILD)/patch.cpp
 	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
