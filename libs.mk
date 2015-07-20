@@ -1,5 +1,3 @@
-OBJS += $(BUILD)/startup.o
-OBJS += $(BUILD)/libnosys_gnu.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_sin_f32.o
 OBJS += $(DSPLIB)/FastMathFunctions/arm_cos_f32.o
 OBJS += $(DSPLIB)/CommonTables/arm_common_tables.o

@@ -7,6 +7,9 @@ class FilterStage {
 public:
   FloatArray coefficients;
   FloatArray state;
+  static const float BESSEL_Q;
+  static const float SALLEN_KEY_Q;
+  static const float BUTTERWORTH_Q;
 
   FilterStage(FloatArray co, FloatArray st) : coefficients(co), state(st){}
 
@@ -225,11 +228,26 @@ public:
     copyCoefficients();
   }
 
-  void setBandPass(float fc, float q);
-  void setNotch(float fc, float q);
-  void setPeak(float fc, float q, float gain);
-  void setLowShelf(float fc, float gain);
-  void setHighShelf(float fc, float gain);
+  void setBandPass(float fc, float q){
+    FilterStage::setBandPass(coefficients, fc, q);
+    copyCoefficients();
+  }
+  void setNotch(float fc, float q){
+    FilterStage::setNotch(coefficients, fc, q);
+    copyCoefficients();
+  }
+  void setPeak(float fc, float q, float gain){
+    FilterStage::setPeak(coefficients, fc, q, gain);
+    copyCoefficients();
+  }
+  void setLowShelf(float fc, float gain){
+    FilterStage::setLowShelf(coefficients, fc, gain);
+    copyCoefficients();
+  }
+  void setHighShelf(float fc, float gain){
+    FilterStage::setHighShelf(coefficients, fc, gain);
+    copyCoefficients();
+  }
 
   void copyCoefficients(){
     for(int i=1; i<stages; ++i){
@@ -253,5 +271,9 @@ public:
     delete filter;
   }
 };
+
+const float FilterStage::BESSEL_Q = 1/sqrtf(3); // 1/sqrt(3)
+const float FilterStage::SALLEN_KEY_Q = 0.5f; // 1/2
+const float FilterStage::BUTTERWORTH_Q = 1/sqrtf(2); // 1/sqrt(2)
 
 #endif // __BiquadFilter_h__

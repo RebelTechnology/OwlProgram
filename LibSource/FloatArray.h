@@ -15,6 +15,10 @@ public:
   int getSize() const{
     return size;
   }
+  int getSize(){
+    return size;
+  }
+
   void clear(){
     setAll(0);
   }
@@ -34,6 +38,7 @@ public:
   void negate(FloatArray& destination);
   void negate(); //in place
   void noise();
+  void noise(float min, float max);
   float getRms();
   float getMean();
   float getPower();
@@ -41,6 +46,9 @@ public:
   float getVariance();
   void scale(float factor, FloatArray destination);
   void scale(float factor);
+  void clip();
+  void clip(float max);
+  void clip(float max, float newMax);
   void add(FloatArray operand2, FloatArray destination);
   void add(FloatArray operand2); //in-place
   void add(float scalar);

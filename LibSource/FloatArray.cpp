@@ -190,7 +190,27 @@ void FloatArray::scale(float factor, FloatArray destination){//supports in-place
 void FloatArray::scale(float factor){
   scale(factor, *this);
 }
-
+void FloatArray::clip(){
+  clip(1);
+}
+void FloatArray::clip(float max){
+  for(int n=0; n<size; n++){
+    if(data[n]>max)
+      data[n]=max;
+    else if(data[n]<-max)
+      data[n]=-max;
+  }
+}
+void FloatArray::clip(float max, float newMax){
+  float scale=newMax/max;
+  for(int n=0; n<size; n++){
+    if(data[n]>max)
+      data[n]=max;
+    else if(data[n]<-max)
+      data[n]=-max;
+    data[n]*=scale;
+  }
+}
 FloatArray FloatArray::subarray(int offset, int length){
   ASSERT(size >= offset+length, "Array too small");
   return FloatArray(data+offset, length);
@@ -345,10 +365,18 @@ void FloatArray::negate(){
 }
 
 void FloatArray::noise(){
+  noise(-1, 1);
+}
+void FloatArray::noise(float min, float max){
+  float amplitude=abs(max-min);
+  float offset=min;
+  ASSERT(getSize()>10, "10<getSize");
+  ASSERT(size==getSize(), "getSize");
   for(int n=0; n<size; n++){
-    data[n]=rand()/(float)RAND_MAX *2 -1;
+    data[n]=(rand()/(float)RAND_MAX) * amplitude + offset;
   }
 }
+
 /**
  * Perform the convolution of this FloatArray with @operand2, putting the result in @destination.
  * @destination must have a minimum size of this+other-1.

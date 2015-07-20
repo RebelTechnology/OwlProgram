@@ -147,9 +147,8 @@ char* WEB_getStatus(){
     float percent = (pv->cycles_per_block/pv->audio_blocksize) / (float)3500;
     p = stpcpy(p, itoa(ceilf(percent*100), 10));
     p = stpcpy(p, (const char*)"% Heap ");
-    percent = pv->heap_bytes_used/(float)(1024*1024);
-    p = stpcpy(p, itoa(ceilf(percent*100), 10));
-    p = stpcpy(p, (const char*)"%");
+    int mem = pv->heap_bytes_used;
+    p = stpcpy(p, itoa(mem, 10));
     break;
   }
   case MEM_ERROR:

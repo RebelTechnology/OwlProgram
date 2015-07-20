@@ -36,17 +36,10 @@ float Patch::getParameterValue(PatchParameterId pid){
 }
 
 AudioBuffer* Patch::createMemoryBuffer(int channels, int samples){
-  return processor->createMemoryBuffer(channels, samples);
-  // MemoryBuffer* buf = new ManagedMemoryBuffer(channels, size);
-  // if(buf == NULL)
-  //   return NULL;
-  // buffers[bufferCount++] = buf;
-  // buf->clear();
-  // return buf;
+  return AudioBuffer::create(channels, samples);
 }
 
 void Patch::setButton(PatchButtonId bid, bool pressed){
-  // processor->setButton(bid, pressed);
   if(pressed)
     getProgramVector()->buttons |= 1<<bid;
   else
@@ -54,7 +47,6 @@ void Patch::setButton(PatchButtonId bid, bool pressed){
 }
 
 bool Patch::isButtonPressed(PatchButtonId bid){
-  // return processor->isButtonPressed(bid);
   return getProgramVector()->buttons & (1<<bid);
 }
 
@@ -70,6 +62,6 @@ int Patch::getElapsedCycles(){
 }
 
 #include "MemoryBuffer.hpp"
-AudioBuffer* AudioBuffer::createMemoryBuffer(int channels, int samples){
+AudioBuffer* AudioBuffer::create(int channels, int samples){
   return new ManagedMemoryBuffer(channels, samples);
 }
