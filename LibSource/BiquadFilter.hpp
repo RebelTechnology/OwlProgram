@@ -28,6 +28,9 @@ public:
     coefficients.copyFrom(newCoefficients);
   }
   
+  float* getCoefficients(){
+    return (float*)coefficients;
+  }
   static void setLowPass(float* coefficients, float fc, float q){
     float omega = M_PI*fc/2;
     float K = tanf(omega);
