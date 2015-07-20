@@ -33,8 +33,7 @@
 
 class ResampleTestPatch : public Patch {
 public:
-  Upsample upsample;
-  Downsample downsample;
+  Resampler resampler;
   FloatArray up;
   FloatArray temp;
   int factor;
@@ -44,8 +43,6 @@ public:
     registerParameter(PARAMETER_C, "master");
     factor=4;
     int blockSize=getBlockSize();
-    // upsample.init();
-    // downsample.init();
     up=FloatArray::create(factor*blockSize);
   }
   ~ResampleTestPatch(){
@@ -58,21 +55,10 @@ public:
       return;
     }
     // debugMessage("oversample",downsample.getCoefficients()[0],downsample.getCoefficients()[1],downsample.getCoefficients()[2]);
-    upsample.up(samples,up);
+    resampler.upsample(samples,up);
     
-    // debugMessage("up max", up.getMaxValue());
-    // debugMessage("up ", downsample.getCoefficients(1)[1], downsample.getCoefficients(1)[2], downsample.getCoefficients(1)[4]);
-    // for(int n=0; n<buffer.getSize(); n++){
-      // for(int k=0; k<factor; k++){
-        // up[n*factor+k]=samples[n];
-      // }
-    // }
-    downsample.down(up, samples);
-    for(int n=0; n<buffer.getSize(); n++){
-      samples[n]=up[n*factor]/factor;
-    }
-    samples.clip();
-    samples.multiply(getParameterValue(PARAMETER_B));
+    resampler.downsample(up, samples);
+    // samples.multiply(getParameterValue(PARAMETER_B));
   }
 };
 

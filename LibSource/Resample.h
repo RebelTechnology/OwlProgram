@@ -3,31 +3,49 @@
 /**
    Implements 4x oversampling
 */  
-class Downsample {
+class Resampler {
 private:
   BiquadFilter *downfilter;
-  int factor;
-  int stages;
+  BiquadFilter *upfilter;
+  int factor=4;
+  int upsampleStages;
+  int downsampleStages;
 public:
-  Downsample(){
+  Resampler():upsampleStages(1), downsampleStages(1){
     // two filters: same coefficients, different state variables
-    factor=4;
-    stages=1;
     init();
   }
+  Resampler(int stages){
+    upsampleStages=stages;
+    downsampleStages=stages;
+    init();
+  }
+  Resampler(int aUpsampleStages, int aDownsampleStages){
+    upsampleStages=aUpsampleStages;
+    downsampleStages=aDownsampleStages;
+    init();
+  }
+  ~Resampler(){
+    BiquadFilter::destroy(upfilter);
+    BiquadFilter::destroy(downfilter);
+  }
   void init(){
-    downfilter=BiquadFilter::create(stages);
-    // [B, A]=cheby1(2, 2, 0.25); matlabToC([B, -A(2:end)])
-    static float coeffs[5]={0.07609109, 0.15218218, 0.07609109, +1.16511283,  -0.54828486};
+    upfilter=BiquadFilter::create(upsampleStages);
+    downfilter=BiquadFilter::create(downsampleStages);
+    // [B, A]=cheby1(2, 2, 0.25); then use [B, -A(2:end)] , note the minus sign in front of the A coefficients!!!!
+    //alternatively, we could use FilterStage to compute the coefficients
+    static float downCoeffs[5]={0.07609109, 0.15218218, 0.07609109, +1.16511283,  -0.54828486};
+    static float upCoeffs[5]={0.07609109, 0.15218218, 0.07609109, +1.16511283,  -0.54828486};
     for(int n=0; n<3; n++){
-      coeffs[n]*=factor; //compensate for the gain loss due to zero-stuffing
+      upCoeffs[n]=downCoeffs[n]*factor; //compensate for the gain loss due to zero-stuffing, gives unitary gain after upsampling
     }
-    downfilter->setCoefficients(FloatArray(coeffs,5));
+    for(int n=3; n<5; n++){
+      upCoeffs[n]=downCoeffs[n];
+    }
+    downfilter->setCoefficients(FloatArray(downCoeffs,5));
+    upfilter->setCoefficients(FloatArray(upCoeffs,5));
   }
-  float* getCoefficients(int stage){
-    return downfilter->getFilterStage(stage).getCoefficients();
-  }
-  void down(FloatArray input, FloatArray output){
+  void downsample(FloatArray input, FloatArray output){
     ASSERT(input.getSize()==output.getSize()*factor, "wrong size");
     downfilter->process(input, input.getSize());
     float* p = (float*)input;
@@ -36,33 +54,7 @@ public:
       p += 4;
     }
   }
-};
-
-  
-class Upsample {
-private:
-  BiquadFilter *upfilter;
-  int factor;
-  int stages;
-public:
-  Upsample(){
-    factor=4;
-    stages=1;
-    init();
-  }
-  void init(){
-    upfilter=BiquadFilter::create(stages);
-    // [B, A]=cheby1(2, 2, 0.25); matlabToC([B, -A(2:end)])
-    static float coeffs[5]={0.07609109, 0.15218218, 0.07609109, +1.16511283, -0.54828486};
-    for(int n=0; n<3; n++){
-      coeffs[n]*=factor; //compensate for the gain loss due to zero-stuffing
-    }
-    upfilter->setCoefficients(FloatArray(coeffs,5));
-  }
-  float* getCoefficients(int stage){
-    return upfilter->getFilterStage(stage).getCoefficients();
-  }
-  void up(FloatArray input, FloatArray output){
+  void upsample(FloatArray input, FloatArray output){
     ASSERT(input.getSize()*factor==output.getSize(), "wrong size");
     float* p = output;
     for(int i=0; i<input.getSize(); ++i){
