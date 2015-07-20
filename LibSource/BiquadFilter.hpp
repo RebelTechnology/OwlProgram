@@ -183,6 +183,10 @@ protected:
 #ifdef ARM_CORTEX
     // arm_biquad_cascade_df1_init_f32(&df1, stages, coefficients, state);
     arm_biquad_cascade_df2T_init_f32(&df2, stages, coefficients, state);
+#else
+    for(int n=0; n<stages*BIQUAD_STATE_VARIABLES_PER_STAGE; n++){
+      state[n]=0;
+    }
 #endif /* ARM_CORTEX */
   }
 public:
@@ -209,7 +213,23 @@ public:
     // arm_biquad_cascade_df1_f32(&df1, input, output, size);
     arm_biquad_cascade_df2T_f32(&df2, input, output, size);
 #else
-    ASSERT(false, "todo!");
+    for(int k=0; k<stages; k++){
+      float b0=getFilterStage(k).getCoefficients()[0];
+      float b1=getFilterStage(k).getCoefficients()[1];
+      float b2=getFilterStage(k).getCoefficients()[2];
+      float a1=getFilterStage(k).getCoefficients()[3];
+      float a2=getFilterStage(k).getCoefficients()[4];
+      float d1=state[k*BIQUAD_STATE_VARIABLES_PER_STAGE];
+      float d2=state[k*BIQUAD_STATE_VARIABLES_PER_STAGE+1];
+      for(int n=0; n<size; n++){ //manually apply filter, one stage
+        float out=b0 * input[n] + d1; 
+        d1 = b1 * input[n] + a1 * out + d2;
+        d2 = b2 * input[n] + a2 * out;
+        output[n]=out;
+        state[k*BIQUAD_STATE_VARIABLES_PER_STAGE]=d1;
+        state[k*BIQUAD_STATE_VARIABLES_PER_STAGE+1]=d2;
+      }
+    }
 #endif /* ARM_CORTEX */
   }
 
