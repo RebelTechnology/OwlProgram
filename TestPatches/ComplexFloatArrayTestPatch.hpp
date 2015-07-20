@@ -231,11 +231,6 @@ public:
       i.setMagnitude(newMagnitude);
       assertt(i.getMagnitude(), newMagnitude, "ComplexFloat setMagnitude() magnitude", 0.0001);
       assertt(i.getPhase(), phase, "ComplexFloat setMagnitude() phase", 0.0001); //check that the phase has not changed
-      // test ComplexFloat setMagnitude(float, ComplexFloat) 
-      ComplexFloat j;
-      j.setMagnitude(magnitude, i); 
-      assertt(j.getMagnitude(), magnitude, "ComplexFloat setMagnitude(float, ComplexFloat) magnitude", 0.0001);
-      assertt(j.getPhase(), phase, "ComplexFloat setMagnitude(float, ComplexFloat) phase", 0.0001);
     }
     {
       //test ComplexFloat.setPhase()
@@ -247,11 +242,6 @@ public:
       i.setPhase(newPhase);
       assertt(i.getPhase(), newPhase, "ComplexFloat setPhase() phase", 0.0001);
       assertt(i.getMagnitude(), magnitude, "ComplexFloat setPhase() magnitude", 0.0001); //check that the magnitude has not changed
-      // test ComplexFloat setPhase(float, ComplexFloat)
-      ComplexFloat j;
-      j.setPhase(phase, i);
-      assertt(i.getPhase(), newPhase, "ComplexFloat setPhase(float, ComplexFloat) phase", 0.0001);
-      assertt(i.getMagnitude(), magnitude, "ComplexFloat setPhase(float, ComplexFloat) magnitude", 0.0001);
     }
     {
       // test ComplexFloatArray.setPhase()

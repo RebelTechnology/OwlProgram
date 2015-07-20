@@ -14,23 +14,11 @@ struct ComplexFloat {
     return atan2(im,re);
   }
   void setPhase(float phase){
-    setPhase(phase, *this);
-  }
-  /*
-    setPhase(float phase, ComplexFloat input) sets the phase to match @phase and the magnitude to match the magnitude of @input
-  */
-  void setPhase(float phase, ComplexFloat input){
-    float magnitude=input.getMagnitude();
+    float magnitude=getMagnitude();
     setPolar(magnitude, phase);
   }
   void setMagnitude(float magnitude){
-    setMagnitude(magnitude, *this);
-  }
-  /*
-    setMagnitude(float magnitude, ComplexFloat input) sets the magnitude to match @magnitude and the phase to match the phase of @input
-  */
-  void setMagnitude(float magnitude, ComplexFloat input){
-    float phase=input.getPhase();
+    float phase=getPhase();
     setPolar(magnitude, phase);
   }
   void setPolar(float magnitude, float phase){

@@ -255,7 +255,7 @@ void ComplexFloatArray::setPhase(FloatArray phase, ComplexFloatArray destination
 void ComplexFloatArray::setPhase(FloatArray phase, int offset, int count, ComplexFloatArray destination){
   ASSERT(destination.getSize()>=count+offset, "Wrong size");
   for(int n=offset; n<count+offset; n++){
-    destination.getData()[n].setPhase(phase[n], getData()[n]);
+    destination.getData()[n].setPolar(getData()[n].getMagnitude(), phase[n]);
   }
 }
 void ComplexFloatArray::setMagnitude(FloatArray magnitude){
@@ -273,6 +273,6 @@ void ComplexFloatArray::setMagnitude(FloatArray magnitude, int offset, int count
   ASSERT(offset+count<=destination.getSize(), "Wrong size2");
   ASSERT(offset+count<=getSize(), "Wrong size3");
   for(int n=offset; n<count+offset; n++){
-    destination.getData()[n].setMagnitude(magnitude[n], getData()[n]);
+    destination.getData()[n].setPolar(magnitude[n], getData()[n].getPhase());
   }
 }
