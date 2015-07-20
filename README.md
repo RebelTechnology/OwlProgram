@@ -17,6 +17,8 @@ See http://hoxtonowl.com for more details of the Open Ware Laboratory.
 * make run: upload patch to attached OWL
 * make store: upload and save to attached OWL
 * make web: build Javascript patch
+* make clean: remove intermediary and target files
+* make realclean: remove all (library+patch) intermediary and target files
 
 ## Make options
 * PATCHNAME: specify name of patch, e.g. SimpleDelay
