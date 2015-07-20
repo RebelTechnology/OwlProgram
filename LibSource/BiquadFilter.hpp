@@ -17,12 +17,27 @@ public:
     setLowPass(coefficients, fc, q);
   }
 
-  void setHighPass(float fc, float q);
-  void setBandPass(float fc, float q);
-  void setNotch(float fc, float q);
-  void setPeak(float fc, float q, float gain);
-  void setLowShelf(float fc, float gain);
-  void setHighShelf(float fc, float gain);
+  void setHighPass(float fc, float q){
+    setHighPass(coefficients, fc, q);
+  }
+  
+  void setBandPass(float fc, float q){
+    setBandPass(coefficients, fc, q);
+  }
+  
+  void setNotch(float fc, float q){
+    setNotch(coefficients, fc, q);
+  }
+  
+  void setPeak(float fc, float q, float gain){
+    setPeak(coefficients, fc, q, gain);
+  }
+  void setLowShelf(float fc, float gain){
+    setLowShelf(coefficients, fc, gain);
+  }
+  void setHighShelf(float fc, float gain){
+    setHighShelf(coefficients, fc, gain);
+  }
   void setCoefficients(FloatArray newCoefficients){
     ASSERT(coefficients.getSize()==newCoefficients.getSize(), "wrong size");
     coefficients.copyFrom(newCoefficients);
