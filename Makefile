@@ -1,4 +1,4 @@
-BUILDROOT = .
+BUILDROOT ?= $(CURDIR)
 
 ifndef CONFIG
   CONFIG=Release
@@ -142,7 +142,7 @@ $(BUILD)/%.syx: $(BUILD)/%.bin
 	@$(FIRMWARESENDER) -q -in $< -save $@
 
 $(BUILD)/%Patch.hpp: $(PATCHSOURCE)/%.dsp
-	@cd $(BUILD) && faust2owl ../$<
+	@cd $(BUILD) && faust2owl $<
 
 size: $(BUILD)/patch.elf $(BUILD)/patch.bin
 	@$(SIZE) $(BUILD)/patch.elf
