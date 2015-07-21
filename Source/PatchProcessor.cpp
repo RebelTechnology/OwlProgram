@@ -1,5 +1,4 @@
 #include "PatchProcessor.h"
-#include "PatchRegistry.h"
 #include "MemoryBuffer.hpp"
 #include "device.h"
 #include <string.h>
