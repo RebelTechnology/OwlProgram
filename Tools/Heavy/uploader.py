@@ -13,7 +13,18 @@ import tempfile
 import time
 import urlparse
 import zipfile
-import sys
+
+class Colours:
+    purple = "\033[95m"
+    cyan = "\033[96m"
+    dark_cyan = "\033[36m"
+    blue = "\033[94m"
+    green = "\033[92m"
+    yellow = "\033[93m"
+    red = "\033[91m"
+    bold = "\033[1m"
+    underline = "\033[4m"
+    end = "\033[0m"
 
 def __zip_dir(in_dir, zip_path, file_filter=None):
     zf = zipfile.ZipFile(zip_path, mode="w", compression=zipfile.ZIP_DEFLATED)
@@ -194,13 +205,6 @@ def main():
             indent=2,
             separators=(",", ": "))
 
-    # check for errors
-    if len(r_json.get("errors",[])) > 0:
-        shutil.rmtree(temp_dir) # clean up the temporary directory
-        for error in r_json["errors"]:
-            print "ERROR:", error["detail"]
-        sys.exit(-1)
-
     # update the api token, if present
     if "token" in reply_json.get("meta",{}) and not args.x:
         if not os.path.exists(os.path.dirname(token_path)):
@@ -208,6 +212,17 @@ def main():
         with open(token_path, "w") as f:
             f.write(reply_json["meta"]["token"])
         os.chmod(token_path, stat.S_IRUSR | stat.S_IWUSR) # force rw------- permissions on the file
+
+    # print any warnings
+    for x in r_json["warnings"]:
+        print "{0}Warning:{1} {2}".format(Colours.yellow, Colours.end, x["detail"])
+
+    # check for errors
+    if len(r_json.get("errors",[])) > 0:
+        shutil.rmtree(temp_dir) # clean up the temporary directory
+        for x in r_json["errors"]:
+            print "{0}Error:{1} {2}".format(Colours.red, Colours.end, x["detail"])
+        return
 
     # retrieve all requested files
     for i,g in enumerate(args.gen):
@@ -235,7 +250,9 @@ def main():
 
             print "{0} files placed in {1}".format(g, target_dir)
         else:
-            print "WARNING: {0} files could not be retrieved.".format(g)
+            print "{0}Warning:{1} {2} files could not be retrieved.".format(
+                Colours.yellow, Colours.end,
+                g)
 
     # delete the temporary directory
     shutil.rmtree(temp_dir)
