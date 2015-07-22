@@ -18,7 +18,7 @@ MEMORY
   EEPROM (rw)      : ORIGIN = 0x08004000, LENGTH = 16K    /* Sector 1 */
   FIRMWARE (rx)    : ORIGIN = 0x08008000, LENGTH = 224K   /* Sector 2 */
   PATCHFLASH (rx)  : ORIGIN = 0x08040000, LENGTH = 128K   /* Sector 6 */ /* total Flash memory is 1Mb */
-  CCMRAM (rw)      : ORIGIN = 0x10008000, LENGTH = 32K    /* total CCM is 64kb */
+  CCMRAM (rw)      : ORIGIN = 0x10000000, LENGTH = 64K    /* total CCM is 64kb */
   LOADERRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 48K
   PATCHRAM (rwx)   : ORIGIN = 0x2000c000, LENGTH = 64K    /* total RAM is 112kb */
   NVRAM (rw)       : ORIGIN = 0x40024000, LENGTH = 4K
