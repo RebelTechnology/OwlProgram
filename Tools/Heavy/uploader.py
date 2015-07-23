@@ -192,6 +192,7 @@ def main():
           "type": "file"
         }
       ],
+      "warnings": [],
       "meta": {
         "token": "11AS0qPRmjTUHEMSovPEvzjodnzB1xaz"
       }
