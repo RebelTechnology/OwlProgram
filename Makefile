@@ -6,16 +6,40 @@ endif
 
 ifeq ($(CONFIG),Debug)
 CPPFLAGS   = -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
-ASFLAGS  = -g
+ASFLAGS    = -g
 endif
 
 ifeq ($(CONFIG),Release)
 CPPFLAGS   = -O2
 endif
 
+DEPS       = $(BUILD)/patch.cpp $(BUILD)/patch.h
+
+ifdef FAUST
+# options for FAUST compilation
+PATCHNAME   ?= $(FAUST)
+PATCHCLASS  ?= $(PATCHNAME)Patch
+PATCHFILE   ?= $(PATCHNAME)Patch.hpp
+DEPS        += $(BUILD)/$(PATCHFILE)
+else ifdef HEAVY
+# options for Heavy PD compilation
+PATCHNAME   ?= $(HEAVY)
+PATCHCLASS  ?= HeavyPatch
+PATCHFILE   ?= HeavyPatch.hpp
+DEPS        += $(HEAVYDIR)/Heavy_owl.h
+HEAVYFILE   ?= $(HEAVY).pd
+HEAVYNAME   ?= owl
+HEAVYDIR    ?= $(BUILD)/HeavySource
+CPPFLAGS    += -I$(HEAVYDIR)
+CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
+vpath %.c $(HEAVYDIR)
+else
+# options for C++ compilation
 PATCHNAME   ?= "Template"
 PATCHCLASS  ?= $(PATCHNAME)Patch
 PATCHFILE   ?= $(PATCHNAME)Patch.hpp
+endif
+
 PATCHIN     ?= 2
 PATCHOUT    ?= 2
 SLOT        ?= 0
@@ -78,14 +102,6 @@ vpath %.c $(PATCHSOURCE)
 vpath %.s $(PATCHSOURCE)
 vpath %.c Libraries/syscalls
 
-# Heavy
-HEAVYFILE ?= $(PATCHNAME).pd
-HEAVYNAME  = owl
-HEAVYDIR   = $(BUILD)/HeavySource
-CPPFLAGS    += -I$(HEAVYDIR)
-CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
-vpath %.c $(HEAVYDIR)
-
 # emscripten
 EMCC       = emcc
 EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11 
@@ -111,23 +127,24 @@ all: patch
 include $(BUILDROOT)/libs.mk
 include $(BUILDROOT)/common.mk
 
-.PHONY: .FORCE clean realclean run store faust heavy online docs
+.PHONY: .FORCE clean realclean run store online docs
+
 .FORCE:
 	@echo Building patch $(PATCHNAME)
 
 $(BUILD)/patch.cpp: .FORCE
-	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $(BUILD)/patch.cpp
+	echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $(BUILD)/patch.cpp
 
 $(BUILD)/patch.h: .FORCE
-	@echo "#include \"$(PATCHFILE)\"" > $(BUILD)/patch.h
-
-$(BUILD)/PatchProgram.o: $(SOURCE)/PatchProgram.cpp $(BUILD)/patch.h $(BUILD)/patch.cpp
-	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(SOURCE)/PatchProgram.cpp -o $@
-	@$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) $(SOURCE)/PatchProgram.cpp > $(@:.o=.d)
+	echo "#include \"$(PATCHFILE)\"" > $(BUILD)/patch.h
 
 $(BUILD)/startup.o: .FORCE
 	@echo '.string "'$(PATCHNAME)'"' > $(BUILD)/progname.s
 	@$(CC) -c $(CPPFLAGS) $(CFLAGS) $(SOURCE)/startup.s -o $@
+
+$(BUILD)/PatchProgram.o: $(SOURCE)/PatchProgram.cpp $(DEPS)
+	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(SOURCE)/PatchProgram.cpp -o $@
+	@$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) $(SOURCE)/PatchProgram.cpp > $(@:.o=.d)
 
 $(BUILD)/patch.elf: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
 	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
@@ -165,10 +182,10 @@ online:
 	@echo "$(ONLINE_INCLUDES)" > $(BUILD)/patch.h
 	@echo "$(ONLINE_REGISTER)" > $(BUILD)/patch.cpp
 	@echo '.string "OnlineCompiler"' > $(BUILD)/progname.s
-	@make $(BUILD)/patch.syx
+	@$(MAKE) $(BUILD)/patch.syx
 	@cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
-web: $(EMCC_SRC) $(BUILD)/patch.h $(BUILD)/patch.cpp
+web: $(EMCC_SRC) $(DEPS)
 	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
@@ -176,14 +193,10 @@ $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@cp -f $(PATCHSOURCE)/*.pd $(BUILD)/HeavySource
 	@cp -f $< $@
 
-$(HEAVYDIR)/Heavy_owl.h: $(BUILD)/HeavySource/_main.pd
+$(HEAVYDIR)/Heavy_owl.h: $(HEAVYDIR)/_main.pd
 	@python ./Tools/Heavy/uploader.py $(BUILD)/HeavySource -g c -n $(HEAVYNAME) -o $(HEAVYDIR)
 
 heavy: $(HEAVYDIR)/Heavy_owl.h
 	@$(eval HEAVY_SRC = $(wildcard $(HEAVYDIR)/*.c) )
-	@$(eval PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(HEAVY_SRC:.c=.o))) )
-	@$(eval PATCHCLASS ?= HeavyPatch)
-	@$(eval PATCHFILE ?= HeavyPatch.hpp)
+	@$(eval PATCH_OBJS += $(addprefix $(HEAVYDIR)/, $(notdir $(HEAVY_SRC:.c=.o))))
 	@make $(PATCH_OBJS)
-
-faust: $(BUILD)/$(PATCHFILE)
