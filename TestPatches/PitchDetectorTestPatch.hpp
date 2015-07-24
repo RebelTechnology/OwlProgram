@@ -58,11 +58,12 @@ public:
         phase -= 2.0 * M_PI;
       if(phase > 4.0*M_PI)
         phase=0;
-      envelope=0.001*envelope + pastEnvelope*0.999;
+      envelope=0.1*envelope + pastEnvelope*0.9;
       pastEnvelope=envelope;
       fa[n]+=sin(phase)*mix*envelope;
     }
-    fa.multiply(getParameterValue(PARAMETER_D));
+    fa.multiply(getParameterValue(PARAMETER_D)*10);
+    fa.copyTo(buffer.getSamples(1));
     float *coeffs=zcc.getFilter()->getFilterStage(0).getCoefficients();
     debugMessage("estimated envelope: ", estimated, envelope);
     // debugMessage("coeffs: ", coeffs[3], coeffs[4], coeffs[2] );
