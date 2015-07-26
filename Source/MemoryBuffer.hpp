@@ -14,7 +14,6 @@ public:
     memset(buffer, 0, size*channels*sizeof(float));
   }
   FloatArray getSamples(int channel){
-    ASSERT(channel < channels, "Invalid channel");
     return FloatArray(buffer+channel*size, size);
   }
   int getChannels(){
