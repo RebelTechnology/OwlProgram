@@ -55,7 +55,7 @@ CPPFLAGS += -fpie
 CPPFLAGS += -fdata-sections 
 CPPFLAGS += -ffunction-sections
 # CPPFLAGS += -munaligned-access
-CPPFLAGS +=  -mno-unaligned-access
+CPPFLAGS += -mno-unaligned-access
 # CPPFLAGS += -mlong-calls
 
 # CPPFLAGS += -mpic-data-is-text-relative
@@ -133,10 +133,10 @@ include $(BUILDROOT)/common.mk
 	@echo Building patch $(PATCHNAME)
 
 $(BUILD)/patch.cpp: .FORCE
-	echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $(BUILD)/patch.cpp
+	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $(BUILD)/patch.cpp
 
 $(BUILD)/patch.h: .FORCE
-	echo "#include \"$(PATCHFILE)\"" > $(BUILD)/patch.h
+	@echo "#include \"$(PATCHFILE)\"" > $(BUILD)/patch.h
 
 $(BUILD)/startup.o: .FORCE
 	@echo '.string "'$(PATCHNAME)'"' > $(BUILD)/progname.s
