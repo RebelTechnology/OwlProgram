@@ -12,10 +12,10 @@ if (!owl.context)
 }
 
 // Cross-browser compatibility for getUserMedia
-navigator.getUserMedia = (navigator.getUserMedia ||
-                          navigator.webkitGetUserMedia ||
-                          navigator.mozGetUserMedia ||
-                          navigator.msGetUserMedia);
+navigator.getUserMedia = navigator.getUserMedia ||
+	navigator.webkitGetUserMedia ||
+	navigator.mozGetUserMedia ||
+	navigator.msGetUserMedia;
 
 var WEB_setup = Module.cwrap('WEB_setup', 'number', ['number', 'number']);
 var WEB_processBlock = Module.cwrap('WEB_processBlock', 'number', ['number', 'number']);
@@ -28,7 +28,9 @@ var WEB_getStatus = Module.cwrap('WEB_getStatus', 'string', []);
 owl.dsp = function () {
 	var that = {};
 	that.model = {
-		inputNode: null
+		inputNode: null,
+		fileNode: owl.context.createMediaElementSource(document.getElementById('file-input-audio')),
+		micNode: null
 	};
 	that.vectorsize = 2048;      
 	console.log("setup[fs "+owl.context.sampleRate+"][bs "+that.vectorsize+"]");
@@ -94,12 +96,26 @@ owl.dsp = function () {
 	}
 
 	that.useMicrophoneInput = function () {
-		navigator.getUserMedia.call(navigator, {audio: true}, function (stream) {
-			var node = owl.context.createMediaStreamSource(stream);
-			that.connectInput(node);
-		}, function (err) {
-			console.error(err);
-		});
+		if (that.model.micNode) {
+			that.connectInput(that.model.micNode);
+		} else {
+			navigator.getUserMedia.call(navigator, {audio: true}, function (stream) {
+				that.model.micNode = owl.context.createMediaStreamSource(stream);
+				that.connectInput(that.model.micNode);
+			}, function (err) {
+				console.error(err);
+			});
+		}
+	}
+
+	that.useFileInput = function () {
+		that.connectInput(that.model.fileNode);
+	}
+
+	that.onFileSelect = function (files) {
+		var fileUrl = files[0] ? URL.createObjectURL(files[0]) : '';
+		var audioElement = document.getElementById('file-input-audio');
+		audioElement.src = fileUrl;
 	}
 
 	// Bind to Web Audio
