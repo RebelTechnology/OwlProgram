@@ -6,16 +6,18 @@
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <!-- <link href="css/custom.css" rel="stylesheet"> -->
   </head>
-
   <body>
-    
     <div class="center">
       <h1>OWL Patch</h1>
+      <h2>Input select</h2>
       <div>
-	<p><input type="button" onclick="patch.play(); return false;"/>Play</p>
-	<p><input type="button" onclick="patch.pause(); return false;"/>Stop</p>
-	<p><input type="button" onclick="getMessage(); return false;"/>Message</p>
-	<p><input type="button" onclick="getStatus(); return false;"/>Status</p>
+        <input type="button" onclick="patch.clearInput(); return false;" value="No input"/>
+        <input type="button" onclick="patch.useMicrophoneInput(); return false;" value="Microphone"/>
+      </div>
+      <h2>Diagnostics</h2>
+      <div>
+        <input type="button" onclick="getMessage(); return false;" value="Message"/>
+        <input type="button" onclick="getStatus(); return false;" value="Status"/>
       </div>
       <div id="patchname"></div>
       <div id="p1"></div>
@@ -46,18 +48,18 @@
       <!-- patch.play(); -->
       var getMessage = function(){
           var msg = patch.getMessage();
-	  if(msg)
-  	    console.log("Program message: "+msg);
-	  document.getElementById("message").innerHTML = msg;
+          if(msg)
+            console.log("Program message: "+msg);
+          document.getElementById("message").innerHTML = msg;
       };
       var getStatus = function(){
-	  document.getElementById("status").innerHTML = patch.getStatus();
+          document.getElementById("status").innerHTML = patch.getStatus();
       };
     </script>
 
       <div>
-	<p id="message"></p>
-	<p id="status"></p>
+        <p id="message"></p>
+        <p id="status"></p>
       </div>
   </body>
 
