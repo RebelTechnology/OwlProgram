@@ -1,4 +1,5 @@
 #include "StompBox.h"
+#include "message.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -14,6 +15,7 @@ public:
     memset(buffer, 0, size*channels*sizeof(float));
   }
   FloatArray getSamples(int channel){
+    ASSERT(channel < channels, "Invalid channel");
     return FloatArray(buffer+channel*size, size);
   }
   int getChannels(){
@@ -28,10 +30,7 @@ class ManagedMemoryBuffer : public MemoryBuffer {
 public:
   ManagedMemoryBuffer(int ch, int sz) :
     MemoryBuffer(new float[ch*sz], ch, sz) {
-    if(buffer == NULL){
-      channels = 0;
-      size = 0;
-    }
+    ASSERT(buffer != NULL, "Memory allocation failed");
   }
   ~ManagedMemoryBuffer(){
     delete buffer;

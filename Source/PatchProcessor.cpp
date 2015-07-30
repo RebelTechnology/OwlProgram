@@ -53,8 +53,11 @@ void PatchProcessor::setParameterValues(uint16_t *params){
 #ifdef SMOOTH_HYSTERESIS
       if(abs(params[i]-parameterValues[i]) > 7)
 #endif
-	// invert parameter values for OWL Modular
-	parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR + 0x1000 - params[i])/(SMOOTH_FACTOR+1);
+      // invert parameter values for OWL Modular
+      if(i<4)
+	parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR + 4095 - params[i])/(SMOOTH_FACTOR+1);
+      else
+	parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR - params[i])/(SMOOTH_FACTOR+1);
   }else{
     for(int i=0; i<NOF_ADC_VALUES; ++i)
 #ifdef SMOOTH_HYSTERESIS
