@@ -398,12 +398,12 @@ public:
       }
     }
     {
-      //test subarray
+      //test subArray
       int offset=size/5;
       int length=size/6;
-      FloatArray sub=fa.subarray(offset, length);
+      FloatArray sub=fa.subArray(offset, length);
       for(int n=0; n<sub.getSize(); n++){
-        assert(sub[n]==fa[n+offset], "subarray()");
+        assert(sub[n]==fa[n+offset], "subArray()");
       }
     }
     

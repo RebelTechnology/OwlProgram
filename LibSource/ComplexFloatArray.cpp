@@ -118,6 +118,11 @@ int ComplexFloatArray::getMaxMagnitudeIndex(){ //this is probably slower than ge
   return maxInd;
 }
 
+ComplexFloatArray ComplexFloatArray::subArray(int offset, int length){
+  ASSERT(size >= offset+length, "Array too small");
+  return ComplexFloatArray(data+offset, length);
+}
+
 float ComplexFloatArray::getMaxMagnitudeValue(){ //this is probably slower than getMagnitudeSquaredValues() and getMaxValue() on it
   float maxMag=-1;
   for(int n=0; n<size; n++){

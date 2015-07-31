@@ -63,7 +63,7 @@ public:
   void correlate(FloatArray operand2, FloatArray destination);
   void correlateInitialized(FloatArray operand2, FloatArray destination);
   void setAll(float value);
-  FloatArray subarray(int offset, int length);
+  FloatArray subArray(int offset, int length);
   void copyTo(FloatArray destination);
   void copyFrom(FloatArray source);
   void copyTo(float* destination, int length);

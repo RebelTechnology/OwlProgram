@@ -211,7 +211,7 @@ void FloatArray::clip(float max, float newMax){
     data[n]*=scale;
   }
 }
-FloatArray FloatArray::subarray(int offset, int length){
+FloatArray FloatArray::subArray(int offset, int length){
   ASSERT(size >= offset+length, "Array too small");
   return FloatArray(data+offset, length);
 }
