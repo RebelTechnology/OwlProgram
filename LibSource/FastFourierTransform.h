@@ -1,6 +1,11 @@
 #ifndef __FastFourierTransform_h__
 #define __FastFourierTransform_h__
 
+
+/**
+ * This class performs direct and inverse Fast Fourier Transform.
+ */
+ 
 #ifdef ARM_CORTEX
 class FastFourierTransform {
 private:
@@ -43,21 +48,47 @@ private:
   ComplexFloat *data;
   int size;
 public:
+  /**
+   * Default constructor.
+   * Does **not** initialize the instance.
+   * @remarks You need to call init(int size) before calling any other method
+  */
   FastFourierTransform() : data(NULL), size(0){}
-  FastFourierTransform(int len){
-    init(len);
+
+  /**
+   * Construct and initialize the instance.
+   * @param[in] aSize The size of the FFT
+   * @remarks Only sizes of 32, 64, 128, 256, 512, 1024, 2048, 4096 are supported, due to limitations of the CMSIS library.
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  */
+    FastFourierTransform(int aSize){
+    init(aSize);
   }
+
   ~FastFourierTransform(){
     free(data);
   }
-  void init(int len){
-    ASSERT(len==32 || len ==64 || len==128 || len==256 || len==512 || len==1024 || len==2048 || len==4096, "Unsupported FFT size");
-    cfgfft = kiss_fft_alloc(len, 0 , 0, 0);
-    cfgifft = kiss_fft_alloc(len, 1,0, 0);
-    size=len;
+
+  /**
+   * Initialize the instance.
+   * @param aSize The size of the FFT
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  */
+  void init(int aSize){
+    ASSERT(aSize==32 || aSize ==64 || aSize==128 || aSize==256 || aSize==512 || aSize==1024 || aSize==2048 || aSize==4096, "Unsupported FFT size");
+    cfgfft = kiss_fft_alloc(aSize, 0 , 0, 0);
+    cfgifft = kiss_fft_alloc(aSize, 1,0, 0);
+    size=aSize;
     data=(ComplexFloat *)malloc(sizeof(ComplexFloat)*getSize());
     temp=ComplexFloatArray(data, getSize());
   }
+
+  /**
+   * Perform the direct FFT.
+   * @param[in] in The real-valued input array
+   * @param[out] out The complex-valued output array
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  */
   void fft(FloatArray& in, ComplexFloatArray& out){
     ASSERT(in.getSize() >= getSize(), "Input array too small");
     ASSERT(out.getSize() >= getSize(), "Output array too small");
@@ -67,6 +98,13 @@ public:
     }
     kiss_fft(cfgfft, (kiss_fft_cpx*)(float*)temp.getData(), (kiss_fft_cpx*)(float*)out);
   }
+  
+  /**
+   * Perform the inverse FFT.
+   * @param[in] in The complex-valued input array
+   * @param[out] out The real-valued output array
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  */
   void ifft(ComplexFloatArray& in, FloatArray& out){
     ASSERT(in.getSize() >= getSize(), "Input array too small");
     ASSERT(out.getSize() >= getSize(), "Output array too small");
@@ -76,6 +114,11 @@ public:
       out[n]=temp[n].re*scale;
     }
   }
+    
+  /**
+   * Get the size of the FFT
+   * @return The size of the FFT
+  */
   int getSize(){
     return size;
   }
