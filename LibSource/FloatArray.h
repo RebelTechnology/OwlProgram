@@ -36,6 +36,7 @@ public:
    * Get the minimum value in the array and its index
    * @param[out] value will be set to the minimum value after the call
    * @param[out] index will be set to the index of the minimum value after the call
+   * 
    */
   void getMin(float* value, int* index);
   
@@ -43,13 +44,13 @@ public:
    * Get the maximum value in the array and its index
    * @param[out] value will be set to the maximum value after the call
    * @param[out] index will be set to the index of the maximum value after the call
-   */
+  */
   void getMax(float* value, int* index);
   
   /**
    * Get the minimum value in the array
    * @return the minimum value contained in the array
-   */
+  */
   float getMinValue();
   
   /**
@@ -282,7 +283,7 @@ public:
    * @param[out] destination the destination array.
    * @param[in] offset first output sample to compute
    * @param[in] samples number of samples to compute
-   * @note **destination[n]** is left unchanged for n<offset and the result is stored from destination[offset] onwards
+   * @remarks **destination[n]** is left unchanged for n<offset and the result is stored from destination[offset] onwards
    * that is, in the same position where they would be if a full convolution was performed.
   */
   void convolve(FloatArray operand2, FloatArray destination, int offset, int samples);
@@ -300,7 +301,7 @@ public:
    * Sets **destination** to the correlation of *this* array and **operand2**.
    * @param[in] operand2 the second operand for the correlation
    * @param[out] destination array. It must have a minimum size of 2*max(srcALen, srcBLen)-1
-   * @note It is the same as correlate(), but destination must have been initialized to 0 in advance. 
+   * @remarks It is the same as correlate(), but destination must have been initialized to 0 in advance. 
   */
   void correlateInitialized(FloatArray operand2, FloatArray destination);
 
@@ -317,10 +318,10 @@ public:
    * @param[in] offset the first element of the subset.
    * @param[in] length the number of elments in the new FloatArray.
    * @return the newly created FloatArray.
-   * @note no memory is allocated by this method. The memory is still shared with the original array.
+   * @remarks no memory is allocated by this method. The memory is still shared with the original array.
    * The memory should not be de-allocated elsewhere (e.g.: by calling FloatArray::destroy() on the original FloatArray) 
    * as long as the FloatArray returned by this method is still in use.
-   * @note Calling FloatArray::destroy() on a FloatArray instance created wit this method will cause an exception.
+   * @remarks Calling FloatArray::destroy() on a FloatArray instance created wit this method will cause an exception.
   */
   FloatArray subArray(int offset, int length);
   
@@ -377,7 +378,7 @@ public:
    * @param[in] fromIndex the first element to copy
    * @param[in] toIndex the destination of the first element
    * @param[in] length the number of elements to copy
-   * @note this method uses *memmove()* so that the source memory and the destination memory can overlap. As a consequence it might have slow performances.
+   * @remarks this method uses *memmove()* so that the source memory and the destination memory can overlap. As a consequence it might have slow performances.
   */
   void move(int fromIndex, int toIndex, int length);
   
@@ -446,15 +447,15 @@ public:
    * Allocates size*sizeof(float) bytes of memory and returns a FloatArray that points to it.
    * @param size the size of the new FloatArray.
    * @return a FloatArray which **data** point to the newly allocated memory and **size** is initialized to the proper value.
-   * @note a FloatArray created with this method has to be destroyed invoking the FloatArray::destroy() method.
+   * @remarks a FloatArray created with this method has to be destroyed invoking the FloatArray::destroy() method.
   */
   static FloatArray create(int size);
   
   /**
    * Destroys a FloatArray created with the create() method.
    * @param array the FloatArray to be destroyed.
-   * @note the FloatArray object passed as an argument should not be used again after invoking this method.
-   * @note a FloatArray object that has not been created by the FloatArray::create() method might cause an exception if passed as an argument to this method.
+   * @remarks the FloatArray object passed as an argument should not be used again after invoking this method.
+   * @remarks a FloatArray object that has not been created by the FloatArray::create() method might cause an exception if passed as an argument to this method.
   */
   static void destroy(FloatArray array);
 };
