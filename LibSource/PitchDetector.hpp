@@ -1,7 +1,112 @@
-#ifndef __PitchDetectors_hpp__
-#define __PitchDetectors_hpp__
+#ifndef __PitchDetector_hpp__
+#define __PitchDetector_hpp__
 
 #include "FloatArray.h"
+
+class FourierPitchDetector{
+private:
+  FastFourierTransform fft;
+  float samplingRate;
+  float minBin;
+  float maxBin;
+  float binSize;
+  float frequency;
+  ComplexFloatArray fd;
+  FloatArray magnitudes;
+  FloatArray timeDomain;
+  int writePointer;
+  Window window;
+public:
+  FourierPitchDetector(){
+    
+  };
+  FourierPitchDetector(int fftSize, float aSamplingRate){
+    init(fftSize, aSamplingRate);
+  };
+  ~FourierPitchDetector(){
+    ComplexFloatArray::destroy(fd);
+    FloatArray::destroy(magnitudes);
+    FloatArray::destroy(timeDomain);
+    Window::destroy(window);
+  }
+  void init(int fftSize, float aSamplingRate){
+    samplingRate=aSamplingRate;
+    frequency=0;
+    writePointer=0;
+    fft.init(fftSize);
+    binSize=samplingRate/fftSize;
+    fd=ComplexFloatArray::create(fftSize);
+    magnitudes=FloatArray::create(fftSize);
+    timeDomain=FloatArray::create(fftSize);
+    window=Window::create(Window::HannWindow, fftSize);
+  }
+  int getSize(){
+    return fft.getSize();
+  }
+  void setsamplingRate(float asamplingRate){
+    samplingRate=asamplingRate;
+  }
+  void setMinFrequency(float aMinFrequency){
+    minBin=(int)(aMinFrequency/binSize);
+  }
+  void setMaxFrequency(float aMaxFrequency){
+    maxBin=(int)(aMaxFrequency/binSize+1);
+  }
+  int process(FloatArray input){ //return values: 0 no fft performed, 1 fft performed
+    ASSERT(input.getSize()<=fd.getSize(), "wrong size");
+    if(input.getSize()==fft.getSize()){ //if the two sizes match, no need to copy the input into the local timeDomain FloatArray
+      input.multiply(window, timeDomain);
+      fft.fft(timeDomain, fd);
+      return 1;
+    }
+    // otherwise keep filling the input buffer TODO: could multiply by the window while copying
+    int samplesToCopy=min(input.getSize(),timeDomain.getSize()-writePointer);
+    timeDomain.insert(input, 0, writePointer, samplesToCopy);
+    writePointer+=samplesToCopy;
+    if(writePointer<fft.getSize()){ // if it is not full, keep going
+      return 0;
+    }
+    if(writePointer==fft.getSize()){ // if it is full, reset pointer and do fft 
+      writePointer=0;
+      timeDomain.multiply(window);
+      fft.fft(timeDomain, fd);
+      return 1;
+    }
+  }
+  float computeFrequency(){// this could have been implemented into process().
+    //The reason why it is in a separate method is to allow to distribute the computational load across different audio blocks
+    ComplexFloatArray fdsub=fd.subArray((int)minBin, (int)maxBin-(int)minBin);
+    FloatArray magnitudesSub=magnitudes.subArray((int)minBin, (int)maxBin-(int)minBin);
+    fdsub.getMagnitudeSquaredValues(magnitudesSub);
+    int maxIndex=magnitudesSub.getMaxIndex();
+    //do quadratic interpolation https://ccrma.stanford.edu/~jos/sasp/Quadratic_Interpolation_Spectral_Peaks.html
+    //this single iteration method gives the following accuracy using as input a sinewave in the range 100Hz-200Hz
+    //fftSize=512; max(abs(error))=15Hz well, with this fftSize, the binsize is 93.75 Hz, with a 100Hz input
+                                    //the peak is in the first quarter of the second bin and the estimate cannot be precise!
+                                    // performance improve drastically above 140Hz (error <2Hz)
+    //fftSize=1024; max(abs(error))=0.7495Hz
+    //fftSize=2048; max(abs(error))=0.37531Hz
+    //fftSize=4096; max(abs(error))=0.18746Hz
+    if(maxIndex==0||maxIndex==magnitudesSub.getSize()-1) { //value out of range
+      frequency=0;  //TODO: what to do if value is out of range?
+      return getFrequency();
+    }
+    //note that we are working on the values in Bel (10*dB).
+    //Using the logarithmic scale gives better accuracy of the peak estimate
+    //in this application
+    float alpha=log10(magnitudesSub[maxIndex-1]);
+    float beta=log10(magnitudesSub[maxIndex]);
+    float gamma=log10(magnitudesSub[maxIndex+1]);
+    float p=0.5*(alpha-gamma)/(alpha-2*beta+gamma);
+    // ASSERT(p>=-0.5 && p<=0.5, "Wrong range for p"); 
+    int bin=maxIndex+minBin;
+    frequency=(bin+p)*binSize; 
+    return getFrequency();
+  }
+  float getFrequency(){
+    return frequency;
+  }
+};
 
 class ZeroCrossingPitchDetector{
 private:
@@ -99,4 +204,4 @@ public:
   }
 };
 
-#endif /* __PitchDetectors_hpp__ */
+#endif /* __PitchDetector_hpp__ */
