@@ -3,24 +3,64 @@
 
 #include "FloatArray.h"
 #include "basicmaths.h"
-
+/**
+* A structure defining a floating point complex number as two members of type float.
+*/
 struct ComplexFloat {
+  /**
+  The real part of the complex number.
+  */
   float re;
+  
+  /**
+  The imaginary part of the complex number.
+  */
   float im;
+  
+  /**
+  Get the magnitude of the complex number.
+  Computes and returns the magnitude of the complex number.
+  @return The magnitude of the complex number.
+  */
   float getMagnitude(){
     return sqrtf(re*re+im*im);  
   }
+  
+  /**
+  Get the phase of the complex number.
+  Computes and returns the phase of the complex number.
+  @return The phase of the complex number.
+  */  
   float getPhase(){
     return atan2(im,re);
   }
+  
+  /**
+  Set the phase of the complex number.
+  Set the phase of the complex number, keeping the magnitude unaltered.
+  @param phase The new phase of the complex number
+  */
   void setPhase(float phase){
     float magnitude=getMagnitude();
     setPolar(magnitude, phase);
   }
+  
+  /**
+  Set the magnitude of the complex number.
+  Set the magnitude of the complex number, keeping the phase unaltered.
+  @param magnitude The new magnitude of the complex number
+  */
   void setMagnitude(float magnitude){
     float phase=getPhase();
     setPolar(magnitude, phase);
   }
+  
+  
+  /**
+  Set magnitude and phase of the complex number.
+  @param magnitude The new magnitude of the complex number
+  @param phase The new phase of the complex number
+  */
   void setPolar(float magnitude, float phase){
     re=magnitude*cosf(phase);
     im=magnitude*sinf(phase);
