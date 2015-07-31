@@ -55,7 +55,7 @@ public:
   }
   float getMaxMagnitudeValue();
   int getMaxMagnitudeIndex();
-  ComplexFloatArray subarray(int offset, int length);
+  ComplexFloatArray subArray(int offset, int length);
   void getRealValues(FloatArray& buf);
   void getImaginaryValues(FloatArray& buf);
   void scale(float factor);
