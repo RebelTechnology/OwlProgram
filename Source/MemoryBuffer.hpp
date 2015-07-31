@@ -13,9 +13,6 @@ public:
   void clear(){
     memset(buffer, 0, size*channels*sizeof(float));
   }
-  // float* getSamples(int channel){
-  //   return buffer+channel*size;
-  // }
   FloatArray getSamples(int channel){
     return FloatArray(buffer+channel*size, size);
   }
@@ -30,13 +27,13 @@ public:
 class ManagedMemoryBuffer : public MemoryBuffer {
 public:
   ManagedMemoryBuffer(int ch, int sz) :
-    MemoryBuffer((float*)malloc(ch*sz*sizeof(float)), ch, sz) {
+    MemoryBuffer(new float[ch*sz], ch, sz) {
     if(buffer == NULL){
       channels = 0;
       size = 0;
     }
   }
   ~ManagedMemoryBuffer(){
-    free(buffer);
+    delete buffer;
   }
 };

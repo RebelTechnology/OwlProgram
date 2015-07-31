@@ -1,5 +1,4 @@
 #include "PatchProcessor.h"
-#include "PatchRegistry.h"
 #include "MemoryBuffer.hpp"
 #include "device.h"
 #include <string.h>
@@ -42,6 +41,8 @@ float PatchProcessor::getParameterValue(PatchParameterId pid){
     return 0.0f;
 }
 
+#define SMOOTH_HYSTERESIS
+#define SMOOTH_FACTOR 3
 void PatchProcessor::setParameterValues(uint16_t *params){
   /* Implements an exponential moving average (leaky integrator) to smooth ADC values
    * y(n) = (1-alpha)*y(n-1) + alpha*y(n)
@@ -49,13 +50,19 @@ void PatchProcessor::setParameterValues(uint16_t *params){
    */
   if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE){
     for(int i=0; i<NOF_ADC_VALUES; ++i)
-      if(abs(params[i]-parameterValues[i]) > 8)
+#ifdef SMOOTH_HYSTERESIS
+      if(abs(params[i]-parameterValues[i]) > 7)
+#endif
 	// invert parameter values for OWL Modular
-	parameterValues[i] = (parameterValues[i] + 0x1000 - params[i]) >> 1;
+	parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR + 0x1000 - params[i])/(SMOOTH_FACTOR+1);
   }else{
     for(int i=0; i<NOF_ADC_VALUES; ++i)
-      if(abs(params[i]-parameterValues[i]) > 16)
+#ifdef SMOOTH_HYSTERESIS
+      if(abs(params[i]-parameterValues[i]) > 7)
+#endif
 	// 16 = half a midi step (4096/128=32)  
-	parameterValues[i] = (parameterValues[i] + params[i]) >> 1;
+	parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR + params[i])/(SMOOTH_FACTOR+1);
   }
+  // for(int i=NOF_ADC_VALUES; i<NOF_PARAMETERS; ++i)
+  //   // todo!
 }
