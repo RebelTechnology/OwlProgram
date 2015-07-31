@@ -148,7 +148,7 @@ public:
       float clip=0.5;
       tempFa1.clip(clip);
       for(int n=0; n<size; n++){
-        assert(abs(tempFa1[n])<=clip, "clip");
+        assert(abs(tempFa1[n])<=clip, "clip to value");
       }
       tempFa1.copyFrom(fa);
       tempFa1.scale(3);
@@ -157,9 +157,11 @@ public:
         assert(abs(tempFa1[n])<=1, "clip to 1");
       }
       fa.scale(3, tempFa1);
-      tempFa1.clip(0.1, 0.5);
+      float min=0.1;
+      float max=0.5;
+      tempFa1.clip(min, max);
       for(int n=0; n<size; n++){
-        assert(abs(tempFa1[n])<=0.5, "clip and scale");
+        assert(abs(tempFa1[n])<=max && abs(tempFa1[n])>=min, "clip, asymmetric");
       }
     }
     //test negate

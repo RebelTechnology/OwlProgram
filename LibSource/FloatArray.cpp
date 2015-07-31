@@ -202,14 +202,12 @@ void FloatArray::clip(float max){
       data[n]=-max;
   }
 }
-void FloatArray::clip(float max, float newMax){
-  float scale=newMax/max;
+void FloatArray::clip(float min, float max){
   for(int n=0; n<size; n++){
     if(data[n]>max)
       data[n]=max;
-    else if(data[n]<-max)
-      data[n]=-max;
-    data[n]*=scale;
+    else if(data[n]<min)
+      data[n]=min;
   }
 }
 FloatArray FloatArray::subArray(int offset, int length){
