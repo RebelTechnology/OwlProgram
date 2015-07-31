@@ -3,6 +3,11 @@
 
 #include <cstddef>
 
+/**
+ * This class contains useful methods for manipulating arrays of floats.
+ * It also provides a convenient handle to the array pointer and the size of the array.
+ * FloatArray objects can be passed by value without copying the contents of the array.
+ */
 class FloatArray {
 private:
   float* data;
@@ -22,8 +27,17 @@ public:
   void clear(){
     setAll(0);
   }
+  /**
+   * Get the minimum value and its index
+   * @param value will be set to the minimum value after the call
+   * @param index will be set to the index of the minimum value after the call
+   */
   void getMin(float* value, int* index);
   void getMax(float* value, int* index);
+  /**
+   * Get the minimum value in the array
+   * @return the minimum value contained in this array
+   */
   float getMinValue();
   float getMaxValue();
   int getMinIndex();
