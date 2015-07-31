@@ -36,8 +36,8 @@ int FloatArray::getMinIndex(){
 }
 
 void FloatArray::getMax(float* value, int* index){
-#ifdef ARM_CORTEX 
   ASSERT(size>0, "Wrong size");
+#ifdef ARM_CORTEX 
   unsigned long idx;
   arm_max_f32(data, size, value, &idx);
   *index = (int)idx;
