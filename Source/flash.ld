@@ -3,10 +3,6 @@
 /* Entry Point */
 ENTRY(Reset_Handler)
 
-/* Highest address of the user mode stack */
-_estack = 0x2001c000;    /* end of 112K RAM */
-/* _estack = 0x10010000;    /\* end of CCM RAM *\/ */
-
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size  = 0x000; /* required amount of heap  */
 _Min_Stack_Size = 0x800; /* required amount of stack */
@@ -137,18 +133,17 @@ SECTIONS
     _programvector = ABSOLUTE(.);
       *(.pv)
     . = ALIGN(8);
+    PROVIDE ( _end = . );
   } >PATCHRAM
 
-  /* User_heap_stack section, used to check that there is enough RAM left */
-  ._user_heap_stack (NOLOAD) :
+  /* User_stack section, used to check that there is enough RAM left */
+  ._user_stack (NOLOAD) :
   {
     . = ALIGN(8);
-    PROVIDE ( end = . );
-    PROVIDE ( _end = . );
-    . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >PATCHRAM
+_estack = 0x2001c000;    /* end of PATCHRAM */
 
   /* CCM section, vars must be located here explicitly */
   /* Example: int foo __attribute__ ((section (".ccmdata"))); */
@@ -159,13 +154,17 @@ SECTIONS
     . = ALIGN(8);
   } >CCMRAM
 
-  /* External SRAM, used for heap memory - no variables to be allocated here! */
+  /* External SRAM, used for heap memory */
   .extdata (NOLOAD) :
   {
     . = ALIGN(8);
     *(.extdata)
     . = ALIGN(8);
+    PROVIDE ( _heap = . );
+    . = . + _Min_Heap_Size;
   } >BANK1_SRAM3
+    _eheap = 0x68100000;
+
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
