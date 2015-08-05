@@ -4,6 +4,7 @@
 
 float ComplexFloatArray::mag(const int i){
   float result;
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_cmplx_mag_f32((float*)&(data[i]), &result,1);
 #else
@@ -12,18 +13,20 @@ float ComplexFloatArray::mag(const int i){
   return result;
 }
 
-void ComplexFloatArray::getMagnitudeValues(FloatArray& dest){
+void ComplexFloatArray::getMagnitudeValues(FloatArray& destination){
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
-  arm_cmplx_mag_f32((float*)data, (float*)dest, size);
+  arm_cmplx_mag_f32((float*)data, (float*)destination, size);
 #else
   for(int i=0; i<size; i++){
-    dest[i]=mag(i);
+    destination[i]=mag(i);
   }
 #endif
 }
 
 float ComplexFloatArray::mag2(const int i){
   float result;
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_cmplx_mag_squared_f32((float*)&(data[i]), &result, 1);
 #else
@@ -34,17 +37,19 @@ float ComplexFloatArray::mag2(const int i){
   return result;
 }
 
-void ComplexFloatArray::getMagnitudeSquaredValues(FloatArray& dest){
+void ComplexFloatArray::getMagnitudeSquaredValues(FloatArray& destination){
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
-  arm_cmplx_mag_squared_f32((float*)data, (float*)dest, size);
+  arm_cmplx_mag_squared_f32((float*)data, (float*)destination, size);
 #else
   for(int i=0; i<size; i++){
-    dest[i]=mag2(i);
+    destination[i]=mag2(i);
   }
 #endif  
 }
 
 void ComplexFloatArray::complexDotProduct(ComplexFloatArray& operand2, ComplexFloat& result){
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_cmplx_dot_prod_f32 ( (float*)data, (float*)operand2, size, &(result.re), &(result.im) );
 #else
@@ -63,6 +68,7 @@ void ComplexFloatArray::complexDotProduct(ComplexFloatArray& operand2, ComplexFl
 
 void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result){
   ASSERT(size==operand2.getSize(), "Wrong size");
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_cmplx_mult_cmplx_f32 ( (float*)data, (float*)operand2, (float*)result, size );  
 #else
@@ -76,13 +82,14 @@ void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray& operan
 #endif  
 }
 
-void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray& buf){
-  ASSERT(size==buf.getSize(), "Wrong size");
+void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray& destination){
+  ASSERT(size==destination.getSize(), "Wrong size");
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
-  arm_cmplx_conj_f32( (float*)data, (float*)buf, size );  
+  arm_cmplx_conj_f32( (float*)data, (float*)destination, size );  
 #else
   float *pSrc=(float*)data;
-  float *pDst=(float *)buf;
+  float *pDst=(float *)destination;
   for(int n=0; n<size; n++) {        
     pDst[(2*n)+0] = pSrc[(2*n)+0];     // real part        
     pDst[(2*n)+1] = -pSrc[(2*n)+1];    // imag part        
@@ -92,6 +99,7 @@ void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray& buf){
 
 void ComplexFloatArray::complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result){
   ASSERT(size==operand2.getSize(), "Wrong size"); 
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_cmplx_mult_real_f32 ( (float*)data, (float*)operand2, (float*)result, size );  
 #else
@@ -148,8 +156,9 @@ void ComplexFloatArray::getImaginaryValues(FloatArray& buf){
 }
 
 void ComplexFloatArray::scale(float factor){
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX  
-  arm_scale_f32((float*)data, factor, (float*)data, size*2);
+  arm_scale_f32((float*)data, factor, (float*)data, size*2); //the *2 accounts for the fact that both real and imaginary parts are scaled
 #else
   for(int n=0; n<size; n++){
     data[n].re *= factor;
@@ -193,6 +202,7 @@ void ComplexFloatArray::copyFrom(ComplexFloatArray source){
 
 void ComplexFloatArray::copyTo(ComplexFloat* other, int length){
   ASSERT(size >= length, "Array too small");
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_copy_f32((float *)data, (float *)other, length*sizeof(ComplexFloat)/sizeof(float));
 #else
@@ -205,6 +215,7 @@ void ComplexFloatArray::copyTo(ComplexFloat* other, int length){
 
 void ComplexFloatArray::copyFrom(ComplexFloat* other, int length){
   ASSERT(size >= length, "Array too small");
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_copy_f32((float *)other, (float *)data, length*sizeof(ComplexFloat)/sizeof(float));  //note the *2 multiplier which accounts for real and imaginary parts
 #else
@@ -214,7 +225,9 @@ void ComplexFloatArray::copyFrom(ComplexFloat* other, int length){
   }
 #endif /* ARM_CORTEX */
 }
+
 void ComplexFloatArray::setAll(float value){
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_fill_f32(value, (float *)data, size *2 ); //note the *2 multiplier which accounts for real and imaginary parts
 #else
@@ -225,12 +238,14 @@ void ComplexFloatArray::setAll(float value){
 #endif /* ARM_CORTEX */
 }
 /*END -- methods copied and adapted from ComplexFloatArray.cpp*/
+
 void ComplexFloatArray::setAll(ComplexFloat value){
   for(int n=0; n<size; n++){
     data[n].re=value.re;
     data[n].im=value.im;
   }
 }
+
 void ComplexFloatArray::setAll(float valueRe, float valueIm){
   ComplexFloat value;
   value.re=valueRe;

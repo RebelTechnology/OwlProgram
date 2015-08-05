@@ -314,14 +314,14 @@ public:
   
   /**
    * A subset of the array.
-   * Returns a subArray that points to subset of the memory used by the original array.
+   * Returns a array that points to subset of the memory used by the original array.
    * @param[in] offset the first element of the subset.
    * @param[in] length the number of elments in the new FloatArray.
    * @return the newly created FloatArray.
    * @remarks no memory is allocated by this method. The memory is still shared with the original array.
    * The memory should not be de-allocated elsewhere (e.g.: by calling FloatArray::destroy() on the original FloatArray) 
    * as long as the FloatArray returned by this method is still in use.
-   * @remarks Calling FloatArray::destroy() on a FloatArray instance created wit this method will cause an exception.
+   * @remarks Calling FloatArray::destroy() on a FloatArray instance created with this method might cause an exception.
   */
   FloatArray subArray(int offset, int length);
   
@@ -346,7 +346,7 @@ public:
   void copyFrom(FloatArray source);
   
   /**
-   * Copies the content into the array.
+   * Copies an array of float into the array.
    * @param[in] source a pointer to the beginning of the portion of memory to read from.
    * @param[in] length number of samples to copy.
   */
