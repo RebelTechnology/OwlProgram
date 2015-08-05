@@ -206,7 +206,7 @@ public:
   /**
    * Allows to index the array using array-style brackets.
    * @param index The index of the element
-   * @return the Value of the **index** element of the array
+   * @return the Value of the <code>index</code> element of the array
    * Example usage:
    * @code
    * int size=1000;
@@ -225,7 +225,7 @@ public:
   /**
    * Allows to index the array using array-style brackets.
    * 
-   * **const** version of operator[]
+   * <code>const</code> version of operator[]
   */
   ComplexFloat& operator [](const int i) const{
     return data[i];
@@ -259,8 +259,8 @@ public:
    * Compares two arrays.
    * Performs an element-wise comparison of the values contained in the arrays.
    * @param other the array to compare against.
-   * @return **true** if the arrays have the same size and the value of each of the elements of the one 
-   * match the value of the corresponding element of the other, or **false** otherwise.
+   * @return <code>true</code> if the arrays have the same size and the value of each of the elements of the one 
+   * match the value of the corresponding element of the other, or <code>false</code> otherwise.
   */
   bool equals(const ComplexFloatArray& other) const{
     if(size!=other.getSize()){
@@ -278,7 +278,7 @@ public:
    * Creates a new ComplexFloatArray.
    * Allocates size*sizeof(float) bytes of memory and returns a ComplexFloatArray that points to it.
    * @param size The size of the new ComplexFloatArray.
-   * @return A ComplexFloatArray which **data** point to the newly allocated memory and **size** is initialized to the proper value.
+   * @return A ComplexFloatArray which **data** point to the newly allocated memory and <code>size</code> is initialized to the proper value.
    * @remarks A ComplexFloatArray created with this method has to be destroyed invoking the ComplexFloatArray::destroy() method.
   */
   static ComplexFloatArray create(int size);
@@ -391,8 +391,8 @@ public:
   /**
    * Set the phase of a range of the elements of an array, using the magnitude from the current array.
    * 
-   * The **offset** and **count** specified apply to both the source and **destination** arrays. 
-   * Elements of the **destination** array outside this range will not be affected.
+   * The <code>offset</code> and <code>count</code> specified apply to both the source and <code>destination</code> arrays. 
+   * Elements of the <code>destination</code> array outside this range will not be affected.
    * @param[in] phase An array containing the phases.
    * @param[in] offset First element to set
    * @param[in] count Number of elements to set
@@ -425,8 +425,8 @@ public:
   /**
    * Set the magnitude of a range of the elements of an array, using the phases from the current array.
    * 
-   * The **offset** and **count** specified apply to both the source and **destination** arrays. 
-   * Elements of the **destination** array outside this range will not be affected.
+   * The <code>offset</code> and <code>count</code> specified apply to both the source and <code>destination</code> arrays. 
+   * Elements of the <code>destination</code> array outside this range will not be affected.
    * @param[in] magnitude An array containing the magnitudes.
    * @param[in] offset First element to set
    * @param[in] count Number of elements to set
