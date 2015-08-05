@@ -133,17 +133,19 @@ SECTIONS
     _programvector = ABSOLUTE(.);
       *(.pv)
     . = ALIGN(8);
-    PROVIDE ( _end = . );
   } >PATCHRAM
 
   /* User_stack section, used to check that there is enough RAM left */
   ._user_stack (NOLOAD) :
   {
     . = ALIGN(8);
+    PROVIDE ( _stack = . );
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
-  } >PATCHRAM
-_estack = 0x2001c000;    /* end of PATCHRAM */
+  } >CCMRAM
+_estack = 0x10010000;    /* end of CCMRAM */
+/*  } >PATCHRAM
+_estack = 0x2001c000; */    /* end of PATCHRAM */
 
   /* CCM section, vars must be located here explicitly */
   /* Example: int foo __attribute__ ((section (".ccmdata"))); */

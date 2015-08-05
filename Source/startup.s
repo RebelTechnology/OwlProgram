@@ -67,7 +67,7 @@ g_pfnVectors:
   .word _startprog 	 /* link base address */
   .word _endprog         /* end of program */
   .word Reset_Handler    /* code entry point */
-  .word _end             /* stack start */
+  .word _stack           /* stack start */
   .word _estack          /* stack end */
   .word _programvector
   .include "progname.s"
