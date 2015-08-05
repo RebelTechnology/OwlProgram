@@ -62,14 +62,14 @@ void ComplexFloatArray::complexDotProduct(ComplexFloatArray& operand2, ComplexFl
 }
 
 void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result){
-  int minSize=min(size,operand2.getSize()); //TODO: shall we take this out and allow it to segfault?
+  ASSERT(size==operand2.getSize(), "Wrong size");
 #ifdef ARM_CORTEX
-  arm_cmplx_mult_cmplx_f32 ( (float*)data, (float*)operand2, (float*)result, minSize );  
+  arm_cmplx_mult_cmplx_f32 ( (float*)data, (float*)operand2, (float*)result, size );  
 #else
   float *pSrcA=(float*)data;
   float *pSrcB=(float*)operand2;
   float *pDst=(float*)result;
-  for(int n=0; n<minSize; n++) {        
+  for(int n=0; n<size; n++) {        
     pDst[(2*n)+0] = pSrcA[(2*n)+0] * pSrcB[(2*n)+0] - pSrcA[(2*n)+1] * pSrcB[(2*n)+1];        
     pDst[(2*n)+1] = pSrcA[(2*n)+0] * pSrcB[(2*n)+1] + pSrcA[(2*n)+1] * pSrcB[(2*n)+0];        
   }        
@@ -77,9 +77,9 @@ void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray& operan
 }
 
 void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray& buf){
-  int minSize= min(size,buf.getSize()); //TODO: shall we take this out and allow it to segfault?
+  ASSERT(size==buf.getSize(), "Wrong size");
 #ifdef ARM_CORTEX
-  arm_cmplx_conj_f32( (float*)data, (float*)buf, minSize );  
+  arm_cmplx_conj_f32( (float*)data, (float*)buf, size );  
 #else
   float *pSrc=(float*)data;
   float *pDst=(float *)buf;
@@ -91,9 +91,9 @@ void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray& buf){
 }
 
 void ComplexFloatArray::complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result){
-  int minSize= min(size,operand2.getSize()); //TODO: shall we take this out and allow it to segfault?
+  ASSERT(size==operand2.getSize(), "Wrong size"); 
 #ifdef ARM_CORTEX
-  arm_cmplx_mult_real_f32 ( (float*)data, (float*)operand2, (float*)result, minSize );  
+  arm_cmplx_mult_real_f32 ( (float*)data, (float*)operand2, (float*)result, size );  
 #else
   float *pSrcCmplx=(float*)data;
   float *pSrcReal=(float*)operand2;
