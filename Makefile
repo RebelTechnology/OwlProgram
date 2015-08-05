@@ -187,6 +187,7 @@ online:
 
 web: $(EMCC_SRC) $(DEPS)
 	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
+	@cp WebSource/*.js WebSource/*.html WebSource/*.mp3 $(BUILD)
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@mkdir -p $(BUILD)/HeavySource
