@@ -6,7 +6,7 @@
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <!-- <link href="css/custom.css" rel="stylesheet"> -->
   </head>
-  <body>
+  <body onload="onload()">
     <div class="center">
       <h1>OWL Patch</h1>
       <h2>Input select</h2>
@@ -35,10 +35,13 @@
       <input type="range" min="0" max="1" step="0.001" oninput="patch.update(3, this.value)"/>
     </div>
 
+    <script type="text/javascript" src="wavy-jones.js"></script>
     <script type="text/javascript" src="../Build/patch.js"></script>
     <script type="text/javascript" src="webaudio.js"></script>
     <script type="text/javascript">
-      var patch = owl.dsp();
+var patch;
+function onload(){
+      patch = owl.dsp();
       patch.update(0, 0.5);
       patch.update(1, 0.5);
       patch.update(2, 0.5);
@@ -61,12 +64,22 @@
       var getStatus = function(){
           document.getElementById("status").innerHTML = patch.getStatus();
       };
+}
     </script>
+    <style>
+    #oscilloscope {
+        width: 400px;
+        height: 200px;
+    }
+    </style>
 
       <div>
         <p id="message"></p>
         <p id="status"></p>
       </div>
+
+      <div id="oscilloscope"></div>
+
   </body>
 
 </html>

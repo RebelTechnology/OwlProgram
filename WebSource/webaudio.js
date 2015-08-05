@@ -148,7 +148,10 @@ owl.dsp = function () {
 		that.scriptProcessor.onaudioprocess = that.compute;
 
 		// Connect output of OWL processor to audio out
-		that.scriptProcessor.connect(owl.context.destination);
+
+	        that.scope = new WavyJones(owl.context, "oscilloscope");
+   	        that.scope.connect(owl.context.destination);
+		that.scriptProcessor.connect(that.scope);
 
 		// TODO the below calls to malloc are not yet being freed, potential memory leak
 		// allocate memory for input / output arrays
