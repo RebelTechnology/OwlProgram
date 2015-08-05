@@ -11,6 +11,7 @@
 #include "Resample.h"
 #include "PitchDetector.hpp"
 #include "SuperSaw.hpp"
+#include "FirFilter.hpp"
 #include "patch.h"
 #include "main.h"
 
