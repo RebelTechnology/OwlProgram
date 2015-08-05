@@ -135,18 +135,16 @@ SECTIONS
     . = ALIGN(8);
   } >PATCHRAM
 
-  /* User_heap_stack section, used to check that there is enough RAM left */
-  ._user_heap_stack (NOLOAD) :
+  /* User_stack section, used to check that there is enough RAM left */
+  ._user_stack (NOLOAD) :
   {
     . = ALIGN(8);
-    PROVIDE ( _end = . );
-    . = . + _Min_Heap_Size;
+    PROVIDE ( _stack = . );
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
 
   } >PATCHRAM
-_estack = 0x2001c000;    /* end of 112K RAM */
-
+_estack = 0x2001c000;    /* end of PATCHRAM */
 /*   } >CCMRAM */
 /* _estack = 0x10010000;    /\* end of CCM RAM *\/ */
 
@@ -158,9 +156,9 @@ _estack = 0x2001c000;    /* end of 112K RAM */
     . = ALIGN(8);
     *(.ccmdata)
     . = ALIGN(8);
-    /* PROVIDE ( _heap = . ); */
+    PROVIDE ( _heap = . );
   } >CCMRAM
-/* _eheap = 0x10010000;    /\* end of CCM *\/ */
+_eheap = 0x10010000;    /* end of CCM */
 
   /* External SRAM, used for heap memory - no variables to be allocated here! */
   .extdata (NOLOAD) :
@@ -168,9 +166,10 @@ _estack = 0x2001c000;    /* end of 112K RAM */
     . = ALIGN(8);
     *(.extdata)
     . = ALIGN(8);
-    PROVIDE ( _heap = . );
+/*    PROVIDE ( _heap = . ); */
+    . = . + _Min_Heap_Size;
   } >BANK1_SRAM3
-_eheap = 0x68100000;
+/* _eheap = 0x68100000; */
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
