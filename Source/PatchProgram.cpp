@@ -10,6 +10,7 @@
 #include "BiquadFilter.hpp"
 #include "Resample.h"
 #include "PitchDetector.hpp"
+#include "SuperSaw.hpp"
 #include "patch.h"
 #include "main.h"
 
