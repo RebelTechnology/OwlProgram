@@ -38,8 +38,6 @@ public:
     ss.setSampleRate(getSampleRate());
   }
   void processAudio(AudioBuffer &buffer){
-    static int count=0;
-    count++;
     float gain=getParameterValue(PARAMETER_A);
     float frequency=powf(2,5*getParameterValue(PARAMETER_B))*100;
     float detune=getParameterValue(PARAMETER_C);
@@ -49,6 +47,7 @@ public:
     ss.setFrequency(frequency);
     ss.setDetune(detune);
     ss.getSamples(fa);
+    // ss.setNumOscillators(gain*14+1); //just for fun
     fa.scale(gain);
   }
 };
