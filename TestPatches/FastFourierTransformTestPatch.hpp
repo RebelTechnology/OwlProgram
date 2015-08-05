@@ -11,17 +11,22 @@ private:
   int fftsize;
   FastFourierTransform fft;
   ComplexFloatArray fd;
+  SuperSaw ss;
 public:
-  FastFourierTransformTestPatch(){
+  FastFourierTransformTestPatch(): ss(getSampleRate()){
+    
     fftsize=getBlockSize();
     fft.init(fftsize);
     fd=ComplexFloatArray::create(fftsize);
     
   };
   void processAudio(AudioBuffer &buffer){
+    ss.setFrequency(300);
     FloatArray td=buffer.getSamples(0);
+    ss.getSamples(td);
     fft.fft(td,fd);
     fft.ifft(fd,td);
+    td.scale(0.1);
   }
 };
 
