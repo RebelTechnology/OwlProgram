@@ -23,11 +23,10 @@ private:
   int lastCall=kNone;
   float samplePeriod;
   float detune;
-  float* frequencyRatios;
-  float* phaseIncrements;
-  float* amplitudes;
-  float* phases;
-  float* allTheArrays=NULL;
+  FloatArray frequencyRatios;
+  FloatArray phaseIncrements;
+  FloatArray amplitudes;
+  FloatArray phases;
   BiquadFilter *filter=NULL;
   float frequency;
   int numberOfOscillators;
@@ -42,7 +41,10 @@ void init(){
   }
   
   void destroy(){
-    free(allTheArrays);
+    FloatArray::destroy(frequencyRatios);
+    FloatArray::destroy(phaseIncrements);
+    FloatArray::destroy(amplitudes);
+    FloatArray::destroy(phases);
     if(filter!=NULL){
       BiquadFilter::destroy(filter);
       filter=NULL;
@@ -52,13 +54,14 @@ void init(){
   void allocate(){
     destroy();
     int numArrays=4;
-    float size=sizeof(float)*numberOfOscillators*numArrays;
-    allTheArrays=(float*)malloc(size);
-    memset(allTheArrays,0,size);
-    frequencyRatios=allTheArrays;
-    phaseIncrements=allTheArrays+numberOfOscillators*1;
-    amplitudes=allTheArrays+numberOfOscillators*2;
-    phases=allTheArrays+numberOfOscillators*3;
+    frequencyRatios=FloatArray::create(numberOfOscillators);
+    frequencyRatios.clear();
+    phaseIncrements=FloatArray::create(numberOfOscillators);
+    phaseIncrements.clear();
+    amplitudes=FloatArray::create(numberOfOscillators);
+    amplitudes.clear();
+    phases=FloatArray::create(numberOfOscillators);
+    phases.clear();
     float filterStages=2;
     filter=BiquadFilter::create(filterStages);
   }
@@ -144,7 +147,6 @@ public:
       amplitudes[n]=detunedAmplitude;
     }
     amplitudes[numberOfOscillators/2]=1-aMix;
-    debugMessage("detunedamplitude", detunedAmplitude, 1-aMix);
   }
 
   /**
@@ -197,7 +199,7 @@ public:
       }
     }
     if(filterBypass==false){
-      filter->process(output, output, size); //highpass filter
+      // filter->process(output, output, size); //highpass filter
     }
   }
 };

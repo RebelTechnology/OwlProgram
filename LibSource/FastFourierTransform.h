@@ -30,7 +30,7 @@ public:
   void ifft(ComplexFloatArray& in, FloatArray& out){
     ASSERT(in.getSize() >= getSize(), "Input array too small");
     ASSERT(out.getSize() >= getSize(), "Output array too small");
-   arm_rfft_fast_f32(&instance, (float*)in, (float*)out, 1);
+    arm_rfft_fast_f32(&instance, (float*)in, (float*)out, 1);
   }
   int getSize(){
     return instance.fftLenRFFT;
@@ -85,33 +85,37 @@ public:
 
   /**
    * Perform the direct FFT.
-   * @param[in] in The real-valued input array
-   * @param[out] out The complex-valued output array
+   * @param[in] input The real-valued input array
+   * @param[out] output The complex-valued output array
+   * @remarks Calling this method will mess up the content of the **input** array.
    * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   */
-  void fft(FloatArray& in, ComplexFloatArray& out){
-    ASSERT(in.getSize() >= getSize(), "Input array too small");
-    ASSERT(out.getSize() >= getSize(), "Output array too small");
+  void fft(FloatArray& input, ComplexFloatArray& output){
+    ASSERT(input.getSize() >= getSize(), "Input array too small");
+    ASSERT(output.getSize() >= getSize(), "Output array too small");
     for(int n=0; n<getSize(); n++){
-      temp[n].re=in[n];
+      temp[n].re=input[n];
       temp[n].im=0;
     }
-    kiss_fft(cfgfft, (kiss_fft_cpx*)(float*)temp.getData(), (kiss_fft_cpx*)(float*)out);
+    kiss_fft(cfgfft, (kiss_fft_cpx*)(float*)temp.getData(), (kiss_fft_cpx*)(float*)output);
   }
   
   /**
    * Perform the inverse FFT.
-   * @param[in] in The complex-valued input array
-   * @param[out] out The real-valued output array
+   * The output is rescaled by 1/fftSize.
+   * @param[in] input The complex-valued input array
+   * @param[out] output The real-valued output array
+   * @remarks Calling this method will mess up the content of the **input** array.
    * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+   * 
   */
-  void ifft(ComplexFloatArray& in, FloatArray& out){
-    ASSERT(in.getSize() >= getSize(), "Input array too small");
-    ASSERT(out.getSize() >= getSize(), "Output array too small");
-    kiss_fft(cfgifft, (kiss_fft_cpx*)(float*)in, (kiss_fft_cpx*)(float*)temp.getData());
+  void ifft(ComplexFloatArray& input, FloatArray& output){
+    ASSERT(input.getSize() >= getSize(), "Input array too small");
+    ASSERT(output.getSize() >= getSize(), "Output array too small");
+    kiss_fft(cfgifft, (kiss_fft_cpx*)(float*)input, (kiss_fft_cpx*)(float*)temp.getData());
     float scale=1.0f/getSize();
     for(int n=0; n<getSize(); n++){
-      out[n]=temp[n].re*scale;
+      output[n]=temp[n].re*scale;
     }
   }
     
