@@ -69,6 +69,13 @@ function getStatus(){
       document.getElementById("status").innerHTML = patch.getStatus();
 }
 
+function monitorProcess(){
+     getMessage();
+     getStatus();
+}
+
+var monitorTask = window.setInterval(monitorProcess, 1000);
+
     </script>
     <style>
     #oscilloscope {

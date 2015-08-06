@@ -148,7 +148,6 @@ owl.dsp = function () {
 		that.scriptProcessor.onaudioprocess = that.compute;
 
 		// Connect output of OWL processor to audio out
-
 	        that.scope = new WavyJones(owl.context, "oscilloscope");
    	        that.scope.connect(owl.context.destination);
 		that.scriptProcessor.connect(that.scope);
