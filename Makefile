@@ -30,6 +30,7 @@ DEPS        += $(HEAVYDIR)/Heavy_owl.h
 HEAVYFILE   ?= $(HEAVY).pd
 HEAVYNAME   ?= owl
 HEAVYDIR    ?= $(BUILD)/HeavySource
+HEAVYSRC    ?= $(BUILDROOT)/HeavySource
 CPPFLAGS    += -I$(HEAVYDIR)
 CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
 vpath %.c $(HEAVYDIR)
@@ -189,12 +190,13 @@ web: $(EMCC_SRC) $(DEPS)
 	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
-	@mkdir -p $(BUILD)/HeavySource
-	@cp -f $(PATCHSOURCE)/*.pd $(BUILD)/HeavySource
+	@mkdir -p $(HEAVYDIR)
+	@cp -f $(PATCHSOURCE)/*.pd $(HEAVYDIR)
 	@cp -f $< $@
 
 $(HEAVYDIR)/Heavy_owl.h: $(HEAVYDIR)/_main.pd
-	@python ./Tools/Heavy/uploader.py $(BUILD)/HeavySource -g c -n $(HEAVYNAME) -o $(HEAVYDIR)
+	@python ./Tools/Heavy/uploader.py $(HEAVYDIR) -g c -n $(HEAVYNAME) -o $(HEAVYDIR)
+	@cp $(HEAVYSRC)/Utils_unix.h $(HEAVYDIR)
 
 heavy: $(HEAVYDIR)/Heavy_owl.h
 	@$(eval HEAVY_SRC = $(wildcard $(HEAVYDIR)/*.c) )
