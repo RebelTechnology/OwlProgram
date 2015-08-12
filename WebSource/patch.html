@@ -16,7 +16,7 @@
         <input type="button" onclick="patch.useFileInput(); return false;" value="File"/>
         <div class="file-input-controls">
           <input type="file" id="file-input-selector" onchange="patch.onFileSelect(this.files)" />
-          <audio src="https://ccrma.stanford.edu/~jos/mp3/gtr-jazz.mp3" id="file-input-audio" controls loop></audio>
+          <audio src="gtr-jazz.mp3" id="file-input-audio" controls loop></audio>
         </div>
       </div>
       <div id="patchname"></div>
@@ -53,9 +53,9 @@ function onload(){
       document.getElementById("p3").innerHTML = "<h3>"+patch.getParameterName(2)+"</h3>";
       document.getElementById("p4").innerHTML = "<h3>"+patch.getParameterName(3)+"</h3>";
       // patch.update("Volume", 0.1);
-      // patch.play();
       patch.scope.lineColor = "blue";
       patch.scope.lineThickness = 2;
+      patch.useFileInput();
 }
 
 function getMessage(){
