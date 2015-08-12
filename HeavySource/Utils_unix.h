@@ -94,7 +94,7 @@
 #define hv_ceil_f(a) ceilf(a)
 #define hv_floor_f(a) floorf(a)
 #define hv_round_f(a) roundf(a)
-#define hv_pow_f(a, b) fastpowf(a, b)
+#define hv_pow_f(a, b) powf(a, b)
 #define hv_fma_f(a, b, c) ((a*b)+c) // TODO(joe): use 'fmaf(a, b, c)' once emscripten supports it
 
 // Utilities
