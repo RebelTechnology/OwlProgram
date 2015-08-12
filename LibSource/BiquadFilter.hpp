@@ -41,11 +41,15 @@ public:
   void setCoefficients(FloatArray newCoefficients){
     ASSERT(coefficients.getSize()==newCoefficients.getSize(), "wrong size");
     coefficients.copyFrom(newCoefficients);
-  }
-  
+  }  
+
   FloatArray getCoefficients(){
     return coefficients;
   }
+  FloatArray getState(){
+    return state;
+  }
+
   static void setLowPass(float* coefficients, float fc, float q){
     float omega = M_PI*fc/2;
     float K = tanf(omega);
@@ -172,6 +176,7 @@ private:
   // arm_biquad_casd_df1_inst_f32 df1;
   arm_biquad_cascade_df2T_instance_f32 df2;
 #endif /* ARM_CORTEX */
+protected:
   float* coefficients; // stages*5
   float* state; // stages*4 for df1, stages*2 for df2
   int stages;
@@ -193,7 +198,6 @@ private:
       coefficients[4+i*5] = coefficients[4];
     }
   }
-protected:
   void init(){
 #ifdef ARM_CORTEX
     // arm_biquad_cascade_df1_init_f32(&df1, stages, coefficients, state);
@@ -205,19 +209,30 @@ protected:
 #endif /* ARM_CORTEX */
   }
 public:
+  BiquadFilter()
+    : coefficients(NULL), state(NULL), stages(0) {}
+
   BiquadFilter(float* coefs, float* ste, int sgs) :
     coefficients(coefs), state(ste), stages(sgs) {
     init();
   }
-  BiquadFilter(){};
 
   int getStages(){
     return stages;
   }
 
-  static int getNumCoefficientsPerStage(){
+  static int getCoefficientsPerStage(){
     return BIQUAD_COEFFICIENTS_PER_STAGE;
   }
+
+  FloatArray getCoefficients(){
+    return FloatArray(coefficients, BIQUAD_COEFFICIENTS_PER_STAGE*stages);
+  }
+
+  FloatArray getState(){
+    return FloatArray(state, BIQUAD_STATE_VARIABLES_PER_STAGE*stages);
+  }
+
   FilterStage getFilterStage(int stage){
     ASSERT(stage < stages, "Invalid filter stage index");
     FloatArray c(coefficients+BIQUAD_COEFFICIENTS_PER_STAGE*stage, BIQUAD_COEFFICIENTS_PER_STAGE);
@@ -305,13 +320,16 @@ public:
 
   void setCoefficientsPointer(FloatArray newCoefficients){ //sets coefficients to point to a given pointer
     ASSERT(BIQUAD_COEFFICIENTS_PER_STAGE*stages==newCoefficients.getSize(), "wrong size");
-    coefficients=newCoefficients;
+    coefficients = newCoefficients;
+    init();
   }
+
   void setCoefficients(FloatArray newCoefficients){//copies coefficients to all stages
     ASSERT(newCoefficients.getSize()==BIQUAD_COEFFICIENTS_PER_STAGE, "wrong size");
     getFilterStage(0).setCoefficients(newCoefficients);
     copyCoefficients(); //set all the other stages
   }
+
   static BiquadFilter* create(int stages){
     return new BiquadFilter(new float[stages*5], new float[stages*2], stages);
     // for df1: state requires stages*4
@@ -322,6 +340,37 @@ public:
     delete filter->coefficients;
     delete filter->state;
     delete filter;
+  }
+};
+
+class StereoBiquadFilter : public BiquadFilter {
+private:
+  BiquadFilter right;
+public:
+  StereoBiquadFilter(float* coefs, float* lstate, float* rstate, int sgs) : 
+    BiquadFilter(coefs, lstate, sgs), 
+    right(coefs, rstate, sgs) {}
+
+  BiquadFilter* getLeftFilter(){
+    return this;
+  }
+
+  BiquadFilter* getRightFilter(){
+    return &right;
+  }
+
+  void process(AudioBuffer &buffer){
+    BiquadFilter::process(buffer.getSamples(LEFT_CHANNEL));
+    right.process(buffer.getSamples(RIGHT_CHANNEL));
+  }
+
+  static StereoBiquadFilter* create(int stages){
+    return new StereoBiquadFilter(new float[stages*5], new float[stages*2], new float[stages*2], stages);
+  }
+
+  static void destroy(StereoBiquadFilter* filter){
+    FloatArray::destroy(filter->right.getState());
+    BiquadFilter::destroy(filter);
   }
 };
 
