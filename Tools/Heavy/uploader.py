@@ -219,11 +219,14 @@ def main():
 
     # update the api token, if present
     if "token" in reply_json.get("meta",{}) and not args.x:
-        if not os.path.exists(os.path.dirname(token_path)):
-            os.makedirs(os.path.dirname(token_path)) # ensure that the .heavy directory exists
-        with open(token_path, "w") as f:
-            f.write(reply_json["meta"]["token"])
-        os.chmod(token_path, stat.S_IRUSR | stat.S_IWUSR) # force rw------- permissions on the file
+        if args.token == None:
+            if not os.path.exists(os.path.dirname(token_path)):
+                os.makedirs(os.path.dirname(token_path)) # ensure that the .heavy directory exists
+            with open(token_path, "w") as f:
+                f.write(reply_json["meta"]["token"])
+            os.chmod(token_path, stat.S_IRUSR | stat.S_IWUSR) # force rw------- permissions on the file
+        else:
+            print "WARNING: Could not update API token!"
 
     # print any warnings
     for x in r_json["warnings"]:
