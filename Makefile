@@ -53,7 +53,7 @@ CPPFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
 CPPFLAGS += -mtune=cortex-m4
 CPPFLAGS += -fpic
 CPPFLAGS += -fpie
-CPPFLAGS += -fdata-sections 
+CPPFLAGS += -fdata-sections
 CPPFLAGS += -ffunction-sections
 # CPPFLAGS += -munaligned-access
 CPPFLAGS += -mno-unaligned-access
@@ -73,7 +73,7 @@ LDSCRIPT ?= Source/flash.ld
 FIRMWARESENDER = Tools/FirmwareSender
 
 C_SRC   = basicmaths.c
-CPP_SRC = main.cpp operators.cpp message.cpp StompBox.cpp PatchProcessor.cpp 
+CPP_SRC = main.cpp operators.cpp message.cpp StompBox.cpp PatchProcessor.cpp
 CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp
 CPP_SRC += PatchProgram.cpp
 
@@ -86,7 +86,7 @@ CPPFLAGS += -I$(PATCHSOURCE)
 CPPFLAGS += -I$(TESTPATCHES)
 CPPFLAGS += -I$(BUILD)
 CPPFLAGS += -IOwlPatches
-PATCH_C_SRC = $(wildcard $(PATCHSOURCE)/*.c) 
+PATCH_C_SRC = $(wildcard $(PATCHSOURCE)/*.c)
 PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_C_SRC:.c=.o)))
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
@@ -105,12 +105,12 @@ vpath %.c Libraries/syscalls
 
 # emscripten
 EMCC       = emcc
-EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11 
+EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11
 EMCCFLAGS += -IOwlPatches -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILD) -I$(TESTPATCHES)
 EMCCFLAGS += -ILibraries/KissFFT
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus']"
-EMCC_SRC   = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/operators.cpp $(SOURCE)/message.cpp 
-EMCC_SRC  += WebSource/web.cpp 
+EMCC_SRC   = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/operators.cpp $(SOURCE)/message.cpp
+EMCC_SRC  += WebSource/web.cpp
 EMCC_SRC  += $(LIBSOURCE)/basicmaths.c $(LIBSOURCE)/StompBox.cpp $(LIBSOURCE)/FloatArray.cpp $(LIBSOURCE)/ComplexFloatArray.cpp
 EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
@@ -195,7 +195,7 @@ $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@cp -f $< $@
 
 $(HEAVYDIR)/Heavy_owl.h: $(HEAVYDIR)/_main.pd
-	@python ./Tools/Heavy/uploader.py $(HEAVYDIR) -g c -n $(HEAVYNAME) -o $(HEAVYDIR)
+	@python ./Tools/Heavy/uploader.py $(HEAVYDIR) -g c -n $(HEAVYNAME) -o $(HEAVYDIR) -t $(HEAVYTOKEN)
 	@cp $(HEAVYSRC)/Utils_unix.h $(HEAVYDIR)
 
 heavy: $(HEAVYDIR)/Heavy_owl.h
