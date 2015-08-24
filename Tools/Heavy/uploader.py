@@ -85,6 +85,10 @@ def main():
         "-v", "--verbose",
         help="Show debugging information.",
         action="count")
+    parser.add_argument(
+        "-t", "--token",
+        help="Use the specified token.",
+    )
     args = parser.parse_args()
 
     domain = args.domain or "https://enzienaudio.com"
@@ -93,7 +97,14 @@ def main():
 
     # token should be stored in ~/.heavy/token
     token_path = os.path.expanduser(os.path.join("~/", ".heavy", "token"))
-    if os.path.exists(token_path) and not args.z:
+
+    if args.token != None:
+        # check if token has been passed as a command line arg...
+        post_data["credentials"] = {
+            "token": args.token
+        }
+    elif os.path.exists(token_path) and not args.z:
+        # ...or if it is stored in the user's home directory
         with open(token_path, "r") as f:
             post_data["credentials"] = {
                 "token": f.read()
