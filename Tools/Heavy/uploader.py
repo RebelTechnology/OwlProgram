@@ -226,7 +226,8 @@ def main():
                 f.write(reply_json["meta"]["token"])
             os.chmod(token_path, stat.S_IRUSR | stat.S_IWUSR) # force rw------- permissions on the file
         else:
-            print "WARNING: Could not update API token!"
+            if reply_json["meta"]["token"] != args.token:
+                print "WARNING: Could not update API token. (old = %s, new = %s)" % (args.token, reply_json["meta"]["token"])
 
     # print any warnings
     for x in r_json["warnings"]:
