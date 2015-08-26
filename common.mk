@@ -20,8 +20,9 @@ SIZE=$(TOOLROOT)/arm-none-eabi-size
 
 
 # Compilation Flags
-ARCH_FLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
-# ARCH_FLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -msoft-float
+ARCH_FLAGS = -mcpu=cortex-m4 -mthumb
+ARCH_FLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
+# ARCH_FLAGS += -mfloat-abi=soft -msoft-float
 ARCH_FLAGS += -fsingle-precision-constant
 DEF_FLAGS = -DARM_MATH_CM4 -DSTM32F4XX -D__FPU_PRESENT -D__FPU_USED=1
 # DEF_FLAGS = -DUSE_STDPERIPH_DRIVER -DARM_MATH_CM4 -DSTM32F4XX
