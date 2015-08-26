@@ -18,8 +18,7 @@
 #define USAGE_ERROR      0x50
 #define PROGRAM_ERROR    0x60
 
-static ProgramVector programVector;
-ProgramVector* getProgramVector() { return &programVector; }
+ProgramVector programVector;
 extern PatchProcessor* getInitialisingPatchProcessor();
 extern char* itoa(int val, int base);
 
