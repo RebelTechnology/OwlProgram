@@ -35,7 +35,11 @@
 #endif
 #include <alloca.h>
 #include <assert.h>
+#ifdef ARM_CORTEX
 #include <basicmaths.h>
+#else
+#include <math.h>
+#endif
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -72,9 +76,16 @@
 #define hv_min_f(a, b) fminf(a, b)
 #define hv_max_d(a, b) fmax(a, b)
 #define hv_min_d(a, b) fmin(a, b)
+#ifdef ARM_CORTEX
 #define hv_sin_f(a) arm_sin_f32(a)
-#define hv_sinh_f(a) sinhf(a)
 #define hv_cos_f(a) arm_cos_f32(a)
+#define hv_sqrt_f(a) arm_sqrtf(a)
+#else
+#define hv_sin_f(a) sinf(a)
+#define hv_cos_f(a) cosf(a)
+#define hv_sqrt_f(a) sqrtf(a)
+#endif
+#define hv_sinh_f(a) sinhf(a)
 #define hv_cosh_f(a) coshf(a)
 #define hv_tan_f(a) tanf(a)
 #define hv_tanh_f(a) tanhf(a)
@@ -87,7 +98,6 @@
 #define hv_atan2_f(a, b) atan2f(a, b)
 #define hv_exp_f(a) expf(a)
 #define hv_abs_f(a) fabsf(a)
-#define hv_sqrt_f(a) arm_sqrtf(a)
 #define hv_log_f(a) logf(a)
 #define hv_log2_f(a) log2f(a)
 #define hv_log10_f(a) log10f(a)
