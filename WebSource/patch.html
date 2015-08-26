@@ -6,7 +6,7 @@
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <!-- <link href="css/custom.css" rel="stylesheet"> -->
   </head>
-  <body>
+  <body onload="onload()">
     <div class="center">
       <h1>OWL Patch</h1>
       <h2>Input select</h2>
@@ -16,13 +16,8 @@
         <input type="button" onclick="patch.useFileInput(); return false;" value="File"/>
         <div class="file-input-controls">
           <input type="file" id="file-input-selector" onchange="patch.onFileSelect(this.files)" />
-          <audio id="file-input-audio" controls></audio>
+          <audio src="gtr-jazz.mp3" id="file-input-audio" controls loop></audio>
         </div>
-      </div>
-      <h2>Diagnostics</h2>
-      <div>
-        <input type="button" onclick="getMessage(); return false;" value="Message"/>
-        <input type="button" onclick="getStatus(); return false;" value="Status"/>
       </div>
       <div id="patchname"></div>
       <div id="p1"></div>
@@ -33,12 +28,20 @@
       <input type="range" min="0" max="1" step="0.001" oninput="patch.update(2, this.value)"/>
       <div id="p4"></div>
       <input type="range" min="0" max="1" step="0.001" oninput="patch.update(3, this.value)"/>
+      <h2>Diagnostics</h2>
+      <div>
+        <input type="button" onclick="getMessage(); return false;" value="Message"/>
+        <input type="button" onclick="getStatus(); return false;" value="Status"/>
+      </div>
     </div>
 
-    <script type="text/javascript" src="../Build/patch.js"></script>
+    <script type="text/javascript" src="wavy-jones.js"></script>
+    <script type="text/javascript" src="patch.js"></script>
     <script type="text/javascript" src="webaudio.js"></script>
     <script type="text/javascript">
-      var patch = owl.dsp();
+var patch;
+function onload(){
+      patch = owl.dsp();
       patch.update(0, 0.5);
       patch.update(1, 0.5);
       patch.update(2, 0.5);
@@ -49,24 +52,45 @@
       document.getElementById("p2").innerHTML = "<h3>"+patch.getParameterName(1)+"</h3>";
       document.getElementById("p3").innerHTML = "<h3>"+patch.getParameterName(2)+"</h3>";
       document.getElementById("p4").innerHTML = "<h3>"+patch.getParameterName(3)+"</h3>";
-
       // patch.update("Volume", 0.1);
-      // patch.play();
-      var getMessage = function(){
-          var msg = patch.getMessage();
-          if(msg)
-            console.log("Program message: "+msg);
-          document.getElementById("message").innerHTML = msg;
-      };
-      var getStatus = function(){
-          document.getElementById("status").innerHTML = patch.getStatus();
-      };
+      patch.scope.lineColor = "blue";
+      patch.scope.lineThickness = 2;
+      patch.useFileInput();
+}
+
+function getMessage(){
+      var msg = patch.getMessage();
+      if(msg)
+        console.log("Program message: "+msg);
+      document.getElementById("message").innerHTML = msg;
+}
+
+function getStatus(){
+      document.getElementById("status").innerHTML = patch.getStatus();
+}
+
+function monitorProcess(){
+     getMessage();
+     getStatus();
+}
+
+var monitorTask = window.setInterval(monitorProcess, 1000);
+
     </script>
+    <style>
+    #oscilloscope {
+        width: 800px;
+        height: 200px;
+    }
+    </style>
 
       <div>
         <p id="message"></p>
         <p id="status"></p>
       </div>
+
+      <div id="oscilloscope"></div>
+
   </body>
 
 </html>
