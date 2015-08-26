@@ -34,6 +34,9 @@ HEAVYSRC    ?= $(BUILDROOT)/HeavySource
 CPPFLAGS    += -I$(HEAVYDIR)
 CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
 vpath %.c $(HEAVYDIR)
+ifdef HEAVYTOKEN
+HEAVYARGS   = -t $(HEAVYTOKEN)
+endif
 else
 # options for C++ compilation
 PATCHNAME   ?= "Template"
@@ -106,7 +109,8 @@ vpath %.c Libraries/syscalls
 # emscripten
 EMCC       = emcc
 EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11
-EMCCFLAGS += -IOwlPatches -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILD) -I$(TESTPATCHES)
+EMCCFLAGS += -IOwlPatches -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILD) -I$(TESTPATCHES) 
+EMCCFLAGS += -I$(BUILD)/HeavySource
 EMCCFLAGS += -ILibraries/KissFFT
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus']"
 EMCC_SRC   = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/operators.cpp $(SOURCE)/message.cpp
@@ -114,6 +118,7 @@ EMCC_SRC  += WebSource/web.cpp
 EMCC_SRC  += $(LIBSOURCE)/basicmaths.c $(LIBSOURCE)/StompBox.cpp $(LIBSOURCE)/FloatArray.cpp $(LIBSOURCE)/ComplexFloatArray.cpp
 EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
+EMCC_SRC  += $(wildcard $(HEAVYDIR)/*.c)
 
 CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11
 
@@ -187,7 +192,7 @@ online:
 	@cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
 web: $(EMCC_SRC) $(DEPS)
-	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
+	$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
 	@cp WebSource/*.js WebSource/*.html WebSource/*.mp3 $(BUILD)
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
@@ -196,7 +201,7 @@ $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@cp -f $< $@
 
 $(HEAVYDIR)/Heavy_owl.h: $(HEAVYDIR)/_main.pd
-	@python ./Tools/Heavy/uploader.py $(HEAVYDIR) -g c -n $(HEAVYNAME) -o $(HEAVYDIR) -t $(HEAVYTOKEN)
+	@python ./Tools/Heavy/uploader.py $(HEAVYDIR) -g c -n $(HEAVYNAME) -o $(HEAVYDIR) $(HEAVYARGS)
 	@cp $(HEAVYSRC)/Utils_unix.h $(HEAVYDIR)
 
 heavy: $(HEAVYDIR)/Heavy_owl.h
