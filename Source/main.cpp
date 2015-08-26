@@ -19,7 +19,7 @@ extern "C" void __libc_init_array();
 #endif /* STARTUP_CODE */
 
 ProgramVector programVector __attribute__ ((section (".pv")));
-ProgramVector* getProgramVector() { return &programVector; }
+// ProgramVector* getProgramVector() { return &programVector; }
 
 int main(void){
 #ifdef STARTUP_CODE
@@ -35,19 +35,19 @@ int main(void){
   *SCB_DEMCR = *SCB_DEMCR | 0x01000000;
   *DWT_CONTROL = *DWT_CONTROL | 1 ; // enable the counter
 #endif /* DEBUG_DWT */
-
-  if(getProgramVector()->checksum != sizeof(ProgramVector)){    
-    getProgramVector()->error = CHECKSUM_ERROR_STATUS;
-    getProgramVector()->message = (char*)"ProgramVector checksum error";
-    getProgramVector()->programStatus(AUDIO_ERROR_STATUS);
+  ProgramVector* pv = getProgramVector();
+  if(pv->checksum != sizeof(ProgramVector)){    
+    pv->error = CHECKSUM_ERROR_STATUS;
+    pv->message = (char*)"ProgramVector checksum error";
+    pv->programStatus(AUDIO_ERROR_STATUS);
     return -1;
   }
 
-  if(getProgramVector()->audio_blocksize <= 0 || 
-     getProgramVector()->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){
-    getProgramVector()->error = CONFIGURATION_ERROR_STATUS;
-    getProgramVector()->message = (char*)"Invalid blocksize";
-    getProgramVector()->programStatus(AUDIO_ERROR_STATUS);
+  if(pv->audio_blocksize <= 0 || 
+     pv->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){
+    pv->error = CONFIGURATION_ERROR_STATUS;
+    pv->message = (char*)"Invalid blocksize";
+    pv->programStatus(AUDIO_ERROR_STATUS);
     return -1;
   }
 
@@ -55,18 +55,18 @@ int main(void){
 
 #ifdef DEBUG_MEM
   struct mallinfo minfo = mallinfo();
-  // getProgramVector()->heap_bytes_used = minfo.uordblks;
-  getProgramVector()->heap_bytes_used = minfo.arena;
+  // pv->heap_bytes_used = minfo.uordblks;
+  pv->heap_bytes_used = minfo.arena;
 #endif /* DEBUG_MEM */
 
   for(;;){
-    getProgramVector()->programReady();
+    pv->programReady();
 #ifdef DEBUG_DWT
       *DWT_CYCCNT = 0; // reset the counter
 #endif /* DEBUG_DWT */
       processBlock();
 #ifdef DEBUG_DWT
-      getProgramVector()->cycles_per_block = *DWT_CYCCNT;
+      pv->cycles_per_block = *DWT_CYCCNT;
 #endif /* DEBUG_DWT */
   }
 }

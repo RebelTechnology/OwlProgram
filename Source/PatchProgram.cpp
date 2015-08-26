@@ -32,9 +32,8 @@ void setup(){
 #include "patch.cpp"
 }
 
-SampleBuffer buffer;
-
 void processBlock(){
+  SampleBuffer buffer;
   buffer.split(getProgramVector()->audio_input, getProgramVector()->audio_blocksize);
   processor.setParameterValues(getProgramVector()->parameters);
   processor.patch->processAudio(buffer);
