@@ -120,6 +120,9 @@ EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
 EMCC_SRC  += $(wildcard $(HEAVYDIR)/*.c)
 
+# closure, to minify js
+CLOSURE = java -jar Tools/Closure/compiler.jar --language_in=ECMASCRIPT5
+
 CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11
 
 # object files
@@ -192,8 +195,11 @@ online:
 	@cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
 web: $(EMCC_SRC) $(DEPS)
-	$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
+	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
 	@cp WebSource/*.js WebSource/*.html WebSource/*.mp3 $(BUILD)
+
+minify: $(BUILD)/patch.js
+	$(CLOSURE) --js_output_file=$(BUILD)/patch.min.js $(BUILD)/patch.js
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@mkdir -p $(HEAVYDIR)
