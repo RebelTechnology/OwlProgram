@@ -109,7 +109,7 @@ vpath %.c Libraries/syscalls
 # emscripten
 EMCC       = emcc
 EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11
-EMCCFLAGS += -IOwlPatches -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILD) -I$(TESTPATCHES) 
+EMCCFLAGS += -IOwlPatches -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILD) -I$(TESTPATCHES)
 EMCCFLAGS += -I$(BUILD)/HeavySource
 EMCCFLAGS += -ILibraries/KissFFT
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus']"
@@ -120,8 +120,9 @@ EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
 EMCC_SRC  += $(wildcard $(HEAVYDIR)/*.c)
 
-# closure, to minify js
-CLOSURE = java -jar Tools/Closure/compiler.jar --language_in=ECMASCRIPT5
+# JavaScript minifiers
+#CLOSURE = java -jar Tools/node_modules/google-closure-compiler/compiler.jar --language_in=ECMASCRIPT5
+UGLIFYJS = Tools/node_modules/uglifyjs/bin/uglifyjs
 
 CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11
 
@@ -199,7 +200,8 @@ web: $(EMCC_SRC) $(DEPS)
 	@cp WebSource/*.js WebSource/*.html WebSource/*.mp3 $(BUILD)
 
 minify: $(BUILD)/patch.js
-	$(CLOSURE) --js_output_file=$(BUILD)/patch.min.js $(BUILD)/patch.js
+#	$(CLOSURE) --js_output_file=$(BUILD)/patch.min.js $(BUILD)/patch.js
+    $(UGLIFYJS) -o $(BUILD)/patch.min.js $(BUILD)/patch.js
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@mkdir -p $(HEAVYDIR)
