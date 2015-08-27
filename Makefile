@@ -201,7 +201,7 @@ web: $(EMCC_SRC) $(DEPS)
 
 minify: $(BUILD)/patch.js
 #	$(CLOSURE) --js_output_file=$(BUILD)/patch.min.js $(BUILD)/patch.js
-    $(UGLIFYJS) -o $(BUILD)/patch.min.js $(BUILD)/patch.js
+	$(UGLIFYJS) -o $(BUILD)/patch.min.js $(BUILD)/patch.js
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@mkdir -p $(HEAVYDIR)
