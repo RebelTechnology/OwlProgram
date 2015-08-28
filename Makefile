@@ -119,6 +119,7 @@ EMCC_SRC  += $(LIBSOURCE)/basicmaths.c $(LIBSOURCE)/StompBox.cpp $(LIBSOURCE)/Fl
 EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
 EMCC_SRC  += $(wildcard $(HEAVYDIR)/*.c)
+WEBDIR     = $(BUILD)/web
 
 # JavaScript minifiers
 #CLOSURE = java -jar Tools/node_modules/google-closure-compiler/compiler.jar --language_in=ECMASCRIPT5
@@ -195,16 +196,17 @@ online:
 	@$(MAKE) $(BUILD)/patch.syx
 	@cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
-$(BUILD)/patch.js: $(EMCC_SRC) $(DEPS)
-	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
-	@cp WebSource/*.js WebSource/*.html WebSource/*.mp3 $(BUILD)
+$(WEBDIR)/patch.js: $(EMCC_SRC) $(DEPS)
+	@mkdir -p $(WEBDIR)
+	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(WEBDIR)/patch.js
+	@cp WebSource/*.js WebSource/*.html WebSource/*.mp3 $(WEBDIR)
 
-$(BUILD)/%.min.js: $(BUILD)/%.js
-	$(UGLIFYJS) -o $@ $<
+$(WEBDIR)/%.min.js: $(WEBDIR)/%.js
+	@$(UGLIFYJS) -o $@ $<
 #	$(CLOSURE) --js_output_file=$@ $<
 
-web: $(BUILD)/patch.js
-minify: $(BUILD)/patch.min.js
+web: $(WEBDIR)/patch.js
+minify: $(WEBDIR)/patch.min.js
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@mkdir -p $(HEAVYDIR)
