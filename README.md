@@ -38,7 +38,7 @@ Example: Compile and run the TestTone patch, defined in file `PatchSource/TestTo
 
 Example: Compile and run in browser
 `make PATCHNAME=TestTone web`
-Then open `WebSource/patch.html`
+Then open `Build/web/patch.html`
 
 ## Building FAUST patches
 To compile and run a FAUST patch
