@@ -195,13 +195,16 @@ online:
 	@$(MAKE) $(BUILD)/patch.syx
 	@cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
-web: $(EMCC_SRC) $(DEPS)
+$(BUILD)/patch.js: $(EMCC_SRC) $(DEPS)
 	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(BUILD)/patch.js
 	@cp WebSource/*.js WebSource/*.html WebSource/*.mp3 $(BUILD)
 
-minify: $(BUILD)/patch.js
-#	$(CLOSURE) --js_output_file=$(BUILD)/patch.min.js $(BUILD)/patch.js
-	$(UGLIFYJS) -o $(BUILD)/patch.min.js $(BUILD)/patch.js
+$(BUILD)/%.min.js: $(BUILD)/%.js
+	$(UGLIFYJS) -o $@ $<
+#	$(CLOSURE) --js_output_file=$@ $<
+
+web: $(BUILD)/patch.js
+minify: $(BUILD)/patch.min.js
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@mkdir -p $(HEAVYDIR)
