@@ -5,12 +5,12 @@ ifndef CONFIG
 endif
 
 ifeq ($(CONFIG),Debug)
-CPPFLAGS   = -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
+CPPFLAGS     = -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
 ASFLAGS    = -g
 endif
 
 ifeq ($(CONFIG),Release)
-CPPFLAGS   = -O2
+CPPFLAGS     = -O2
 endif
 
 DEPS       = $(BUILD)/patch.cpp $(BUILD)/patch.h
@@ -112,6 +112,8 @@ EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11
 EMCCFLAGS += -IOwlPatches -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILD) -I$(TESTPATCHES)
 EMCCFLAGS += -I$(BUILD)/HeavySource
 EMCCFLAGS += -ILibraries/KissFFT
+EMCCFLAGS += -Wno-warn-absolute-paths
+EMCCFLAGS += -Wno-c++11-extensions
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus']"
 EMCC_SRC   = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/operators.cpp $(SOURCE)/message.cpp
 EMCC_SRC  += WebSource/web.cpp
