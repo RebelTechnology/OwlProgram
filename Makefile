@@ -107,7 +107,7 @@ vpath %.s $(PATCHSOURCE)
 vpath %.c Libraries/syscalls
 
 # emscripten
-EMCC       = emcc
+EMCC      ?= emcc
 EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11
 EMCCFLAGS += -IOwlPatches -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILD) -I$(TESTPATCHES)
 EMCCFLAGS += -I$(BUILD)/HeavySource
