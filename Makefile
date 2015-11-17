@@ -113,6 +113,7 @@ EMCCFLAGS += -IOwlPatches -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILD)
 EMCCFLAGS += -I$(BUILD)/HeavySource
 EMCCFLAGS += -ILibraries/KissFFT
 EMCCFLAGS += -Wno-warn-absolute-paths
+EMCCFLAGS += -Wno-unknown-warning-option
 EMCCFLAGS += -Wno-c++11-extensions
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus']"
 EMCC_SRC   = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/operators.cpp $(SOURCE)/message.cpp
