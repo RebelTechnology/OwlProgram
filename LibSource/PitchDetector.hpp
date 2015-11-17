@@ -63,15 +63,13 @@ public:
     int samplesToCopy=min(input.getSize(),timeDomain.getSize()-writePointer);
     timeDomain.insert(input, 0, writePointer, samplesToCopy);
     writePointer+=samplesToCopy;
-    if(writePointer<fft.getSize()){ // if it is not full, keep going
-      return 0;
-    }
     if(writePointer==fft.getSize()){ // if it is full, reset pointer and do fft 
       writePointer=0;
       timeDomain.multiply(window);
       fft.fft(timeDomain, fd);
       return 1;
     }
+    return 0;
   }
   float computeFrequency(){// this could have been implemented into process().
     //The reason why it is in a separate method is to allow to distribute the computational load across different audio blocks
