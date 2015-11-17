@@ -1,7 +1,6 @@
 #ifndef __StompBox_h__
 #define __StompBox_h__
 
-#include <string>
 #include "FloatArray.h"
 class PatchProcessor;
 
@@ -15,7 +14,7 @@ enum PatchParameterId {
 };
 
 enum PatchButtonId {
-  BYPASS_BUTTON,
+  BYPASS_BUTTON = 0,
   PUSHBUTTON,
   GREEN_BUTTON,
   RED_BUTTON
