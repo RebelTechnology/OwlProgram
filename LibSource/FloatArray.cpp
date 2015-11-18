@@ -3,6 +3,12 @@
 #include "message.h"
 #include <string.h>
 
+ FloatArray::FloatArray() :
+   data(NULL), size(0) {}
+
+ FloatArray::FloatArray(float* d, int s) :
+   data(d), size(s) {}
+
 void FloatArray::getMin(float* value, int* index){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -470,8 +476,11 @@ void FloatArray::correlateInitialized(FloatArray operand2, FloatArray destinatio
   operand2.reverse();
 #endif /* ARM_CORTEX */  
 }
+
 FloatArray FloatArray::create(int size){
-  return FloatArray(new float[size], size);
+  FloatArray fa(new float[size], size);
+  fa.clear();
+  return fa;
 }
 
 void FloatArray::destroy(FloatArray array){

@@ -13,13 +13,13 @@ private:
   float* data;
   int size;
 public:
- FloatArray() :
-   data(NULL), size(0) {}
- FloatArray(float* d, int s) :
-   data(d), size(s) {}
+  FloatArray();
+  FloatArray(float* data, int size);
+
   int getSize() const{
     return size;
   }
+
   int getSize(){
     return size;
   }
