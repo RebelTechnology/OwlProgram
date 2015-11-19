@@ -1,6 +1,5 @@
 #include "FloatArray.h"
 #include "basicmaths.h"
-#include "message.h"
 #include <string.h>
 
  FloatArray::FloatArray() :

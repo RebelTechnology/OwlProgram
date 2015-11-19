@@ -50,6 +50,11 @@ bool Patch::isButtonPressed(PatchButtonId bid){
   return getProgramVector()->buttons & (1<<bid);
 }
 
+int Patch::getSamplesSinceButtonPressed(PatchButtonId bid){
+  int index = bid+PARAMETER_F;
+  return index <= getProgramVector()->parameters_size ? 
+    getProgramVector()->parameters[index] : 0;
+}
 
 #define DWT_CYCCNT ((volatile unsigned int *)0xE0001004)
 
