@@ -97,7 +97,7 @@ public:
   static void setPeak(float* coefficients, float fc, float q, float gain){
     float omega = M_PI*fc/2;
     float K = tanf(omega);
-    float V = abs(gain-0.5)*60 + 1; // Gain
+    float V = fabs(gain-0.5)*60 + 1; // Gain
     float norm;
     if (gain >= 0.5) {
       norm = 1 / (1 + 1/q * K + K * K);
@@ -120,7 +120,7 @@ public:
   static void setLowShelf(float* coefficients, float fc, float gain){
     float omega = M_PI*fc/2;
     float K = tanf(omega);
-    float V = abs(gain-0.5)*60 + 1; // Gain
+    float V = fabs(gain-0.5)*60 + 1; // Gain
     float norm;
     if(gain >= 0.5) {
       norm = 1 / (1 + M_SQRT2 * K + K * K);
@@ -142,7 +142,7 @@ public:
   static void setHighShelf(float* coefficients, float fc, float gain){
     float omega = M_PI*fc/2;
     float K = tanf(omega);
-    float V = abs(gain-0.5)*60 + 1; // Gain
+    float V = fabs(gain-0.5)*60 + 1; // Gain
     float norm;
     if(gain >= 0.5) {
       norm = 1 / (1 + M_SQRT2 * K + K * K);
