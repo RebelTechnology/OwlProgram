@@ -19,10 +19,17 @@
  * M_SQRT2    - sqrt(2)
  * M_SQRT1_2  - 1/sqrt(2)
  */
-#include <math.h>
 #ifdef ARM_CORTEX
 #include "arm_math.h" 
 #endif //ARM_CORTEX
+
+#ifdef __cplusplus
+#include <cmath>
+//#include <algorithm>
+#else
+#include <math.h>
+#endif
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -31,13 +38,14 @@
 #endif
 #ifndef min
 #define min(a,b) ((a)<(b)?(a):(b))
-#endif /* min */
+#endif
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
-#endif /* max */
+#endif
 #ifndef abs
 #define abs(x) ((x)>0?(x):-(x))
-#endif /* abs */
+#endif
+//#endif /* __cplusplus */
 
 // todo: see
 // http://www.hxa.name/articles/content/fast-pow-adjustable_hxa7241_2007.html
