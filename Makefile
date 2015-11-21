@@ -18,7 +18,7 @@ DEPS       = $(BUILD)/patch.cpp $(BUILD)/patch.h
 ifdef FAUST
 # options for FAUST compilation
 PATCHNAME   ?= $(FAUST)
-PATCHCLASS  ?= $(PATCHNAME)Patch
+PATCHCLASS  ?= FaustPatch
 PATCHFILE   ?= $(PATCHNAME)Patch.hpp
 DEPS        += $(BUILD)/$(PATCHFILE)
 else ifdef HEAVY
@@ -173,7 +173,8 @@ $(BUILD)/%.syx: $(BUILD)/%.bin
 	@$(FIRMWARESENDER) -q -in $< -save $@
 
 $(BUILD)/%Patch.hpp: $(PATCHSOURCE)/%.dsp
-	@cd $(BUILD) && faust2owl $<
+	@faust -I $(PATCHSOURCE) -i -inpl -a owl.cpp -cn $(PATCHNAME)Patch $< -o $@
+#	@cd $(BUILD) && faust2owl $<
 
 size: $(BUILD)/patch.elf $(BUILD)/patch.bin
 	@$(SIZE) $(BUILD)/patch.elf
