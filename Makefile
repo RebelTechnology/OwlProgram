@@ -174,7 +174,6 @@ $(BUILD)/%.syx: $(BUILD)/%.bin
 
 $(BUILD)/%Patch.hpp: $(PATCHSOURCE)/%.dsp
 	@faust -I $(PATCHSOURCE) -i -inpl -a owl.cpp -cn $(PATCHNAME)Patch $< -o $@
-#	@cd $(BUILD) && faust2owl $<
 
 size: $(BUILD)/patch.elf $(BUILD)/patch.bin
 	@$(SIZE) $(BUILD)/patch.elf
