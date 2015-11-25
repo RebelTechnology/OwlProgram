@@ -32,6 +32,10 @@ public:
     win.window(type, win, size);
     return win;
   }
+  static Window create(int size){
+    Window win(new float[size], size);
+    return win;
+  }
   static void window(WindowType type, float *window, int size){
     switch(type){
     case HannWindow:
@@ -65,12 +69,13 @@ public:
   static void triangular(float *window, int size){
     float rampStep = 1/(size/2.0f);
     float ramp = 0;
-    for(int n=0; n<size/2.0f; n++){
+    int n=0;
+    for(; n<size/2; n++){
       window[n] = ramp;
       ramp = ramp+rampStep;
     }
     rampStep = -rampStep;
-    for(int n=size/2.0f; n<size; n++){
+    for(; n<size; n++){
       window[n] = ramp;
       ramp = ramp+rampStep;
     }
