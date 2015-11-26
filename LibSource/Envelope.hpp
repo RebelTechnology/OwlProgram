@@ -41,7 +41,7 @@ private:
     else if(trig == kGate)
       stage = kRelease;
   }
-  static constexpr float minTime = 0.005;
+  static const float minTime = 0.005;
   const float samplePeriod;
   EnvelopeStage stage;
   EnvelopeTrigger trig;
