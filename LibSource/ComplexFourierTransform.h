@@ -16,39 +16,6 @@ public:
     ASSERT(len==32 || len ==64 || len==128 || len==256 || len==512 || len==1024 || len==2048 || len==4096, "Unsupported FFT size");
     void* args[] = {(void*)&instance, (void*)&len};
     getProgramVector()->serviceCall(OWL_SERVICE_ARM_CFFT_INIT_F32, args, 2);
-    /* switch (len) { //this block is taken from http://www.keil.com/pack/doc/cmsis/DSP/html/group___complex_f_f_t.html */
-    /*   case 16: */
-    /*     instance = arm_cfft_sR_f32_len16; */
-    /*     break; */
-    /*   case 32: */
-    /*     instance = arm_cfft_sR_f32_len32; */
-    /*     break; */
-    /*   case 64: */
-    /*     instance = arm_cfft_sR_f32_len64; */
-    /*     break; */
-    /*   case 128: */
-    /*     instance = arm_cfft_sR_f32_len128; */
-    /*     break; */
-    /*   case 256: */
-    /*     instance = arm_cfft_sR_f32_len256; */
-    /*     break; */
-    /*   case 512: */
-    /*     instance = arm_cfft_sR_f32_len512; */
-    /*     break; */
-    /*   /\* */
-    /*   case 1024: */
-    /*     instance = arm_cfft_sR_f32_len1024; */
-    /*     break; */
-    /*   case 2048: */
-    /*     instance = arm_cfft_sR_f32_len2048; */
-    /*     break; */
-    /*   case 4096: */
-    /*     instance = &arm_cfft_sR_f32_len4096; */
-    /*     break; */
-    /*   *\/ */
-    /* default: */
-    /*   ASSERT(0, "Unsupported FFT size"); */
-    /* } */
     // Supported FFT Lengths are 32, 64, 128, 256, 512, 1024, 2048, 4096.
   }
   void fft(ComplexFloatArray& inout){
