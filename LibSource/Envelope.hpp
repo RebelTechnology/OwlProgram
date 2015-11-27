@@ -41,7 +41,7 @@ private:
     else if(trig == kGate)
       stage = kRelease;
   }
-  static const float minTime = 0.005;
+  static const float minTime;
   const float samplePeriod;
   EnvelopeStage stage;
   EnvelopeTrigger trig;
@@ -53,6 +53,8 @@ private:
   bool gateState;
   int gateTime;
 };
+
+const float AdsrEnvelope::minTime = 0.005;
 
 AdsrEnvelope::AdsrEnvelope(float sampleRate) : 
   samplePeriod(1.0/sampleRate),
@@ -174,7 +176,7 @@ float AdsrEnvelope::getNextSample(){
     }
     break;
   case kIdle:
-    level = 0;
+    level = 0.0;
     if(gateState == true || trig == kRetrigger)
       stage = kAttack;
     break;
