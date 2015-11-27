@@ -28,6 +28,11 @@
       <input type="range" min="0" max="1" step="0.001" oninput="patch.update(2, this.value)"/>
       <div id="p4"></div>
       <input type="range" min="0" max="1" step="0.001" oninput="patch.update(3, this.value)"/>
+      <div/>
+      <input id="pushbutton" type="button" 
+	     onmousedown="toggleButton(); return false;"
+	     onmouseup="toggleButton(); return false;"
+	     value="Pushbutton"/>
       <h2>Diagnostics</h2>
       <div>
         <input type="button" onclick="getMessage(); return false;" value="Message"/>
@@ -69,9 +74,26 @@ function getStatus(){
       document.getElementById("status").innerHTML = patch.getStatus();
 }
 
+function toggleButton(){
+     patch.toggleButton();
+     updateButton();
+}
+
+function updateButton(){
+     var state = patch.getButtons();
+     var button = document.getElementById("pushbutton");
+     if(state & 0x04) // GREEN_BUTTON
+       button.style.background = 'lightgreen';
+     else if(state & 0x08) // RED_BUTTON
+       button.style.background = 'red';
+     else
+       button.style.background = 'lightgray';
+}
+
 function monitorProcess(){
      getMessage();
      getStatus();
+     updateButton();
 }
 
 var monitorTask = window.setInterval(monitorProcess, 1000);

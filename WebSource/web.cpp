@@ -27,6 +27,8 @@ extern "C"{
   int WEB_setup(long fs, int bs);
   void WEB_processBlock(float** inputs, float** outputs);
   void WEB_setParameter(int pid, float value);
+  void WEB_setButtons(int values);
+  int WEB_getButtons();
   char* WEB_getMessage();
   char* WEB_getStatus();
   char* WEB_getPatchName();
@@ -51,10 +53,19 @@ static int blocksize;
 static char* patchName = NULL;
 static uint16_t parameters[NOF_PARAMETERS];
 static char* parameterNames[NOF_PARAMETERS];
+static volatile uint16_t buttons = 1<<2; // GREEN
 
 void WEB_setParameter(int pid, float value){
   if(pid < NOF_PARAMETERS)
     parameters[pid] = value*4096;
+}
+
+void WEB_setButtons(int values){
+  buttons = values;
+}
+
+int WEB_getButtons(){
+  return buttons;
 }
 
 int WEB_setup(long fs, int bs){
@@ -74,7 +85,7 @@ int WEB_setup(long fs, int bs){
   pv->audio_samplingrate = fs;
   pv->parameters = parameters;
   pv->parameters_size = NOF_PARAMETERS;
-  pv->buttons = 0;
+  pv->buttons = buttons;
   pv->registerPatch = registerPatch;
   pv->registerPatchParameter = registerPatchParameter;
   pv->cycles_per_block = 0;
@@ -119,11 +130,13 @@ void WEB_processBlock(float** inputs, float** outputs){
   ProgramVector* pv = getProgramVector();
   MemBuffer buffer(inputs, 2, blocksize);
   PatchProcessor* processor = getInitialisingPatchProcessor();
+  pv->buttons = buttons;
   processor->setParameterValues(pv->parameters);
   processor->patch->processAudio(buffer);
   memcpy(outputs[0], inputs[0], blocksize*sizeof(float));
   memcpy(outputs[1], inputs[1], blocksize*sizeof(float));
   pv->cycles_per_block = systicks()-now;
+  buttons = pv->buttons;
 }
 
 char* WEB_getMessage(){

@@ -24,6 +24,8 @@ var WEB_getPatchName = Module.cwrap('WEB_getPatchName', 'string', []);
 var WEB_getParameterName = Module.cwrap('WEB_getParameterName', 'string', ['number']);
 var WEB_getMessage = Module.cwrap('WEB_getMessage', 'string', []);
 var WEB_getStatus = Module.cwrap('WEB_getStatus', 'string', []);
+var WEB_setButtons = Module.cwrap('WEB_setButtons', 'number', ['number']);
+var WEB_getButtons = Module.cwrap('WEB_getButtons', 'number', []);
 
 owl.dsp = function () {
 	var that = {};
@@ -129,9 +131,26 @@ owl.dsp = function () {
 
 	that.update = function (key, val) {
 		WEB_setParameter(key, val);
-		console.log("set parameter "+key+": "+val);
 		return that;
 	};
+    
+        that.setButtons = function(values) {
+		WEB_setButtons(values);
+		return that;
+        };
+
+        that.getButtons = function() {
+    	        return WEB_getButtons();
+        };
+
+        that.toggleButton = function() {
+	        var values = WEB_getButtons();
+	        values ^= 0x02; // PUSHBUTTON;
+	        values ^= 0x04; // GREEN_BUTTON;
+	        values ^= 0x08; // RED_BUTTON;
+        	WEB_setButtons(values);
+		return that;
+        };
 
 	that.init = function () {
 		var i;
