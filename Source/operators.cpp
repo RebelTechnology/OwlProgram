@@ -9,3 +9,4 @@ void * operator new (size_t, void * p) { return p ; }
 void * operator new[](size_t size) { return malloc(size); }
 void operator delete(void* ptr) { free(ptr); }
 void operator delete[](void * ptr) { free(ptr); }
+//int _gettimeofday(struct timeval *__p, void *__tz){return 0;}
