@@ -1,6 +1,7 @@
 #ifndef __StompBox_h__
 #define __StompBox_h__
 
+#include "basicmaths.h"
 #include "FloatArray.h"
 class PatchProcessor;
 
