@@ -77,7 +77,8 @@ FIRMWARESENDER = Tools/FirmwareSender
 
 C_SRC   = basicmaths.c
 CPP_SRC = main.cpp operators.cpp message.cpp StompBox.cpp PatchProcessor.cpp
-CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp
+CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp FastFourierTransform.cpp 
+CPP_SRC += Envelope.cpp VoltsPerOctave.cpp
 CPP_SRC += PatchProgram.cpp
 
 SOURCE       = $(BUILDROOT)/Source
@@ -118,7 +119,7 @@ EMCCFLAGS += -Wno-c++11-extensions
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus','_WEB_getButtons','_WEB_setButtons']"""
 EMCC_SRC   = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/operators.cpp $(SOURCE)/message.cpp
 EMCC_SRC  += WebSource/web.cpp
-EMCC_SRC  += $(LIBSOURCE)/basicmaths.c $(LIBSOURCE)/StompBox.cpp $(LIBSOURCE)/FloatArray.cpp $(LIBSOURCE)/ComplexFloatArray.cpp
+EMCC_SRC  += $(LIBSOURCE)/basicmaths.c $(LIBSOURCE)/StompBox.cpp $(LIBSOURCE)/FloatArray.cpp $(LIBSOURCE)/ComplexFloatArray.cpp $(LIBSOURCE)/FastFourierTransform.cpp $(LIBSOURCE)/Envelope.cpp
 EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
 EMCC_SRC  += $(wildcard $(HEAVYDIR)/*.c)
