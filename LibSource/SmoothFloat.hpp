@@ -1,7 +1,10 @@
+#ifndef __SmoothFloat_hpp__
+#define __SmoothFloat_hpp__
 
 /**
  * Applies exponential smoothing to a float value.
  * y(n) = lambda*y(n-1) + (1.0-lambda)*y(n)
+ * Smoothing is applied when the value is written to, not when it is read.
  */
 class SmoothFloat {
 private:
@@ -25,3 +28,4 @@ public:
   }
 };
 
+#endif /* __SmoothFloat_hpp__ */
