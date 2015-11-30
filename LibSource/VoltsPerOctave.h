@@ -4,6 +4,10 @@
 #include "FloatArray.h"
 #include "basicmaths.h"
 
+/*
+ * Converts samples into volts and frequencies, following 1V/octave tuning.
+ * Tuned to 440Hz. Change base note with setTune(float octave).
+ */
 class VoltsPerOctave {
 private:
   float offset;
@@ -20,13 +24,13 @@ public:
   float getFrequency(float sample){
     return voltsToHerz(sampleToVolts(sample)+tune);
   }
-  void getFrequency(FloatArray samples, FloatArray output);
   float sampleToVolts(float sample){
     return (sample-offset) * multiplier;
   }
   float voltsToHerz(float volts){
     return 440.f * powf(2, volts);
   }
+  void getFrequency(FloatArray samples, FloatArray output);
 };
 
 #endif /* __VoltsPerOctave_hpp__ */
