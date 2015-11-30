@@ -14,7 +14,7 @@ private:
   float multiplier;
   float tune;
 public:
-  VoltsPerOctave();
+  VoltsPerOctave(bool input = true);
   VoltsPerOctave(float offset, float multiplier);
   // Tune the frequency converter to octaves up or down.
   // For semitones divide by 12. For cents divide by 1200.
@@ -29,6 +29,12 @@ public:
   }
   float voltsToHerz(float volts){
     return 440.f * powf(2, volts);
+  }
+  float voltsToSample(float volts){
+    return volts / multiplier + offset;
+  }
+  float herzToVolts(float hertz){
+    return log2f(hertz/440.0f);
   }
   void getFrequency(FloatArray samples, FloatArray output);
 };

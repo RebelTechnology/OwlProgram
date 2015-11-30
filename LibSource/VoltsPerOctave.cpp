@@ -4,20 +4,25 @@
 #include "ServiceCall.h"
 #include <stdint.h>
 
-VoltsPerOctave::VoltsPerOctave() : tune(0.0) {
+VoltsPerOctave::VoltsPerOctave(bool input) : tune(0.0) {
   int32_t volts_offset = 0, volts_scalar = 0;
   void* args[] = {
-    (void*)"VO", (void*)&volts_offset, 
-    (void*)"VS", (void*)&volts_scalar
+    (void*)(input ? "IO" : "OO"), (void*)&volts_offset, 
+    (void*)(input ? "IS" : "OS"), (void*)&volts_scalar
   };
   int ret = getProgramVector()->serviceCall(OWL_SERVICE_GET_PARAMETERS, args, 4);
   if(ret == OWL_SERVICE_OK){
-    multiplier = (float)volts_scalar/INT32_MAX;
-    offset = (float)volts_offset/INT32_MAX;
+    multiplier = (float)volts_scalar/UINT16_MAX;
+    offset = (float)volts_offset/UINT16_MAX;
   }else{
     if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE){
-      multiplier = -4.40f;
-      offset = -0.0585f;
+      if(input){
+	multiplier = -4.29;
+	offset = -0.06382;
+      }else{
+	multiplier = -4.642;
+	offset = 0.1208;
+      }
     }else{
       multiplier = 2.0f;
       offset = 0.0f;
@@ -32,7 +37,7 @@ VoltsPerOctave::VoltsPerOctave(float o, float m)
 void VoltsPerOctave::getFrequency(FloatArray samples, FloatArray output){
   ASSERT(output.getSize() >= samples.getSize(), "Output buffer too short");
   // todo: block based implementation
-  // samples.add(-offset, output);
+  // samples.subtract(offset, output);
   // samples.multiply(multiplier, output);
   // for(int i=0; i<samples.getSize(); ++i)
   //   output[i] = voltsToHertz(output[i]);
