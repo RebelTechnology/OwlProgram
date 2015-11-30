@@ -25,7 +25,6 @@
 
 #ifdef __cplusplus
 #include <cmath>
-//#include <algorithm>
 #else
 #include <math.h>
 #endif
@@ -56,15 +55,8 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-  inline float arm_sqrtf(float in){
-    float out;
-#ifdef ARM_CORTEX
-    arm_sqrt_f32(in, &out);
-#else
-    out=sqrtf(in);
-#endif
-    return out;
-  }
+
+   float arm_sqrtf(float in);
 
    // fast approximations
    float fastlog2f(float x);
