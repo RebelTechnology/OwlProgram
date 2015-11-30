@@ -28,6 +28,8 @@
       <input type="range" min="0" max="1" step="0.001" oninput="patch.update(2, this.value)"/>
       <div id="p4"></div>
       <input type="range" min="0" max="1" step="0.001" oninput="patch.update(3, this.value)"/>
+      <div id="p5"></div>
+      <input type="range" min="0" max="1" step="0.001" oninput="patch.update(4, this.value)"/>
       <div/>
       <input id="pushbutton" type="button" 
 	     onmousedown="toggleButton(); return false;"
@@ -57,6 +59,7 @@ function onload(){
       document.getElementById("p2").innerHTML = "<h3>"+patch.getParameterName(1)+"</h3>";
       document.getElementById("p3").innerHTML = "<h3>"+patch.getParameterName(2)+"</h3>";
       document.getElementById("p4").innerHTML = "<h3>"+patch.getParameterName(3)+"</h3>";
+      document.getElementById("p5").innerHTML = "<h3>"+patch.getParameterName(4)+"</h3>";
       // patch.update("Volume", 0.1);
       patch.scope.lineColor = "blue";
       patch.scope.lineThickness = 2;
