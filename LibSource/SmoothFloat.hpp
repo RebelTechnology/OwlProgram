@@ -19,6 +19,10 @@ public:
   float getValue(){
     return value;
   }
+  // set without smoothing
+  void resetValue(float newValue){
+    value = newValue;
+  }
   SmoothFloat& operator=(const float& other){
     setValue(other);
     return *this;
