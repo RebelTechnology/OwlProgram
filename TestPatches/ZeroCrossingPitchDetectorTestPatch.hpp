@@ -26,16 +26,16 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef __PitchDetectorTestPatch_hpp__
-#define __PitchDetectorTestPatch_hpp__
+#ifndef __ZeroCrossingPitchDetectorTestPatch_hpp__
+#define __ZeroCrossingPitchDetectorTestPatch_hpp__
 
 #include "StompBox.h"
+#include "PitchDetector.hpp"
 
-class PitchDetectorTestPatch : public Patch {
+class ZeroCrossingPitchDetectorTestPatch : public Patch {
 public:
-  BiquadFilter *filter;
   ZeroCrossingPitchDetector zcc;
-  PitchDetectorTestPatch() : zcc(getSampleRate(), getBlockSize()){
+  ZeroCrossingPitchDetectorTestPatch() : zcc(getSampleRate(), getBlockSize()){
     registerParameter(PARAMETER_A, "Mix");
     registerParameter(PARAMETER_B, "HP cutoff");
     registerParameter(PARAMETER_C, "LP cutoff");
@@ -44,16 +44,16 @@ public:
   void processAudio(AudioBuffer &buffer){
     FloatArray fa=buffer.getSamples(0);
     float mix=getParameterValue(PARAMETER_A);
-    zcc.setHighPassCutoff(getParameterValue(PARAMETER_B)*500+50);
-    zcc.setLowPassCutoff(getParameterValue(PARAMETER_C)*1000+150);
+    zcc.setHighPassCutoff(getParameterValue(PARAMETER_B)*15000+150);
+    zcc.setLowPassCutoff(getParameterValue(PARAMETER_C)*500+50);
     zcc.process(fa);
-    float estimated=zcc.getFrequency();
+    float frequency=zcc.getFrequency();
     float envelope=fa.getRms();
     fa.multiply(1-mix);
     for(int n=0;n<fa.getSize(); n++){
       static float phase=0;
       static float pastEnvelope=0;
-      phase += 2.0 * M_PI * estimated/getSampleRate();
+      phase += 2.0 * M_PI * frequency/getSampleRate();
       if(phase > 2.0 * M_PI)
         phase -= 2.0 * M_PI;
       if(phase > 4.0*M_PI)
@@ -64,10 +64,10 @@ public:
     }
     fa.multiply(getParameterValue(PARAMETER_D)*10);
     fa.copyTo(buffer.getSamples(1));
-    float *coeffs=zcc.getFilter()->getFilterStage(0).getCoefficients();
-    debugMessage("estimated envelope: ", estimated, envelope);
+    debugMessage("frequency/envelope: ", frequency, envelope);
+    // float *coeffs=zcc.getFilter()->getFilterStage(0).getCoefficients();
     // debugMessage("coeffs: ", coeffs[3], coeffs[4], coeffs[2] );
   }
 };
 
-#endif // __PitchDetectorTestPatch_hpp__
+#endif // __ZeroCrossingPitchDetectorTestPatch_hpp__
