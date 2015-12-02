@@ -2,6 +2,10 @@
 #define __PitchDetector_hpp__
 
 #include "FloatArray.h"
+#include "ComplexFloatArray.h"
+#include "FastFourierTransform.h"
+#include "BiquadFilter.hpp"
+#include "Window.hpp"
 
 class FourierPitchDetector{
 private:
@@ -114,37 +118,26 @@ private:
   FloatArray counts;
   FloatArray filterOutput;
   float samplingRate;
+  const static int POINTS_AVERAGE = 10;
 public:
-  ZeroCrossingPitchDetector(): samplingRate(48000), numLowPassStages(1), numHighPassStages(0){
-    init(0);
-  };
-  ZeroCrossingPitchDetector(float aSamplingRate, int aMaxBlocksize):numLowPassStages(1), numHighPassStages(0){
-    samplingRate=aSamplingRate;
-    init(aMaxBlocksize);
-  };
-  ZeroCrossingPitchDetector(float aSamplingRate, int aMaxBlocksize, int aNumLowPassStages, int aNumHighPassStages){
-    samplingRate=aSamplingRate;
-    init(aMaxBlocksize);
+  ZeroCrossingPitchDetector(float aSamplingRate, int blocksize, int aNumLowPassStages=1, int aNumHighPassStages=1) :
+    samplingRate(aSamplingRate),
+    numLowPassStages(aNumLowPassStages),
+    numHighPassStages(aNumHighPassStages) {
+    // RAII constructor
+    filterOutput = FloatArray::create(blocksize);
+    counts = FloatArray::create(POINTS_AVERAGE); //number of zcc to be averaged
+    filter = BiquadFilter::create(numLowPassStages+numHighPassStages);
+    setLowPassCutoff(0.03);
+    setHighPassCutoff(0.001);
   }
   ~ZeroCrossingPitchDetector(){
     FloatArray::destroy(counts);
     FloatArray::destroy(filterOutput);
     BiquadFilter::destroy(filter);
   }
-  void init(int aMaxBlocksize){
-    setMaxBlocksize(aMaxBlocksize);
-    counts=FloatArray::create(10); //number of zcc to be averaged
-    counts.setAll(0);
-    filter=BiquadFilter::create(numLowPassStages+numHighPassStages);
-    setLowPassCutoff(0.03);
-    setHighPassCutoff(0.001);
-  };
   void setSamplingRate(float aSamplingRate){
-    samplingRate=aSamplingRate;
-  }
-  void setMaxBlocksize(int aMaxBlocksize){
-    FloatArray::destroy(filterOutput);
-    filterOutput=FloatArray::create(aMaxBlocksize);
+    samplingRate = aSamplingRate;
   }
   void setLowPassCutoff(float fc){
     if(numLowPassStages<1)
@@ -193,9 +186,11 @@ public:
       count++;
     }
   }
-
   float getFrequency(){
-    return samplingRate/counts.getMean();
+    float mean = counts.getMean();
+    if(mean > 0.0) // avoid divide by zero
+      return samplingRate/mean;
+    return 0.0;
   }
   BiquadFilter* getFilter(){
     return filter;
