@@ -81,12 +81,14 @@ template<type T>
 class StiffValue {
   // simple hysteresis
 private:
-  T value;
   T delta;
+  T value;
 public:
   StiffValue(){}
-  StiffValue(T initialValue, T d)
-   : value(initialValue), delta(d){}
+  StiffValue(T d)
+   : delta(d){}
+  StiffValue(T d, T initialValue)
+   : delta(d), value(initialValue) {}
   void update(T newValue){
     if(abs(value-newValue) > delta)
       value = newValue;
