@@ -43,14 +43,16 @@ GenericParameter<T, SmoothValue<T>> Patch::requestParameter(const char* name, T 
 
 // Patch {
 // FloatParameter requestParameter(const char* name, float min, float max, float defaultValue);
-// SmoothFloatParameter requestParameter(const char* name, float min, float max, float defaultValue, float lambda);
+// SmoothFloatParameter requestParameter(const char* name, float min, float max, float defaultValue, float lambda); // lambda between 0.5 and 0.99 - compensate for rate/blocksize
 // IntParameter requestParameter(const char* name, int min, int max, int defaultValue);
-// SmoothIntParameter requestParameter(const char* name, int min, int max, int defaultValue, int delta);
+// StiffIntParameter requestParameter(const char* name, int min, int max, int defaultValue, float delta); // delta between 0 and 1 for 0 to 4095
 // };
 
 // exponentially averaged float parameter with hysteresis:
-// StiffValue<SmoothFloatParameter> spread(0.1); spread = requestParameter("spread", 0.0, 1.0, 0.5, 0.9);
-// typedef StiffSmoothFloatParameter StiffValue<SmoothFloatParameter> ??
+// won't work!
+// StiffSmoothFloatParameter spread; spread = requestParameter("spread", 0.0, 1.0, 0.5, 0.9); // how to set stiff delta?
+// should be GenericParameter<float, SmoothValue<StiffFloat>> but whole of stiff gets assigned to value of smooth
+// typedef StiffSmoothFloatParameter GenericParameter<float, SmoothValue<StiffFloat>>
 
 // default in patch processor to StiffSmoothIntParameter
 
@@ -62,7 +64,6 @@ typedef StiffFloatParameter GenericParameter<float, StiffFloat>;
 typedef SmoothFloatParameter GenericParameter<float, SmoothFloat>;
 //FloatParameter spread = requestParameter("Spread", 0.0, 1.0, 0.5);
 //SmoothFloatParameter spread = requestParameter("Spread", 0.0, 1.0, SmoothFloat(0.9, 0.5));
-//StiffFloatParameter spread = requestParameter("Spread", 0.0, 1.0);
 //SmoothFloatParameter spread = requestParameter("Spread", 0.0, 1.0, 0.5, 0.9);
 
 template<type T, type V>
@@ -71,6 +72,7 @@ GenericParameter<T,V>::GenericParameter<T,V>(PatchParameterId p, T mn, T mx, T v
 
 template<type T, type V>
 GenericParameter(const GenericParameter<T,V>& other){
+  // register for update callback in copy constructor
   if(pid != NO_PID)
     getCurrentPatchProcessor()->setPatchParameter(pid, this);
 }
