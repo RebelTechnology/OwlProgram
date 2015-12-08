@@ -5,6 +5,8 @@
  * Applies exponential smoothing to a float value.
  * y(n) = lambda*y(n-1) + (1.0-lambda)*y(n)
  * Smoothing is applied when the value is written to, not when it is read.
+ * todo: adjust for sampling frequency / blocksize (time delay of the response (mean) is 1/α data points)
+ * https://en.wikipedia.org/wiki/Exponential_smoothing
  */
 class SmoothFloat {
 private:
