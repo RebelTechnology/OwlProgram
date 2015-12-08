@@ -3,7 +3,14 @@
 
 #include "basicmaths.h"
 #include "FloatArray.h"
-class PatchProcessor;
+#include "PatchParameter.h"
+#include "SmoothValue.h"
+
+enum PatchParameterScale {
+  LIN,
+  EXP,
+  LOG
+};
 
 enum PatchParameterId {
   PARAMETER_A,
@@ -40,7 +47,9 @@ class Patch {
 public:
   Patch();
   virtual ~Patch();
-  void registerParameter(PatchParameterId pid, const char* name, const char* description = "");
+  FloatParameter getParameter(const char* name, float min, float max, float defaultValue=0.0f, PatchParameterScale scale=LIN, float lambda=0.0f, float delta=0.0);
+  IntParameter getParameter(const char* name, int min, int max, int defaultValue=0, PatchParameterScale scale=LIN, float lambda=0.0f, float delta=0.0);
+  void registerParameter(PatchParameterId pid, const char* name);
   float getParameterValue(PatchParameterId pid);
   bool isButtonPressed(PatchButtonId bid);
   int getSamplesSinceButtonPressed(PatchButtonId bid);
@@ -52,8 +61,6 @@ public:
   int getElapsedCycles();
 public:
   virtual void processAudio(AudioBuffer& output) = 0;
-private:
-  PatchProcessor* processor;
 };
 
 #endif // __StompBox_h__

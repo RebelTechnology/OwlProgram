@@ -10,12 +10,11 @@ AudioBuffer::~AudioBuffer(){}
 
 PatchProcessor* getInitialisingPatchProcessor();
 
-Patch::Patch() : processor(getInitialisingPatchProcessor()){
-}
+Patch::Patch(){}
 
 Patch::~Patch(){}
 
-void Patch::registerParameter(PatchParameterId pid, const char* name, const char* description){
+void Patch::registerParameter(PatchParameterId pid, const char* name){
   if(getProgramVector()->registerPatchParameter != NULL)
     getProgramVector()->registerPatchParameter(pid, name);
 }
@@ -29,10 +28,9 @@ int Patch::getBlockSize(){
 }
 
 float Patch::getParameterValue(PatchParameterId pid){
-  return processor->getParameterValue(pid);
+  //  return getInitialisingPatchProcessor()->getParameterValue(pid);
   // if(pid < getProgramVector()->parameters_size)
-  //   return getProgramVector()->parameters[pid]/4096.0f;
-  // return 0.0;
+  return getProgramVector()->parameters[pid]/4096.0f;
 }
 
 AudioBuffer* Patch::createMemoryBuffer(int channels, int samples){
@@ -70,3 +68,12 @@ int Patch::getElapsedCycles(){
 AudioBuffer* AudioBuffer::create(int channels, int samples){
   return new ManagedMemoryBuffer(channels, samples);
 }
+
+FloatParameter Patch::getParameter(const char* name, float min, float max, float defaultValue, PatchParameterScale scale, float lambda, float delta){
+  return getInitialisingPatchProcessor()->getParameter(name, min, max, defaultValue, scale, lambda, delta);
+}
+
+IntParameter Patch::getParameter(const char* name, int min, int max, int defaultValue, PatchParameterScale scale, float lambda, float delta){
+  return getInitialisingPatchProcessor()->getParameter(name, min, max, defaultValue, scale, lambda, delta);
+}
+
