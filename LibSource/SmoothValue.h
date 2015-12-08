@@ -1,5 +1,5 @@
-#ifndef __SmoothValue_hpp__
-#define __SmoothValue_hpp__
+#ifndef __SmoothValue_h__
+#define __SmoothValue_h__
 
 /**
  * Applies exponential smoothing to a scalar value.
@@ -9,7 +9,7 @@
  * todo: adjust for sampling frequency / blocksize (time delay of the response (mean) is 1/α data points)
  * https://en.wikipedia.org/wiki/Exponential_smoothing
  */
-template<type T>
+template<typename T>
 class SmoothValue {
 private:
   T value;
@@ -28,24 +28,24 @@ public:
   T getValue(){
     return value;
   }
-  SmoothFloat& operator=(const T& other){
-    setValue(other);
+  SmoothValue<T>& operator=(const T& other){
+    update(other);
     return *this;
   }
-  SmoothFloat& operator+=(const T& other){
-    setValue(value+other);
+  SmoothValue<T>& operator+=(const T& other){
+    update(value+other);
     return *this;
   }
-  SmoothFloat& operator-=(const T& other){
-    setValue(value-other);
+  SmoothValue<T>& operator-=(const T& other){
+    update(value-other);
     return *this;
   }
-  SmoothFloat& operator*=(const T& other){
-    setValue(value*other);
+  SmoothValue<T>& operator*=(const T& other){
+    update(value*other);
     return *this;
   }
-  SmoothFloat& operator/=(const T& other){
-    setValue(value/other);
+  SmoothValue<T>& operator/=(const T& other){
+    update(value/other);
     return *this;
   }
   operator T(){
@@ -53,33 +53,46 @@ public:
   }
 };
 
-typedef SmoothFloat SmoothValue<float);
-typedef SmoothInt SmoothValue<float);
+typedef SmoothValue<float> SmoothFloat;
+typedef SmoothValue<int> SmoothInt;
 
-SmoothFloat::SmoothFloat()
-    : lambda(0.9), value(0.0){}
+template<>
+SmoothFloat::SmoothValue()
+  : lambda(0.9), value(0.0){}
 
-SmoothFloat::SmoothFloat(float l)
-    : lambda(l), value(0.0){}
+template<>
+SmoothFloat::SmoothValue(float l)
+  : lambda(l), value(0.0){}
 
-SmoothFloat::SmoothFloat(float l, float initialValue)
-    : lambda(l), value(initialValue){}
+template<>
+SmoothFloat::SmoothValue(float l, float initialValue)
+  : lambda(l), value(initialValue){}
 
-
-SmoothInt::SmoothInt(int divider) : lambda(divider)
-{
+template<>
+SmoothInt::SmoothValue(int divider) : lambda(divider) {
 // lambda = 1 - 1/divider
 // divider 4:0.75, 5:0.8, 6:0.833, 7:0.857, 8:0.875, 9:0.888, 10:0.9 et c
 }
-SmoothInt::update(int newValue){
-    value = (value*lambda + newValue)/(lambda+1);
+
+template<>
+SmoothInt::SmoothValue(int divider, int initialValue) 
+  : lambda(divider), value(initialValue) {}
+
+template<>
+void SmoothFloat::update(float newValue){
+  value = value*lambda + newValue*(1.0f - lambda);
+}
+
+template<>
+void SmoothInt::update(int newValue){
+  value = (value*lambda + newValue)/(lambda+1);
 }
 
 /**
  * Applies simple hysteresis to a scalar.
  * Only updates the value if the absolute difference is greater than delta
  */
-template<type T>
+template<typename T>
 class StiffValue {
   // simple hysteresis
 private:
@@ -97,6 +110,7 @@ public:
   }
 };
 
-// possible: StiffValue<SmoothValue<float>>
+typedef StiffValue<float> StiffFloat;
+typedef StiffValue<int> StiffInt;
 
-#endif /* __SmoothValue_hpp__ */
+#endif /* __SmoothValue_h__ */
