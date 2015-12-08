@@ -13,7 +13,7 @@ public:
   WavetableOscillator(float sr=48000.0, int size=1024);
   WavetableOscillator(float sr, const FloatArray wavetable);
   void setSampleRate(float value);
-  float setFrequency(float freq);
+  void setFrequency(float freq);
   float getSample(float phase);
   float getNextSample();
   void getSamples(FloatArray samples);

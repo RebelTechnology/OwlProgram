@@ -1,5 +1,6 @@
 #include "WavetableOscillator.h"
 #include "basicmaths.h"
+#include <stdint.h>
 
 WavetableOscillator::WavetableOscillator(float sr, int size) : 
   multiplier(1.0/sr), 
@@ -19,9 +20,9 @@ void WavetableOscillator::setSampleRate(float value){
   multiplier = 1.0/value;
 }
 
-float WavetableOscillator::setFrequency(float freq){
+void WavetableOscillator::setFrequency(float freq){
   //    inc = max(0.0, min(0.5, freq*multiplier));
-  inc = freq*multiplier;
+  inc = freq*multiplier;  
 }
 
 float WavetableOscillator::getSample(float phase){
