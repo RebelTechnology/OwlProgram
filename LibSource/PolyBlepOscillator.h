@@ -6,11 +6,12 @@
 
 class PolyBlepOscillator {
 private:
-  const float multiplier;
+  float multiplier;
   stmlib::Oscillator osc;
   float frequency, shape, pw;
 public:
-  PolyBlepOscillator(float sr);
+  PolyBlepOscillator(float sr=48000.0);
+  void setSampleRate(float value);
   void setFrequency(float value);
   /** set waveform shape: 0.0 for saw, 1.0 for square wave */
   void setShape(float value);

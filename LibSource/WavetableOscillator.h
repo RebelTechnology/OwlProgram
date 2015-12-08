@@ -5,13 +5,14 @@
 
 class WavetableOscillator {
 private:
-  const float multiplier;
+  float multiplier;
   FloatArray wave;
   float acc;
   float inc;
 public:
-  WavetableOscillator(float sr, int size=1024);
+  WavetableOscillator(float sr=48000.0, int size=1024);
   WavetableOscillator(float sr, const FloatArray wavetable);
+  void setSampleRate(float value);
   float setFrequency(float freq);
   float getSample(float phase);
   float getNextSample();

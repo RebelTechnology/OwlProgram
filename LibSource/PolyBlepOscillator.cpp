@@ -9,6 +9,10 @@ PolyBlepOscillator::PolyBlepOscillator(float sr):
   osc.Init();
 }
 
+void PolyBlepOscillator::setSampleRate(float value){
+  multiplier = 1.0/value;
+}
+
 void PolyBlepOscillator::setFrequency(float value){
   frequency = value*multiplier;
 }

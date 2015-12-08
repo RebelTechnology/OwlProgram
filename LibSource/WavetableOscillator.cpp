@@ -12,7 +12,12 @@ WavetableOscillator::WavetableOscillator(float sr, int size) :
 WavetableOscillator::WavetableOscillator(float sr, const FloatArray wavetable): 
   multiplier(1.0/sr),
   wave(wavetable),
-  acc(0.0), inc(0.1){}
+  acc(0.0), inc(0.1)
+{}
+
+void WavetableOscillator::setSampleRate(float value){
+  multiplier = 1.0/value;
+}
 
 float WavetableOscillator::setFrequency(float freq){
   //    inc = max(0.0, min(0.5, freq*multiplier));
