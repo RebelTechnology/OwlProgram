@@ -30,7 +30,7 @@
 #define __FirFilterTestPatch_hpp__
 
 #include "StompBox.h"
-#include "FirFilter.hpp"
+#include "FirFilter.h"
 class FirFilterTestPatch : public Patch {
 public:
   FirFilter *filter;

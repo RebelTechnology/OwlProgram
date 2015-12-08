@@ -1,4 +1,8 @@
-#include "SmoothValue.hpp"
+#ifndef __PatchParameter_h__
+#define __PatchParameter_h__
+
+
+#include "SmoothValue.h"
 
 class PatchParameter {
 public:
@@ -87,3 +91,5 @@ void GenericParameter<float,V>::update(uint16_t value){
   value = newValue/4096.0f;
   // should work for <float, float>, <float, SmoothFloat>, and <float, StiffFloat>
 }
+
+#endif /* __PatchParameter_h__ */

@@ -1,11 +1,11 @@
-#ifndef __PitchDetector_hpp__
-#define __PitchDetector_hpp__
+#ifndef __PitchDetector_h__
+#define __PitchDetector_h__
 
 #include "FloatArray.h"
 #include "ComplexFloatArray.h"
 #include "FastFourierTransform.h"
-#include "BiquadFilter.hpp"
-#include "Window.hpp"
+#include "BiquadFilter.h"
+#include "Window.h"
 
 class FourierPitchDetector{
 private:
@@ -197,4 +197,4 @@ public:
   }
 };
 
-#endif /* __PitchDetector_hpp__ */
+#endif /* __PitchDetector_h__ */

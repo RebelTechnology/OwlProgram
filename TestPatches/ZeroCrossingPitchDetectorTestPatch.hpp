@@ -30,7 +30,7 @@
 #define __ZeroCrossingPitchDetectorTestPatch_hpp__
 
 #include "StompBox.h"
-#include "PitchDetector.hpp"
+#include "PitchDetector.h"
 
 class ZeroCrossingPitchDetectorTestPatch : public Patch {
 public:

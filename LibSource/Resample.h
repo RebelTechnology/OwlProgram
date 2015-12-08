@@ -1,4 +1,7 @@
-#include "BiquadFilter.hpp"
+#ifndef __Resample_h__
+#define __Resample_h__
+
+#include "BiquadFilter.h"
 #
 /**
    Implements 4x oversampling
@@ -66,3 +69,5 @@ public:
     upfilter->process(output, output.getSize());
   }
 };
+
+#endif /* __Resample_h__ */
