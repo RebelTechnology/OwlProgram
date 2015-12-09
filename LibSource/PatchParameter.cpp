@@ -5,6 +5,10 @@
 
 PatchProcessor* getInitialisingPatchProcessor();
 
+// copy ctors: superceded by assignment operators
+/* PatchParameter(PatchParameter<T>& other); */
+/* PatchParameter(const PatchParameter<T>& other); */
+
 // template<typename T>
 // PatchParameter<T>::PatchParameter(PatchParameter<T>& other) :
 //   pid(other.pid), value(other.value) {

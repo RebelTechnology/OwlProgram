@@ -11,9 +11,6 @@ private:
 public:
   PatchParameter() : pid(NO_PID){}
   PatchParameter(int parameterId) : pid(parameterId){}
-  // copy ctor: called when requestParameter() returns to patch constructor
-  PatchParameter(PatchParameter<T>& other);
-  PatchParameter(const PatchParameter<T>& other);
   PatchParameter<T>& operator=( const PatchParameter<T>& other );
   void update(T newValue){
     value = newValue;
