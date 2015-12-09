@@ -31,22 +31,22 @@ public:
     update(other);
     return *this;
   }
-  /* SmoothValue<T>& operator+=(const T& other){ */
-  /*   update(value+other); */
-  /*   return *this; */
-  /* } */
-  /* SmoothValue<T>& operator-=(const T& other){ */
-  /*   update(value-other); */
-  /*   return *this; */
-  /* } */
-  /* SmoothValue<T>& operator*=(const T& other){ */
-  /*   update(value*other); */
-  /*   return *this; */
-  /* } */
-  /* SmoothValue<T>& operator/=(const T& other){ */
-  /*   update(value/other); */
-  /*   return *this; */
-  /* } */
+  SmoothValue<T>& operator+=(const T& other){
+    update(value+other);
+    return *this;
+  }
+  SmoothValue<T>& operator-=(const T& other){
+    update(value-other);
+    return *this;
+  }
+  SmoothValue<T>& operator*=(const T& other){
+    update(value*other);
+    return *this;
+  }
+  SmoothValue<T>& operator/=(const T& other){
+    update(value/other);
+    return *this;
+  }
   operator T(){
     return getValue();
   }
@@ -62,7 +62,6 @@ typedef SmoothValue<int> SmoothInt;
  */
 template<typename T>
 class StiffValue {
-  // simple hysteresis
 private:
   T delta;
   T value;
@@ -81,6 +80,22 @@ public:
   }
   StiffValue<T>& operator=(const T& other){
     update(other);
+    return *this;
+  }
+  StiffValue<T>& operator+=(const T& other){
+    update(value+other);
+    return *this;
+  }
+  StiffValue<T>& operator-=(const T& other){
+    update(value-other);
+    return *this;
+  }
+  StiffValue<T>& operator*=(const T& other){
+    update(value*other);
+    return *this;
+  }
+  StiffValue<T>& operator/=(const T& other){
+    update(value/other);
     return *this;
   }
   operator T(){
@@ -114,6 +129,22 @@ public:
   }
   SmoothStiffValue<T>& operator=(const T& other){
     update(other);
+    return *this;
+  }
+  SmoothStiffValue<T>& operator+=(const T& other){
+    update(value+other);
+    return *this;
+  }
+  SmoothStiffValue<T>& operator-=(const T& other){
+    update(value-other);
+    return *this;
+  }
+  SmoothStiffValue<T>& operator*=(const T& other){
+    update(value*other);
+    return *this;
+  }
+  SmoothStiffValue<T>& operator/=(const T& other){
+    update(value/other);
     return *this;
   }
   operator T(){
