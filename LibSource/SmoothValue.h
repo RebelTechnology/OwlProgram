@@ -23,7 +23,7 @@ public:
     value = other.value;
     lambda = other.lambda;
   }
-  T normal(T lambda, float samplerate);
+  T normal(T lambda, int blocksize);
   void update(T newValue);
   T getValue(){
     return value;
@@ -69,7 +69,10 @@ SmoothFloat::SmoothValue(float l, float initialValue)
   : lambda(l), value(initialValue){}
 
 template<>
-SmoothInt::SmoothValue(int divider) : lambda(divider) {
+SmoothInt::SmoothValue(int divider) : lambda(5), value(0) {}
+
+template<>
+SmoothInt::SmoothValue(int divider) : lambda(divider), value(0) {
 // lambda = 1 - 1/divider
 // divider 4:0.75, 5:0.8, 6:0.833, 7:0.857, 8:0.875, 9:0.888, 10:0.9 et c
 }
@@ -86,6 +89,16 @@ void SmoothFloat::update(float newValue){
 template<>
 void SmoothInt::update(int newValue){
   value = (value*lambda + newValue)/(lambda+1);
+}
+
+template<>
+float SmoothFloat::normal(float lambda, int blocksize){
+  return lambda*128.0f/blocksize;
+}
+
+template<>
+int SmoothInt::normal(int divider, int blocksize){
+  return (int)(divider*128.0f/blocksize);
 }
 
 /**
