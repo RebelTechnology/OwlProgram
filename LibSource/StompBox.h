@@ -6,12 +6,6 @@
 #include "PatchParameter.h"
 #include "SmoothValue.h"
 
-enum PatchParameterScale {
-  LIN,
-  EXP,
-  LOG
-};
-
 enum PatchParameterId {
   PARAMETER_A,
   PARAMETER_B,
@@ -47,8 +41,8 @@ class Patch {
 public:
   Patch();
   virtual ~Patch();
-  FloatParameter getParameter(const char* name, float min, float max, float defaultValue=0.0f, PatchParameterScale scale=LIN, float lambda=0.0f, float delta=0.0);
-  IntParameter getParameter(const char* name, int min, int max, int defaultValue=0, PatchParameterScale scale=LIN, float lambda=0.0f, float delta=0.0);
+  FloatParameter getParameter(const char* name, float min, float max, float defaultValue=0.0f, float lambda=0.0f, float delta=0.0, float skew=1.0);
+  IntParameter getParameter(const char* name, int min, int max, int defaultValue=0, float lambda=0.0f, float delta=0.0, float skew=1.0);
   void registerParameter(PatchParameterId pid, const char* name);
   float getParameterValue(PatchParameterId pid);
   bool isButtonPressed(PatchButtonId bid);
@@ -59,7 +53,6 @@ public:
   AudioBuffer* createMemoryBuffer(int channels, int samples);
   float getElapsedBlockTime();
   int getElapsedCycles();
-public:
   virtual void processAudio(AudioBuffer& output) = 0;
 };
 

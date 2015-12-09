@@ -69,11 +69,11 @@ AudioBuffer* AudioBuffer::create(int channels, int samples){
   return new ManagedMemoryBuffer(channels, samples);
 }
 
-FloatParameter Patch::getParameter(const char* name, float min, float max, float defaultValue, PatchParameterScale scale, float lambda, float delta){
-  return getInitialisingPatchProcessor()->getParameter(name, min, max, defaultValue, scale, lambda, delta);
+FloatParameter Patch::getParameter(const char* name, float min, float max, float defaultValue, float lambda, float delta, float skew){
+  return getInitialisingPatchProcessor()->getParameter(name, min, max, defaultValue, lambda, delta, skew);
 }
 
-IntParameter Patch::getParameter(const char* name, int min, int max, int defaultValue, PatchParameterScale scale, float lambda, float delta){
-  return getInitialisingPatchProcessor()->getParameter(name, min, max, defaultValue, scale, lambda, delta);
+IntParameter Patch::getParameter(const char* name, int min, int max, int defaultValue, float lambda, float delta, float skew){
+  return getInitialisingPatchProcessor()->getParameter(name, min, max, defaultValue, lambda, delta, skew);
 }
 

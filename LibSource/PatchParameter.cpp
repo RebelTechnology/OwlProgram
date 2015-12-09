@@ -5,6 +5,11 @@
 
 PatchProcessor* getInitialisingPatchProcessor();
 
+#define PATCH_PARAMETER_NO_PID -1
+
+template<typename T>
+PatchParameter<T>::PatchParameter() : pid(PATCH_PARAMETER_NO_PID){}
+
 // copy ctors: superceded by assignment operators
 /* PatchParameter(PatchParameter<T>& other); */
 /* PatchParameter(const PatchParameter<T>& other); */
@@ -14,8 +19,7 @@ PatchProcessor* getInitialisingPatchProcessor();
 //   pid(other.pid), value(other.value) {
 //   // copy ctor
 //   // register for update callback in copy constructor
-//   debugMessage("const copy ctor", pid, (int)this);
-//   if(pid != NO_PID)
+//   if(pid != PATCH_PARAMETER_NO_PID)
 //     getInitialisingPatchProcessor()->setPatchParameter(pid, this);
 // }
 
@@ -24,8 +28,7 @@ PatchProcessor* getInitialisingPatchProcessor();
 //   pid(other.pid), value(other.value) {
 //   // copy ctor
 //   // register for update callback in copy constructor
-//   debugMessage("const copy ctor", pid, (int)this);
-//   if(pid != NO_PID)
+//   if(pid != PATCH_PARAMETER_NO_PID)
 //     getInitialisingPatchProcessor()->setPatchParameter(pid, this);
 // }
 
@@ -33,8 +36,7 @@ template<typename T>
 PatchParameter<T>& PatchParameter<T>::operator=( const PatchParameter<T>& other ){
   pid = other.pid;
   value = other.value;
-  debugMessage("assignment operator", pid, (int)this);
-  if(pid != NO_PID)
+  if(pid != PATCH_PARAMETER_NO_PID)
     getInitialisingPatchProcessor()->setPatchParameter(pid, this);
   return *this;
 }

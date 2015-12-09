@@ -23,7 +23,6 @@ public:
     value = other.value;
     lambda = other.lambda;
   }
-  T normal(T lambda, float samplerate);
   void update(T newValue);
   T getValue(){
     return value;
@@ -51,6 +50,7 @@ public:
   operator T(){
     return getValue();
   }
+  static T normal(float lambda, int blocksize);
 };
 
 typedef SmoothValue<float> SmoothFloat;
@@ -86,6 +86,7 @@ public:
   operator T(){
     return getValue();
   }
+  static T normal(float delta);
 };
 
 typedef StiffValue<float> StiffFloat;

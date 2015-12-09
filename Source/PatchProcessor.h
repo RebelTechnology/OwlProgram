@@ -30,7 +30,7 @@ public:
   void setPatchParameter(int pid, IntParameter* param);
 
   template<typename T>
-  PatchParameter<T> getParameter(const char* name, T min, T max, T defaultValue, PatchParameterScale scale, float lambda, float delta);
+  PatchParameter<T> getParameter(const char* name, T min, T max, T defaultValue, float lambda, float delta, float skew);
 private:
   uint8_t bufferCount;
   ParameterUpdater* parameters[NOF_ADC_VALUES];

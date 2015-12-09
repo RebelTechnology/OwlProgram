@@ -35,14 +35,34 @@ void SmoothInt::update(int newValue){
 
 template<>
 void SmoothStiffFloat::update(float newValue){
-  if(abs(value-newValue) > delta)
+  if(abs(value-newValue) >= delta)
     value = value*lambda + newValue*(1.0f - lambda);
 }
 
 template<>
 void SmoothStiffInt::update(int newValue){
-  if(abs(value-newValue) > delta)
+  if(abs(value-newValue) >= delta)
     value = (value*lambda + newValue)/(lambda+1);
+}
+
+template<>
+float SmoothValue<float>::normal(float lambda, int blocksize){
+  return lambda*128.0f/blocksize;
+}
+
+template<>
+int SmoothValue<int>::normal(float lambda, int blocksize){
+  return (1.0f/(1.0-lambda))*128.0f/blocksize;
+}
+
+template<>
+float StiffValue<float>::normal(float delta){
+  return delta;
+}
+
+template<>
+int StiffValue<int>::normal(float delta){
+  return delta;
 }
 
 template class SmoothValue<int>;
