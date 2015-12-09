@@ -41,8 +41,8 @@ class Patch {
 public:
   Patch();
   virtual ~Patch();
-  FloatParameter getParameter(const char* name, float min, float max, float defaultValue=0.0f, float lambda=0.0f, float delta=0.0, float skew=1.0);
-  IntParameter getParameter(const char* name, int min, int max, int defaultValue=0, float lambda=0.0f, float delta=0.0, float skew=1.0);
+  FloatParameter getFloatParameter(const char* name, float min, float max, float defaultValue=0.0f, float lambda=0.0f, float delta=0.0, float skew=1.0);
+  IntParameter getIntParameter(const char* name, int min, int max, int defaultValue=0, float lambda=0.0f, float delta=0.0, float skew=1.0);
   void registerParameter(PatchParameterId pid, const char* name);
   float getParameterValue(PatchParameterId pid);
   bool isButtonPressed(PatchButtonId bid);

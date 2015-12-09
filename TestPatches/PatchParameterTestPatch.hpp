@@ -12,10 +12,10 @@ private:
 
 public:
   PatchParameterTestPatch(){
-    p1 = getParameter("float", 0.0, 1.0);
-    p2 = getParameter("smoothfloat", 0.0, 1.0, 0.5, 0.9);
-    p3 = getParameter("stiffint", 0, 10, 0, 0, 2);
-    p4 = getParameter("expfloat", 0.0, 10.0, 0.0, 0.0, 0.0, 2.0);
+    p1 = getFloatParameter("float", 0.0, 1.0);
+    p2 = getFloatParameter("smoothfloat", 0.0, 1.0, 0.5, 0.9);
+    p3 = getIntParameter("stiffint", 0, 10, 0, 0, 2);
+    p4 = getFloatParameter("expfloat", 0.0, 10.0, 0.0, 0.0, 0.0, 2.0);
   }
   void processAudio(AudioBuffer &buffer){
     //    debugMessage("p1/p2/p3", (float)p1, (float)p2, (float)p3);
