@@ -9,7 +9,7 @@ private:
 public:
   PatchParameter();
   PatchParameter(int parameterId) : pid(parameterId){}
-  /* copy constructor */
+  /* assignment operator */
   PatchParameter<T>& operator=( const PatchParameter<T>& other );
   void update(T newValue){
     value = newValue;
