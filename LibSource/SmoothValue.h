@@ -32,30 +32,29 @@ public:
     update(other);
     return *this;
   }
-  SmoothValue<T>& operator+=(const T& other){
-    update(value+other);
-    return *this;
-  }
-  SmoothValue<T>& operator-=(const T& other){
-    update(value-other);
-    return *this;
-  }
-  SmoothValue<T>& operator*=(const T& other){
-    update(value*other);
-    return *this;
-  }
-  SmoothValue<T>& operator/=(const T& other){
-    update(value/other);
-    return *this;
-  }
+  /* SmoothValue<T>& operator+=(const T& other){ */
+  /*   update(value+other); */
+  /*   return *this; */
+  /* } */
+  /* SmoothValue<T>& operator-=(const T& other){ */
+  /*   update(value-other); */
+  /*   return *this; */
+  /* } */
+  /* SmoothValue<T>& operator*=(const T& other){ */
+  /*   update(value*other); */
+  /*   return *this; */
+  /* } */
+  /* SmoothValue<T>& operator/=(const T& other){ */
+  /*   update(value/other); */
+  /*   return *this; */
+  /* } */
   operator T(){
-    return value;
+    return getValue();
   }
 };
 
 typedef SmoothValue<float> SmoothFloat;
 typedef SmoothValue<int> SmoothInt;
-
 
 /**
  * Applies simple hysteresis to a scalar.
@@ -77,9 +76,51 @@ public:
     if(abs(value-newValue) > delta)
       value = newValue;
   }
+  T getValue(){
+    return value;
+  }
+  StiffValue<T>& operator=(const T& other){
+    update(other);
+    return *this;
+  }
+  operator T(){
+    return getValue();
+  }
 };
 
 typedef StiffValue<float> StiffFloat;
 typedef StiffValue<int> StiffInt;
+
+/**
+ * Applies hysteresis and smoothing to a scalar.
+ */
+template<typename T>
+class SmoothStiffValue {
+  // simple hysteresis
+private:
+  T lambda;
+  T delta;
+  T value;
+public:
+  SmoothStiffValue(){}
+  SmoothStiffValue(T l, T d)
+    : lambda(d), delta(d){}
+  SmoothStiffValue(T l, T d, T initialValue)
+    : lambda(d), delta(d), value(initialValue) {}
+  void update(T newValue);
+  T getValue(){
+    return value;
+  }
+  SmoothStiffValue<T>& operator=(const T& other){
+    update(other);
+    return *this;
+  }
+  operator T(){
+    return getValue();
+  }
+};
+
+typedef SmoothStiffValue<float> SmoothStiffFloat;
+typedef SmoothStiffValue<int> SmoothStiffInt;
 
 #endif /* __SmoothValue_h__ */

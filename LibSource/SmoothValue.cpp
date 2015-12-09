@@ -1,4 +1,5 @@
 #include "SmoothValue.h"
+#include "basicmaths.h"
 
 template<>
 SmoothFloat::SmoothValue()
@@ -32,5 +33,19 @@ void SmoothInt::update(int newValue){
   value = (value*lambda + newValue)/(lambda+1);
 }
 
+template<>
+void SmoothStiffFloat::update(float newValue){
+  if(abs(value-newValue) > delta)
+    value = value*lambda + newValue*(1.0f - lambda);
+}
+
+template<>
+void SmoothStiffInt::update(int newValue){
+  if(abs(value-newValue) > delta)
+    value = (value*lambda + newValue)/(lambda+1);
+}
+
 template class SmoothValue<int>;
 template class SmoothValue<float>;
+template class SmoothStiffValue<int>;
+template class SmoothStiffValue<float>;

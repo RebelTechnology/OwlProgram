@@ -50,8 +50,6 @@ void PatchProcessor::setParameterValues(uint16_t *params){
     parameters[i]->update(params[i]);
 }
 
-#include "SmoothValue.h"
-#include "ProgramVector.h"
 template<typename T, typename V>
 class TemplateParameterUpdater : public ParameterUpdater {
 private:
@@ -65,28 +63,12 @@ public:
   void update(uint16_t newValue){
     value = (newValue*(maximum-minimum)+minimum)/4095;
     if(parameter != NULL)
-      parameter->update(value);
+      parameter->update((T)value);
   }
   void setParameter(PatchParameter<T>* p){
     parameter = p;
   }
 };
-#if 0
-template<typename T, typename V>
-void TemplateParameterUpdater<T, V>::setParameter(PatchParameter<T>* p){
-  parameter = p;
-}
-  
-template<typename V>
-void TemplateParameterUpdater<float, V>::setParameter(FloatParameter p){
-  parameter = p;
-}
-  
-template<typename V>
-void TemplateParameterUpdater<int, V>::setParameter(IntParameter p){
-  parameter = p;
-}
-#endif
 
 template<typename T>
 PatchParameter<T> PatchProcessor::getParameter(const char* name, T min, T max, T defaultValue, PatchParameterScale scale, float lambda, float delta){
@@ -101,12 +83,12 @@ PatchParameter<T> PatchProcessor::getParameter(const char* name, T min, T max, T
     ParameterUpdater* updater = NULL;
     if(lambda == 0.0 && delta == 0.0){
       updater = new TemplateParameterUpdater<T, T>(min, max, defaultValue);
-    // }else if(lambda == 0.0){
-    //   updater = new TemplateParameterUpdater<T, StiffValue<T>>(min, max, StiffValue<T>(delta, defaultValue));
-    // }else if(delta == 0.0){
-    //   updater = new TemplateParameterUpdater<T, SmoothValue<T>>(min, max, SmoothValue<T>(lambda, defaultValue));
-    // }else{
-    //   updater = new TemplateParameterUpdater<T, SmoothValue<StiffValue<T>>>(min, max, SmoothValue<StiffValue<T>>(lambda, StiffValue<T>(delta, defaultValue)));
+    }else if(lambda == 0.0){      
+      updater = new TemplateParameterUpdater<T, StiffValue<T>>(min, max, StiffValue<T>(delta, defaultValue));
+    }else if(delta == 0.0){
+      updater = new TemplateParameterUpdater<T, SmoothValue<T>>(min, max, SmoothValue<T>(lambda, defaultValue));
+    }else{
+      updater = new TemplateParameterUpdater<T, SmoothStiffValue<T>>(min, max, SmoothStiffValue<T>(lambda, delta, defaultValue));
     }
     parameters[pid] = updater;
   }
@@ -117,6 +99,14 @@ PatchParameter<T> PatchProcessor::getParameter(const char* name, T min, T max, T
 // explicit instantiation
 template PatchParameter<float> PatchProcessor::getParameter(const char* name, float min, float max, float defaultValue, PatchParameterScale scale, float lambda, float delta);
 template PatchParameter<int> PatchProcessor::getParameter(const char* name, int min, int max, int defaultValue, PatchParameterScale scale, float lambda, float delta);
+template class TemplateParameterUpdater<int, int>;
+template class TemplateParameterUpdater<float, float>;
+template class TemplateParameterUpdater<int, SmoothValue<int>>;
+template class TemplateParameterUpdater<float, SmoothValue<float>>;
+template class TemplateParameterUpdater<int, StiffValue<int>>;
+template class TemplateParameterUpdater<float, StiffValue<float>>;
+template class TemplateParameterUpdater<int, SmoothStiffValue<int>>;
+template class TemplateParameterUpdater<float, SmoothStiffValue<float>>;
   
 #if 0
 #define SMOOTH_HYSTERESIS
@@ -151,29 +141,11 @@ void PatchProcessor::setParameterValues(uint16_t *params){
 #endif
 
 void PatchProcessor::setPatchParameter(int pid, FloatParameter* param){
-  ParameterUpdater* pu = parameters[pid];
-  // TemplateParameterUpdater<float, V>* pu = dynamic_cast<TemplateParameterUpdater<float, V>>(parameters[pid]);
-  if(pu != NULL){
-    pu->setParameter(param);
-  }
+  if(pid < parameterCount && parameters[pid] != NULL)
+    parameters[pid]->setParameter(param);
 }
 
 void PatchProcessor::setPatchParameter(int pid, IntParameter* param){
-  ParameterUpdater* pu = parameters[pid];
-  if(pu != NULL)
-    pu->setParameter(param);
+  if(pid < parameterCount && parameters[pid] != NULL)
+    parameters[pid]->setParameter(param);
 }
-
-#if 0
-template<typename V>
-void TemplateParameterUpdater<int, V>::update(uint16_t newValue){
-  value = (newValue*(maximum-minimum)+minimum)/4095;
-  parameter.update(value);
-}
-
-template<typename V>
-void TemplateParameterUpdater<float, V>::update(uint16_t newValue){
-  value = (newValue*(maximum-minimum)+minimum)/4096.0f;
-  parameter.update(value);
-}
-#endif
