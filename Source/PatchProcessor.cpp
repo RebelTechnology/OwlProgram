@@ -61,7 +61,7 @@ public:
   LinearParameterUpdater(T min, T max, V initialValue)
     : parameter(NULL), minimum(min), maximum(max), value(initialValue) {}
   void update(uint16_t newValue){
-    value = (newValue*(maximum-minimum)+minimum)/4096;
+    value = (newValue*(maximum-minimum))/4096+minimum;
     if(parameter != NULL)
       parameter->update((T)value);
   }
