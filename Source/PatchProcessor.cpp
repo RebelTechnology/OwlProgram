@@ -70,6 +70,11 @@ public:
   }
 };
 
+// void setSkew (float mid){
+//   if (maximum > minimum)
+//     skew = log (0.5) / log ((mid - minimum) / (maximum - minimum));
+// }
+
 template<typename T, typename V>
 class ExponentialParameterUpdater : public ParameterUpdater {
 private:
@@ -122,21 +127,21 @@ PatchParameter<T> PatchProcessor::getParameter(const char* name, T min, T max, T
       if(lambda == 0.0 && delta == 0.0){
 	updater = new LinearParameterUpdater<T, T>(min, max, defaultValue);
       }else if(delta == 0.0){
-	updater = new LinearParameterUpdater<T, SmoothValue<T>>(min, max, SmoothValue<T>(l, defaultValue));
+	updater = new LinearParameterUpdater<T, SmoothValue<T> >(min, max, SmoothValue<T>(l, defaultValue));
       }else if(lambda == 0.0){      
-	updater = new LinearParameterUpdater<T, StiffValue<T>>(min, max, StiffValue<T>(d, defaultValue));
+	updater = new LinearParameterUpdater<T, StiffValue<T> >(min, max, StiffValue<T>(d, defaultValue));
       }else{
-	updater = new LinearParameterUpdater<T, SmoothStiffValue<T>>(min, max, SmoothStiffValue<T>(l, d, defaultValue));
+	updater = new LinearParameterUpdater<T, SmoothStiffValue<T> >(min, max, SmoothStiffValue<T>(l, d, defaultValue));
       }
     }else{
       if(lambda == 0.0 && delta == 0.0){
 	updater = new ExponentialParameterUpdater<T, T>(skew, min, max, defaultValue);
       }else if(delta == 0.0){
-	updater = new ExponentialParameterUpdater<T, SmoothValue<T>>(skew, min, max, SmoothValue<T>(l, defaultValue));
+	updater = new ExponentialParameterUpdater<T, SmoothValue<T> >(skew, min, max, SmoothValue<T>(l, defaultValue));
       }else if(lambda == 0.0){      
-	updater = new ExponentialParameterUpdater<T, StiffValue<T>>(skew, min, max, StiffValue<T>(d, defaultValue));
+	updater = new ExponentialParameterUpdater<T, StiffValue<T> >(skew, min, max, StiffValue<T>(d, defaultValue));
       }else{
-	updater = new ExponentialParameterUpdater<T, SmoothStiffValue<T>>(skew, min, max, SmoothStiffValue<T>(l, d, defaultValue));
+	updater = new ExponentialParameterUpdater<T, SmoothStiffValue<T> >(skew, min, max, SmoothStiffValue<T>(l, d, defaultValue));
       }
     }
     parameters[pid] = updater;
