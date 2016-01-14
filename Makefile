@@ -1,4 +1,4 @@
-BUILDROOT ?= $(CURDIR)
+BUILDROOT ?= ./
 
 ifndef CONFIG
   CONFIG=Release
@@ -6,11 +6,13 @@ endif
 
 ifeq ($(CONFIG),Debug)
 CPPFLAGS     = -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
-ASFLAGS    = -g
+EMCCFLAGS   ?= -g
+ASFLAGS      = -g
 endif
 
 ifeq ($(CONFIG),Release)
 CPPFLAGS     = -O2
+EMCCFLAGS   ?= -O2
 endif
 
 DEPS       = $(BUILD)/patch.cpp $(BUILD)/patch.h
@@ -118,7 +120,7 @@ EMCCFLAGS += -Wno-warn-absolute-paths
 EMCCFLAGS += -Wno-unknown-warning-option
 EMCCFLAGS += -Wno-c++11-extensions
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus','_WEB_getButtons','_WEB_setButtons']"""
-EMCC_SRC   = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/operators.cpp $(SOURCE)/message.cpp
+EMCC_SRC   = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/message.cpp
 EMCC_SRC  += WebSource/web.cpp
 EMCC_SRC  += $(LIBSOURCE)/basicmaths.c $(LIBSOURCE)/StompBox.cpp $(LIBSOURCE)/FloatArray.cpp $(LIBSOURCE)/ComplexFloatArray.cpp $(LIBSOURCE)/FastFourierTransform.cpp $(LIBSOURCE)/Envelope.cpp $(LIBSOURCE)/VoltsPerOctave.cpp $(LIBSOURCE)/WavetableOscillator.cpp $(LIBSOURCE)/PolyBlepOscillator.cpp
 EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
