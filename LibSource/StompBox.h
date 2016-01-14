@@ -45,7 +45,7 @@ public:
    * The parameter value will be scaled to the range given by min and max.
    * Lambda specifies smoothing factor 0 to 1.0, or 0.0 for no smoothing (default).
    * Delta specifies hysteresis, or stiffness, as the absolute value change required to update the parameter, or 0.0 for no hysteresis (default).
-   * Skew specifies exponentiation: < 1.0 for logarithmic distribution, > 1.0 for exponential, or 1.0 for linear scaling (default).
+   * Skew specifies exponentiation: < 1.0 for logarithmic, > 1.0 for exponential, or 1.0 for linear scaling (default).
    */
   FloatParameter getFloatParameter(const char* name, float min, float max, float defaultValue=0.0f, float lambda=0.0f, float delta=0.0, float skew=1.0);
   IntParameter getIntParameter(const char* name, int min, int max, int defaultValue=0, float lambda=0.0f, float delta=0.0, float skew=1.0);

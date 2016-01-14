@@ -30,7 +30,11 @@ int Patch::getBlockSize(){
 float Patch::getParameterValue(PatchParameterId pid){
   //  return getInitialisingPatchProcessor()->getParameterValue(pid);
   // if(pid < getProgramVector()->parameters_size)
-  return getProgramVector()->parameters[pid]/4096.0f;
+  if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4){
+    return (4095 - getProgramVector()->parameters[pid])/4096.0f;
+  }else{
+    return getProgramVector()->parameters[pid]/4096.0f;
+  }
 }
 
 AudioBuffer* Patch::createMemoryBuffer(int channels, int samples){
