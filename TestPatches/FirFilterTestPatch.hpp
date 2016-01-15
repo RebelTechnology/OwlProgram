@@ -34,7 +34,7 @@
 class FirFilterTestPatch : public Patch {
 public:
   FirFilter *filter;
-  int numTaps=128;
+  int numTaps=64;
   FloatArray temp;
   FloatArray coefficients;
   FirFilterTestPatch(){
