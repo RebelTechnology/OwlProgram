@@ -7,8 +7,8 @@
 
 class ParameterUpdater {
 public:
-  virtual void update(uint16_t value);
-  float getValue();
+  virtual ~ParameterUpdater(){}
+  virtual void update(uint16_t value) = 0;
   virtual void setParameter(IntParameter* p){}
   virtual void setParameter(FloatParameter* p){}
 };
@@ -19,7 +19,6 @@ public:
   ~PatchProcessor();
   void clear();
   void setPatch(Patch* patch);
-  float getParameterValue(PatchParameterId pid);
   int getBlockSize();
   double getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);

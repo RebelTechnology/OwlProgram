@@ -38,13 +38,6 @@ AudioBuffer* PatchProcessor::createMemoryBuffer(int channels, int size){
   return buf;
 }
 
-float PatchProcessor::getParameterValue(PatchParameterId pid){
-  if(pid < NOF_ADC_VALUES && parameters[pid] != NULL)
-    return parameters[pid]->getValue();
-  else
-    return 0.0f;
-}
-
 void PatchProcessor::setParameterValues(uint16_t *params){
   for(int i=0; i<parameterCount; ++i)
     parameters[i]->update(params[i]);
@@ -70,7 +63,7 @@ public:
   }
 };
 
-// void setSkew (float mid){
+// void setSkew(float mid){
 //   if (maximum > minimum)
 //     skew = log (0.5) / log ((mid - minimum) / (maximum - minimum));
 // }
