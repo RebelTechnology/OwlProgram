@@ -47,8 +47,8 @@ public:
    * Delta specifies hysteresis, or stiffness, as the absolute value change required to update the parameter, or 0.0 for no hysteresis (default).
    * Skew specifies exponentiation: < 1.0 for logarithmic, > 1.0 for exponential, or 1.0 for linear scaling (default).
    */
-  FloatParameter getFloatParameter(const char* name, float min, float max, float defaultValue=0.0f, float lambda=0.0f, float delta=0.0, float skew=1.0);
-  IntParameter getIntParameter(const char* name, int min, int max, int defaultValue=0, float lambda=0.0f, float delta=0.0, float skew=1.0);
+  FloatParameter getFloatParameter(const char* name, float min, float max, float defaultValue=0.0f, float lambda=0.0f, float delta=0.0, float skew=LIN);
+  IntParameter getIntParameter(const char* name, int min, int max, int defaultValue=0, float lambda=0.0f, float delta=0.0, float skew=LIN);
   void registerParameter(PatchParameterId pid, const char* name);
   float getParameterValue(PatchParameterId pid);
   bool isButtonPressed(PatchButtonId bid);
@@ -60,6 +60,10 @@ public:
   float getElapsedBlockTime();
   int getElapsedCycles();
   virtual void processAudio(AudioBuffer& output) = 0;
+  /** constant skew values for exponential, linear and logarithmic parameters */
+  static const float EXP;
+  static const float LIN;
+  static const float LOG;
 };
 
 #endif // __StompBox_h__

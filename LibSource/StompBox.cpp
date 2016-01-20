@@ -81,3 +81,6 @@ IntParameter Patch::getIntParameter(const char* name, int min, int max, int defa
   return getInitialisingPatchProcessor()->getParameter(name, min, max, defaultValue, lambda, delta, skew);
 }
 
+const float Patch::EXP = 2.0;
+const float Patch::LIN = 1.0;
+const float Patch::LOG = 0.5;
