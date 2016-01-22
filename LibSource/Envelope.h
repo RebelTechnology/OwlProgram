@@ -9,7 +9,7 @@
 class AdsrEnvelope {
 private:
   enum EnvelopeStage { kAttack, kDecay, kSustain, kRelease, kIdle };
-  enum EnvelopeTrigger { kGate, kTrigger, kRetrigger };
+  enum EnvelopeTrigger { kGate, kTrigger };
 
 public:
   AdsrEnvelope(float newSampleRate);
@@ -21,7 +21,6 @@ public:
   void trigger(bool state);
   void trigger(bool state, int triggerDelay);
   void setRetrigger(bool on);
-  void retrigger(bool on, int triggerDelay);
   void gate(bool state);
   void gate(bool state, int gateDelay);
   void setLevel(float newLevel);
@@ -29,11 +28,11 @@ public:
   void getEnvelope(FloatArray &output); // increments envelope by output buffer length
   void attenuate(FloatArray &buf); // increments envelope by buffer length
 private:
-  void updateStage();
   static const float minTime;
   const float samplePeriod;
   EnvelopeStage stage;
   EnvelopeTrigger trig;
+  bool retrigger;
   float level;
   float attackIncrement;
   float decayIncrement;

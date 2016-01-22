@@ -9,7 +9,7 @@ void EnvelopeGenerator::calculateMultiplier(double startLevel,
 }
 */
 
-const float AdsrEnvelope::minTime = 0.005;
+const float AdsrEnvelope::minTime = 0.001;
 
 AdsrEnvelope::AdsrEnvelope(float sampleRate) : 
   samplePeriod(1.0/sampleRate),
@@ -17,18 +17,12 @@ AdsrEnvelope::AdsrEnvelope(float sampleRate) :
   trig(kGate),
   level(0.0),
   gateState(false),
-  gateTime(0) {
+  gateTime(-1) {
   setAttack(0.0);
   setDecay(0.0);
   setSustain(1.0);
   setRelease(0.0);
-}
-
-void AdsrEnvelope::updateStage(){
-  if(gateState)
-    stage = kAttack;
-  // else if(trig == kGate)
-  //   stage = kRelease;
+  setRetrigger(false);
 }
 
 void AdsrEnvelope::setAttack(float newAttack){
@@ -52,15 +46,7 @@ void AdsrEnvelope::setSustain(float newSustain){
 }
 
 void AdsrEnvelope::setRetrigger(bool state){
-  if(state)
-    trig = kRetrigger;
-  else
-    trig = kGate;
-}
-
-void AdsrEnvelope::retrigger(bool state, int delay){
-  gate(state, delay);
-  setRetrigger(state);
+  retrigger = state;
 }
 
 void AdsrEnvelope::trigger(){
@@ -84,8 +70,6 @@ void AdsrEnvelope::gate(bool state, int delay){
   if(gateState != state){
     gateTime = delay;
     gateState = state;
-    if(gateTime == 0)
-      updateStage();
   }
   trig = kGate;
 }
@@ -105,8 +89,15 @@ void AdsrEnvelope::getEnvelope(FloatArray &output){
 }
 
 float AdsrEnvelope::getNextSample(){
-  if(gateTime && --gateTime == 0)
-    updateStage();
+  if(gateTime == 0){
+    stage = kAttack;
+    if(trig == kTrigger){
+      gateState = false;
+    }
+  }
+  if(gateTime >= 0){
+    gateTime--; // this will stop at -1
+  }
   switch (stage) {
   case kAttack:
     // attack ramp
@@ -123,29 +114,37 @@ float AdsrEnvelope::getNextSample(){
     level += decayIncrement;
     if(level <= sustain){
       level = sustain;
-      stage = kSustain;
-    }else if(gateState == false && trig == kGate){
+      if(trig == kGate){
+        stage = kSustain;
+      } else { // (trig == kTrigger)
+        stage = kRelease;
+      }
+    } else if(gateState == false && trig == kGate){
       stage = kRelease;
     }
     break;
   case kSustain:
     level = sustain;
-    if(gateState == false || trig != kGate)
+    if(gateState == false){
       stage = kRelease;
+    }
     break;
   case kRelease:
     // release ramp
     level += releaseIncrement;
     if(level <= 0.0){
       level = 0.0;
-      stage = kIdle;
-    }else if(gateState == true){
+      if (retrigger == true)
+        trigger();
+      else // (retrigger == false)
+        stage = kIdle;
+    }else if(gateState == true ){ // if during release the gate is on again, start over from the current level
       stage = kAttack;
     }
     break;
   case kIdle:
     level = 0.0;
-    if(gateState == true || trig == kRetrigger)
+    if(gateState == true)
       stage = kAttack;
     break;
   }
