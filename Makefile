@@ -223,7 +223,7 @@ $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 
 $(HEAVYDIR)/Heavy_owl.h: $(HEAVYDIR)/_main.pd
 	@python ./Tools/Heavy/uploader.py $(HEAVYDIR) -g c -n $(HEAVYNAME) -o $(HEAVYDIR) $(HEAVYARGS)
-	@cp $(HEAVYSRC)/Utils_unix.h $(HEAVYDIR)
+	@cp $(HEAVYSRC)/HvUtils.h $(HEAVYDIR)
 
 heavy: $(HEAVYDIR)/Heavy_owl.h
 	@$(eval HEAVY_SRC = $(wildcard $(HEAVYDIR)/*.c) )
