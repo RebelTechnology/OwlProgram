@@ -205,10 +205,10 @@ static inline hv_int32_t __hv_utils_min_i(hv_int32_t x, hv_int32_t y) { return (
 #define hv_sqrt_f(a) arm_sqrtf(a)
 #else
 #define hv_sin_f(a) sinf(a)
-#define hv_sinh_f(a) sinhf(a)
 #define hv_cos_f(a) cosf(a)
 #define hv_sqrt_f(a) sqrtf(a)
 #endif
+#define hv_sinh_f(a) sinhf(a)
 #define hv_cosh_f(a) coshf(a)
 #define hv_tan_f(a) tanf(a)
 #define hv_tanh_f(a) tanhf(a)
