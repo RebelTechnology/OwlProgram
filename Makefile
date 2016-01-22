@@ -82,6 +82,7 @@ CPP_SRC = main.cpp operators.cpp message.cpp StompBox.cpp PatchProcessor.cpp
 CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp FastFourierTransform.cpp 
 CPP_SRC += Envelope.cpp VoltsPerOctave.cpp
 CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
+CPP_SRC += SmoothValue.cpp PatchParameter.cpp
 CPP_SRC += PatchProgram.cpp
 
 SOURCE       = $(BUILDROOT)/Source
@@ -124,6 +125,7 @@ EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_proc
 EMCC_SRC   = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/message.cpp
 EMCC_SRC  += WebSource/web.cpp
 EMCC_SRC  += $(LIBSOURCE)/basicmaths.c $(LIBSOURCE)/StompBox.cpp $(LIBSOURCE)/FloatArray.cpp $(LIBSOURCE)/ComplexFloatArray.cpp $(LIBSOURCE)/FastFourierTransform.cpp $(LIBSOURCE)/Envelope.cpp $(LIBSOURCE)/VoltsPerOctave.cpp $(LIBSOURCE)/WavetableOscillator.cpp $(LIBSOURCE)/PolyBlepOscillator.cpp
+EMCC_SRC  += $(LIBSOURCE)/SmoothValue.cpp $(LIBSOURCE)/PatchParameter.cpp
 EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
 EMCC_SRC  += $(wildcard $(HEAVYDIR)/*.c)
