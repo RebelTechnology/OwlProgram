@@ -149,7 +149,11 @@
     #define hv_free(x) free(x)
   #endif
 #else
-  #define hv_alloca(_n) alloca(_n)
+#if defined __GNUC__
+  #define hv_alloca(_n)  __builtin_alloca(_n)
+#else
+  #define hv_alloca(_n)  alloca(_n)
+#endif
   #if HV_SIMD_AVX
     #define hv_malloc(_n) aligned_alloc(32, _n)
     #define hv_free(x) free(x)
@@ -177,7 +181,12 @@
 #endif
 
 // Math
+#ifdef ARM_CORTEX
+#include <basicmaths.h>
+#else
 #include <math.h>
+#endif
+
 static inline hv_size_t __hv_utils_max_ui(hv_size_t x, hv_size_t y) { return (x > y) ? x : y; }
 static inline hv_size_t __hv_utils_min_ui(hv_size_t x, hv_size_t y) { return (x < y) ? x : y; }
 static inline hv_int32_t __hv_utils_max_i(hv_int32_t x, hv_int32_t y) { return (x > y) ? x : y; }
@@ -190,9 +199,16 @@ static inline hv_int32_t __hv_utils_min_i(hv_int32_t x, hv_int32_t y) { return (
 #define hv_min_f(a, b) fminf(a, b)
 #define hv_max_d(a, b) fmax(a, b)
 #define hv_min_d(a, b) fmin(a, b)
+#ifdef ARM_CORTEX
+#define hv_sin_f(a) arm_sin_f32(a)
+#define hv_cos_f(a) arm_cos_f32(a)
+#define hv_sqrt_f(a) arm_sqrtf(a)
+#else
 #define hv_sin_f(a) sinf(a)
 #define hv_sinh_f(a) sinhf(a)
 #define hv_cos_f(a) cosf(a)
+#define hv_sqrt_f(a) sqrtf(a)
+#endif
 #define hv_cosh_f(a) coshf(a)
 #define hv_tan_f(a) tanf(a)
 #define hv_tanh_f(a) tanhf(a)
@@ -205,7 +221,6 @@ static inline hv_int32_t __hv_utils_min_i(hv_int32_t x, hv_int32_t y) { return (
 #define hv_atan2_f(a, b) atan2f(a, b)
 #define hv_exp_f(a) expf(a)
 #define hv_abs_f(a) fabsf(a)
-#define hv_sqrt_f(a) sqrtf(a)
 #define hv_log_f(a) logf(a)
 #define hv_log2_f(a) log2f(a)
 #define hv_log10_f(a) log10f(a)
