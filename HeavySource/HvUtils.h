@@ -149,11 +149,8 @@
     #define hv_free(x) free(x)
   #endif
 #else
-#if defined __GNUC__
-  #define hv_alloca(_n)  __builtin_alloca(_n)
-#else
+  #include "alloca.h"
   #define hv_alloca(_n)  alloca(_n)
-#endif
   #if HV_SIMD_AVX
     #define hv_malloc(_n) aligned_alloc(32, _n)
     #define hv_free(x) free(x)
