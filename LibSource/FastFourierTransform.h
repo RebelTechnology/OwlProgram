@@ -19,8 +19,6 @@ private:
   kiss_fft_cfg cfgfft;
   kiss_fft_cfg cfgifft;
   ComplexFloatArray temp;
-  ComplexFloat *data;
-  int size;
 #endif /* ARM_CORTEX */
 
 public:

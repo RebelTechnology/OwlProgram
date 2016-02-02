@@ -38,23 +38,21 @@ int FastFourierTransform::getSize(){
 
 #else /* ARM_CORTEX */
 
-FastFourierTransform::FastFourierTransform() : data(NULL), size(0){}
+FastFourierTransform::FastFourierTransform(){}
 
 FastFourierTransform::FastFourierTransform(int aSize){
   init(aSize);
 }
 
 FastFourierTransform::~FastFourierTransform(){
-  free(data);
+  ComplexFloatArray::destroy(temp);
 }
 
 void FastFourierTransform::init(int aSize){
   ASSERT(aSize==32 || aSize ==64 || aSize==128 || aSize==256 || aSize==512 || aSize==1024 || aSize==2048 || aSize==4096, "Unsupported FFT size");
   cfgfft = kiss_fft_alloc(aSize, 0 , 0, 0);
   cfgifft = kiss_fft_alloc(aSize, 1,0, 0);
-  size=aSize;
-  data=(ComplexFloat *)malloc(sizeof(ComplexFloat)*getSize());
-  temp=ComplexFloatArray(data, getSize());
+  temp = ComplexFloatArray::create(getSize());
 }
 
 void FastFourierTransform::fft(FloatArray& input, ComplexFloatArray& output){
@@ -78,7 +76,7 @@ void FastFourierTransform::ifft(ComplexFloatArray& input, FloatArray& output){
 }
     
 int FastFourierTransform::getSize(){
-  return size;
+  return temp.getSize();
 }
 
 #endif /* ifndef ARM_CORTEX */

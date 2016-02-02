@@ -1,7 +1,9 @@
 #ifndef __ComplexFourierTransform_h__
 #define __ComplexFourierTransform_h__
-#ifdef ARM_CORTEX
 
+#include "ComplexFloatArray.h"
+
+#ifdef ARM_CORTEX
 #include "arm_const_structs.h"
 
 class ComplexFourierTransform {
@@ -39,23 +41,19 @@ private:
   kiss_fft_cfg cfgfft;
   kiss_fft_cfg cfgifft;
   ComplexFloatArray temp;
-  ComplexFloat *data;
-  int size;
 public:
-  ComplexFourierTransform() : data(NULL), size(0){}
+  ComplexFourierTransform(){}
   ComplexFourierTransform(int len){
     init(len);
   }
   ~ComplexFourierTransform(){
-    free(data);
+    ComplexFloatArray::destroy(temp);
   }
   void init(int len){
     ASSERT(len==32 || len ==64 || len==128 || len==256 || len==512 || len==1024 || len==2048 || len==4096, "Unsupported FFT size");
     cfgfft = kiss_fft_alloc(len, 0 , 0, 0);
     cfgifft = kiss_fft_alloc(len, 1,0, 0);
-    size=len;
-    data=(ComplexFloat *)malloc(sizeof(ComplexFloat)*getSize());
-    temp=ComplexFloatArray(data, getSize());
+    temp = ComplexFloatArray::create(getSize());
   }
   void fft(ComplexFloatArray& inout){
     ASSERT(inout.getSize() >= getSize(), "Input array too small");
@@ -69,7 +67,7 @@ public:
     inout.copyFrom(temp);
   }
   int getSize(){
-    return size;
+    return temp.getSize();
   }
 };
 #endif /* ifndef ARM_CORTEX */
