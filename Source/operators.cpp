@@ -10,3 +10,10 @@ void * operator new[](size_t size) { return malloc(size); }
 void operator delete(void* ptr) { free(ptr); }
 void operator delete[](void * ptr) { free(ptr); }
 //int _gettimeofday(struct timeval *__p, void *__tz){return 0;}
+
+// Static initialisation thread safety guards
+// Returns 1 if the initialization is not yet complete; 0 otherwise.
+extern "C" int __cxa_guard_acquire ( __int64_t *guard_object ){ return !*(char *)(guard_object); }
+// Sets the first byte of the guard object to a non-zero value.
+extern "C" void __cxa_guard_release ( __int64_t *guard_object ){ *(char *)guard_object = 1; }
+extern "C" void __cxa_guard_abort ( __int64_t *guard_object ){}
