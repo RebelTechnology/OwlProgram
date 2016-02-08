@@ -3,8 +3,9 @@
 
 #include "FloatArray.h"
 #include "polyblep/dsp/oscillator.h"
+#include "Oscillator.h"
 
-class PolyBlepOscillator {
+class PolyBlepOscillator : public Oscillator {
 private:
   float multiplier;
   stmlib::Oscillator osc;

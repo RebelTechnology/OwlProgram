@@ -2,6 +2,7 @@
 #define __basicmaths_h__
 
 #include <stdlib.h>
+#include <stdint.h>
 
 #define _USE_MATH_DEFINES
 /* Definitions of useful mathematical constants
@@ -57,6 +58,7 @@
 #endif
 
    float arm_sqrtf(float in);
+   uint32_t arm_rand32();
 
    // fast approximations
    float fastlog2f(float x);
@@ -78,6 +80,9 @@
 #define cosf(x) arm_cos_f32(x)
 #define sqrt(x) arm_sqrtf(x)
 #define sqrtf(x) arm_sqrtf(x)
+#define rand() arm_rand32()
+#undef RAND_MAX
+#define RAND_MAX UINT32_MAX
 #endif //ARM_CORTEX
 
 #endif // __basicmaths_h__

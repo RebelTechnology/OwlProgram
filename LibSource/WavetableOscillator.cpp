@@ -2,12 +2,11 @@
 #include "basicmaths.h"
 #include <stdint.h>
 
-WavetableOscillator::WavetableOscillator(float sr, int size) : 
-  multiplier(1.0/sr), 
-  wave(FloatArray::create(size)), 
-  acc(0.0), inc(0.0){
+WavetableOscillator* WavetableOscillator::create(float sr, int size) {
+  FloatArray wave = FloatArray::create(size);
   for(int i=0; i<size; ++i)
     wave[i] = sin(2*M_PI*i/(size-1));    
+  return new WavetableOscillator(sr, wave);
 }
 
 WavetableOscillator::WavetableOscillator(float sr, const FloatArray wavetable): 

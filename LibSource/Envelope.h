@@ -25,8 +25,8 @@ public:
   void gate(bool state, int gateDelay);
   void setLevel(float newLevel);
   float getNextSample(); // increments envelope one step
-  void getEnvelope(FloatArray &output); // increments envelope by output buffer length
-  void attenuate(FloatArray &buf); // increments envelope by buffer length
+  void getEnvelope(FloatArray output); // increments envelope by output buffer length
+  void attenuate(FloatArray buf); // increments envelope by buffer length
 private:
   static const float minTime;
   const float samplePeriod;

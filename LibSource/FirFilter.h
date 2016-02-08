@@ -67,8 +67,8 @@ public:
     processBlock(source.getData(), destination.getData(), destination.getSize());
   }
   
-  FloatArray* getCoefficients(){
-    return &coefficients;
+  FloatArray getCoefficients(){
+    return coefficients;
   };
   
   /**

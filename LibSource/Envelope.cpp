@@ -78,12 +78,12 @@ void AdsrEnvelope::setLevel(float newLevel){
   level = newLevel;
 }
 
-void AdsrEnvelope::attenuate(FloatArray &output){
+void AdsrEnvelope::attenuate(FloatArray output){
   for(int n = 0; n < output.getSize(); n++)
     output[n] *= getNextSample();
 }
 
-void AdsrEnvelope::getEnvelope(FloatArray &output){
+void AdsrEnvelope::getEnvelope(FloatArray output){
   for(int n = 0; n < output.getSize(); n++)
     output[n] = getNextSample();
 }

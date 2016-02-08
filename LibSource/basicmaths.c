@@ -1,6 +1,33 @@
 #include "basicmaths.h"
 #include <stdint.h>
 
+/* #ifdef ARM_CORTEX */
+/* #ifndef DWT_CYCCNT */
+/* #define DWT_CYCCNT ((volatile unsigned int *)0xE0001004) */
+/* #endif */
+/*   static uint32_t seed = *DWT_CYCCNT; */
+/* #else */
+/*   static uint32_t seed = time(NULL); */
+/* #endif */
+
+static uint32_t r32seed = 33641;
+
+void arm_srand32(uint32_t s){
+  r32seed = s;
+}
+
+/**
+ * generate an unsigned 32bit pseudo-random number using xorshifter algorithm.
+ * "Anyone who considers arithmetical methods of producing random digits is, of course, in a state of sin." 
+ * -- John von Neumann.
+*/
+uint32_t arm_rand32(){
+  r32seed ^= r32seed << 13;
+  r32seed ^= r32seed >> 17;
+  r32seed ^= r32seed << 5;
+  return r32seed;
+}
+
 float arm_sqrtf(float in){
   float out;
 #ifdef ARM_CORTEX

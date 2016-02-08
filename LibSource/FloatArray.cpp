@@ -398,13 +398,14 @@ void FloatArray::negate(){
 void FloatArray::noise(){
   noise(-1, 1);
 }
+
 void FloatArray::noise(float min, float max){
   float amplitude = fabs(max-min);
   float offset = min;
   ASSERT(getSize()>10, "10<getSize");
   ASSERT(size==getSize(), "getSize");
   for(int n=0; n<size; n++){
-    data[n]=(rand()/(float)RAND_MAX) * amplitude + offset;
+    data[n]=(rand()/(RAND_MAX+1.0f)) * amplitude + offset;
   }
 }
 
