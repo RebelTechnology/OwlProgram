@@ -11,6 +11,8 @@ See http://hoxtonowl.com for more details of the Open Ware Laboratory.
 * faust2owl (to compile FAUST patches) [4]
 * Enzien Audio account (to compile PD patches) [5]
 
+* On Windows, you'll need a MAKE utility [6].  You'll also need to open common.mk and point TOOLROOT to your gcc installation directory, using a path string without spaces (such as using 8.3 filenames).
+
 ## Make targets
 * make patch: build patch binary
 * make sysex: package binary as sysex
@@ -70,3 +72,4 @@ Note: assign OWL parameters with PD receivers called `Channel-A`, `Channel-B`, e
 [3] http://emscripten.org
 [4] http://faust.grame.fr/
 [5] https://enzienaudio.com
+[6] http://sourceforge.net/projects/mingw/
