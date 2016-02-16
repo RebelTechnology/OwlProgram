@@ -15,7 +15,6 @@ CPPFLAGS += -I$(PATCHSOURCE)
 CPPFLAGS += -I$(LIBSOURCE)
 CPPFLAGS += -I$(GENSOURCE)
 CPPFLAGS += -I$(TESTPATCHES)
-CPPFLAGS += -IOwlPatches
 PATCH_C_SRC    = $(wildcard $(PATCHSOURCE)/*.c)
 PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
 PATCH_C_SRC   += $(wildcard $(GENSOURCE)/*.c)
@@ -75,32 +74,17 @@ vpath %.c $(GENSOURCE)
 vpath %.s $(GENSOURCE)
 vpath %.c Libraries/syscalls
 
-.PHONY: .FORCE clean realclean run store online docs
-
-.FORCE:
-	@echo Building patch $(PATCHNAME)
-
-compile: $(BUILD)/patch.cpp $(BUILD)/patch.h $(BUILD)/patch.bin
-
-$(BUILD)/patch.cpp: .FORCE
-	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $@
-
-$(BUILD)/patch.h: .FORCE
-	@echo "#include \"$(PATCHFILE)\"" > $@
-
-$(BUILD)/startup.o: .FORCE
-	@echo '.string "'$(PATCHNAME)'"' > $(BUILD)/progname.s
-	@$(CC) -c $(CPPFLAGS) $(CFLAGS) -I$(BUILD) $(SOURCE)/startup.s -o $@
-
 $(BUILD)/PatchProgram.o: $(SOURCE)/PatchProgram.cpp $(DEPS)
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/PatchProgram.cpp -o $@
+	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/PatchProgram.cpp -o $@
 	@$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/PatchProgram.cpp > $(@:.o=.d)
 
 $(BUILD)/patch.elf: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
+	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
 
 as: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
 	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
 
 map: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
 	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/patch.map $(OBJS) $(PATCH_OBJS) $(LDLIBS)
+
+compile: $(BUILD)/patch.bin

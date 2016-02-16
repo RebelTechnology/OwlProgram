@@ -5,7 +5,7 @@ GENSOURCE    = $(BUILD)/Source
 # emscripten
 EMCC      ?= emcc
 EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11
-EMCCFLAGS += -IOwlPatches -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(GENSOURCE) -I$(BUILD)
+EMCCFLAGS += -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(GENSOURCE) -I$(BUILD)
 EMCCFLAGS += -I$(BUILD)/HeavySource
 EMCCFLAGS +=  -ILibraries -ILibraries/KissFFT -DHV_SIMD_NONE
 EMCCFLAGS += -Wno-warn-absolute-paths
@@ -32,7 +32,7 @@ online:
 	@$(MAKE) $(BUILD)/patch.syx
 	@cp $(BUILD)/patch.syx $(BUILD)/online.syx
 
-$(WEBDIR)/patch.js: $(EMCC_SRC) $(DEPS)
+$(WEBDIR)/patch.js: $(EMCC_SRC)
 	@mkdir -p $(WEBDIR)
 	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(WEBDIR)/patch.js
 	@cp WebSource/*.js WebSource/*.html WebSource/*.mp3 $(WEBDIR)

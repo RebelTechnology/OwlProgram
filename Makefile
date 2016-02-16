@@ -4,6 +4,8 @@ ifndef CONFIG
   CONFIG=Release
 endif
 
+DEPS = .FORCE
+
 ifeq ($(CONFIG),Debug)
 CPPFLAGS     = -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
 EMCCFLAGS   ?= -g
@@ -20,13 +22,13 @@ ifdef FAUST
 PATCHNAME   ?= $(FAUST)
 PATCHCLASS  ?= FaustPatch
 PATCHFILE   ?= $(PATCHNAME)Patch.hpp
-DEPS        = faust
+DEPS        += faust
 else ifdef HEAVY
 # options for Heavy PD compilation
 PATCHNAME   ?= $(HEAVY)
 PATCHCLASS  ?= HeavyPatch
 PATCHFILE   ?= HeavyPatch.hpp
-DEPS        = heavy
+DEPS        += heavy
 else
 # options for C++ compilation
 PATCHNAME   ?= "Template"
@@ -43,60 +45,74 @@ LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
 FIRMWARESENDER = Tools/FirmwareSender
 
-export BUILD
-export BUILDROOT
-export PATCHNAME 
-export PATCHCLASS 
-export PATCHSOURCE
-export PATCHFILE
-export PATCHIN
-export PATCHOUT
-export HEAVYTOKEN
-export HEAVY
-export LDSCRIPT
+export BUILD BUILDROOT
+export PATCHNAME PATCHCLASS PATCHSOURCE 
+export PATCHFILE PATCHIN PATCHOUT
+export HEAVYTOKEN HEAVY
+export LDSCRIPT CPPFLAGS EMCCFLAGS ASFLAGS
+
+DEPS += $(BUILD)/patch.cpp $(BUILD)/patch.h $(BUILD)/Source/startup.s 
 
 all: patch
 
 .PHONY: .FORCE clean realclean run store online docs
 
+.FORCE:
+	@echo Building patch $(PATCHNAME)
+	@mkdir -p $(BUILD)/Source
+
+$(BUILD)/patch.cpp:
+	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $@
+
+$(BUILD)/patch.h:
+	@echo "#include \"$(PATCHFILE)\"" > $@
+
+$(BUILD)/Source/startup.s:
+	@echo '.string "'$(PATCHNAME)'"' > $(BUILD)/Source/progname.s
+
 $(BUILD)/%.syx: $(BUILD)/%.bin
 	@$(FIRMWARESENDER) -q -in $< -save $@
 
-size: $(BUILD)/patch.elf $(BUILD)/patch.bin
+size: patch
 	@$(SIZE) $(BUILD)/patch.elf
 	@ls -s --block-size=1 $(BUILD)/patch.bin
 
 patch: $(DEPS)
-	mkdir -p $(BUILD)/Source
-	$(MAKE) -f compile.mk compile
+	@$(MAKE) -f compile.mk compile
+
+map: $(DEPS)
+	@$(MAKE) -f compile.mk map
+
+web: $(DEPS)
+	@$(MAKE) -f web.mk web
+	@echo Built Web Audio $(PATCHNAME) in $(BUILD)/web
+
+online: $(DEPS)
+	@$(MAKE) -f web.mk online
 
 faust:
-	$(MAKE) -f faust.mk faust
+	@$(MAKE) -f faust.mk faust
 
 heavy:
-	$(MAKE) -f heavy.mk HEAVY=$(HEAVY) heavy
-
-web:
-	$(MAKE) -f web.mk web
-
-online:
-	$(MAKE) -f web.mk online
+	@$(MAKE) -f heavy.mk HEAVY=$(HEAVY) heavy
 
 # patch: $(BUILD)/patch.bin
 
 sysex: patch $(BUILD)/patch.syx
 
 run: patch
-	$(FIRMWARESENDER) -in $(BUILD)/patch.bin -out $(OWLDEVICE) -run
+	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to run
+	@$(FIRMWARESENDER) -q -in $(BUILD)/patch.bin -out $(OWLDEVICE) -run
 
 store: patch
-	$(FIRMWARESENDER) -in $(BUILD)/patch.bin -out $(OWLDEVICE) -store $(SLOT)
+	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to store in slot $(SLOT)
+	@$(FIRMWARESENDER) -q -in $(BUILD)/patch.bin -out $(OWLDEVICE) -store $(SLOT)
 
 docs:
 	@doxygen Doxyfile
 
 clean:
-	@rm -rf $(BUILD)/*
+	rm -rf $(BUILD)/*
 
 realclean: clean
 	@find Libraries/ -name '*.o' -delete
