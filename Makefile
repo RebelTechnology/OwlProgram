@@ -90,6 +90,9 @@ web: $(DEPS)
 online: $(DEPS)
 	@$(MAKE) -f web.mk online
 
+minify: $(DEPS)
+	@$(MAKE) -f web.mk minify
+
 faust:
 	@$(MAKE) -f faust.mk faust
 
