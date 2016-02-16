@@ -21,7 +21,7 @@ ifdef FAUST
 # options for FAUST compilation
 PATCHNAME   ?= $(FAUST)
 PATCHCLASS  ?= FaustPatch
-PATCHFILE   ?= $(PATCHNAME)Patch.hpp
+PATCHFILE   ?= FaustPatch.hpp
 DEPS        += faust
 else ifdef HEAVY
 # options for Heavy PD compilation
