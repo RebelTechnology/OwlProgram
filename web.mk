@@ -1,7 +1,11 @@
+LIBSOURCE    = $(BUILDROOT)/LibSource
+SOURCE       = $(BUILDROOT)/Source
+GENSOURCE    = $(BUILD)/Source
+
 # emscripten
 EMCC      ?= emcc
 EMCCFLAGS ?= -fno-rtti -fno-exceptions # -std=c++11
-EMCCFLAGS += -IOwlPatches -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILD) -I$(TESTPATCHES)
+EMCCFLAGS += -IOwlPatches -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(GENSOURCE) -I$(BUILD)
 EMCCFLAGS += -I$(BUILD)/HeavySource
 EMCCFLAGS +=  -ILibraries -ILibraries/KissFFT -DHV_SIMD_NONE
 EMCCFLAGS += -Wno-warn-absolute-paths
@@ -14,7 +18,7 @@ EMCC_SRC  += WebSource/web.cpp
 EMCC_SRC  += $(LIBSOURCE)/basicmaths.c $(LIBSOURCE)/StompBox.cpp $(LIBSOURCE)/FloatArray.cpp $(LIBSOURCE)/ComplexFloatArray.cpp $(LIBSOURCE)/FastFourierTransform.cpp $(LIBSOURCE)/Envelope.cpp $(LIBSOURCE)/VoltsPerOctave.cpp $(LIBSOURCE)/WavetableOscillator.cpp $(LIBSOURCE)/PolyBlepOscillator.cpp
 EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
-EMCC_SRC  += $(wildcard $(HEAVYDIR)/*.c)
+EMCC_SRC  += $(wildcard $(GENSOURCE)/*.c)
 WEBDIR     = $(BUILD)/web
 
 # JavaScript minifiers

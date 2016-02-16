@@ -62,11 +62,5 @@ $(BUILD)/%.bin: $(BUILD)/%.elf
 $(BUILD)/%.s: $(BUILD)/%.elf
 	@$(OBJDUMP) -S $< > $@
 
-clean:
-	@rm -rf $(BUILD)/*
-
-realclean: clean
-	@find Libraries/ -name '*.o' -delete
-
 # pull in dependencies
 -include $(OBJS:.o=.d) $(SOLO_OBJS:.o=.d) $(MULTI_OBJS:.o=.d)

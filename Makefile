@@ -76,6 +76,12 @@ faust:
 heavy:
 	$(MAKE) -f heavy.mk HEAVY=$(HEAVY) heavy
 
+web:
+	$(MAKE) -f web.mk web
+
+online:
+	$(MAKE) -f web.mk online
+
 # patch: $(BUILD)/patch.bin
 
 sysex: patch $(BUILD)/patch.syx
