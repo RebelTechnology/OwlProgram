@@ -55,6 +55,8 @@ extern "C" {
 }
 
 class HeavyPatch : public Patch {
+private:
+  bool pushbutton;
 public:
   HeavyPatch() {
     registerParameter(PARAMETER_A, "Channel-A");
@@ -77,7 +79,10 @@ public:
     float paramC = getParameterValue(PARAMETER_C);
     float paramD = getParameterValue(PARAMETER_D);
     float paramE = getParameterValue(PARAMETER_E);
-    float push = isButtonPressed(PUSHBUTTON) ? 1.0 : 0.0;
+    if(isButtonPressed(PUSHBUTTON) != pushbutton){
+      pushbutton = isButtonPressed(PUSHBUTTON);
+      hv_vscheduleMessageForReceiver(context, "Channel-Push", 0.0, "f", pushbutton ? 1.0 : 0.0);
+    }
     // Note: The third parameter is the timestamp at which to execute the message,
     // but in this case it simply means to execute it immediately. "f" says that
     // the message contains one element and its type is float. paramA is then the
@@ -87,7 +92,6 @@ public:
     hv_vscheduleMessageForReceiver(context, "Channel-C", 0.0, "f", paramC);
     hv_vscheduleMessageForReceiver(context, "Channel-D", 0.0, "f", paramD);
     hv_vscheduleMessageForReceiver(context, "Channel-E", 0.0, "f", paramE);
-    hv_vscheduleMessageForReceiver(context, "Channel-Push", 0.0, "f", push);
     float* outputs[] = {buffer.getSamples(0), buffer.getSamples(1) };    
     hv_owl_process(context, outputs, outputs, getBlockSize());		     
   }
