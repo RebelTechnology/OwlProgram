@@ -35,7 +35,7 @@ online:
 $(WEBDIR)/patch.js: $(EMCC_SRC)
 	@mkdir -p $(WEBDIR)
 	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(WEBDIR)/patch.js
-	@cp WebSource/*.js WebSource/*.html WebSource/*.mp3 $(WEBDIR)
+	@cp WebSource/*.js WebSource/*.html $(WEBDIR)
 
 $(WEBDIR)/%.min.js: $(WEBDIR)/%.js
 	@$(UGLIFYJS) -o $@ $<

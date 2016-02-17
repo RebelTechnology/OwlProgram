@@ -78,30 +78,26 @@ size: patch
 	@ls -s --block-size=1 $(BUILD)/patch.bin
 
 patch: $(DEPS)
-	@$(MAKE) -f compile.mk compile
+	@$(MAKE) -s -f compile.mk compile
 
 map: $(DEPS)
-	@$(MAKE) -f compile.mk map
+	@$(MAKE) -s -f compile.mk map
 
 web: $(DEPS)
-	@$(MAKE) -f web.mk web
-	@echo Built Web Audio $(PATCHNAME) in $(BUILD)/web
-
-online: $(DEPS)
-	@$(MAKE) -f web.mk online
+	@$(MAKE) -s -f web.mk web
+	@echo Built Web Audio $(PATCHNAME) in $(BUILD)/web/patch.js
 
 minify: $(DEPS)
-	@$(MAKE) -f web.mk minify
+	@$(MAKE) -s -f web.mk minify
 
 faust:
-	@$(MAKE) -f faust.mk faust
+	@$(MAKE) -s -f faust.mk faust
 
 heavy:
-	@$(MAKE) -f heavy.mk HEAVY=$(HEAVY) heavy
-
-# patch: $(BUILD)/patch.bin
+	@$(MAKE) -s -f heavy.mk HEAVY=$(HEAVY) heavy
 
 sysex: patch $(BUILD)/patch.syx
+	@echo Built sysex $(PATCHNAME) in $(BUILD)/patch.syx
 
 run: patch
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to run
