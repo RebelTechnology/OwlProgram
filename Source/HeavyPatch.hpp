@@ -4,6 +4,56 @@
 #include "StompBox.h"
 #include "Heavy_owl.h"
 
+extern "C" {
+  static bool isButtonPressed(PatchButtonId bid){
+    getProgramVector()->buttons & (1<<bid);
+  }
+  static void setButton(PatchButtonId bid, bool pressed){
+    if(pressed)
+      getProgramVector()->buttons |= 1<<bid;
+    else
+      getProgramVector()->buttons &= ~(1<<bid);
+  }
+  static void printHook(double timestampMs, const char *printLabel, const char *msgString, void *userData) {
+    // printf("[@ %.3fms] %s: %s\n", timestampMs, printLabel, msgString);
+    debugMessage(msgString);
+  }
+  static void sendHook(double timestampMs, // in milliseconds
+		       const char *receiverName,
+		       const HvMessage *const m,
+		       void *userData) {
+    // if(strcmp(receiverName, "Channel-Buttons") == 0){
+    //   // first 
+    //   int count = hv_msg_getNumElements(m);
+    //   float value;
+    //   PatchButtonId bid;
+    //   // hv_msg_getType(m, 0);
+    //   if(count > 0)
+    // 	value = hv_msg_getFloat(m, 0);
+    //   if(led > 0.75)
+    // 	bid = GREEN_BUTTON;
+    //   else if(led > 0.25)
+    // 	bid = RED_BUTTON;
+    //   else
+    // 	bid = PUSHBUTTON;
+    //   bool pressed;
+    //   if(count > 1)
+    // 	value = hv_msg_getFloat(m, 1) > 0.5;
+    //   else // else toggle
+    // 	pressed = !isButtonPressed(bid);
+    //   setButton(bid, pressed);
+    // }else 
+      if(strcmp(receiverName, "Channel-Push") == 0){
+      bool pressed;
+      if(hv_msg_getNumElements(m) > 0)
+	pressed = hv_msg_isBang(m, 0) || hv_msg_getFloat(m, 0) > 0.5;
+      else
+	pressed = !isButtonPressed(PUSHBUTTON);
+      setButton(PUSHBUTTON, pressed);
+    }
+  }
+}
+
 class HeavyPatch : public Patch {
 public:
   HeavyPatch() {
@@ -13,6 +63,8 @@ public:
     registerParameter(PARAMETER_D, "Channel-D");
     registerParameter(PARAMETER_E, "Channel-E");    
     context = hv_owl_new(getSampleRate());
+    hv_setPrintHook(context, &printHook);
+    hv_setSendHook(context, sendHook);
   }
   
   ~HeavyPatch() {
