@@ -16,7 +16,12 @@ extern "C" {
   }
   static void printHook(double timestampMs, const char *printLabel, const char *msgString, void *userData) {
     // printf("[@ %.3fms] %s: %s\n", timestampMs, printLabel, msgString);
-    debugMessage(msgString);
+    char buf[64];
+    char* p = buf;
+    int len = strnlen(printLabel, 48);
+    stpncpy(buf, printLabel, 63);
+    stpncpy(buf, msgString, 63-len);
+    debugMessage(buf);
   }
   static void sendHook(double timestampMs, // in milliseconds
 		       const char *receiverName,
