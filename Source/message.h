@@ -14,7 +14,11 @@
 
 #define ASSERT(cond, msg) if(!(cond)){assert_failed(msg, __PRETTY_FUNCTION__, __LINE__);}
 
-void debugMessage(const char* msg);
+ extern "C" {
+   void debugMessage(const char* msg);
+   void assert_failed(uint8_t* location, uint32_t line);
+ }
+
 void debugMessage(const char* msg, int);
 void debugMessage(const char* msg, int, int, int);
 void debugMessage(const char* msg, float);
@@ -22,9 +26,5 @@ void debugMessage(const char* msg, float, float);
 void debugMessage(const char* msg, float, float, float);
 
 void assert_failed(const char* msg, const char* location, int line);
-
-extern "C" {
-  void assert_failed(uint8_t* location, uint32_t line);
-}
 
 #endif /* __MESSAG£_H */
