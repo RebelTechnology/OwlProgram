@@ -13,7 +13,7 @@ ASFLAGS      = -g
 endif
 
 ifeq ($(CONFIG),Release)
-CPPFLAGS     = -Os
+CPPFLAGS     = -O2
 EMCCFLAGS   ?= -Oz # optimise for size
 endif
 
