@@ -111,7 +111,7 @@ docs:
 	@doxygen Doxyfile
 
 clean:
-	rm -rf $(BUILD)/*
+	@rm -rf $(BUILD)/*
 
 realclean: clean
 	@find Libraries/ -name '*.o' -delete
