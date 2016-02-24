@@ -25,7 +25,7 @@ void WavetableOscillator::setFrequency(float freq){
 }
 
 float WavetableOscillator::getSample(float phase){
-  int size = wave.getSize();
+  uint32_t size = wave.getSize();
   uint32_t index = phase*(size-1);
   index = min(index, size-1);
   return wave[index];
