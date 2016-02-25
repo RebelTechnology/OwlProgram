@@ -73,12 +73,11 @@ $(BUILD)/Source/startup.s:
 $(BUILD)/%.syx: $(BUILD)/%.bin
 	@$(FIRMWARESENDER) -q -in $< -save $@
 
-size: patch
-	@$(SIZE) $(BUILD)/patch.elf
-	@ls -s --block-size=1 $(BUILD)/patch.bin
-
 patch: $(DEPS)
 	@$(MAKE) -s -f compile.mk compile
+
+size: patch
+	@$(MAKE) -s -f common.mk size
 
 map: $(DEPS)
 	@$(MAKE) -s -f compile.mk map

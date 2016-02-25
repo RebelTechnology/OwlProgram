@@ -17,7 +17,7 @@ GDB=$(TOOLROOT)/arm-none-eabi-gdb
 OBJCOPY=$(TOOLROOT)/arm-none-eabi-objcopy
 OBJDUMP=$(TOOLROOT)/arm-none-eabi-objdump
 SIZE=$(TOOLROOT)/arm-none-eabi-size
-
+NM=$(TOOLROOT)/arm-none-eabi-nm
 
 # Compilation Flags
 ARCH_FLAGS = -mcpu=cortex-m4 -mthumb
@@ -33,10 +33,6 @@ INC_FLAGS += -I$(USB_OTG_FILE)/inc
 CPPFLAGS += $(ARCH_FLAGS) $(INC_FLAGS) $(DEF_FLAGS)
 CFLAGS += -fno-builtin -std=c99
 LDFLAGS += -T$(LDSCRIPT) $(ARCH_FLAGS)
-
-# Build executable 
-$(ELF) : $(OBJS) $(LDSCRIPT)
-	@$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
 # compile and generate dependency info
 $(BUILD)/%.o: %.c
@@ -61,6 +57,11 @@ $(BUILD)/%.bin: $(BUILD)/%.elf
 
 $(BUILD)/%.s: $(BUILD)/%.elf
 	@$(OBJDUMP) -S $< > $@
+
+size:
+	$(SIZE) $(BUILD)/patch.elf
+	$(NM) --print-size --size-sort $(ELF) | tail -n 10
+	@ls -s --block-size=1 $(BUILD)/patch.bin
 
 # pull in dependencies
 -include $(OBJS:.o=.d) $(SOLO_OBJS:.o=.d) $(MULTI_OBJS:.o=.d)
