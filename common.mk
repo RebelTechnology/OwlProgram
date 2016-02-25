@@ -59,9 +59,9 @@ $(BUILD)/%.s: $(BUILD)/%.elf
 	@$(OBJDUMP) -S $< > $@
 
 size:
+	$(NM) --print-size --size-sort $(BUILD)/patch.elf | tail -n 10
 	$(SIZE) $(BUILD)/patch.elf
-	$(NM) --print-size --size-sort $(ELF) | tail -n 10
-	@ls -s --block-size=1 $(BUILD)/patch.bin
+	ls -s --block-size=1 $(BUILD)/patch.bin
 
 # pull in dependencies
 -include $(OBJS:.o=.d) $(SOLO_OBJS:.o=.d) $(MULTI_OBJS:.o=.d)
