@@ -58,6 +58,9 @@ $(BUILD)/%.bin: $(BUILD)/%.elf
 $(BUILD)/%.s: $(BUILD)/%.elf
 	@$(OBJDUMP) -S $< > $@
 
+$(BUILD)/%.map: $(BUILD)/%.elf
+	@$(OBJDUMP) -S $< > $@
+
 size:
 	$(NM) --print-size --size-sort $(BUILD)/patch.elf | tail -n 10
 	$(SIZE) $(BUILD)/patch.elf

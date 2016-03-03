@@ -7,13 +7,13 @@ endif
 DEPS = .FORCE
 
 ifeq ($(CONFIG),Debug)
-CPPFLAGS     = -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
+CPPFLAGS    ?= -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
 EMCCFLAGS   ?= -g
 ASFLAGS      = -g
 endif
 
 ifeq ($(CONFIG),Release)
-CPPFLAGS     = -O2
+CPPFLAGS    ?= -O2 -specs=nano.specs
 EMCCFLAGS   ?= -Oz # optimise for size
 endif
 
@@ -55,19 +55,19 @@ DEPS += $(BUILD)/patch.cpp $(BUILD)/patch.h $(BUILD)/Source/startup.s
 
 all: patch
 
-.PHONY: .FORCE clean realclean run store online docs
+.PHONY: .FORCE clean realclean run store docs
 
 .FORCE:
 	@echo Building patch $(PATCHNAME)
 	@mkdir -p $(BUILD)/Source
 
-$(BUILD)/patch.cpp:
+$(BUILD)/patch.cpp: .FORCE
 	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $@
 
-$(BUILD)/patch.h:
+$(BUILD)/patch.h: .FORCE
 	@echo "#include \"$(PATCHFILE)\"" > $@
 
-$(BUILD)/Source/startup.s:
+$(BUILD)/Source/startup.s: .FORCE
 	@echo '.string "'$(PATCHNAME)'"' > $(BUILD)/Source/progname.s
 
 $(BUILD)/%.syx: $(BUILD)/%.bin
@@ -79,8 +79,11 @@ patch: $(DEPS)
 size: patch
 	@$(MAKE) -s -f common.mk size
 
-map: $(DEPS)
+map: patch
 	@$(MAKE) -s -f compile.mk map
+
+as: patch
+	@$(MAKE) -s -f compile.mk as
 
 web: $(DEPS)
 	@$(MAKE) -s -f web.mk web
@@ -93,7 +96,7 @@ faust:
 	@$(MAKE) -s -f faust.mk faust
 
 heavy:
-	@$(MAKE) -s -f heavy.mk HEAVY=$(HEAVY) heavy
+	@$(MAKE) -s -f heavy.mk heavy
 
 sysex: patch $(BUILD)/patch.syx
 	@echo Built sysex $(PATCHNAME) in $(BUILD)/patch.syx
