@@ -51,22 +51,20 @@ int main(void){
     return -1;
   }
 
-  setup();
+  run();
+  // setup();
 
-#ifdef DEBUG_MEM
-  struct mallinfo minfo = mallinfo();
-  // pv->heap_bytes_used = minfo.uordblks;
-  pv->heap_bytes_used = minfo.arena;
-#endif /* DEBUG_MEM */
+  // extern uint32_t total_heap_used;
+  // pv->heap_bytes_used = total_heap_used;
 
-  for(;;){
-    pv->programReady();
-#ifdef DEBUG_DWT
-      *DWT_CYCCNT = 0; // reset the counter
-#endif /* DEBUG_DWT */
-      processBlock();
-#ifdef DEBUG_DWT
-      pv->cycles_per_block = *DWT_CYCCNT;
-#endif /* DEBUG_DWT */
-  }
+//   for(;;){
+//     pv->programReady();
+// #ifdef DEBUG_DWT
+//       *DWT_CYCCNT = 0; // reset the counter
+// #endif /* DEBUG_DWT */
+//       processBlock();
+// #ifdef DEBUG_DWT
+//       pv->cycles_per_block = *DWT_CYCCNT;
+// #endif /* DEBUG_DWT */
+//   }
 }

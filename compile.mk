@@ -81,8 +81,8 @@ $(BUILD)/PatchProgram.o: $(SOURCE)/PatchProgram.cpp $(DEPS)
 $(BUILD)/patch.elf: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
 	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
 
-as: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
-	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
+as: $(BUILD)/patch.elf
+	@$(OBJDUMP) -S $< > $(BUILD)/patch.s
 
 map: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
 	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/patch.map $(OBJS) $(PATCH_OBJS) $(LDLIBS)

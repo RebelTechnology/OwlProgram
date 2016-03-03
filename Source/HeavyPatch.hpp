@@ -21,6 +21,7 @@ extern "C" {
     stpncpy(buf, printLabel, 63);
     stpncpy(buf, msgString, 63-len);
     debugMessage(buf);
+    free(buf);
   }
   static void sendHook(double timestampMs, // in milliseconds
 		       const char *receiverName,
