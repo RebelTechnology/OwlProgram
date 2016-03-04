@@ -33,8 +33,8 @@
 
 // basic includes
 #include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
+/* #include <stdio.h> */
+/* #include <stdlib.h> */
 
 // type definitions
 #include <stdint.h>
@@ -164,8 +164,8 @@
 #endif
 
 // Assert
-#include <assert.h>
-#define hv_assert(e) assert(e)
+#include "message.h"
+#define hv_assert(e) ASSERT((e), "Heavy assertion failed")
 
 // Export and Inline
 #if HV_MSVC
