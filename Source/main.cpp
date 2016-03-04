@@ -35,9 +35,9 @@ int main(void){
 #endif /* STARTUP_CODE */
 
   extern char _heap, _eheap; /* Defined by the linker */
-  static char fast_heap[FAST_HEAP_SIZE] __attribute__ ((section (".ccmdata")));
+  extern char _fastheap, _fasteheap;
   const HeapRegion_t xHeapRegions[] = {
-    { ( uint8_t * )fast_heap, FAST_HEAP_SIZE },
+    { ( uint8_t * )&_fastheap, (size_t)(&_fasteheap - &_fastheap) },
     { ( uint8_t * )&_heap, (size_t)(&_eheap - &_heap) },
     { NULL, 0 } /* Terminates the array. */
   };
