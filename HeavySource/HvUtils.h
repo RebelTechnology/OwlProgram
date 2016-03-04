@@ -173,8 +173,13 @@
 #endif
 
 // Assert
+#ifdef ARM_CORTEX
 #include "message.h"
 #define hv_assert(e) ASSERT((e), "Heavy assertion failed")
+#else
+#include <assert.h>
+#define hv_assert(e) assert(e)
+#endif
 
 // Export and Inline
 #if HV_MSVC
