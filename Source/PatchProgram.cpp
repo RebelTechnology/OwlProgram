@@ -38,23 +38,31 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
 
 void run(){
   ProgramVector* pv = getProgramVector();
+#ifdef DEBUG_DWT
   volatile unsigned int *DWT_CYCCNT = (volatile unsigned int *)0xE0001004; //address of the
+#endif
 
 #include "patch.cpp"
 
+#ifdef DEBUG_MEM
   extern uint32_t total_heap_used;
   pv->heap_bytes_used = total_heap_used;
+#endif
 
   SampleBuffer buffer;
   for(;;){
     pv->programReady();
+#ifdef DEBUG_DWT
     *DWT_CYCCNT = 0; // reset the counter
+#endif
 
     buffer.split(pv->audio_input, pv->audio_blocksize);
     processor.setParameterValues(pv->parameters);
     processor.patch->processAudio(buffer);
     buffer.comb(pv->audio_output);
 
+#ifdef DEBUG_DWT
     pv->cycles_per_block = *DWT_CYCCNT;
+#endif
   }
 }

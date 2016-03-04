@@ -5,10 +5,6 @@
 #include "device.h"
 #include "main.h"
 
-#ifdef DEBUG_MEM
-#include <malloc.h>
-#endif /* DEBUG_MEM */
-
 #ifdef STARTUP_CODE
 extern char _sbss[];
 extern char _ebss[];
