@@ -69,9 +69,6 @@ SmoothFloat::SmoothValue(float l, float initialValue)
   : lambda(l), value(initialValue){}
 
 template<>
-SmoothInt::SmoothValue(int divider) : lambda(5), value(0) {}
-
-template<>
 SmoothInt::SmoothValue(int divider) : lambda(divider), value(0) {
 // lambda = 1 - 1/divider
 // divider 4:0.75, 5:0.8, 6:0.833, 7:0.857, 8:0.875, 9:0.888, 10:0.9 et c
