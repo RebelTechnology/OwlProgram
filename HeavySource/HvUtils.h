@@ -36,6 +36,10 @@
 /* #include <stdio.h> */
 /* #include <stdlib.h> */
 
+#ifdef ARM_CORTEX
+#include <basicmaths.h>
+#endif
+
 // type definitions
 #include <stdint.h>
 #include <stdbool.h>
@@ -148,6 +152,11 @@
     #define hv_malloc(_n) malloc(_n)
     #define hv_free(x) free(x)
   #endif
+#elif ARM_CORTEX
+  #include "alloca.h"
+  #define hv_alloca(_n)  alloca(_n)
+  #define hv_malloc(_n) pvPortMalloc(_n)
+  #define hv_free(_n) vPortFree(_n)
 #else
   #include "alloca.h"
   #define hv_alloca(_n)  alloca(_n)
@@ -178,9 +187,7 @@
 #endif
 
 // Math
-#ifdef ARM_CORTEX
-#include <basicmaths.h>
-#else
+#ifndef ARM_CORTEX
 #include <math.h>
 #endif
 

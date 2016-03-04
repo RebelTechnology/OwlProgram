@@ -246,11 +246,10 @@ char *msg_toString(const HvMessage *m) {
   // now we do the piecewise concatenation into our final string
   // the final buffer we will pass back after concatenating all strings - user should free it
   char *finalString = (char *) hv_malloc(size*sizeof(char));
-  int pos = 0;
+  char* dst = finalString;
   for (int i = 0; i < msg_getNumElements(m); i++) {
     // put a string representation of each atom into the final string
     char* ptr;
-    char* dst = finalString+pos;
     switch (msg_getType(m, i)) {
       case HV_MSG_BANG: 
 	dst = stpcpy(dst, "bang");
@@ -263,7 +262,7 @@ char *msg_toString(const HvMessage *m) {
 	ptr = msg_getSymbol(m, i); 
 	dst = stpcpy(dst, ptr);
 	break;
-      case HV_MSG_HASH: 
+      case HV_MSG_HASH:
 	ptr = itoa(msg_getHash(m, i), 16);
 	dst = stpcpy(dst, "0x");
 	dst = stpcpy(dst, ptr);
@@ -271,9 +270,9 @@ char *msg_toString(const HvMessage *m) {
       default: 
 	break;
     }
-    pos += len[i];
-    finalString[pos-1] = 32; // ASCII space
+    dst = stpcpy(dst, " ");
   }
+  hv_assert(dst - finalString == size);
   finalString[size-1] = '\0'; // ensure that the string is null terminated
   return finalString;
 }
