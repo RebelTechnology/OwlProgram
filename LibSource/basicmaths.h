@@ -79,8 +79,8 @@
 #define sqrt(x) arm_sqrtf(x)
 #define sqrtf(x) arm_sqrtf(x)
 #define rand() arm_rand32()
-#define pow(x, y) fastpowf(x, y)
-#define powf(x, y) fastpowf(x, y)
+/* #define pow(x, y) fastpowf(x, y) */
+/* #define powf(x, y) fastpowf(x, y) */
 #undef RAND_MAX
 #define RAND_MAX UINT32_MAX
 #endif //ARM_CORTEX
