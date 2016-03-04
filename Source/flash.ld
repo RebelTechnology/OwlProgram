@@ -134,7 +134,9 @@ SECTIONS
     _programvector = ABSOLUTE(.);
       *(.pv)
     . = ALIGN(8);
+    PROVIDE ( _eprogram = . );
   } >PATCHRAM
+  _eram = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM);
 
   .fastheap (NOLOAD) :
   {

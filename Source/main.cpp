@@ -34,10 +34,13 @@ int main(void){
   __libc_init_array(); // Call static constructors
 #endif /* STARTUP_CODE */
 
-  extern char _heap, _eheap; /* Defined by the linker */
-  extern char _fastheap, _fasteheap;
+ /* Defined by the linker */
+  extern char _fastheap, _fasteheap; // internal RAM dedicated to heap
+  extern char _eprogram, _eram; // remaining program space
+  extern char _heap, _eheap; // external memory
   const HeapRegion_t xHeapRegions[] = {
     { ( uint8_t * )&_fastheap, (size_t)(&_fasteheap - &_fastheap) },
+    { ( uint8_t * )&_eprogram, (size_t)(&_eram - &_eprogram) },
     { ( uint8_t * )&_heap, (size_t)(&_eheap - &_heap) },
     { NULL, 0 } /* Terminates the array. */
   };
