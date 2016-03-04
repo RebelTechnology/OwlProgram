@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include "heap.h"
 
 #define _USE_MATH_DEFINES
 /* Definitions of useful mathematical constants
@@ -64,6 +65,9 @@
 #ifdef __cplusplus
 }
 #endif
+
+#define malloc(x) pvPortMalloc(x)
+#define free(x) vPortFree(x)
 
 #ifdef ARM_CORTEX
 #define sin(x) arm_sin_f32(x)

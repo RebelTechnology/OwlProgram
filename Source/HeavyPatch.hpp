@@ -2,6 +2,7 @@
 #define __HeavyPatch_hpp__
 
 #include "StompBox.h"
+#include "basicmaths.h"
 #include "Heavy_owl.h"
 
 extern "C" {
@@ -16,12 +17,12 @@ extern "C" {
   }
   static void printHook(double timestampMs, const char *printLabel, const char *msgString, void *userData) {
     char buf[64];
-    char* p = buf;
+    char* dst = buf;
     int len = strnlen(printLabel, 48);
-    stpncpy(buf, printLabel, 63);
-    stpncpy(buf, msgString, 63-len);
+    dst = stpncpy(dst, printLabel, 63);
+    dst = stpcpy(dst, " ");
+    dst = stpncpy(dst, msgString, 63-len);
     debugMessage(buf);
-    free(buf);
   }
   static void sendHook(double timestampMs, // in milliseconds
 		       const char *receiverName,

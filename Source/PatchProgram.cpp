@@ -6,6 +6,7 @@
 #include "StompBox.h"
 #include "patch.h"
 #include "main.h"
+#include "heap.h"
 
 #if !defined PATCH_ALLOCATE_STACK && !defined PATCH_ALLOCATE_HEAP
 #define PATCH_ALLOCATE_DYNAMIC
@@ -42,11 +43,17 @@ void run(){
   volatile unsigned int *DWT_CYCCNT = (volatile unsigned int *)0xE0001004; //address of the
 #endif
 
+#ifdef DEBUG_MEM
+  size_t before = xPortGetFreeHeapSize();
+#endif
+
 #include "patch.cpp"
 
 #ifdef DEBUG_MEM
-  extern uint32_t total_heap_used;
-  pv->heap_bytes_used = total_heap_used;
+  // todo xPortGetFreeHeapSize() before and after
+  // extern uint32_t total_heap_used;
+  // pv->heap_bytes_used = total_heap_used;
+  pv->heap_bytes_used = before - xPortGetFreeHeapSize();
 #endif
 
   SampleBuffer buffer;
