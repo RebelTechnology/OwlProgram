@@ -5,6 +5,7 @@
 #include "device.h"
 #include "main.h"
 #include "heap.h"
+#include "message.h"
 
 #ifdef STARTUP_CODE
 extern char _sbss[];
@@ -19,6 +20,12 @@ ProgramVector programVector __attribute__ ((section (".pv")));
 // ProgramVector* getProgramVector() { return &programVector; }
 
 #define FAST_HEAP_SIZE (32*1024)
+
+extern "C" {
+  void vApplicationMallocFailedHook( void ){
+    error(0x60, "Heap overflow");
+  }
+}
 
 int main(void){
 #ifdef STARTUP_CODE

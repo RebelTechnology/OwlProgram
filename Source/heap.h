@@ -7,11 +7,13 @@
  extern "C" {
 #endif
 
+#define configUSE_MALLOC_FAILED_HOOK    1
 #define portBYTE_ALIGNMENT		8
 #if portBYTE_ALIGNMENT == 8
-	#define portBYTE_ALIGNMENT_MASK ( 0x0007 )
+#define portBYTE_ALIGNMENT_MASK ( 0x0007 )
 #endif
 #define configASSERT( x )
+
    typedef struct HeapRegion
    {
      uint8_t *pucStartAddress;
