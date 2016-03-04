@@ -80,8 +80,8 @@
 
 #ifdef __FAST_MATH__ /* set by gcc option -ffast-math */
 // fast approximate math functions
-#define pow(x, y) fastpowf(x, y)
-#define powf(x, y) fastpowf(x, y)
+/* #define pow(x, y) fastpowf(x, y) */
+/* #define powf(x, y) fastpowf(x, y) */
 #define atan2(x, y) fastatan2f(x, y)
 #define atan2f(x, y) fastatan2f(x, y)
 /* Fast exponentiation function, y = e^x */
