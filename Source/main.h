@@ -5,8 +5,8 @@
  extern "C" {
 #endif
 
-   void run();
-   /* void processBlock(); */
+   void setup();
+   void processBlock();
 
 #ifdef __cplusplus
 }

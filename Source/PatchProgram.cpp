@@ -8,16 +8,13 @@
 #include "main.h"
 #include "heap.h"
 
-#if !defined PATCH_ALLOCATE_STACK && !defined PATCH_ALLOCATE_HEAP
-#define PATCH_ALLOCATE_DYNAMIC
-#define MAX_STACK_PATCH_SIZE (1024*8)
-#endif
-
 PatchProcessor processor;
 
 PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
 }
+
+#define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
 
 void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){
   ASSERT(patch != NULL, "Memory allocation failed");
@@ -26,50 +23,28 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
   processor.setPatch(patch);
 }
 
-#include <alloca.h>
-#include <new>
-
-#ifdef PATCH_ALLOCATE_HEAP
-#define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
-#elif defined PATCH_ALLOCATE_STACK
-#define REGISTER_PATCH(T, STR, IN, OUT) do{static T t; registerPatch(STR, IN, OUT, &t); }while(0)
-#elif defined PATCH_ALLOCATE_DYNAMIC
-#define REGISTER_PATCH(T, STR, IN, OUT) do{T* t; if(sizeof(T) > MAX_STACK_PATCH_SIZE){ t = new T(); }else{ t = new((void*)alloca(sizeof(T)))T(); } registerPatch(STR, IN, OUT, t); }while(0)
-#endif
-
-void run(){
-  ProgramVector* pv = getProgramVector();
-#ifdef DEBUG_DWT
-  volatile unsigned int *DWT_CYCCNT = (volatile unsigned int *)0xE0001004; //address of the
-#endif
-
+void setup(){
 #ifdef DEBUG_MEM
+#ifdef ARM_CORTEX
   size_t before = xPortGetFreeHeapSize();
 #endif
-
+#endif
 #include "patch.cpp"
-
 #ifdef DEBUG_MEM
   // todo xPortGetFreeHeapSize() before and after
   // extern uint32_t total_heap_used;
   // pv->heap_bytes_used = total_heap_used;
-  pv->heap_bytes_used = before - xPortGetFreeHeapSize();
+#ifdef ARM_CORTEX
+  getProgramVector()->heap_bytes_used = before - xPortGetFreeHeapSize();
 #endif
-
-  SampleBuffer buffer;
-  for(;;){
-    pv->programReady();
-#ifdef DEBUG_DWT
-    *DWT_CYCCNT = 0; // reset the counter
 #endif
+}
 
-    buffer.split(pv->audio_input, pv->audio_blocksize);
-    processor.setParameterValues(pv->parameters);
-    processor.patch->processAudio(buffer);
-    buffer.comb(pv->audio_output);
-
-#ifdef DEBUG_DWT
-    pv->cycles_per_block = *DWT_CYCCNT;
-#endif
-  }
+SampleBuffer buffer;
+void processBlock(){
+  ProgramVector* pv = getProgramVector();
+  buffer.split(pv->audio_input, pv->audio_blocksize);
+  processor.setParameterValues(pv->parameters);
+  processor.patch->processAudio(buffer);
+  buffer.comb(pv->audio_output);
 }
