@@ -15,6 +15,7 @@
  */
 
 #include "HvMessage.h"
+#include "message.h"
 
 HvMessage *msg_init(HvMessage *m, hv_size_t numElements, hv_uint32_t timestamp) {
   m->timestamp = timestamp;

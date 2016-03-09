@@ -33,12 +33,13 @@
 
 // basic includes
 #include <stdarg.h>
-/* #include <stdio.h> */
-/* #include <stdlib.h> */
-
 #ifdef ARM_CORTEX
 #include <basicmaths.h>
+#else
+#include <stdio.h>
+#include <stdlib.h>
 #endif
+
 
 // type definitions
 #include <stdint.h>
@@ -124,7 +125,9 @@
 #define hv_snprintf(a, b, c, ...) snprintf(a, b, c, __VA_ARGS__)
 
 // Memory management
+#ifndef ARM_CORTEX
 #define hv_realloc(a, b) realloc(a, b)
+#endif // ARM_CORTEX
 #define hv_memcpy(a, b, c) memcpy(a, b, c)
 #define hv_memclear(a, b) memset(a, 0, b)
 #if HV_MSVC
@@ -157,6 +160,10 @@
   #define hv_alloca(_n)  alloca(_n)
   #define hv_malloc(_n) pvPortMalloc(_n)
   #define hv_free(_n) vPortFree(_n)
+inline void* hv_realloc(void *ptr, size_t size){
+  hv_free(ptr);
+  return hv_malloc(size);
+}
 #else
   #include "alloca.h"
   #define hv_alloca(_n)  alloca(_n)
