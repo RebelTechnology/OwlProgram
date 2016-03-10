@@ -23,6 +23,8 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
   processor.setPatch(patch);
 }
 
+SampleBuffer* buffer;
+ProgramVector* pv;
 void setup(){
 #ifdef DEBUG_MEM
 #ifdef ARM_CORTEX
@@ -38,13 +40,14 @@ void setup(){
   getProgramVector()->heap_bytes_used = before - xPortGetFreeHeapSize();
 #endif
 #endif
+  // buffer = new SampleBuffer(getBlockSize());
+  buffer = new SampleBuffer();
+  pv = getProgramVector();
 }
 
-SampleBuffer buffer;
 void processBlock(){
-  ProgramVector* pv = getProgramVector();
-  buffer.split(pv->audio_input, pv->audio_blocksize);
+  buffer->split(pv->audio_input, pv->audio_blocksize);
   processor.setParameterValues(pv->parameters);
-  processor.patch->processAudio(buffer);
-  buffer.comb(pv->audio_output);
+  processor.patch->processAudio(*buffer);
+  buffer->comb(pv->audio_output);
 }
