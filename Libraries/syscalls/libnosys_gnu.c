@@ -1,7 +1,7 @@
 /***********************************************************************
  * $Id:: libnosys_gnu.c 3304 2010-04-20 21:04:01Z usb10131             $
  *
- * Project: Linosys function for GNU c compiler
+ * Project: Libnosys function for GNU c compiler
  *
  * Description:
  *     Definitions for OS interface, stub function required by newlibc
@@ -98,32 +98,6 @@ int _open(const char *name, int flags, int mode)
 int _read(int file, char *ptr, int len)
 {
   return 0;
-}
-
-caddr_t _sbrk(int incr)
-{
-  
-  extern char _heap, _eheap; /* Defined by the linker */
-  static char *heap_end;
-  char *prev_heap_end;
-
-  if (heap_end == 0)
-  {
-    /* use the entire external memory for heap */
-    heap_end = &_heap;
-    /* give 16KB area for stacks and use the rest of memory for heap*/
-    /* heap_end += 0x4000; */
-  }
-  prev_heap_end = heap_end;
-
-  if (heap_end+incr > &_eheap)
-  {
-    errno = ENOMEM;
-    return (caddr_t) -1;
-  }
-
-  heap_end += incr;
-  return (caddr_t) prev_heap_end;
 }
 
 int _stat(char *file, struct stat *st)

@@ -97,7 +97,7 @@ int WEB_setup(long fs, int bs){
   setup();
 
   struct mallinfo minfo = mallinfo();
-  // getProgramVector()->heap_bytes_used = minfo.uordblks;
+  // pv->heap_bytes_used = minfo.uordblks;
   pv->heap_bytes_used = minfo.arena;
 
   return 0;
