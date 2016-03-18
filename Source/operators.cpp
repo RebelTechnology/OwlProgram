@@ -1,14 +1,15 @@
 #include <stdlib.h>
+#include "heap.h"
 
 extern "C" void *__gxx_personality_v0;
 extern "C" void __cxa_end_cleanup (void);
 extern "C" void __cxa_pure_virtual(){}
 
-void * operator new(size_t size) { return malloc(size); }
-void * operator new (size_t, void * p) { return p ; }
-void * operator new[](size_t size) { return malloc(size); }
-void operator delete(void* ptr) { free(ptr); }
-void operator delete[](void * ptr) { free(ptr); }
+void * operator new(size_t size) { return pvPortMalloc(size); }
+void * operator new(size_t, void * p) { return p ; }
+void * operator new[](size_t size) { return pvPortMalloc(size); }
+void operator delete(void* ptr) { vPortFree(ptr); }
+void operator delete[](void * ptr) { vPortFree(ptr); }
 //int _gettimeofday(struct timeval *__p, void *__tz){return 0;}
 
 // Static initialisation thread safety guards

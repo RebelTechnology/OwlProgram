@@ -106,6 +106,12 @@ void debugMessage(const char* msg, float a, float b, float c){
   getProgramVector()->message = buffer;
 }
 
+void error(int8_t code, const char* reason){
+  getProgramVector()->message = (char*)reason;
+  if(getProgramVector()->programStatus != NULL)
+    getProgramVector()->programStatus(AUDIO_ERROR_STATUS);
+}
+
 void assert_failed(const char* msg, const char* location, int line){
   char* p = buffer;
   p = stpncpy(p, msg, 32);

@@ -1,6 +1,6 @@
 BUILDROOT ?= .
 
-C_SRC   = basicmaths.c
+C_SRC   = basicmaths.c heap_5.c # sbrk.c
 CPP_SRC = main.cpp operators.cpp message.cpp StompBox.cpp PatchProcessor.cpp
 CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp FastFourierTransform.cpp 
 CPP_SRC += Envelope.cpp VoltsPerOctave.cpp
@@ -81,8 +81,8 @@ $(BUILD)/PatchProgram.o: $(SOURCE)/PatchProgram.cpp $(DEPS)
 $(BUILD)/patch.elf: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
 	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
 
-as: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
-	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
+as: $(BUILD)/patch.elf
+	@$(OBJDUMP) -S $< > $(BUILD)/patch.s
 
 map: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
 	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/patch.map $(OBJS) $(PATCH_OBJS) $(LDLIBS)
