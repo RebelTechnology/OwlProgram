@@ -92,10 +92,10 @@ web: $(DEPS)
 minify: $(DEPS)
 	@$(MAKE) -s -f web.mk minify
 
-faust:
+faust: .FORCE
 	@$(MAKE) -s -f faust.mk faust
 
-heavy:
+heavy: .FORCE
 	@$(MAKE) -s -f heavy.mk heavy
 
 sysex: patch $(BUILD)/patch.syx
