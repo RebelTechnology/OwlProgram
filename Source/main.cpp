@@ -60,7 +60,6 @@ int main(void){
     pv->programStatus(AUDIO_ERROR_STATUS);
     return -1;
   }
-
   if(pv->audio_blocksize <= 0 || 
      pv->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){
     pv->error = CONFIGURATION_ERROR_STATUS;
@@ -69,19 +68,16 @@ int main(void){
     return -1;
   }
 
-  setup();
-
-  // extern uint32_t total_heap_used;
-  // pv->heap_bytes_used = total_heap_used;
+  setup(pv);
 
   for(;;){
     pv->programReady();
 #ifdef DEBUG_DWT
-      *DWT_CYCCNT = 0; // reset the counter
+    *DWT_CYCCNT = 0; // reset the counter
 #endif /* DEBUG_DWT */
-      processBlock();
+    processBlock(pv);
 #ifdef DEBUG_DWT
-      pv->cycles_per_block = *DWT_CYCCNT;
+    pv->cycles_per_block = *DWT_CYCCNT;
 #endif /* DEBUG_DWT */
   }
 }
