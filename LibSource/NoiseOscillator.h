@@ -9,7 +9,8 @@ class WhiteNoiseOscillator : public Oscillator {
  public:
   /* returns white noise in the range -0.5 to 0.5 */
   virtual float getNextSample(){
-#ifdef ARM_CORTEX
+#if 0 // #ifdef ARM_CORTEX
+    // todo: fixme
     union {
       float f;
       uint32_t i;
@@ -45,7 +46,7 @@ private:
     NumPinkBins  = 16,
     NumPinkBins1 = NumPinkBins-1
   };
-
+ public:
   PinkNoiseOscillator()
   {
     m_count = 1;
@@ -86,7 +87,7 @@ private:
     // update counter 
     m_count++; 
 
-    return (white() + m_pink)*0.125f; 
+    return (WhiteNoiseOscillator::getNextSample() + m_pink)*0.125f; 
   }
 
 
@@ -120,10 +121,59 @@ public:
 	break;
     }
     return m_brown*0.0625f;
+  }  
+};
+
+class GaussianNoiseOscillator : public Oscillator {
+private:
+  FloatArray noise; // whitenoise
+  int phase;
+public:
+  GaussianNoiseOscillator(FloatArray ns) : noise(ns), phase(0) {}
+
+  static void destroy(GaussianNoiseOscillator* gn){
+    FloatArray::destroy(gn->noise);
+    delete gn;
+  }
+
+  static GaussianNoiseOscillator* create(int size){
+    GaussianNoiseOscillator* gn = new GaussianNoiseOscillator(FloatArray::create(size));
+
+    // generate white gaussian noise:
+    // from http://www.musicdsp.org/showone.php?id=168
+    /* Setup constants */
+    const static int q = 15;
+    const static float c1 = (1 << q) - 1;
+    const static float c2 = ((int)(c1 / 3)) + 1;
+    const static float c3 = 1.f / c1;
+    float max = 0;
+
+    /* random number in range 0 - 1 not including 1 */
+    float random = 0.f;
+    for(int i = 0; i < gn->noise.getSize(); i++){
+      random = ((float)rand() / (float)RAND_MAX);
+      gn->noise[i] = (2.f * ((random * c2) + (random * c2) + (random * c2)) - 3.f * (c2 - 1.f)) * c3;	  
+      if(fabs(gn->noise[i]) > max)
+	max = fabs(gn->noise[i]);
+    }
+    for (int i = 0; i < gn->noise.getSize(); i++){
+      //normalize the gain of our noise
+      gn->noise[i] = gn->noise[i] / max;
+    }
+
+    return gn;
+  }
+
+  float getNextSample(){
+    float sample = noise[phase];
+    if(++phase == noise.getSize())
+      phase = 0;
+    return sample;
   }
 };
 
-#ifdef 0 // ARM_CORTEX
+
+#if 0 // ARM_CORTEX
 class TrueNoiseOscillator : public Oscillator {
 public:
   TrueNoiseOscillator() {
