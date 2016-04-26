@@ -124,7 +124,7 @@ task.h is included from an application file. */
 #define mtCOVERAGE_TEST_MARKER()
 #define vTaskSuspendAll()
 /* #define xTaskResumeAll() */
-BaseType_t xTaskResumeAll( void ){}
+BaseType_t xTaskResumeAll( void ){ return 0; }
 #define traceMALLOC( pvAddress, uiSize )
 #define traceFREE( pvAddress, uiSize )
 
