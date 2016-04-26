@@ -24,9 +24,9 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-   void assert_failed(uint8_t* file, uint32_t line);
+   void assert_failed(const char* msg, const char* location, int line);
 #ifdef __cplusplus
 }
 #endif
-#define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t *)__FILE__, __LINE__))
+#define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t *)__FILE__, "", __LINE__))
 #endif
