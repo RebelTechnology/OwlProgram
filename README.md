@@ -21,6 +21,9 @@ See http://hoxtonowl.com for more details of the Open Ware Laboratory.
 * make web: build Javascript patch
 * make clean: remove intermediary and target files
 * make realclean: remove all (library+patch) intermediary and target files
+* make size: show binary size metrics and large object summary
+* make map: build map file (Build/patch.map)
+* make as: build assembly file (Build/patch.s)
 
 ## Make options
 * PATCHNAME: specify name of patch, e.g. SimpleDelay
@@ -29,6 +32,7 @@ See http://hoxtonowl.com for more details of the Open Ware Laboratory.
 * PATCHIN: number of input channels, default 2
 * PATCHOUT: number of output channels, default 2
 * SLOT: user program slot to store patch in, default 0
+* TARGET: changes the output prefix, default 'patch'
 
 If you follow the convention of SimpleDelay then you don't have to specify `PATCHCLASS` and `PATCHFILE`, they will be deduced from `PATCHNAME`.
 

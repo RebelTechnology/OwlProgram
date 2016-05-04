@@ -5,6 +5,7 @@ ifndef CONFIG
 endif
 
 DEPS = .FORCE
+TARGET ?= patch
 
 ifeq ($(CONFIG),Debug)
 CPPFLAGS    ?= -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
@@ -45,7 +46,7 @@ LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
 FIRMWARESENDER = Tools/FirmwareSender
 
-export BUILD BUILDROOT
+export BUILD BUILDROOT TARGET
 export PATCHNAME PATCHCLASS PATCHSOURCE 
 export PATCHFILE PATCHIN PATCHOUT
 export HEAVYTOKEN HEAVY
@@ -81,13 +82,15 @@ size: patch
 
 map: patch
 	@$(MAKE) -s -f compile.mk map
+	@echo Built $(PATCHNAME) map in $(BUILD)/$(TARGET).map
 
 as: patch
 	@$(MAKE) -s -f compile.mk as
+	@echo Built $(PATCHNAME) assembly in $(BUILD)/$(TARGET).s
 
 web: $(DEPS)
 	@$(MAKE) -s -f web.mk web
-	@echo Built Web Audio $(PATCHNAME) in $(BUILD)/web/patch.js
+	@echo Built Web Audio $(PATCHNAME) in $(BUILD)/web/$(TARGET).js
 
 minify: $(DEPS)
 	@$(MAKE) -s -f web.mk minify
@@ -98,16 +101,16 @@ faust: .FORCE
 heavy: .FORCE
 	@$(MAKE) -s -f heavy.mk heavy
 
-sysex: patch $(BUILD)/patch.syx
-	@echo Built sysex $(PATCHNAME) in $(BUILD)/patch.syx
+sysex: patch $(BUILD)/$(TARGET).syx
+	@echo Built sysex $(PATCHNAME) in $(BUILD)/$(TARGET).syx
 
 run: patch
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to run
-	@$(FIRMWARESENDER) -q -in $(BUILD)/patch.bin -out $(OWLDEVICE) -run
+	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out $(OWLDEVICE) -run
 
 store: patch
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to store in slot $(SLOT)
-	@$(FIRMWARESENDER) -q -in $(BUILD)/patch.bin -out $(OWLDEVICE) -store $(SLOT)
+	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out $(OWLDEVICE) -store $(SLOT)
 
 docs:
 	@doxygen Doxyfile

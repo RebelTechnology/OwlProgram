@@ -32,17 +32,17 @@ online:
 	@echo "$(ONLINE_INCLUDES)" > $(BUILD)/patch.h
 	@echo "$(ONLINE_REGISTER)" > $(BUILD)/patch.cpp
 	@echo '.string "OnlineCompiler"' > $(BUILD)/progname.s
-	@$(MAKE) $(BUILD)/patch.syx
-	@cp $(BUILD)/patch.syx $(BUILD)/online.syx
+	@$(MAKE) $(BUILD)/$(TARGET).syx
+	@cp $(BUILD)/$(TARGET).syx $(BUILD)/online.syx
 
-$(WEBDIR)/patch.js: $(EMCC_SRC)
+$(WEBDIR)/$(TARGET).js: $(EMCC_SRC)
 	@mkdir -p $(WEBDIR)
-	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(WEBDIR)/patch.js
+	@$(EMCC) $(EMCCFLAGS) $(EMCC_SRC) -o $(WEBDIR)/$(TARGET).js
 	@cp WebSource/*.js WebSource/*.html $(WEBDIR)
 
 $(WEBDIR)/%.min.js: $(WEBDIR)/%.js
 	@$(UGLIFYJS) -o $@ $<
 #	$(CLOSURE) --js_output_file=$@ $<
 
-web: $(WEBDIR)/patch.js
-minify: $(WEBDIR)/patch.min.js
+web: $(WEBDIR)/$(TARGET).js
+minify: $(WEBDIR)/$(TARGET).min.js
