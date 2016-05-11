@@ -2,6 +2,8 @@
 #define __basicmaths_h__
 
 #include <stdlib.h>
+#include <stdint.h>
+#include "heap.h"
 
 #define _USE_MATH_DEFINES
 /* Definitions of useful mathematical constants
@@ -46,31 +48,27 @@
 #endif
 //#endif /* __cplusplus */
 
-// todo: see
-// http://www.hxa.name/articles/content/fast-pow-adjustable_hxa7241_2007.html
-// http://www.finesse.demon.co.uk/steven/sqrt.html
-// http://www.keil.com/forum/7934/
-// http://processors.wiki.ti.com/index.php/ARM_compiler_optimizations
-
 #ifdef __cplusplus
  extern "C" {
 #endif
 
    float arm_sqrtf(float in);
+   uint32_t arm_rand32();
 
    // fast approximations
+   float fastexpf(float x);
    float fastlog2f(float x);
+   float fastpow2f(float x);
    float fastpowf(float a, float b);
-   float fastsqrt1(float a);
-   float fastsqrt2(float a);
-   float fastsqrt3(float a);
+   float fastatan2f(float a, float b);
 
 #ifdef __cplusplus
 }
 #endif
 
-/* #define pow(x, y) fastpowf(x, y) */
-/* #define powf(x, y) fastpowf(x, y) */
+#define malloc(x) pvPortMalloc(x)
+#define free(x) vPortFree(x)
+
 #ifdef ARM_CORTEX
 #define sin(x) arm_sin_f32(x)
 #define sinf(x) arm_sin_f32(x)
@@ -78,6 +76,22 @@
 #define cosf(x) arm_cos_f32(x)
 #define sqrt(x) arm_sqrtf(x)
 #define sqrtf(x) arm_sqrtf(x)
+#define rand() arm_rand32()
+
+#ifdef __FAST_MATH__ /* set by gcc option -ffast-math */
+// fast approximate math functions
+#define atan2(x, y) fastatan2f(x, y)
+#define atan2f(x, y) fastatan2f(x, y)
+/* #define pow(x, y) fastpowf(x, y) */
+/* #define powf(x, y) fastpowf(x, y) */
+/* Fast exponentiation function, y = e^x */
+/* 1.0 / ln(2) = 1.442695041f */
+/* #define exp(x) fastpow2f(x * 1.442695041f) */
+/* #define expf(x) fastpow2f(x * 1.442695041f) */
+#endif
+
+#undef RAND_MAX
+#define RAND_MAX UINT32_MAX
 #endif //ARM_CORTEX
 
 #endif // __basicmaths_h__

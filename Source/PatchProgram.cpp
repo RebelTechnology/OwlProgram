@@ -6,6 +6,7 @@
 #include "StompBox.h"
 #include "patch.h"
 #include "main.h"
+#include "heap.h"
 
 PatchProcessor processor;
 
@@ -22,14 +23,29 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
   processor.setPatch(patch);
 }
 
-void setup(){
+SampleBuffer* samples;
+void setup(ProgramVector* pv){
+#ifdef DEBUG_MEM
+#ifdef ARM_CORTEX
+  size_t before = xPortGetFreeHeapSize();
+#endif
+#endif
 #include "patch.cpp"
+#ifdef DEBUG_MEM
+  // todo xPortGetFreeHeapSize() before and after
+  // extern uint32_t total_heap_used;
+  // pv->heap_bytes_used = total_heap_used;
+#ifdef ARM_CORTEX
+  getProgramVector()->heap_bytes_used = before - xPortGetFreeHeapSize();
+#endif
+#endif
+  // samples = new SampleBuffer(getBlockSize());
+  samples = new SampleBuffer();
 }
 
-void processBlock(){
-  SampleBuffer buffer;
-  buffer.split(getProgramVector()->audio_input, getProgramVector()->audio_blocksize);
-  processor.setParameterValues(getProgramVector()->parameters);
-  processor.patch->processAudio(buffer);
-  buffer.comb(getProgramVector()->audio_output);
+void processBlock(ProgramVector* pv){
+  samples->split(pv->audio_input, pv->audio_blocksize);
+  processor.setParameterValues(pv->parameters);
+  processor.patch->processAudio(*samples);
+  samples->comb(pv->audio_output);
 }

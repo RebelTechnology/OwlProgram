@@ -2,9 +2,47 @@
 #define __HeavyPatch_hpp__
 
 #include "StompBox.h"
+#include "basicmaths.h"
 #include "Heavy_owl.h"
 
+extern "C" {
+  static bool isButtonPressed(PatchButtonId bid){
+    return getProgramVector()->buttons & (1<<bid);
+  }
+  static void setButton(PatchButtonId bid, bool pressed){
+    if(pressed)
+      getProgramVector()->buttons |= 1<<bid;
+    else
+      getProgramVector()->buttons &= ~(1<<bid);
+  }
+  static void printHook(double timestampMs, const char *printLabel, const char *msgString, void *userData) {
+    char buf[64];
+    char* dst = buf;
+    int len = strnlen(printLabel, 48);
+    dst = stpncpy(dst, printLabel, 63);
+    dst = stpcpy(dst, " ");
+    dst = stpncpy(dst, msgString, 63-len);
+    debugMessage(buf);
+  }
+  static void sendHook(double timestampMs, // in milliseconds
+		       const char *receiverName,
+		       const HvMessage *const m,
+		       void *userData) {
+    if(strcmp(receiverName, "Channel-Push") == 0){
+      bool pressed;
+      if(hv_msg_getNumElements(m) > 0 && hv_msg_isFloat(m, 0))
+	pressed = hv_msg_getFloat(m, 0) > 0.5;
+      else
+	pressed = !isButtonPressed(PUSHBUTTON);
+      setButton(PUSHBUTTON, pressed);
+      debugMessage("push", pressed, isButtonPressed(PUSHBUTTON));
+    }
+  }
+}
+
 class HeavyPatch : public Patch {
+private:
+  bool pushbutton;
 public:
   HeavyPatch() {
     registerParameter(PARAMETER_A, "Channel-A");
@@ -13,6 +51,8 @@ public:
     registerParameter(PARAMETER_D, "Channel-D");
     registerParameter(PARAMETER_E, "Channel-E");    
     context = hv_owl_new(getSampleRate());
+    hv_setPrintHook(context, &printHook);
+    hv_setSendHook(context, sendHook);
   }
   
   ~HeavyPatch() {
@@ -24,7 +64,11 @@ public:
     float paramB = getParameterValue(PARAMETER_B);
     float paramC = getParameterValue(PARAMETER_C);
     float paramD = getParameterValue(PARAMETER_D);
-    float paramE = getParameterValue(PARAMETER_E);    
+    float paramE = getParameterValue(PARAMETER_E);
+    if(isButtonPressed(PUSHBUTTON) != pushbutton){
+      pushbutton = isButtonPressed(PUSHBUTTON);
+      hv_vscheduleMessageForReceiver(context, "Channel-Push", 0.0, "f", pushbutton ? 1.0 : 0.0);
+    }
     // Note: The third parameter is the timestamp at which to execute the message,
     // but in this case it simply means to execute it immediately. "f" says that
     // the message contains one element and its type is float. paramA is then the

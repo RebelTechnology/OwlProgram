@@ -81,11 +81,11 @@ int FloatArray::getMaxIndex(){
 }
 
 void FloatArray::rectify(FloatArray& destination){ //this is actually "copy data with rectifify"
-  int minSize= min(size,destination.getSize()); //TODO: shall we take this out and allow it to segfault?
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX   
   arm_abs_f32(data, destination.getData(), size);
 #else
+  int minSize= min(size,destination.getSize()); //TODO: shall we take this out and allow it to segfault?
   for(int n=0; n<minSize; n++){
     destination[n] = fabs(data[n]);
   }
@@ -398,13 +398,14 @@ void FloatArray::negate(){
 void FloatArray::noise(){
   noise(-1, 1);
 }
+
 void FloatArray::noise(float min, float max){
   float amplitude = fabs(max-min);
   float offset = min;
   ASSERT(getSize()>10, "10<getSize");
   ASSERT(size==getSize(), "getSize");
   for(int n=0; n<size; n++){
-    data[n]=(rand()/(float)RAND_MAX) * amplitude + offset;
+    data[n]=(rand()/(RAND_MAX+1.0f)) * amplitude + offset;
   }
 }
 

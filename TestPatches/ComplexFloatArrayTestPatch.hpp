@@ -2,6 +2,7 @@
 #define __ComplexFloatArrayTestPatch_hpp__
 
 #include "StompBox.h"
+#include "ComplexFloatArray.h"
 
 class ComplexFloatArrayTestPatch : public Patch {
 private:

@@ -11,14 +11,25 @@ private:
 #ifdef ARM_CORTEX
   arm_fir_instance_f32 instance;
 #else
-  // TODO
+  int pointer;
 #endif /* ARM_CORTEX */
 
   void processBlock(float* source, float* destination, int size){
 #ifdef ARM_CORTEX
     arm_fir_f32(&instance, source, destination, size);
 #else
-    ASSERT(false, "TODO");
+    for(int n = 0; n < size; n++){
+      states[pointer] = source[n];
+      int tempPointer = pointer;
+      float y = 0;
+      for(int k = 0; k < coefficients.getSize(); k++){
+        y += coefficients[k] * states[tempPointer];
+        tempPointer = (tempPointer == states.getSize()) ? 0 : tempPointer+1;
+      }
+      destination[n] = y;
+      //  destination[n] = 0;
+      pointer = (pointer == states.getSize()) ? 0 : pointer+1;
+    }
 #endif /* ARM_CORTEX */
   }
   
@@ -37,10 +48,11 @@ public:
     coefficients=FloatArray::create(numTaps);
     blockSize=aBlockSize;
     states=FloatArray::create(numTaps + blockSize - 1);
+    states.clear();
 #ifdef ARM_CORTEX
     arm_fir_init_f32(&instance, coefficients.getSize(), coefficients.getData(), states.getData(), blockSize);
 #else
-    ASSERT(0, "TODO");
+    pointer = 0;
 #endif /* ARM_CORTEX */
   }
   
@@ -55,8 +67,8 @@ public:
     processBlock(source.getData(), destination.getData(), destination.getSize());
   }
   
-  FloatArray* getCoefficients(){
-    return &coefficients;
+  FloatArray getCoefficients(){
+    return coefficients;
   };
   
   /**

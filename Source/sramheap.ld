@@ -14,8 +14,7 @@ MEMORY
   EEPROM (rw)      : ORIGIN = 0x08004000, LENGTH = 16K    /* Sector 1 */
   FIRMWARE (rx)    : ORIGIN = 0x08008000, LENGTH = 224K   /* Sector 2 */
   PATCHFLASH (rx)  : ORIGIN = 0x08040000, LENGTH = 128K   /* Sector 6 */ /* total Flash memory is 1Mb */
-  CCMHEAP (rw)     : ORIGIN = 0x10004000, LENGTH = 32K
-  CCMRAM (rw)      : ORIGIN = 0x1000c000, LENGTH = 16K    /* total CCM is 64kb */
+  CCMRAM (rw)      : ORIGIN = 0x10008000, LENGTH = 32K    /* total CCM is 64kb */
   LOADERRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 48K
   PATCHRAM (rwx)   : ORIGIN = 0x2000c000, LENGTH = 64K    /* total RAM is 112kb */
   NVRAM (rw)       : ORIGIN = 0x40024000, LENGTH = 4K
@@ -134,26 +133,7 @@ SECTIONS
     _programvector = ABSOLUTE(.);
       *(.pv)
     . = ALIGN(8);
-    PROVIDE ( _eprogram = . );
   } >PATCHRAM
-  _eram = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM);
-
-  .fastheap (NOLOAD) :
-  {
-    . = ALIGN(8);
-    PROVIDE ( _fastheap = . );
-    . = ALIGN(8);
-  } >CCMHEAP
-  _fasteheap = ORIGIN(CCMHEAP) + LENGTH(CCMHEAP);
-
-  /* CCM section, vars must be located here explicitly */
-  /* Example: int foo __attribute__ ((section (".ccmdata"))); */
-  .ccmdata (NOLOAD) :
-  {
-    . = ALIGN(8);
-    *(.ccmdata)
-    . = ALIGN(8);
-  } >CCMRAM
 
   /* User_stack section, used to check that there is enough RAM left */
   ._user_stack (NOLOAD) :
@@ -162,20 +142,44 @@ SECTIONS
     PROVIDE ( _stack = . );
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
-  } >CCMRAM
-  _estack = 0x10010000;    /* end of CCMRAM */
 
-  /* External SRAM, used for heap memory */
+  } >CCMRAM
+/* _estack = 0x2001c000;    /\* end of PATCHRAM *\/ */
+/*   } >CCMRAM */
+_estack = 0x10010000;    /* end of CCM RAM */
+
+  .sramdata (NOLOAD) :
+  {
+    . = ALIGN(8);
+    *(.sramdata)
+    . = ALIGN(8);
+    PROVIDE(_heap = .);
+    . = . + _Min_Heap_Size;
+  } > PATCHRAM
+  _eheap = 0x2001c000;
+
+  /* CCM section, vars must be located here explicitly */
+  /* Example: int foo __attribute__ ((section (".ccmdata"))); */
+  .ccmdata (NOLOAD) :
+  {
+    . = ALIGN(8);
+    *(.ccmdata)
+    . = ALIGN(8);
+    /* PROVIDE ( _heap = . ); */
+    /* . = . + _Min_Heap_Size; */
+  } >CCMRAM
+/* _eheap = 0x10010000;    /\* end of CCM *\/ */
+
+  /* External SRAM, used for heap memory - no variables to be allocated here! */
   .extdata (NOLOAD) :
   {
     . = ALIGN(8);
     *(.extdata)
     . = ALIGN(8);
-    PROVIDE ( _heap = . );
+/*    PROVIDE ( _heap = . ); */
     . = . + _Min_Heap_Size;
   } >BANK1_SRAM3
-    _eheap = 0x68100000;
-
+/* _eheap = 0x68100000; */
 
   /* Remove information from the standard libraries */
   /DISCARD/ :

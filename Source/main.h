@@ -1,12 +1,14 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
+#include "ProgramVector.h"
+
 #ifdef __cplusplus
  extern "C" {
 #endif
 
-   void setup();
-   void processBlock();
+   void setup(ProgramVector* pv);
+   void processBlock(ProgramVector* pv);
 
 #ifdef __cplusplus
 }

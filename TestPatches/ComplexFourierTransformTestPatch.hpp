@@ -17,10 +17,10 @@ private:
     if(abs(second-first)<tol){
       cond=true;
     }
-    assert(cond, message);
+    return assert(cond, message);
   }
   bool assert(bool condition,const char * message){
-    assert(condition, message, -1);
+    return assert(condition, message, -1);
   }
   bool assert(bool condition,const char * message, int n){
     if(condition==false && success==true){ //only hit this the first time, so only the first failed assertion gets displayed

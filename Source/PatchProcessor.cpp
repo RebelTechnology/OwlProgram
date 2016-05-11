@@ -164,7 +164,7 @@ void PatchProcessor::setParameterValues(uint16_t *params){
       if(i<4)
         parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR + 4095 - params[i])/(SMOOTH_FACTOR+1);
       else
-        parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR - params[i])/(SMOOTH_FACTOR+1);
+        parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR + params[i])/(SMOOTH_FACTOR+1);
     }
   }else{
     for(int i=0; i<NOF_ADC_VALUES; ++i)
