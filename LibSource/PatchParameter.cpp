@@ -33,7 +33,7 @@ PatchParameter<T>::PatchParameter() : pid(PATCH_PARAMETER_NO_PID){}
 // }
 
 template<typename T>
-PatchParameter<T>& PatchParameter<T>::operator=( const PatchParameter<T>& other ){
+PatchParameter<T>& PatchParameter<T>::operator=(const PatchParameter<T>& other){
   pid = other.pid;
   value = other.value;
   if(pid != PATCH_PARAMETER_NO_PID)
