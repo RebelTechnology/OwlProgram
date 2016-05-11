@@ -30,10 +30,22 @@ int Patch::getBlockSize(){
 float Patch::getParameterValue(PatchParameterId pid){
   //  return getInitialisingPatchProcessor()->getParameterValue(pid);
   // if(pid < getProgramVector()->parameters_size)
-  if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4){
-    return (4095 - getProgramVector()->parameters[pid])/4096.0f;
-  }else{
-    return getProgramVector()->parameters[pid]/4096.0f;
+  if(pid < getProgramVector()->parameters_size){
+    if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4){
+      return (4095 - getProgramVector()->parameters[pid])/4096.0f;
+    }else{
+      return getProgramVector()->parameters[pid]/4096.0f;
+    }
+  }
+}
+
+void Patch::setParameterValue(PatchParameterId pid, float value){
+  if(pid < getProgramVector()->parameters_size){
+    if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4){
+      getProgramVector()->parameters[pid] = 4095 - value*4096.0f;
+    }else{
+      getProgramVector()->parameters[pid] = value*4096.0f;
+    }
   }
 }
 

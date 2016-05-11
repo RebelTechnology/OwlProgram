@@ -51,6 +51,7 @@ public:
   IntParameter getIntParameter(const char* name, int min, int max, int defaultValue=0, float lambda=0.0f, float delta=0.0, float skew=LIN);
   void registerParameter(PatchParameterId pid, const char* name);
   float getParameterValue(PatchParameterId pid);
+  void setParameterValue(PatchParameterId pid, float value);
   bool isButtonPressed(PatchButtonId bid);
   int getSamplesSinceButtonPressed(PatchButtonId bid);
   void setButton(PatchButtonId bid, bool pressed);
