@@ -28,13 +28,14 @@ extern "C" {
 		       const char *receiverName,
 		       const HvMessage *const m,
 		       void *userData) {
-      if(strcmp(receiverName, "Channel-Push") == 0){
+    if(strcmp(receiverName, "Channel-Push") == 0){
       bool pressed;
-      if(hv_msg_getNumElements(m) > 0)
-	pressed = hv_msg_isBang(m, 0) || hv_msg_getFloat(m, 0) > 0.5;
+      if(hv_msg_getNumElements(m) > 0 && hv_msg_isFloat(m, 0))
+	pressed = hv_msg_getFloat(m, 0) > 0.5;
       else
 	pressed = !isButtonPressed(PUSHBUTTON);
       setButton(PUSHBUTTON, pressed);
+      debugMessage("push", pressed, isButtonPressed(PUSHBUTTON));
     }
   }
 }
