@@ -94,7 +94,7 @@ int WEB_setup(long fs, int bs){
   pv->programStatus = programStatus;
   pv->serviceCall = serviceCall;
   pv->message = NULL;
-  setup();
+  setup(pv);
 
   struct mallinfo minfo = mallinfo();
   // pv->heap_bytes_used = minfo.uordblks;

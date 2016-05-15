@@ -78,13 +78,13 @@ $(BUILD)/PatchProgram.o: $(SOURCE)/PatchProgram.cpp $(DEPS)
 	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/PatchProgram.cpp -o $@
 	@$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/PatchProgram.cpp > $(@:.o=.d)
 
-$(BUILD)/patch.elf: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
+$(BUILD)/$(TARGET).elf: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
 	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
 
-as: $(BUILD)/patch.elf
-	@$(OBJDUMP) -S $< > $(BUILD)/patch.s
+as: $(BUILD)/$(TARGET).elf
+	@$(OBJDUMP) -S $< > $(BUILD)/$(TARGET).s
 
 map: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
-	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/patch.map $(OBJS) $(PATCH_OBJS) $(LDLIBS)
+	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/$(TARGET).map $(OBJS) $(PATCH_OBJS) $(LDLIBS)
 
-compile: $(BUILD)/patch.bin
+compile: $(BUILD)/$(TARGET).bin

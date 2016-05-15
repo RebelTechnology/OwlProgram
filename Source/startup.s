@@ -52,9 +52,19 @@ LoopFillZerobss:
   bcc  FillZerobss
 
 /* Call static constructors */
-    bl __libc_init_array
+  bl __libc_init_array
+	/*
+	ldr r12,=__libc_init_array
+	mov lr,pc
+	bx r12
+	*/
 /* Call the application's entry point.*/
   bl  main
+	/*
+	lrd r12,=main
+	mov lr,pc
+	bx r12
+	*/
   bx  lr    
 .size  Reset_Handler, .-Reset_Handler
 
