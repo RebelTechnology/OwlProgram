@@ -12,7 +12,7 @@ $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@cp -f $< $@
 
 $(BUILD)/Source/Heavy_owl.h: $(HEAVYDIR)/_main.pd
-	@python ./Tools/Heavy/uploader.py $(HEAVYDIR) -g c -n $(HEAVYNAME) -o $(BUILD)/Source $(HEAVYARGS)
+	@python2.7 ./Tools/Heavy/uploader.py $(HEAVYDIR) -g c -n $(HEAVYNAME) -o $(BUILD)/Source $(HEAVYARGS)
 	@cp $(HEAVYSRC)/HvUtils.h $(HEAVYSRC)/HvMessage.c $(HEAVYSRC)/MessagePool.c $(BUILD)/Source
 
 heavy: $(BUILD)/Source/Heavy_owl.h

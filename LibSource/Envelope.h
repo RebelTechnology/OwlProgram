@@ -3,10 +3,25 @@
 
 #include "FloatArray.h"
 
+class Envelope {
+public:
+  virtual void trigger(){
+    trigger(true, 0);
+  }
+  virtual void trigger(bool state){
+    trigger(state, 0);
+  }
+  virtual void trigger(bool state, int triggerDelay){}
+  virtual void gate(bool state){
+    gate(state, 0);
+  }
+  virtual void gate(bool state, int gateDelay){}
+};
+
 /**
  * Linear ADSR Envelope
  */
-class AdsrEnvelope {
+class AdsrEnvelope : public Envelope {
 private:
   enum EnvelopeStage { kAttack, kDecay, kSustain, kRelease, kIdle };
   enum EnvelopeTrigger { kGate, kTrigger };
