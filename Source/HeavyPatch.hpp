@@ -5,6 +5,13 @@
 #include "basicmaths.h"
 #include "Heavy_owl.h"
 
+#define HV_OWL_PARAM_A "Channel-A"
+#define HV_OWL_PARAM_B "Channel-B"
+#define HV_OWL_PARAM_C "Channel-C"
+#define HV_OWL_PARAM_D "Channel-D"
+#define HV_OWL_PARAM_E "Channel-E"
+#define HV_OWL_PARAM_PUSH "Channel-Push"
+
 extern "C" {
   static bool isButtonPressed(PatchButtonId bid){
     return getProgramVector()->buttons & (1<<bid);
@@ -28,14 +35,13 @@ extern "C" {
 		       const char *receiverName,
 		       const HvMessage *const m,
 		       void *userData) {
-    if(strcmp(receiverName, "Channel-Push") == 0){
+    if(strcmp(receiverName, HV_OWL_PARAM_PUSH) == 0){
       bool pressed;
       if(hv_msg_getNumElements(m) > 0 && hv_msg_isFloat(m, 0))
 	pressed = hv_msg_getFloat(m, 0) > 0.5;
       else
 	pressed = !isButtonPressed(PUSHBUTTON);
       setButton(PUSHBUTTON, pressed);
-      debugMessage("push", pressed, isButtonPressed(PUSHBUTTON));
     }
   }
 }
@@ -43,13 +49,21 @@ extern "C" {
 class HeavyPatch : public Patch {
 private:
   bool pushbutton;
+  unsigned int receiverHash[6];
+
 public:
   HeavyPatch() {
-    registerParameter(PARAMETER_A, "Channel-A");
-    registerParameter(PARAMETER_B, "Channel-B");
-    registerParameter(PARAMETER_C, "Channel-C");
-    registerParameter(PARAMETER_D, "Channel-D");
-    registerParameter(PARAMETER_E, "Channel-E");    
+    registerParameter(PARAMETER_E, HV_OWL_PARAM_A);
+    registerParameter(PARAMETER_E, HV_OWL_PARAM_B);
+    registerParameter(PARAMETER_E, HV_OWL_PARAM_C);
+    registerParameter(PARAMETER_E, HV_OWL_PARAM_D);
+    registerParameter(PARAMETER_E, HV_OWL_PARAM_E);
+    receiverHash[0] = hv_stringToHash(HV_OWL_PARAM_A);
+    receiverHash[1] = hv_stringToHash(HV_OWL_PARAM_B);
+    receiverHash[2] = hv_stringToHash(HV_OWL_PARAM_C);
+    receiverHash[3] = hv_stringToHash(HV_OWL_PARAM_D);
+    receiverHash[4] = hv_stringToHash(HV_OWL_PARAM_E);
+    receiverHash[5] = hv_stringToHash(HV_OWL_PARAM_PUSH);
     context = hv_owl_new(getSampleRate());
     hv_setPrintHook(context, &printHook);
     hv_setSendHook(context, sendHook);
@@ -67,17 +81,18 @@ public:
     float paramE = getParameterValue(PARAMETER_E);
     if(isButtonPressed(PUSHBUTTON) != pushbutton){
       pushbutton = isButtonPressed(PUSHBUTTON);
-      hv_vscheduleMessageForReceiver(context, "Channel-Push", 0.0, "f", pushbutton ? 1.0 : 0.0);
+      hv_sendFloatToReceiver(context, receiverHash[5], pushbutton ? 1.0 : 0.0);
     }
-    // Note: The third parameter is the timestamp at which to execute the message,
-    // but in this case it simply means to execute it immediately. "f" says that
-    // the message contains one element and its type is float. paramA is then the
-    // value.
-    hv_vscheduleMessageForReceiver(context, "Channel-A", 0.0, "f", paramA);
-    hv_vscheduleMessageForReceiver(context, "Channel-B", 0.0, "f", paramB);
-    hv_vscheduleMessageForReceiver(context, "Channel-C", 0.0, "f", paramC);
-    hv_vscheduleMessageForReceiver(context, "Channel-D", 0.0, "f", paramD);
-    hv_vscheduleMessageForReceiver(context, "Channel-E", 0.0, "f", paramE);
+    hv_sendFloatToReceiver(context, receiverHash[0], paramA);
+    hv_sendFloatToReceiver(context, receiverHash[1], paramB);
+    hv_sendFloatToReceiver(context, receiverHash[2], paramC);
+    hv_sendFloatToReceiver(context, receiverHash[3], paramD);
+    hv_sendFloatToReceiver(context, receiverHash[4], paramE);
+    // hv_sendFloatToReceiver(context, HV_OWL_PARAM_B, paramB);
+    // hv_sendFloatToReceiver(context, HV_OWL_PARAM_C, paramC);
+    // hv_sendFloatToReceiver(context, HV_OWL_PARAM_D, paramD);
+    // hv_sendFloatToReceiver(context, HV_OWL_PARAM_E, paramE);
+
     float* outputs[] = {buffer.getSamples(0), buffer.getSamples(1) };    
     hv_owl_process(context, outputs, outputs, getBlockSize());		     
   }
