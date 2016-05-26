@@ -24,6 +24,7 @@ See http://hoxtonowl.com for more details of the Open Ware Laboratory.
 * make size: show binary size metrics and large object summary
 * make map: build map file (Build/patch.map)
 * make as: build assembly file (Build/patch.s)
+* make help: print target information
 
 ## Make options
 * PATCHNAME: specify name of patch, e.g. SimpleDelay

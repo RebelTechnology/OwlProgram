@@ -119,6 +119,7 @@ void msg_copyToBuffer(const HvMessage *m, char *buffer, hv_size_t len) {
 HvMessage *msg_copy(const HvMessage *m) {
   const hv_size_t heapSize = msg_getNumHeapBytes(m);
   char *r = (char *) hv_malloc(heapSize);
+  hv_assert(r != NULL);
   msg_copyToBuffer(m, r, heapSize);
   return (HvMessage *) r;
 }
@@ -128,9 +129,9 @@ void msg_free(HvMessage *m) {
 }
 
 bool msg_hasFormat(const HvMessage *m, const char *fmt) {
-  if (fmt == NULL) return false;
-  if (msg_getNumElements(m) != hv_strlen(fmt)) return false;
-  for (int i = 0; i < msg_getNumElements(m); i++) {
+  hv_assert(fmt != NULL);
+  const int n = msg_getNumElements(m);
+  for (int i = 0; i < n; ++i) {
     switch (fmt[i]) {
       case 'b': if (!msg_isBang(m, i)) return false; break;
       case 'f': if (!msg_isFloat(m, i)) return false; break;
@@ -139,7 +140,7 @@ bool msg_hasFormat(const HvMessage *m, const char *fmt) {
       default: return false;
     }
   }
-  return true;
+  return (fmt[n] == '\0');
 }
 
 bool msg_compareSymbol(const HvMessage *m, int i, const char *s) {
@@ -179,14 +180,15 @@ hv_uint32_t msg_symbolToHash(const char *s) {
   // this hash is based MurmurHash2
   // http://en.wikipedia.org/wiki/MurmurHash
   // https://sites.google.com/site/murmurhash/
-  static const unsigned int n = 0x5bd1e995;
-  static const int r = 24;
+  static const hv_uint32_t n = 0x5bd1e995;
+  static const hv_int32_t r = 24;
 
-  int len = (int) hv_strlen(s);
-  hv_uint32_t x = (hv_uint32_t) (len); // seed (0) ^ len
+  if (s == NULL) return 0;
+  hv_uint32_t len = (hv_uint32_t) hv_strlen(s);
+  hv_uint32_t x = len; // seed (0) ^ len
 
   while (len >= 4) {
-    hv_uint32_t k = *((hv_uint32_t *)s);
+    hv_uint32_t k = *((hv_uint32_t *) s);
     k *= n;
     k ^= k >> r;
     k *= n;
@@ -195,7 +197,7 @@ hv_uint32_t msg_symbolToHash(const char *s) {
     s += 4; len -= 4;
   }
 
-  switch(len) {
+  switch (len) {
     case 3: x ^= s[2] << 16;
     case 2: x ^= s[1] << 8;
     case 1: x ^= s[0]; x *= n;
