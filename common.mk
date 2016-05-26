@@ -2,22 +2,21 @@
 DSPLIB=Libraries/CMSIS/DSP_Lib/Source
 
 # Tool path
-TOOLROOT ?= Tools/gcc-arm-none-eabi-5_2-2015q4/bin
+TOOLROOT ?= Tools/gcc-arm-none-eabi-5_2-2015q4/bin/
 
 CMSIS ?= Libraries/CMSIS/Include/
 
 # Tools
-CC=$(TOOLROOT)/arm-none-eabi-gcc
-CXX=$(TOOLROOT)/arm-none-eabi-g++
-LD=$(TOOLROOT)/arm-none-eabi-gcc
-AR=$(TOOLROOT)/arm-none-eabi-ar
-AS=$(TOOLROOT)/arm-none-eabi-as
-RANLIB=$(TOOLROOT)/arm-none-eabi-ranlib
-GDB=$(TOOLROOT)/arm-none-eabi-gdb
-OBJCOPY=$(TOOLROOT)/arm-none-eabi-objcopy
-OBJDUMP=$(TOOLROOT)/arm-none-eabi-objdump
-SIZE=$(TOOLROOT)/arm-none-eabi-size
-NM=$(TOOLROOT)/arm-none-eabi-nm
+CC=$(TOOLROOT)arm-none-eabi-gcc
+CXX=$(TOOLROOT)arm-none-eabi-g++
+LD=$(TOOLROOT)arm-none-eabi-gcc
+AR=$(TOOLROOT)arm-none-eabi-ar
+AS=$(TOOLROOT)arm-none-eabi-as
+RANLIB=$(TOOLROOT)arm-none-eabi-ranlib
+GDB=$(TOOLROOT)arm-none-eabi-gdb
+OBJCOPY=$(TOOLROOT)arm-none-eabi-objcopy
+OBJDUMP=$(TOOLROOT)arm-none-eabi-objdump
+SIZE=$(TOOLROOT)arm-none-eabi-size
 
 # Compilation Flags
 ARCH_FLAGS = -mcpu=cortex-m4 -mthumb
