@@ -37,6 +37,7 @@ float Patch::getParameterValue(PatchParameterId pid){
       return getProgramVector()->parameters[pid]/4096.0f;
     }
   }
+  return 0.0f;
 }
 
 void Patch::setParameterValue(PatchParameterId pid, float value){
