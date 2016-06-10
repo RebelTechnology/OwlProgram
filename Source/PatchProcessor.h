@@ -22,7 +22,7 @@ public:
   int getBlockSize();
   double getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
-  void setParameterValues(uint16_t *parameters);
+  void setParameterValues(uint16_t* parameters);
   Patch* patch;
   uint8_t index;
   void setPatchParameter(int pid, FloatParameter* param);
