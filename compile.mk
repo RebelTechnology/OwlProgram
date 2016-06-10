@@ -3,7 +3,7 @@ BUILDROOT ?= .
 C_SRC   = basicmaths.c heap_5.c # sbrk.c
 CPP_SRC = main.cpp operators.cpp message.cpp StompBox.cpp PatchProcessor.cpp
 CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp FastFourierTransform.cpp 
-CPP_SRC += Envelope.cpp VoltsPerOctave.cpp
+CPP_SRC += Envelope.cpp VoltsPerOctave.cpp Window.cpp
 CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
 CPP_SRC += PatchProgram.cpp SmoothValue.cpp PatchParameter.cpp
 
