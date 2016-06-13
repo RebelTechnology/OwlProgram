@@ -41,11 +41,15 @@ class Patch {
 public:
   Patch();
   virtual ~Patch();
+  /** constant skew values for exponential, linear and logarithmic parameters */
+  static const float EXP;
+  static const float LIN;
+  static const float LOG;
   /* Get a float or int parameter with optional smoothing, hysteresis and exponentiation.
    * The parameter value will be scaled to the range given by min and max.
    * Lambda specifies smoothing factor 0 to 1.0, or 0.0 for no smoothing (default).
    * Delta specifies hysteresis, or stiffness, as the absolute value change required to update the parameter, or 0.0 for no hysteresis (default).
-   * Skew specifies exponentiation: < 1.0 for logarithmic, > 1.0 for exponential, or 1.0 for linear scaling (default).
+   * Skew specifies exponentiation: > 1.0 for logarithmic, < 1.0 for exponential, or 1.0 for linear scaling (default).
    */
   FloatParameter getFloatParameter(const char* name, float min, float max, float defaultValue=0.0f, float lambda=0.0f, float delta=0.0, float skew=LIN);
   IntParameter getIntParameter(const char* name, int min, int max, int defaultValue=0, float lambda=0.0f, float delta=0.0, float skew=LIN);
@@ -56,15 +60,14 @@ public:
   int getSamplesSinceButtonPressed(PatchButtonId bid);
   void setButton(PatchButtonId bid, bool pressed);
   int getBlockSize();
-  double getSampleRate();
+  float getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
   float getElapsedBlockTime();
   int getElapsedCycles();
+  virtual void encoderChanged(PatchParameterId pid, int32_t delta, int samples){};
+  virtual void buttonChanged(PatchButtonId bid, bool value, int samples){}
+  virtual void parameterChanged(PatchParameterId pid, float value, int samples){}
   virtual void processAudio(AudioBuffer& output) = 0;
-  /** constant skew values for exponential, linear and logarithmic parameters */
-  static const float EXP;
-  static const float LIN;
-  static const float LOG;
 };
 
 #endif // __StompBox_h__

@@ -9,6 +9,7 @@
 
 #define OWL_PEDAL_HARDWARE    0x11
 #define OWL_MODULAR_HARDWARE  0x12
+#define OWL_RACK_HARDWARE     0x13
 
    typedef enum { 
      AUDIO_IDLE_STATUS = 0, 
@@ -36,8 +37,14 @@
      void (*programStatus)(ProgramVectorAudioStatus status);
      int (*serviceCall)(int service, void** params, int len);
      uint32_t cycles_per_block;
+     // outgoing
      uint32_t heap_bytes_used;
      char* message;
+     uint32_t stateChanged;
+     /* uint32_t buttonsChanged; */
+     /* uint32_t parametersChanged; */
+     void (*buttonChangedCallback)(uint8_t bid, bool value);
+     void (*encoderChangedCallback)(uint8_t bid, int32_t delta);
    } ProgramVector;
 
 #define CHECKSUM_ERROR_STATUS      -10

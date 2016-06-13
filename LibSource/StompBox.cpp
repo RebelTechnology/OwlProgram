@@ -19,7 +19,7 @@ void Patch::registerParameter(PatchParameterId pid, const char* name){
     getProgramVector()->registerPatchParameter(pid, name);
 }
 
-double Patch::getSampleRate(){
+float Patch::getSampleRate(){
   return getProgramVector()->audio_samplingrate;
 }
 
