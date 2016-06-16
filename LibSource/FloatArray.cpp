@@ -299,7 +299,7 @@ void FloatArray::setAll(float value){
 }
 
 void FloatArray::add(FloatArray operand2, FloatArray destination){ //allows in-place
-  ASSERT(operand2.size == size &&  destination.size==size, "Arrays must be same size");
+  ASSERT(operand2.size >= size &&  destination.size<=size, "Arrays must be matching size");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   /* despite not explicitely documented in the CMSIS documentation,

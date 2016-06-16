@@ -264,7 +264,7 @@ public:
   /**
    * Array-scalar multiplication.
    * Multiplies the values in the array by **scalar**.
-   * @param scalar to be subtracted from the array
+   * @param scalar to be multiplied with the array elements
   */
   void multiply(float scalar);
   

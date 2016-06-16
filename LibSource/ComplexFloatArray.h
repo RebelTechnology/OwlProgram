@@ -107,6 +107,10 @@ public:
     return data[i].im;
   }
   
+  void clear(){
+    setAll(0);
+  }
+
   /**
     The magnitude of an element of the array.
     @param i The index of the element
