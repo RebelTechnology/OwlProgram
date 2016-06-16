@@ -70,7 +70,7 @@ void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray& operan
   ASSERT(size==operand2.getSize(), "Wrong size");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
-  arm_cmplx_mult_cmplx_f32 ( (float*)data, (float*)operand2, (float*)result, size );  
+  arm_cmplx_mult_cmplx_f32( (float*)data, (float*)operand2, (float*)result, size );  
 #else
   float *pSrcA=(float*)data;
   float *pSrcB=(float*)operand2;

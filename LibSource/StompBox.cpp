@@ -86,6 +86,10 @@ AudioBuffer* AudioBuffer::create(int channels, int samples){
   return new ManagedMemoryBuffer(channels, samples);
 }
 
+FloatParameter Patch::getParameter(const char* name, float defaultValue){
+  return getFloatParameter(name, 0.0f, 1.0f, defaultValue, 0.0f, 0.0f, LIN);
+}
+
 FloatParameter Patch::getFloatParameter(const char* name, float min, float max, float defaultValue, float lambda, float delta, float skew){
   return getInitialisingPatchProcessor()->getParameter(name, min, max, defaultValue, lambda, delta, skew);
 }

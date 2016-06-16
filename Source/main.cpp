@@ -19,11 +19,9 @@ extern "C" void __libc_init_array();
 ProgramVector programVector __attribute__ ((section (".pv")));
 // ProgramVector* getProgramVector() { return &programVector; }
 
-#define FAST_HEAP_SIZE (32*1024)
-
 extern "C" {
   void vApplicationMallocFailedHook( void ){
-    error(0x60, "Heap overflow");
+    error(0x60, "Memory overflow");
   }
 }
 
