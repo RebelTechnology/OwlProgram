@@ -5,6 +5,7 @@
 #include "ProgramVector.h"
 #include "PatchProcessor.h"
 #include "basicmaths.h"
+#include "main.h"
 
 AudioBuffer::~AudioBuffer(){}
 
@@ -41,24 +42,21 @@ float Patch::getParameterValue(PatchParameterId pid){
 }
 
 void Patch::setParameterValue(PatchParameterId pid, float value){
-  if(pid < getProgramVector()->parameters_size){
-    if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4){
-      getProgramVector()->parameters[pid] = 4095 - value*4096.0f;
-    }else{
-      getProgramVector()->parameters[pid] = value*4096.0f;
-    }
-  }
-}
-
-AudioBuffer* Patch::createMemoryBuffer(int channels, int samples){
-  return AudioBuffer::create(channels, samples);
-}
-
-void Patch::setButton(PatchButtonId bid, bool pressed){
-  if(pressed)
-    getProgramVector()->buttons |= 1<<bid;
+  if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4)
+    doSetPatchParameter(pid, (4095 - value)*4096.0f);
   else
-    getProgramVector()->buttons &= ~(1<<bid);
+    doSetPatchParameter(pid, value*4096.0f);
+  // if(pid < getProgramVector()->parameters_size){
+  //   if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4){
+  //     getProgramVector()->parameters[pid] = (4095 - value)*4096.0f;
+  //   }else{
+  //     getProgramVector()->parameters[pid] = value*4096.0f;
+  //   }
+  // }
+}
+
+void Patch::setButton(PatchButtonId bid, uint16_t value, uint16_t samples){
+  doSetButton(bid, value, samples);
 }
 
 bool Patch::isButtonPressed(PatchButtonId bid){
@@ -69,6 +67,10 @@ int Patch::getSamplesSinceButtonPressed(PatchButtonId bid){
   int index = bid+PARAMETER_F;
   return index <= getProgramVector()->parameters_size ? 
     getProgramVector()->parameters[index] : 0;
+}
+
+AudioBuffer* Patch::createMemoryBuffer(int channels, int samples){
+  return AudioBuffer::create(channels, samples);
 }
 
 #define DWT_CYCCNT ((volatile unsigned int *)0xE0001004)

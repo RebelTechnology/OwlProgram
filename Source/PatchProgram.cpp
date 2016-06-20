@@ -14,6 +14,29 @@ PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
 }
 
+void doSetPatchParameter(uint8_t id, uint16_t value){
+  if(getProgramVector()->checksum == sizeof(getProgramVector()) &&
+     getProgramVector()->setPatchParameter != NULL)
+    getProgramVector()->setPatchParameter(id, value);
+}
+
+void doSetButton(uint8_t id, uint16_t value, uint16_t samples){
+  if(getProgramVector()->checksum == sizeof(getProgramVector()) &&
+     getProgramVector()->setButton != NULL)
+    getProgramVector()->setButton((PatchButtonId)id, value, samples);
+}
+
+void onButtonChanged(uint8_t id, uint16_t value, uint16_t samples){
+  if(processor.patch != NULL)
+    processor.patch->buttonChanged((PatchButtonId)id, value, samples);
+}
+
+void onEncoderChanged(uint8_t id, int16_t delta, uint16_t samples){
+  debugMessage("encoder changed", id, delta, samples);
+  if(processor.patch != NULL)
+    processor.patch->encoderChanged((PatchParameterId)id, delta, samples);
+}
+
 #define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
 
 void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){

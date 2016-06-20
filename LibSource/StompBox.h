@@ -48,7 +48,8 @@ enum PatchButtonId {
   BYPASS_BUTTON = 0,
   PUSHBUTTON,
   GREEN_BUTTON,
-  RED_BUTTON
+  RED_BUTTON,
+  MIDI_NOTE_BUTTON = 0x80 // values over 127 are mapped to note numbers
 };
 
 enum PatchChannelId {
@@ -88,15 +89,15 @@ public:
   void setParameterValue(PatchParameterId pid, float value);
   bool isButtonPressed(PatchButtonId bid);
   int getSamplesSinceButtonPressed(PatchButtonId bid);
-  void setButton(PatchButtonId bid, bool pressed);
+  void setButton(PatchButtonId bid, uint16_t value, uint16_t samples);
   int getBlockSize();
   float getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
   float getElapsedBlockTime();
   int getElapsedCycles();
-  virtual void encoderChanged(PatchParameterId pid, int32_t delta, int samples){};
-  virtual void buttonChanged(PatchButtonId bid, bool value, int samples){}
-  virtual void parameterChanged(PatchParameterId pid, float value, int samples){}
+  virtual void encoderChanged(PatchParameterId pid, int16_t delta, uint16_t samples){};
+  virtual void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){}
+  /* virtual void parameterChanged(PatchParameterId pid, float value, int samples){} */
   virtual void processAudio(AudioBuffer& output) = 0;
 };
 

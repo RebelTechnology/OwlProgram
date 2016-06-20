@@ -52,7 +52,15 @@ int main(void){
   *DWT_CONTROL = *DWT_CONTROL | 1 ; // enable the counter
 #endif /* DEBUG_DWT */
   ProgramVector* pv = getProgramVector();
-  if(pv->checksum != sizeof(ProgramVector)){    
+  if(pv->checksum == sizeof(ProgramVector)){
+    debugMessage("checksum v12", pv->checksum);
+    // set event callbacks
+    // pv->setButton = doSetButton;
+    // pv->setPatchParameter = doSetPatchParameter;
+    pv->buttonChangedCallback = onButtonChanged;
+    pv->encoderChangedCallback = onEncoderChanged;
+
+  }else if(pv->checksum != PROGRAM_VECTOR_CHECKSUM_V11){
     pv->error = CHECKSUM_ERROR_STATUS;
     pv->message = (char*)"ProgramVector checksum error";
     pv->programStatus(AUDIO_ERROR_STATUS);
