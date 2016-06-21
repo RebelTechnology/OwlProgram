@@ -103,3 +103,5 @@ IntParameter Patch::getIntParameter(const char* name, int min, int max, int defa
 const float Patch::EXP = 0.5;
 const float Patch::LIN = 1.0;
 const float Patch::LOG = 2.0;
+const uint16_t Patch::ON = 4095;
+const uint16_t Patch::OFF = 0;

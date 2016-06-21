@@ -75,6 +75,8 @@ public:
   static const float EXP;
   static const float LIN;
   static const float LOG;
+  static const uint16_t ON;
+  static const uint16_t OFF;
   /* Get a float or int parameter with optional smoothing, hysteresis and exponentiation.
    * The parameter value will be scaled to the range given by min and max.
    * Lambda specifies smoothing factor 0 to 1.0, or 0.0 for no smoothing (default).
@@ -89,7 +91,7 @@ public:
   void setParameterValue(PatchParameterId pid, float value);
   bool isButtonPressed(PatchButtonId bid);
   int getSamplesSinceButtonPressed(PatchButtonId bid);
-  void setButton(PatchButtonId bid, uint16_t value, uint16_t samples);
+  void setButton(PatchButtonId bid, uint16_t value, uint16_t samples=0);
   int getBlockSize();
   float getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);

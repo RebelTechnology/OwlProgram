@@ -15,13 +15,13 @@ PatchProcessor* getInitialisingPatchProcessor(){
 }
 
 void doSetPatchParameter(uint8_t id, uint16_t value){
-  if(getProgramVector()->checksum == sizeof(getProgramVector()) &&
+  if(getProgramVector()->checksum == sizeof(ProgramVector) &&
      getProgramVector()->setPatchParameter != NULL)
     getProgramVector()->setPatchParameter(id, value);
 }
 
 void doSetButton(uint8_t id, uint16_t value, uint16_t samples){
-  if(getProgramVector()->checksum == sizeof(getProgramVector()) &&
+  if(getProgramVector()->checksum == sizeof(ProgramVector) &&
      getProgramVector()->setButton != NULL)
     getProgramVector()->setButton((PatchButtonId)id, value, samples);
 }

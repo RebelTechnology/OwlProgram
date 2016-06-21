@@ -1,13 +1,14 @@
 #include "PatchProcessor.h"
 #include "MemoryBuffer.hpp"
 #include "device.h"
+#include "main.h"
 #include <string.h>
 #include "ProgramVector.h"
 #include "SmoothValue.h"
 
 PatchProcessor::PatchProcessor() 
   : patch(NULL), bufferCount(0), parameterCount(0) {
-  for(int i=0; i<NOF_ADC_VALUES; ++i)
+  for(int i=0; i<MAX_NUMBER_OF_PARAMETERS; ++i)
     parameters[i] = NULL;
 }
 
@@ -39,8 +40,15 @@ AudioBuffer* PatchProcessor::createMemoryBuffer(int channels, int size){
 }
 
 void PatchProcessor::setParameterValues(uint16_t *params){
-  for(int i=0; i<parameterCount; ++i)
-    parameters[i]->update(params[i]);
+  if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE){
+    for(int i=0; i<4; ++i)
+      parameters[i]->update(4095 - params[i]);
+    for(int i=4; i<parameterCount; ++i)
+      parameters[i]->update(params[i]);
+  }else{
+    for(int i=0; i<parameterCount; ++i)
+      parameters[i]->update(params[i]);
+  }
 }
 
 template<typename T, typename V>
@@ -102,15 +110,23 @@ int PatchProcessor::getBlockSize(){
   return getProgramVector()->audio_blocksize;
 }
 
+void PatchProcessor::setDefaultValue(int pid, float value){
+  doSetPatchParameter(pid, value*4095);
+}
+
+void PatchProcessor::setDefaultValue(int pid, int value){
+  doSetPatchParameter(pid, value);
+}
+
 template<typename T>
 PatchParameter<T> PatchProcessor::getParameter(const char* name, T min, T max, T defaultValue, float lambda, float delta, float skew){
-  // todo: lambda and delta: if non-zero, smooth/stiff
   int pid = 0;
   int blocksize = getBlockSize();
-  if(parameterCount < 5){
+  if(parameterCount < MAX_NUMBER_OF_PARAMETERS){
     pid = parameterCount++;
     if(getProgramVector()->registerPatchParameter != NULL)
       getProgramVector()->registerPatchParameter(pid, name);
+    setDefaultValue(pid, defaultValue);
     if(parameters[pid] != NULL)
       delete parameters[pid];
     ParameterUpdater* updater = NULL;
@@ -146,38 +162,6 @@ PatchParameter<T> PatchProcessor::getParameter(const char* name, T min, T max, T
 // explicit instantiation
 template PatchParameter<float> PatchProcessor::getParameter(const char* name, float min, float max, float defaultValue, float lambda, float delta, float skew);
 template PatchParameter<int> PatchProcessor::getParameter(const char* name, int min, int max, int defaultValue, float lambda, float delta, float skew);
-  
-#if 0
-#define SMOOTH_HYSTERESIS
-#define SMOOTH_FACTOR 3
-void PatchProcessor::setParameterValues(uint16_t *params){
-  /* Implements an exponential moving average (leaky integrator) to smooth ADC values
-   * y(n) = (1-alpha)*y(n-1) + alpha*y(n)
-   * with alpha=0.5, fs=48k, bs=128, then w0 ~= 18hz
-   */
-  if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE){
-    for(int i=0; i<NOF_ADC_VALUES; ++i)
-#ifdef SMOOTH_HYSTERESIS
-      if(abs(params[i]-parameterValues[i]) > 7)
-#endif
-    {  // invert parameter values for OWL Modular
-      if(i<4)
-        parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR + 4095 - params[i])/(SMOOTH_FACTOR+1);
-      else
-        parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR + params[i])/(SMOOTH_FACTOR+1);
-    }
-  }else{
-    for(int i=0; i<NOF_ADC_VALUES; ++i)
-#ifdef SMOOTH_HYSTERESIS
-      if(abs(params[i]-parameterValues[i]) > 7)
-#endif
-	// 16 = half a midi step (4096/128=32)  
-	parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR + params[i])/(SMOOTH_FACTOR+1);
-  }
-  // for(int i=NOF_ADC_VALUES; i<NOF_PARAMETERS; ++i)
-  //   // todo!
-}
-#endif
 
 void PatchProcessor::setPatchParameter(int pid, FloatParameter* param){
   if(pid < parameterCount && parameters[pid] != NULL)

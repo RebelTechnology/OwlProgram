@@ -27,12 +27,13 @@ public:
   uint8_t index;
   void setPatchParameter(int pid, FloatParameter* param);
   void setPatchParameter(int pid, IntParameter* param);
-
   template<typename T>
   PatchParameter<T> getParameter(const char* name, T min, T max, T defaultValue, float lambda, float delta, float skew);
 private:
+  void setDefaultValue(int pid, float value);
+  void setDefaultValue(int pid, int value);
   uint8_t bufferCount;
-  ParameterUpdater* parameters[NOF_ADC_VALUES];
+  ParameterUpdater* parameters[MAX_NUMBER_OF_PARAMETERS];
   uint8_t parameterCount;
   AudioBuffer* buffers[MAX_BUFFERS_PER_PATCH];
 };

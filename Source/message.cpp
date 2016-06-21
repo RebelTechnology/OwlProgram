@@ -42,7 +42,7 @@ char* ftoa(float val, int base){
 }
 
 void debugMessage(const char* msg){
-  strlcpy(buffer, msg, 64);
+  strncpy(buffer, msg, 64);
   getProgramVector()->message = buffer;
 }
 
