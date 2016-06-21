@@ -8,15 +8,16 @@ CMSIS ?= Libraries/CMSIS/Include/
 
 # Tools
 CC=$(TOOLROOT)arm-none-eabi-gcc
-CXX=$(TOOLROOT)arm-none-eabi-g++
 LD=$(TOOLROOT)arm-none-eabi-gcc
 AR=$(TOOLROOT)arm-none-eabi-ar
 AS=$(TOOLROOT)arm-none-eabi-as
-RANLIB=$(TOOLROOT)arm-none-eabi-ranlib
+NM=$(TOOLROOT)arm-none-eabi-nm
+CXX=$(TOOLROOT)arm-none-eabi-g++
 GDB=$(TOOLROOT)arm-none-eabi-gdb
+SIZE=$(TOOLROOT)arm-none-eabi-size
+RANLIB=$(TOOLROOT)arm-none-eabi-ranlib
 OBJCOPY=$(TOOLROOT)arm-none-eabi-objcopy
 OBJDUMP=$(TOOLROOT)arm-none-eabi-objdump
-SIZE=$(TOOLROOT)arm-none-eabi-size
 
 # Compilation Flags
 ARCH_FLAGS = -mcpu=cortex-m4 -mthumb
