@@ -3,7 +3,7 @@
 
 PolyBlepOscillator::PolyBlepOscillator(float sr):
   multiplier(1.0/sr),
-  frequency(440.0), 
+  frequency(440.0*multiplier), 
   shape(0.5), 
   pw(0.5) {
   osc.Init();
