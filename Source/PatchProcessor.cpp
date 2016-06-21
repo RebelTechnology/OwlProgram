@@ -17,9 +17,16 @@ PatchProcessor::~PatchProcessor(){
 }
 
 void PatchProcessor::clear(){
-  for(int i=0; i<bufferCount; ++i)
+  for(int i=0; i<bufferCount; ++i){
     delete buffers[i];
+    buffers[i] = NULL;
+  }
   bufferCount = 0;
+  for(int i=0; i<parameterCount; ++i){
+    delete parameters[i];
+    parameters[i] = NULL;
+  }
+  parameterCount = 0;
   delete patch;
   patch = NULL;
   index = -1;
