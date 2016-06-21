@@ -88,12 +88,7 @@ public:
     hv_sendFloatToReceiver(context, receiverHash[2], paramC);
     hv_sendFloatToReceiver(context, receiverHash[3], paramD);
     hv_sendFloatToReceiver(context, receiverHash[4], paramE);
-    // hv_sendFloatToReceiver(context, HV_OWL_PARAM_B, paramB);
-    // hv_sendFloatToReceiver(context, HV_OWL_PARAM_C, paramC);
-    // hv_sendFloatToReceiver(context, HV_OWL_PARAM_D, paramD);
-    // hv_sendFloatToReceiver(context, HV_OWL_PARAM_E, paramE);
-
-    float* outputs[] = {buffer.getSamples(0), buffer.getSamples(1) };    
+    float* outputs[] = {buffer.getSamples(LEFT_CHANNEL), buffer.getSamples(RIGHT_CHANNEL) };    
     hv_owl_process(context, outputs, outputs, getBlockSize());		     
   }
   
