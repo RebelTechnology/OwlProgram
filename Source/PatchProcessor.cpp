@@ -48,7 +48,7 @@ AudioBuffer* PatchProcessor::createMemoryBuffer(int channels, int size){
 
 void PatchProcessor::setParameterValues(uint16_t *params){
   if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE){
-    for(int i=0; i<4; ++i)
+    for(int i=0; i<4 && i<parameterCount; ++i)
       parameters[i]->update(4095 - params[i]);
     for(int i=4; i<parameterCount; ++i)
       parameters[i]->update(params[i]);
@@ -129,7 +129,8 @@ template<typename T>
 PatchParameter<T> PatchProcessor::getParameter(const char* name, T min, T max, T defaultValue, float lambda, float delta, float skew){
   int pid = 0;
   int blocksize = getBlockSize();
-  if(parameterCount < MAX_NUMBER_OF_PARAMETERS){
+  if(parameterCount < MAX_NUMBER_OF_PARAMETERS && 
+     parameterCount < getProgramVector()->parameters_size){
     pid = parameterCount++;
     if(getProgramVector()->registerPatchParameter != NULL)
       getProgramVector()->registerPatchParameter(pid, name);
