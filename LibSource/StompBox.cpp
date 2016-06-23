@@ -64,9 +64,8 @@ bool Patch::isButtonPressed(PatchButtonId bid){
 }
 
 int Patch::getSamplesSinceButtonPressed(PatchButtonId bid){
-  int index = bid+PARAMETER_F;
-  return index <= getProgramVector()->parameters_size ? 
-    getProgramVector()->parameters[index] : 0;
+  // deprecated
+  return 0;
 }
 
 AudioBuffer* Patch::createMemoryBuffer(int channels, int samples){

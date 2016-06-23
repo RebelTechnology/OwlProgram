@@ -46,7 +46,7 @@ AudioBuffer* PatchProcessor::createMemoryBuffer(int channels, int size){
   return buf;
 }
 
-void PatchProcessor::setParameterValues(uint16_t *params){
+void PatchProcessor::setParameterValues(int16_t *params){
   if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE){
     for(int i=0; i<4 && i<parameterCount; ++i)
       parameters[i]->update(4095 - params[i]);
@@ -68,7 +68,7 @@ private:
 public:
   LinearParameterUpdater(T min, T max, V initialValue)
     : parameter(NULL), minimum(min), maximum(max), value(initialValue) {}
-  void update(uint16_t newValue){
+  void update(int16_t newValue){
     value = (newValue*(maximum-minimum))/4096+minimum;
     if(parameter != NULL)
       parameter->update((T)value);
@@ -97,7 +97,7 @@ public:
     //    ASSERT(skew > 0.0 && skew <= 2.0, "Invalid exponential skew value");
     ASSERT(skew > 0.0, "Invalid exponential skew value");
   }
-  void update(uint16_t newValue){
+  void update(int16_t newValue){
     float v = newValue/4096.0f;
     v = expf(logf(v)/skew);
     value = v*(maximum-minimum)+minimum;

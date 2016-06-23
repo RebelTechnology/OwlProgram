@@ -14,14 +14,14 @@ PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
 }
 
-void doSetPatchParameter(uint8_t id, uint16_t value){
-  if(getProgramVector()->checksum == sizeof(ProgramVector) &&
+void doSetPatchParameter(uint8_t id, int16_t value){
+  if(getProgramVector()->checksum >= PROGRAM_VECTOR_CHECKSUM_V12 &&
      getProgramVector()->setPatchParameter != NULL)
     getProgramVector()->setPatchParameter(id, value);
 }
 
 void doSetButton(uint8_t id, uint16_t value, uint16_t samples){
-  if(getProgramVector()->checksum == sizeof(ProgramVector) &&
+  if(getProgramVector()->checksum >= PROGRAM_VECTOR_CHECKSUM_V12 &&
      getProgramVector()->setButton != NULL)
     getProgramVector()->setButton((PatchButtonId)id, value, samples);
 }
@@ -32,7 +32,6 @@ void onButtonChanged(uint8_t id, uint16_t value, uint16_t samples){
 }
 
 void onEncoderChanged(uint8_t id, int16_t delta, uint16_t samples){
-  debugMessage("encoder changed", id, delta, samples);
   if(processor.patch != NULL)
     processor.patch->encoderChanged((PatchParameterId)id, delta, samples);
 }

@@ -1,7 +1,6 @@
 #include <inttypes.h>
 
 #define DEBUG_MEM
-/* #define DEBUG_DWT */
 /* #define STARTUP_CODE */
 
 #define AUDIO_BIGEND

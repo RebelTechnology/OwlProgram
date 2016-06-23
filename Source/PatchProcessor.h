@@ -8,7 +8,7 @@
 class ParameterUpdater {
 public:
   virtual ~ParameterUpdater(){}
-  virtual void update(uint16_t value) = 0;
+  virtual void update(int16_t value) = 0;
   virtual void setParameter(IntParameter* p){}
   virtual void setParameter(FloatParameter* p){}
 };
@@ -22,7 +22,7 @@ public:
   int getBlockSize();
   double getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
-  void setParameterValues(uint16_t* parameters);
+  void setParameterValues(int16_t* parameters);
   Patch* patch;
   uint8_t index;
   void setPatchParameter(int pid, FloatParameter* param);

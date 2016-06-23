@@ -44,33 +44,19 @@ int main(void){
   };
   vPortDefineHeapRegions( xHeapRegions );
 
-#ifdef DEBUG_DWT
-  volatile unsigned int *DWT_CYCCNT = (volatile unsigned int *)0xE0001004; //address of the register
-  volatile unsigned int *DWT_CONTROL = (volatile unsigned int *)0xE0001000; //address of the register
-  volatile unsigned int *SCB_DEMCR = (volatile unsigned int *)0xE000EDFC; //address of the register
-  *SCB_DEMCR = *SCB_DEMCR | 0x01000000;
-  *DWT_CONTROL = *DWT_CONTROL | 1 ; // enable the counter
-#endif /* DEBUG_DWT */
   ProgramVector* pv = getProgramVector();
-  if(pv->checksum == sizeof(ProgramVector)){
-    debugMessage("checksum v12", pv->checksum);
+  if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V12){
     // set event callbacks
-    // pv->setButton = doSetButton;
-    // pv->setPatchParameter = doSetPatchParameter;
     pv->buttonChangedCallback = onButtonChanged;
     pv->encoderChangedCallback = onEncoderChanged;
-
-  }else if(pv->checksum != PROGRAM_VECTOR_CHECKSUM_V11){
-    pv->error = CHECKSUM_ERROR_STATUS;
-    pv->message = (char*)"ProgramVector checksum error";
-    pv->programStatus(AUDIO_ERROR_STATUS);
+  }else if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V11){
+    // no event callbacks
+  }else{
+    error(CHECKSUM_ERROR_STATUS, "ProgramVector checksum error");
     return -1;
   }
-  if(pv->audio_blocksize <= 0 || 
-     pv->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){
-    pv->error = CONFIGURATION_ERROR_STATUS;
-    pv->message = (char*)"Invalid blocksize";
-    pv->programStatus(AUDIO_ERROR_STATUS);
+  if(pv->audio_blocksize <= 0 || pv->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){     
+    error(CONFIGURATION_ERROR_STATUS, "Invalid blocksize");
     return -1;
   }
 
@@ -78,12 +64,6 @@ int main(void){
 
   for(;;){
     pv->programReady();
-#ifdef DEBUG_DWT
-    *DWT_CYCCNT = 0; // reset the counter
-#endif /* DEBUG_DWT */
     processBlock(pv);
-#ifdef DEBUG_DWT
-    pv->cycles_per_block = *DWT_CYCCNT;
-#endif /* DEBUG_DWT */
   }
 }
