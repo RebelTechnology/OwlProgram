@@ -26,13 +26,12 @@ extern "C" {
 }
 
 int main(void){
-#ifdef STARTUP_CODE
+ #ifdef STARTUP_CODE
   memcpy(_sidata, _sdata, _sdata-_edata); // Copy the data segment initializers
   memset(_sbss, 0, _ebss-_sbss); // zero fill the BSS segment
-  __libc_init_array(); // Call static constructors
 #endif /* STARTUP_CODE */
 
- /* Defined by the linker */
+/* Defined by the linker */
   extern char _fastheap, _fasteheap; // internal RAM dedicated to heap
   extern char _eprogram, _eram; // remaining program space
   extern char _heap, _eheap; // external memory
@@ -42,7 +41,11 @@ int main(void){
     { ( uint8_t * )&_heap, (size_t)(&_eheap - &_heap) },
     { NULL, 0 } /* Terminates the array. */
   };
-  vPortDefineHeapRegions( xHeapRegions );
+  vPortDefineHeapRegions( xHeapRegions ); // call before static initialisers to allow heap use
+
+#ifdef STARTUP_CODE
+  __libc_init_array(); // Call static constructors
+#endif /* STARTUP_CODE */
 
   ProgramVector* pv = getProgramVector();
   if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V12){
