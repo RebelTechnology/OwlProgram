@@ -1,7 +1,6 @@
 #include <inttypes.h>
 
 #define DEBUG_MEM
-/* #define DEBUG_DWT */
 /* #define STARTUP_CODE */
 
 #define AUDIO_BIGEND
@@ -12,8 +11,7 @@
 
 #define MAX_BUFFERS_PER_PATCH        8
 #define MAX_NUMBER_OF_PATCHES        32
-
-#define NOF_ADC_VALUES               5
+#define MAX_NUMBER_OF_PARAMETERS     24
 
 #define LED_PORT                     GPIOE
 #define LED_GREEN                    GPIO_Pin_5

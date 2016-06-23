@@ -1,3 +1,9 @@
+#ifndef __WINDOW_H__
+#define __WINDOW_H__
+
+#include "basicmaths.h"
+#include "FloatArray.h"
+
 /*
  * Window provides static methods to generate and apply window functions:
  * rectangular, hann, hanning, hamming, triangular
@@ -99,8 +105,7 @@ public:
   static void applyWindow(float *signal, float *window, int size){
     applyWindow(signal, window, signal, size);
   }
-  static void applyWindow(float *signalIn, float *window, float *signalOut, int size){
-    for(int n=0; n<size; n++)
-      signalOut[n] = window[n]*signalIn[n];
-  }
+  static void applyWindow(float *signalIn, float *window, float *signalOut, int size);
 };
+
+#endif /* __WINDOW_H__ */

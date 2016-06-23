@@ -28,7 +28,7 @@ public:
     return (sample-offset) * multiplier;
   }
   float voltsToHerz(float volts){
-    return 440.f * powf(2, volts);
+    return 440.f * fastpow2f(volts);
   }
   float voltsToSample(float volts){
     return volts / multiplier + offset;

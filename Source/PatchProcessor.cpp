@@ -1,20 +1,32 @@
 #include "PatchProcessor.h"
 #include "MemoryBuffer.hpp"
 #include "device.h"
+#include "main.h"
 #include <string.h>
 #include "ProgramVector.h"
+#include "SmoothValue.h"
 
 PatchProcessor::PatchProcessor() 
-  : patch(NULL), bufferCount(0) {}
+  : patch(NULL), bufferCount(0), parameterCount(0) {
+  for(int i=0; i<MAX_NUMBER_OF_PARAMETERS; ++i)
+    parameters[i] = NULL;
+}
 
 PatchProcessor::~PatchProcessor(){
   clear();
 }
 
 void PatchProcessor::clear(){
-  for(int i=0; i<bufferCount; ++i)
+  for(int i=0; i<bufferCount; ++i){
     delete buffers[i];
+    buffers[i] = NULL;
+  }
   bufferCount = 0;
+  for(int i=0; i<parameterCount; ++i){
+    delete parameters[i];
+    parameters[i] = NULL;
+  }
+  parameterCount = 0;
   delete patch;
   patch = NULL;
   index = -1;
@@ -34,39 +46,137 @@ AudioBuffer* PatchProcessor::createMemoryBuffer(int channels, int size){
   return buf;
 }
 
-float PatchProcessor::getParameterValue(PatchParameterId pid){
-  if(pid < NOF_ADC_VALUES)
-    return parameterValues[pid]/4096.0f;
-  else
-    return 0.0f;
+void PatchProcessor::setParameterValues(int16_t *params){
+  if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE){
+    for(int i=0; i<4 && i<parameterCount; ++i)
+      parameters[i]->update(4095 - params[i]);
+    for(int i=4; i<parameterCount; ++i)
+      parameters[i]->update(params[i]);
+  }else{
+    for(int i=0; i<parameterCount; ++i)
+      parameters[i]->update(params[i]);
+  }
 }
 
-#define SMOOTH_HYSTERESIS
-#define SMOOTH_FACTOR 3
-void PatchProcessor::setParameterValues(uint16_t *params){
-  /* Implements an exponential moving average (leaky integrator) to smooth ADC values
-   * y(n) = (1-alpha)*y(n-1) + alpha*y(n)
-   * with alpha=0.5, fs=48k, bs=128, then w0 ~= 18hz
-   */
-  if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE){
-    for(int i=0; i<NOF_ADC_VALUES; ++i)
-#ifdef SMOOTH_HYSTERESIS
-      if(abs(params[i]-parameterValues[i]) > 7)
-#endif
-    {  // invert parameter values for OWL Modular
-      if(i<4)
-        parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR + 4095 - params[i])/(SMOOTH_FACTOR+1);
-      else
-        parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR + params[i])/(SMOOTH_FACTOR+1);
-    }
-  }else{
-    for(int i=0; i<NOF_ADC_VALUES; ++i)
-#ifdef SMOOTH_HYSTERESIS
-      if(abs(params[i]-parameterValues[i]) > 7)
-#endif
-	// 16 = half a midi step (4096/128=32)  
-	parameterValues[i] = (parameterValues[i]*SMOOTH_FACTOR + params[i])/(SMOOTH_FACTOR+1);
+template<typename T, typename V>
+class LinearParameterUpdater : public ParameterUpdater {
+private:
+  PatchParameter<T>* parameter;
+  T minimum;
+  T maximum;
+  V value;
+public:
+  LinearParameterUpdater(T min, T max, V initialValue)
+    : parameter(NULL), minimum(min), maximum(max), value(initialValue) {}
+  void update(int16_t newValue){
+    value = (newValue*(maximum-minimum))/4096+minimum;
+    if(parameter != NULL)
+      parameter->update((T)value);
   }
-  // for(int i=NOF_ADC_VALUES; i<NOF_PARAMETERS; ++i)
-  //   // todo!
+  void setParameter(PatchParameter<T>* p){
+    parameter = p;
+  }
+};
+
+// void setSkew(float mid){
+//   if (maximum > minimum)
+//     skew = log (0.5) / log ((mid - minimum) / (maximum - minimum));
+// }
+
+template<typename T, typename V>
+class ExponentialParameterUpdater : public ParameterUpdater {
+private:
+  PatchParameter<T>* parameter;
+  float skew;
+  T minimum;
+  T maximum;
+  V value;
+public:
+  ExponentialParameterUpdater(float skw, T min, T max, V initialValue)
+    : parameter(NULL), skew(skw), minimum(min), maximum(max), value(initialValue) {
+    //    ASSERT(skew > 0.0 && skew <= 2.0, "Invalid exponential skew value");
+    ASSERT(skew > 0.0, "Invalid exponential skew value");
+  }
+  void update(int16_t newValue){
+    float v = newValue/4096.0f;
+    v = expf(logf(v)/skew);
+    value = v*(maximum-minimum)+minimum;
+    if(parameter != NULL)
+      parameter->update((T)value);
+  }
+  void setParameter(PatchParameter<T>* p){
+    parameter = p;
+  }
+};
+
+double PatchProcessor::getSampleRate(){
+  return getProgramVector()->audio_samplingrate;
+}
+
+int PatchProcessor::getBlockSize(){
+  return getProgramVector()->audio_blocksize;
+}
+
+void PatchProcessor::setDefaultValue(int pid, float value){
+  doSetPatchParameter(pid, value*4095);
+}
+
+void PatchProcessor::setDefaultValue(int pid, int value){
+  doSetPatchParameter(pid, value);
+}
+
+template<typename T>
+PatchParameter<T> PatchProcessor::getParameter(const char* name, T min, T max, T defaultValue, float lambda, float delta, float skew){
+  int pid = 0;
+  int blocksize = getBlockSize();
+  if(parameterCount < MAX_NUMBER_OF_PARAMETERS && 
+     parameterCount < getProgramVector()->parameters_size){
+    pid = parameterCount++;
+    if(getProgramVector()->registerPatchParameter != NULL)
+      getProgramVector()->registerPatchParameter(pid, name);
+    setDefaultValue(pid, defaultValue);
+    if(parameters[pid] != NULL)
+      delete parameters[pid];
+    ParameterUpdater* updater = NULL;
+    T l = SmoothValue<T>::normal(lambda, blocksize);
+    T d = StiffValue<T>::normal(delta);
+    if(skew == 1.0){
+      if(lambda == 0.0 && delta == 0.0){
+	updater = new LinearParameterUpdater<T, T>(min, max, defaultValue);
+      }else if(delta == 0.0){
+	updater = new LinearParameterUpdater<T, SmoothValue<T> >(min, max, SmoothValue<T>(l, defaultValue));
+      }else if(lambda == 0.0){      
+	updater = new LinearParameterUpdater<T, StiffValue<T> >(min, max, StiffValue<T>(d, defaultValue));
+      }else{
+	updater = new LinearParameterUpdater<T, SmoothStiffValue<T> >(min, max, SmoothStiffValue<T>(l, d, defaultValue));
+      }
+    }else{
+      if(lambda == 0.0 && delta == 0.0){
+	updater = new ExponentialParameterUpdater<T, T>(skew, min, max, defaultValue);
+      }else if(delta == 0.0){
+	updater = new ExponentialParameterUpdater<T, SmoothValue<T> >(skew, min, max, SmoothValue<T>(l, defaultValue));
+      }else if(lambda == 0.0){      
+	updater = new ExponentialParameterUpdater<T, StiffValue<T> >(skew, min, max, StiffValue<T>(d, defaultValue));
+      }else{
+	updater = new ExponentialParameterUpdater<T, SmoothStiffValue<T> >(skew, min, max, SmoothStiffValue<T>(l, d, defaultValue));
+      }
+    }
+    parameters[pid] = updater;
+  }
+  PatchParameter<T> pp(pid);
+  return pp;
+}
+
+// explicit instantiation
+template PatchParameter<float> PatchProcessor::getParameter(const char* name, float min, float max, float defaultValue, float lambda, float delta, float skew);
+template PatchParameter<int> PatchProcessor::getParameter(const char* name, int min, int max, int defaultValue, float lambda, float delta, float skew);
+
+void PatchProcessor::setPatchParameter(int pid, FloatParameter* param){
+  if(pid < parameterCount && parameters[pid] != NULL)
+    parameters[pid]->setParameter(param);
+}
+
+void PatchProcessor::setPatchParameter(int pid, IntParameter* param){
+  if(pid < parameterCount && parameters[pid] != NULL)
+    parameters[pid]->setParameter(param);
 }

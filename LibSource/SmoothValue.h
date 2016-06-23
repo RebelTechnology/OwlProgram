@@ -23,7 +23,6 @@ public:
     value = other.value;
     lambda = other.lambda;
   }
-  T normal(T lambda, int blocksize);
   void update(T newValue);
   T getValue(){
     return value;
@@ -49,54 +48,13 @@ public:
     return *this;
   }
   operator T(){
-    return value;
+    return getValue();
   }
+  static T normal(float lambda, int blocksize);
 };
 
 typedef SmoothValue<float> SmoothFloat;
 typedef SmoothValue<int> SmoothInt;
-
-template<>
-SmoothFloat::SmoothValue()
-  : lambda(0.9), value(0.0){}
-
-template<>
-SmoothFloat::SmoothValue(float l)
-  : lambda(l), value(0.0){}
-
-template<>
-SmoothFloat::SmoothValue(float l, float initialValue)
-  : lambda(l), value(initialValue){}
-
-template<>
-SmoothInt::SmoothValue(int divider) : lambda(divider), value(0) {
-// lambda = 1 - 1/divider
-// divider 4:0.75, 5:0.8, 6:0.833, 7:0.857, 8:0.875, 9:0.888, 10:0.9 et c
-}
-
-template<>
-SmoothInt::SmoothValue(int divider, int initialValue) 
-  : lambda(divider), value(initialValue) {}
-
-template<>
-void SmoothFloat::update(float newValue){
-  value = value*lambda + newValue*(1.0f - lambda);
-}
-
-template<>
-void SmoothInt::update(int newValue){
-  value = (value*lambda + newValue)/(lambda+1);
-}
-
-template<>
-float SmoothFloat::normal(float lambda, int blocksize){
-  return lambda*128.0f/blocksize;
-}
-
-template<>
-int SmoothInt::normal(int divider, int blocksize){
-  return (int)(divider*128.0f/blocksize);
-}
 
 /**
  * Applies simple hysteresis to a scalar.
@@ -104,7 +62,6 @@ int SmoothInt::normal(int divider, int blocksize){
  */
 template<typename T>
 class StiffValue {
-  // simple hysteresis
 private:
   T delta;
   T value;
@@ -118,9 +75,84 @@ public:
     if(abs(value-newValue) > delta)
       value = newValue;
   }
+  T getValue(){
+    return value;
+  }
+  StiffValue<T>& operator=(const T& other){
+    update(other);
+    return *this;
+  }
+  StiffValue<T>& operator+=(const T& other){
+    update(value+other);
+    return *this;
+  }
+  StiffValue<T>& operator-=(const T& other){
+    update(value-other);
+    return *this;
+  }
+  StiffValue<T>& operator*=(const T& other){
+    update(value*other);
+    return *this;
+  }
+  StiffValue<T>& operator/=(const T& other){
+    update(value/other);
+    return *this;
+  }
+  operator T(){
+    return getValue();
+  }
+  static T normal(float delta);
 };
 
 typedef StiffValue<float> StiffFloat;
 typedef StiffValue<int> StiffInt;
+
+/**
+ * Applies hysteresis and smoothing to a scalar.
+ */
+template<typename T>
+class SmoothStiffValue {
+  // simple hysteresis
+private:
+  T lambda;
+  T delta;
+  T value;
+public:
+  SmoothStiffValue(){}
+  SmoothStiffValue(T l, T d)
+    : lambda(d), delta(d){}
+  SmoothStiffValue(T l, T d, T initialValue)
+    : lambda(d), delta(d), value(initialValue) {}
+  void update(T newValue);
+  T getValue(){
+    return value;
+  }
+  SmoothStiffValue<T>& operator=(const T& other){
+    update(other);
+    return *this;
+  }
+  SmoothStiffValue<T>& operator+=(const T& other){
+    update(value+other);
+    return *this;
+  }
+  SmoothStiffValue<T>& operator-=(const T& other){
+    update(value-other);
+    return *this;
+  }
+  SmoothStiffValue<T>& operator*=(const T& other){
+    update(value*other);
+    return *this;
+  }
+  SmoothStiffValue<T>& operator/=(const T& other){
+    update(value/other);
+    return *this;
+  }
+  operator T(){
+    return getValue();
+  }
+};
+
+typedef SmoothStiffValue<float> SmoothStiffFloat;
+typedef SmoothStiffValue<int> SmoothStiffInt;
 
 #endif /* __SmoothValue_h__ */

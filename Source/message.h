@@ -14,6 +14,15 @@
 
 #define ASSERT(cond, msg) if(!(cond)){assert_failed(msg, __PRETTY_FUNCTION__, __LINE__);}
 
+#ifndef CHECKSUM_ERROR_STATUS
+#define CHECKSUM_ERROR_STATUS      -10
+#endif
+#ifndef OUT_OF_MEMORY_ERROR_STATUS
+#define OUT_OF_MEMORY_ERROR_STATUS -20
+#endif
+#ifndef CONFIGURATION_ERROR_STATUS
+#define CONFIGURATION_ERROR_STATUS -30
+#endif
 
 #ifdef __cplusplus
  extern "C" {
