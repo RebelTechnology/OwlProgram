@@ -101,7 +101,7 @@ public:
       float note = (float)(bid - MIDI_NOTE_BUTTON);
       float velocity = (float)(value>>5);
       // unsigned int hash = 0x41BE0F9C; // __hv_ctlin
-      float ms = 0;//1000.0f*(samples+getBlockSize())/getSampleRate(); // delay in milliseconds
+      float ms = 1000.0f*(samples+getBlockSize())/getSampleRate(); // delay in milliseconds
       // float cmd = value ? 0x90 : 0x80;
       hv_msg_setFloat(notein, 0, note);
       hv_msg_setFloat(notein, 1, velocity);
