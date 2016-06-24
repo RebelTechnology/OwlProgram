@@ -51,7 +51,7 @@ unsigned long systicks(){
 #define NOF_PARAMETERS 16
 static int blocksize;
 static char* patchName = NULL;
-static uint16_t parameters[NOF_PARAMETERS];
+static int16_t parameters[NOF_PARAMETERS];
 static char* parameterNames[NOF_PARAMETERS];
 static volatile uint16_t buttons = 1<<2; // GREEN
 

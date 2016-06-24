@@ -19,22 +19,19 @@ extern "C" void __libc_init_array();
 ProgramVector programVector __attribute__ ((section (".pv")));
 // ProgramVector* getProgramVector() { return &programVector; }
 
-#define FAST_HEAP_SIZE (32*1024)
-
 extern "C" {
   void vApplicationMallocFailedHook( void ){
-    error(0x60, "Heap overflow");
+    error(0x60, "Memory overflow");
   }
 }
 
 int main(void){
-#ifdef STARTUP_CODE
+ #ifdef STARTUP_CODE
   memcpy(_sidata, _sdata, _sdata-_edata); // Copy the data segment initializers
   memset(_sbss, 0, _ebss-_sbss); // zero fill the BSS segment
-  __libc_init_array(); // Call static constructors
 #endif /* STARTUP_CODE */
 
- /* Defined by the linker */
+/* Defined by the linker */
   extern char _fastheap, _fasteheap; // internal RAM dedicated to heap
   extern char _eprogram, _eram; // remaining program space
   extern char _heap, _eheap; // external memory
@@ -44,27 +41,25 @@ int main(void){
     { ( uint8_t * )&_heap, (size_t)(&_eheap - &_heap) },
     { NULL, 0 } /* Terminates the array. */
   };
-  vPortDefineHeapRegions( xHeapRegions );
+  vPortDefineHeapRegions( xHeapRegions ); // call before static initialisers to allow heap use
 
-#ifdef DEBUG_DWT
-  volatile unsigned int *DWT_CYCCNT = (volatile unsigned int *)0xE0001004; //address of the register
-  volatile unsigned int *DWT_CONTROL = (volatile unsigned int *)0xE0001000; //address of the register
-  volatile unsigned int *SCB_DEMCR = (volatile unsigned int *)0xE000EDFC; //address of the register
-  *SCB_DEMCR = *SCB_DEMCR | 0x01000000;
-  *DWT_CONTROL = *DWT_CONTROL | 1 ; // enable the counter
-#endif /* DEBUG_DWT */
+#ifdef STARTUP_CODE
+  __libc_init_array(); // Call static constructors
+#endif /* STARTUP_CODE */
+
   ProgramVector* pv = getProgramVector();
-  if(pv->checksum != sizeof(ProgramVector)){    
-    pv->error = CHECKSUM_ERROR_STATUS;
-    pv->message = (char*)"ProgramVector checksum error";
-    pv->programStatus(AUDIO_ERROR_STATUS);
+  if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V12){
+    // set event callbacks
+    pv->buttonChangedCallback = onButtonChanged;
+    pv->encoderChangedCallback = onEncoderChanged;
+  }else if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V11){
+    // no event callbacks
+  }else{
+    error(CHECKSUM_ERROR_STATUS, "ProgramVector checksum error");
     return -1;
   }
-  if(pv->audio_blocksize <= 0 || 
-     pv->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){
-    pv->error = CONFIGURATION_ERROR_STATUS;
-    pv->message = (char*)"Invalid blocksize";
-    pv->programStatus(AUDIO_ERROR_STATUS);
+  if(pv->audio_blocksize <= 0 || pv->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){     
+    error(CONFIGURATION_ERROR_STATUS, "Invalid blocksize");
     return -1;
   }
 
@@ -72,12 +67,6 @@ int main(void){
 
   for(;;){
     pv->programReady();
-#ifdef DEBUG_DWT
-    *DWT_CYCCNT = 0; // reset the counter
-#endif /* DEBUG_DWT */
     processBlock(pv);
-#ifdef DEBUG_DWT
-    pv->cycles_per_block = *DWT_CYCCNT;
-#endif /* DEBUG_DWT */
   }
 }

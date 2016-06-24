@@ -20,7 +20,7 @@
 HvMessage *msg_init(HvMessage *m, hv_size_t numElements, hv_uint32_t timestamp) {
   m->timestamp = timestamp;
   m->numElements = (hv_uint16_t) numElements;
-  m->numBytes = (hv_uint16_t) msg_getByteSize(numElements);
+  m->numBytes = (hv_uint16_t) msg_getCoreSize(numElements);
   return m;
 }
 
@@ -43,7 +43,7 @@ HvMessage *msg_initWithBang(HvMessage *m, hv_uint32_t timestamp) {
 HvMessage *msg_initWithSymbol(HvMessage *m, hv_uint32_t timestamp, char *s) {
   m->timestamp = timestamp;
   m->numElements = 1;
-  m->numBytes = sizeof(HvMessage);
+  m->numBytes = sizeof(HvMessage) + (hv_uint16_t) hv_strlen(s);
   msg_setSymbol(m, 0, s);
   return m;
 }
@@ -56,51 +56,18 @@ HvMessage *msg_initWithHash(HvMessage *m, hv_uint32_t timestamp, hv_uint32_t h) 
   return m;
 }
 
-HvMessage *msg_initV(HvMessage *const m, const hv_uint32_t timestamp, const char *format, ...) {
-  va_list ap;
-  va_start(ap, format);
-
-  const int numElem = (int) hv_strlen(format);
-  msg_init(m, numElem, timestamp);
-  for (int i = 0; i < numElem; i++) {
-    switch (format[i]) {
-      case 'b': msg_setBang(m,i); break;
-      case 'f': msg_setFloat(m, i, (float) va_arg(ap, double)); break;
-      case 's': msg_setSymbol(m, i, (char *) va_arg(ap, char *)); break;
-      case 'h': // hash not supported
-      default: break;
-    }
-  }
-  va_end(ap);
-
-  return m;
-}
-
-hv_size_t msg_getNumHeapBytes(const HvMessage *m) {
-  // get the size of all symbol elements
-  hv_size_t rsizeofsym = 0;
-  for (int i = 0; i < msg_getNumElements(m); ++i) {
-    if (msg_isSymbol(m,i)) {
-      rsizeofsym += (hv_size_t) hv_strlen(msg_getSymbol(m,i)) + 1; // +1 to allow for trailing '\0'
-    }
-  }
-
-  // the total byte size on the heap
-  return (msg_getByteSize(msg_getNumElements(m)) + rsizeofsym);
-}
-
 void msg_copyToBuffer(const HvMessage *m, char *buffer, hv_size_t len) {
   HvMessage *r = (HvMessage *) buffer;
 
+  hv_size_t len_r = msg_getCoreSize(msg_getNumElements(m));
+
   // assert that the message is not already larger than the length of the buffer
-  hv_assert(msg_getNumBytes(m) <= len);
+  hv_assert(len_r <= len);
 
   // copy the basic message to the buffer
-  hv_memcpy(r, m, msg_getNumBytes(m));
+  hv_memcpy(r, m, len_r);
 
-  hv_size_t len_r = msg_getNumBytes(m);
-
-  char *p = buffer + msg_getByteSize(msg_getNumElements(m)); // points to the end of the base message
+  char *p = buffer + len_r; // points to the end of the base message
   for (int i = 0; i < msg_getNumElements(m); ++i) {
     if (msg_isSymbol(m,i)) {
       const hv_size_t symLen = (hv_size_t) hv_strlen(msg_getSymbol(m,i)) + 1; // include the trailing null char
@@ -117,7 +84,7 @@ void msg_copyToBuffer(const HvMessage *m, char *buffer, hv_size_t len) {
 
 // the message is serialised such that all symbol elements are placed in order at the end of the buffer
 HvMessage *msg_copy(const HvMessage *m) {
-  const hv_size_t heapSize = msg_getNumHeapBytes(m);
+  const hv_uint32_t heapSize = msg_getSize(m);
   char *r = (char *) hv_malloc(heapSize);
   hv_assert(r != NULL);
   msg_copyToBuffer(m, r, heapSize);
@@ -184,6 +151,7 @@ hv_uint32_t msg_symbolToHash(const char *s) {
   static const hv_int32_t r = 24;
 
   if (s == NULL) return 0;
+
   hv_uint32_t len = (hv_uint32_t) hv_strlen(s);
   hv_uint32_t x = len; // seed (0) ^ len
 

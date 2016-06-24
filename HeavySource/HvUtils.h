@@ -207,6 +207,7 @@ static inline hv_size_t __hv_utils_max_ui(hv_size_t x, hv_size_t y) { return (x 
 static inline hv_size_t __hv_utils_min_ui(hv_size_t x, hv_size_t y) { return (x < y) ? x : y; }
 static inline hv_int32_t __hv_utils_max_i(hv_int32_t x, hv_int32_t y) { return (x > y) ? x : y; }
 static inline hv_int32_t __hv_utils_min_i(hv_int32_t x, hv_int32_t y) { return (x < y) ? x : y; }
+
 #define hv_max_ui(a, b) __hv_utils_max_ui(a, b)
 #define hv_min_ui(a, b) __hv_utils_min_ui(a, b)
 #define hv_max_i(a, b) __hv_utils_max_i(a, b)
@@ -238,7 +239,12 @@ static inline hv_int32_t __hv_utils_min_i(hv_int32_t x, hv_int32_t y) { return (
 #define hv_exp_f(a) expf(a)
 #define hv_abs_f(a) fabsf(a)
 #define hv_log_f(a) logf(a)
-#define hv_log2_f(a) log2f(a)
+#if HV_ANDROID
+  // NOTE(mhroth): for whatever silly reason, log2f is not defined!
+  #define hv_log2_f(a) (1.44269504088896f*logf(a))
+#else
+  #define hv_log2_f(a) log2f(a)
+#endif // HV_ANDROID
 #define hv_log10_f(a) log10f(a)
 #define hv_ceil_f(a) ceilf(a)
 #define hv_floor_f(a) floorf(a)
@@ -259,5 +265,32 @@ static inline hv_int32_t __hv_utils_min_i(hv_int32_t x, hv_int32_t y) { return (
   }
 #endif
 #define hv_min_max_log2(a) __hv_utils_min_max_log2(a)
+
+// Atomics
+#if HV_WIN
+#include <Windows.h>
+#define hv_atomic_bool volatile LONG
+#define HV_SPINLOCK_ACQUIRE(_x) \
+while (InterlockedCompareExchange(&_x, true, false)) { }
+#define HV_SPINLOCK_RELEASE(_x) (_x = false)
+#elif defined(__has_include)
+#if __has_include(<stdatomic.h>)
+#include <stdatomic.h>
+#define hv_atomic_bool volatile atomic_bool
+#define HV_SPINLOCK_ACQUIRE(_x) \
+bool expected = false; \
+while (!atomic_compare_exchange_strong(&_x, &expected, true)) { expected = false; }
+#define HV_SPINLOCK_RELEASE(_x) atomic_store(&_x, false)
+#else
+#define hv_atomic_bool volatile bool
+#define HV_SPINLOCK_ACQUIRE(_x) _x = true;
+#define HV_SPINLOCK_RELEASE(_x) _x = false;
+#endif
+#else
+#define hv_atomic_bool volatile bool
+#define HV_SPINLOCK_ACQUIRE(_x) _x = true;
+#define HV_SPINLOCK_RELEASE(_x) _x = false;
+#endif
+
 
 #endif // _HEAVY_UTILS_H_

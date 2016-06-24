@@ -1,6 +1,4 @@
-#!/usr/bin/python
-
-# Copyright 2015 Section6. All Rights Reserved.
+# Copyright 2015,2016 Enzien Audio, Ltd. All Rights Reserved.
 
 import argparse
 import getpass
@@ -26,14 +24,19 @@ class Colours:
     underline = "\033[4m"
     end = "\033[0m"
 
+# the maxmimum file upload size of 1MB
+__HV_MAX_UPLOAD_SIZE = 1024*1024
+
 def __zip_dir(in_dir, zip_path, file_filter=None):
+    """Recursively zip an entire directory with an optional file filter
+    """
     zf = zipfile.ZipFile(zip_path, mode="w", compression=zipfile.ZIP_DEFLATED)
     for subdir, dirs, files in os.walk(in_dir):
-        for file in files:
-            if (file_filter is None) or (len(file_filter) > 0 and file.lower().split(".")[-1] in file_filter):
+        for f in files:
+            if (file_filter is None) or (f.lower().split(".")[-1] in file_filter):
                 zf.write(
-                    filename=os.path.join(subdir,file),
-                    arcname=os.path.relpath(os.path.join(subdir,file), start=in_dir))
+                    filename=os.path.join(subdir,f),
+                    arcname=os.path.relpath(os.path.join(subdir,f), start=in_dir))
     return zip_path
 
 def __unzip(zip_path, target_dir):
@@ -46,25 +49,36 @@ def main():
         description="Compiles a Pure Data file.")
     parser.add_argument(
         "input_dir",
-        help="A directory containing _main.pd. The entire directory will be uploaded.")
+        help="A directory containing _main.pd. All .pd files in the directory structure will be uploaded.")
     parser.add_argument(
         "-n", "--name",
         default="heavy",
-        help="Patch name. If it doesn't exist, the uploader will fail. Make sure that it exists on the Heavy website.")
+        help="Patch name. If it doesn't exist on the Heavy site, the uploader will fail.")
     parser.add_argument(
         "-g", "--gen",
         nargs="+",
         default=["c"],
-        help="List of generator outputs. Currently supported generators are 'c' and 'js'.")
+        help="List of generator outputs. Currently supported generators are "
+            "'c', 'js', 'pdext', 'pdext-osx', 'unity', 'unity-osx', "
+            "'unity-win-x86', 'unity-win-x86_64', 'wwise', 'wwise-win-x86_64', "
+            "'vst2' ,'vst2-osx', and 'vst2-win-x86_64'.")
     parser.add_argument(
         "-b",
-        help="All files will be placed in the output directory, placed in their own subdirectory corresonding to the generator name.",
+        help="All files will be placed in the output directory, placed in their own subdirectory corresponding to the generator name.",
+        action="count")
+    parser.add_argument(
+        "-y",
+        help="Extract only the generated C files. Static files are deleted. "
+            "Only effective for the 'c' generator.",
         action="count")
     parser.add_argument(
         "-o", "--out",
         nargs="+",
         default=["./"], # by default
         help="List of destination directories for retrieved files. Order should be the same as for --gen.")
+    parser.add_argument(
+        "-r", "--release",
+        help="Optionally request a specific release of Heavy to use while compiling.")
     parser.add_argument(
         "-d", "--domain",
         default="https://enzienaudio.com",
@@ -79,7 +93,7 @@ def main():
         action="count")
     parser.add_argument(
         "--noverify",
-        help="Don't verify the SSL connection. Generally a bad idea.",
+        help="Don't verify the SSL connection. This is generally a very bad idea.",
         action="count")
     parser.add_argument(
         "-v", "--verbose",
@@ -98,17 +112,13 @@ def main():
     # token should be stored in ~/.heavy/token
     token_path = os.path.expanduser(os.path.join("~/", ".heavy", "token"))
 
-    if args.token != None:
+    if args.token is not None:
         # check if token has been passed as a command line arg...
-        post_data["credentials"] = {
-            "token": args.token
-        }
+        post_data["credentials"] = {"token": args.token}
     elif os.path.exists(token_path) and not args.z:
         # ...or if it is stored in the user's home directory
         with open(token_path, "r") as f:
-            post_data["credentials"] = {
-                "token": f.read()
-            }
+            post_data["credentials"] = {"token": f.read()}
     else:
         # otherwise, get the username and password
         post_data["credentials"] = {
@@ -117,6 +127,10 @@ def main():
         }
 
     tick = time.time()
+
+    # parse the optional release argument
+    if args.release:
+        post_data["release"] = args.release
 
     # make a temporary directory
     temp_dir = tempfile.mkdtemp(prefix="lroyal-")
@@ -129,16 +143,25 @@ def main():
             args.input_dir,
             os.path.join(temp_dir, "archive.zip"),
             file_filter={"pd"})
+        if os.stat(zip_path).st_size > __HV_MAX_UPLOAD_SIZE:
+            raise Exception("The target directory, zipped, is {0} bytes. The maximum upload size of 1MB.".format(
+                os.stat(zip_path).st_size))
     except Exception as e:
-        print e
+        print "{0}Error:{1} {2}".format(Colours.red, Colours.end, e)
         shutil.rmtree(temp_dir) # clean up the temporary directory
         return
 
     post_data["name"] = args.name
 
     # the outputs to generate (always include c)
-    __SUPPORTED_GENERATOR_SET = {"c", "js"}
-    post_data["gen"] = list(({"c"} | set(args.gen)) & __SUPPORTED_GENERATOR_SET)
+    __SUPPORTED_GENERATOR_SET = {
+        "c", "js",
+        "pdext", "pdext-osx",
+        "unity", "unity-osx", "unity-win-x86", "unity-win-x86_64",
+        "wwise", "wwise-win-x86_64",
+        "vst2", "vst2-osx", "vst2-win-x86_64",
+    }
+    post_data["gen"] = list(({"c"} | {s.lower() for s in set(args.gen)}) & __SUPPORTED_GENERATOR_SET)
 
     # upload the job, get the response back
     # NOTE(mhroth): multipart-encoded file can only be sent as a flat dictionary,
@@ -151,6 +174,7 @@ def main():
 
     if r.status_code != requests.codes.ok:
         shutil.rmtree(temp_dir) # clean up the temporary directory
+        print "Getting a weird error? Get the latest uploader at https://enzienaudio.com/static/uploader.py"
         r.raise_for_status() # raise an exception
 
     # decode the JSON API response
@@ -203,7 +227,9 @@ def main():
           "type": "file"
         }
       ],
-      "warnings": [],
+      "warnings": [
+        {"details": "blah blah blah"}
+      ],
       "meta": {
         "token": "11AS0qPRmjTUHEMSovPEvzjodnzB1xaz"
       }
@@ -219,25 +245,32 @@ def main():
 
     # update the api token, if present
     if "token" in reply_json.get("meta",{}) and not args.x:
-        if args.token == None:
+        if args.token is not None:
+            if reply_json["meta"]["token"] != args.token:
+                print "WARNING: Token returned by API is not the same as the "
+                "token supplied at the command line. (old = %s, new = %s)".format(
+                    args.token,
+                    reply_json["meta"]["token"])
+        else:
             if not os.path.exists(os.path.dirname(token_path)):
-                os.makedirs(os.path.dirname(token_path)) # ensure that the .heavy directory exists
+                # ensure that the .heavy directory exists
+                os.makedirs(os.path.dirname(token_path))
             with open(token_path, "w") as f:
                 f.write(reply_json["meta"]["token"])
-            os.chmod(token_path, stat.S_IRUSR | stat.S_IWUSR) # force rw------- permissions on the file
-        else:
-            if reply_json["meta"]["token"] != args.token:
-                print "WARNING: Could not update API token. (old = %s, new = %s)" % (args.token, reply_json["meta"]["token"])
+            # force rw------- permissions on the file
+            os.chmod(token_path, stat.S_IRUSR | stat.S_IWUSR)
 
     # print any warnings
-    for x in r_json["warnings"]:
-        print "{0}Warning:{1} {2}".format(Colours.yellow, Colours.end, x["detail"])
+    for i,x in enumerate(r_json.get("warnings",[])):
+        print "{3}) {0}Warning:{1} {2}".format(
+            Colours.yellow, Colours.end, x["detail"], i+1)
 
     # check for errors
     if len(r_json.get("errors",[])) > 0:
         shutil.rmtree(temp_dir) # clean up the temporary directory
-        for x in r_json["errors"]:
-            print "{0}Error:{1} {2}".format(Colours.red, Colours.end, x["detail"])
+        for i,x in enumerate(r_json["errors"]):
+            print "{3}) {0}Error:{1} {2}".format(
+                Colours.red, Colours.end, x["detail"], i+1)
         return
 
     # retrieve all requested files
@@ -264,6 +297,12 @@ def main():
                 os.makedirs(target_dir) # ensure that the output directory exists
             __unzip(c_zip_path, target_dir)
 
+            if g == "c" and args.y:
+                keep_files = ("_{0}.h".format(args.name), "_{0}.c".format(args.name))
+                for f in os.listdir(target_dir):
+                    if not f.endswith(keep_files):
+                        os.remove(os.path.join(target_dir, f));
+
             print "{0} files placed in {1}".format(g, target_dir)
         else:
             print "{0}Warning:{1} {2} files could not be retrieved.".format(
@@ -273,8 +312,9 @@ def main():
     # delete the temporary directory
     shutil.rmtree(temp_dir)
 
-    print "Job URL", reply_json["data"]["links"]["self"]
+    print "Job URL:", reply_json["data"]["links"]["self"]
     print "Total request time: {0}ms".format(int(1000.0*(time.time()-tick)))
+    print "Heavy release:", reply_json.get("meta",{}).get("release", "default")
 
 def __get_file_url_for_generator(json_api, g):
     """Returns the file link for a specific generator.

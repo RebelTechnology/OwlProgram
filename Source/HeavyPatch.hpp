@@ -10,7 +10,12 @@
 #define HV_OWL_PARAM_C "Channel-C"
 #define HV_OWL_PARAM_D "Channel-D"
 #define HV_OWL_PARAM_E "Channel-E"
+#define HV_OWL_PARAM_F "Channel-F"
+#define HV_OWL_PARAM_G "Channel-G"
+#define HV_OWL_PARAM_H "Channel-H"
 #define HV_OWL_PARAM_PUSH "Channel-Push"
+#define HEAVY_MESSAGE_POOL_SIZE  4 // in kB (default 10kB)
+#define HEAVY_MESSAGE_QUEUE_SIZE 1 // in kB (default 2kB)
 
 extern "C" {
   static bool isButtonPressed(PatchButtonId bid){
@@ -48,9 +53,8 @@ extern "C" {
 
 class HeavyPatch : public Patch {
 private:
-  bool pushbutton;
-  unsigned int receiverHash[6];
-
+  unsigned int receiverHash[9];
+  HvMessage* notein;
 public:
   HeavyPatch() {
     registerParameter(PARAMETER_E, HV_OWL_PARAM_A);
@@ -63,37 +67,68 @@ public:
     receiverHash[2] = hv_stringToHash(HV_OWL_PARAM_C);
     receiverHash[3] = hv_stringToHash(HV_OWL_PARAM_D);
     receiverHash[4] = hv_stringToHash(HV_OWL_PARAM_E);
-    receiverHash[5] = hv_stringToHash(HV_OWL_PARAM_PUSH);
-    context = hv_owl_new(getSampleRate());
+    receiverHash[5] = hv_stringToHash(HV_OWL_PARAM_F);
+    receiverHash[6] = hv_stringToHash(HV_OWL_PARAM_G);
+    receiverHash[7] = hv_stringToHash(HV_OWL_PARAM_H);
+    receiverHash[8] = hv_stringToHash(HV_OWL_PARAM_PUSH);
+    context = hv_owl_new_with_options(getSampleRate(), 
+				      HEAVY_MESSAGE_POOL_SIZE, 
+				      HEAVY_MESSAGE_QUEUE_SIZE);
     hv_setPrintHook(context, &printHook);
     hv_setSendHook(context, sendHook);
+
+    // create note in message
+    notein = (HvMessage*)malloc(hv_msg_getByteSize(5));
+    hv_msg_init(notein, 5, 0.0);
+    hv_msg_setFloat(notein, 0, 60.0); // note
+    hv_msg_setFloat(notein, 1, 80.0); // velocity
+    hv_msg_setFloat(notein, 2, 1.0f); // channel
+    hv_msg_setFloat(notein, 3, 0x90); // command
+    hv_msg_setFloat(notein, 4, 0.0f); // port
   }
   
   ~HeavyPatch() {
     hv_owl_free(context);
+    free(notein);
   }
   
+  void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){
+    if(bid == PUSHBUTTON){
+      hv_sendFloatToReceiver(context, receiverHash[8], value ? 1.0 : 0.0);
+    }else if(bid >= MIDI_NOTE_BUTTON){
+      // send message to notein object
+      unsigned int hash = 0x67E37CA3; // __hv_notein
+      float note = (float)(bid - MIDI_NOTE_BUTTON);
+      float velocity = (float)(value>>5);
+      // unsigned int hash = 0x41BE0F9C; // __hv_ctlin
+      float ms = 1000.0f*(samples+getBlockSize())/getSampleRate(); // delay in milliseconds
+      // float cmd = value ? 0x90 : 0x80;
+      hv_msg_setFloat(notein, 0, note);
+      hv_msg_setFloat(notein, 1, velocity);
+      // notein expects: note, velocity, channel, command, port
+      // not thread safe
+      hv_scheduleMessageForReceiver(context, hash, ms, notein);
+    }
+  }
+
   void processAudio(AudioBuffer &buffer) {
     float paramA = getParameterValue(PARAMETER_A);
     float paramB = getParameterValue(PARAMETER_B);
     float paramC = getParameterValue(PARAMETER_C);
     float paramD = getParameterValue(PARAMETER_D);
     float paramE = getParameterValue(PARAMETER_E);
-    if(isButtonPressed(PUSHBUTTON) != pushbutton){
-      pushbutton = isButtonPressed(PUSHBUTTON);
-      hv_sendFloatToReceiver(context, receiverHash[5], pushbutton ? 1.0 : 0.0);
-    }
+    float paramF = getParameterValue(PARAMETER_F);
+    float paramG = getParameterValue(PARAMETER_G);
+    float paramH = getParameterValue(PARAMETER_H);
     hv_sendFloatToReceiver(context, receiverHash[0], paramA);
     hv_sendFloatToReceiver(context, receiverHash[1], paramB);
     hv_sendFloatToReceiver(context, receiverHash[2], paramC);
     hv_sendFloatToReceiver(context, receiverHash[3], paramD);
     hv_sendFloatToReceiver(context, receiverHash[4], paramE);
-    // hv_sendFloatToReceiver(context, HV_OWL_PARAM_B, paramB);
-    // hv_sendFloatToReceiver(context, HV_OWL_PARAM_C, paramC);
-    // hv_sendFloatToReceiver(context, HV_OWL_PARAM_D, paramD);
-    // hv_sendFloatToReceiver(context, HV_OWL_PARAM_E, paramE);
-
-    float* outputs[] = {buffer.getSamples(0), buffer.getSamples(1) };    
+    hv_sendFloatToReceiver(context, receiverHash[5], paramF);
+    hv_sendFloatToReceiver(context, receiverHash[6], paramG);
+    hv_sendFloatToReceiver(context, receiverHash[7], paramH);
+    float* outputs[] = {buffer.getSamples(LEFT_CHANNEL), buffer.getSamples(RIGHT_CHANNEL) };    
     hv_owl_process(context, outputs, outputs, getBlockSize());		     
   }
   

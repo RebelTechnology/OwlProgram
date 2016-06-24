@@ -5,22 +5,22 @@
 #include "ProgramVector.h"
 #include "PatchProcessor.h"
 #include "basicmaths.h"
+#include "main.h"
 
 AudioBuffer::~AudioBuffer(){}
 
 PatchProcessor* getInitialisingPatchProcessor();
 
-Patch::Patch() : processor(getInitialisingPatchProcessor()){
-}
+Patch::Patch(){}
 
 Patch::~Patch(){}
 
-void Patch::registerParameter(PatchParameterId pid, const char* name, const char* description){
+void Patch::registerParameter(PatchParameterId pid, const char* name){
   if(getProgramVector()->registerPatchParameter != NULL)
     getProgramVector()->registerPatchParameter(pid, name);
 }
 
-double Patch::getSampleRate(){
+float Patch::getSampleRate(){
   return getProgramVector()->audio_samplingrate;
 }
 
@@ -29,21 +29,34 @@ int Patch::getBlockSize(){
 }
 
 float Patch::getParameterValue(PatchParameterId pid){
-  return processor->getParameterValue(pid);
+  //  return getInitialisingPatchProcessor()->getParameterValue(pid);
   // if(pid < getProgramVector()->parameters_size)
-  //   return getProgramVector()->parameters[pid]/4096.0f;
-  // return 0.0;
+  if(pid < getProgramVector()->parameters_size){
+    if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4){
+      return (4095 - getProgramVector()->parameters[pid])/4096.0f;
+    }else{
+      return getProgramVector()->parameters[pid]/4096.0f;
+    }
+  }
+  return 0.0f;
 }
 
-AudioBuffer* Patch::createMemoryBuffer(int channels, int samples){
-  return AudioBuffer::create(channels, samples);
-}
-
-void Patch::setButton(PatchButtonId bid, bool pressed){
-  if(pressed)
-    getProgramVector()->buttons |= 1<<bid;
+void Patch::setParameterValue(PatchParameterId pid, float value){
+  if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4)
+    doSetPatchParameter(pid, (4095 - value)*4096.0f);
   else
-    getProgramVector()->buttons &= ~(1<<bid);
+    doSetPatchParameter(pid, value*4096.0f);
+  // if(pid < getProgramVector()->parameters_size){
+  //   if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4){
+  //     getProgramVector()->parameters[pid] = (4095 - value)*4096.0f;
+  //   }else{
+  //     getProgramVector()->parameters[pid] = value*4096.0f;
+  //   }
+  // }
+}
+
+void Patch::setButton(PatchButtonId bid, uint16_t value, uint16_t samples){
+  doSetButton(bid, value, samples);
 }
 
 bool Patch::isButtonPressed(PatchButtonId bid){
@@ -51,9 +64,12 @@ bool Patch::isButtonPressed(PatchButtonId bid){
 }
 
 int Patch::getSamplesSinceButtonPressed(PatchButtonId bid){
-  int index = bid+PARAMETER_F;
-  return index <= getProgramVector()->parameters_size ? 
-    getProgramVector()->parameters[index] : 0;
+  // deprecated
+  return 0;
+}
+
+AudioBuffer* Patch::createMemoryBuffer(int channels, int samples){
+  return AudioBuffer::create(channels, samples);
 }
 
 #define DWT_CYCCNT ((volatile unsigned int *)0xE0001004)
@@ -70,3 +86,21 @@ int Patch::getElapsedCycles(){
 AudioBuffer* AudioBuffer::create(int channels, int samples){
   return new ManagedMemoryBuffer(channels, samples);
 }
+
+FloatParameter Patch::getParameter(const char* name, float defaultValue){
+  return getFloatParameter(name, 0.0f, 1.0f, defaultValue, 0.0f, 0.0f, LIN);
+}
+
+FloatParameter Patch::getFloatParameter(const char* name, float min, float max, float defaultValue, float lambda, float delta, float skew){
+  return getInitialisingPatchProcessor()->getParameter(name, min, max, defaultValue, lambda, delta, skew);
+}
+
+IntParameter Patch::getIntParameter(const char* name, int min, int max, int defaultValue, float lambda, float delta, float skew){
+  return getInitialisingPatchProcessor()->getParameter(name, min, max, defaultValue, lambda, delta, skew);
+}
+
+const float Patch::EXP = 0.5;
+const float Patch::LIN = 1.0;
+const float Patch::LOG = 2.0;
+const uint16_t Patch::ON = 4095;
+const uint16_t Patch::OFF = 0;
