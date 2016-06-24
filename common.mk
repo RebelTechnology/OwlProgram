@@ -2,7 +2,7 @@
 DSPLIB=Libraries/CMSIS/DSP_Lib/Source
 
 # Tool path
-TOOLROOT ?= Tools/gcc-arm-none-eabi-5_2-2015q4/bin
+TOOLROOT ?= Tools/gcc-arm-none-eabi-4_9-2015q2/bin
 
 CMSIS ?= Libraries/CMSIS/Include/
 
@@ -64,7 +64,7 @@ $(BUILD)/%.map: $(BUILD)/%.elf
 size:
 	$(NM) --print-size --size-sort $(BUILD)/$(TARGET).elf | tail -n 10
 	$(SIZE) $(BUILD)/$(TARGET).elf
-	ls -s --block-size=1 $(BUILD)/$(TARGET).bin
+	ls -s $(BUILD)/$(TARGET).bin
 
 # pull in dependencies
 -include $(OBJS:.o=.d) $(SOLO_OBJS:.o=.d) $(MULTI_OBJS:.o=.d)
