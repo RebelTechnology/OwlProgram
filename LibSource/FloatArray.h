@@ -120,7 +120,7 @@ public:
   void negate(FloatArray& destination);
   
   /**
-   * Copy and negate the array.
+   * Negate the array.
    * Sets each element in the array to its opposite.
   */
   void negate(); 
@@ -147,7 +147,7 @@ public:
   
   /**
    * Mean of the array.
-   * Gets the mean of the values in the array.
+   * Gets the mean (or average) of the values in the array.
   */
   float getMean();
   
