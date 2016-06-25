@@ -20,13 +20,13 @@ void FastFourierTransform::init(int len){
   // Supported FFT Lengths are 32, 64, 128, 256, 512, 1024, 2048, 4096.
 }
 
-void FastFourierTransform::fft(FloatArray& in, ComplexFloatArray& out){
+void FastFourierTransform::fft(FloatArray in, ComplexFloatArray out){
   ASSERT(in.getSize() >= getSize(), "Input array too small");
   ASSERT(out.getSize() >= getSize(), "Output array too small");
   arm_rfft_fast_f32(&instance, (float*)in, (float*)out, 0);
 }
 
-void FastFourierTransform::ifft(ComplexFloatArray& in, FloatArray& out){
+void FastFourierTransform::ifft(ComplexFloatArray in, FloatArray out){
   ASSERT(in.getSize() >= getSize(), "Input array too small");
   ASSERT(out.getSize() >= getSize(), "Output array too small");
   arm_rfft_fast_f32(&instance, (float*)in, (float*)out, 1);
@@ -55,7 +55,7 @@ void FastFourierTransform::init(int aSize){
   temp = ComplexFloatArray::create(getSize());
 }
 
-void FastFourierTransform::fft(FloatArray& input, ComplexFloatArray& output){
+void FastFourierTransform::fft(FloatArray input, ComplexFloatArray output){
   ASSERT(input.getSize() >= getSize(), "Input array too small");
   ASSERT(output.getSize() >= getSize(), "Output array too small");
   for(int n=0; n<getSize(); n++){
@@ -65,7 +65,7 @@ void FastFourierTransform::fft(FloatArray& input, ComplexFloatArray& output){
   kiss_fft(cfgfft, (kiss_fft_cpx*)(float*)temp.getData(), (kiss_fft_cpx*)(float*)output);
 }
   
-void FastFourierTransform::ifft(ComplexFloatArray& input, FloatArray& output){
+void FastFourierTransform::ifft(ComplexFloatArray input, FloatArray output){
   ASSERT(input.getSize() >= getSize(), "Input array too small");
   ASSERT(output.getSize() >= getSize(), "Output array too small");
   kiss_fft(cfgifft, (kiss_fft_cpx*)(float*)input, (kiss_fft_cpx*)(float*)temp.getData());

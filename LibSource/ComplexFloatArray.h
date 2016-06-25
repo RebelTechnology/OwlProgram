@@ -122,7 +122,7 @@ public:
     The magnitudes of the elements of the array.
     @param[out] destination The array where the magnitude values will be stored.
   */  
-  void getMagnitudeValues(FloatArray& destination);
+  void getMagnitudeValues(FloatArray destination);
   
   /**
     The magnitude squared of an element of the array.
@@ -135,34 +135,34 @@ public:
     The squared magnitudes of the elements of the array.
     @param[out] destination The array where the magnitude squared values will be stored.
   */  
-  void getMagnitudeSquaredValues(FloatArray& destination);
+  void getMagnitudeSquaredValues(FloatArray destination);
   
    /**
     The complex conjugate values of the element of the array.
     @param[out] destination The array where the complex conjugate values will be stored.
   */  
-  void getComplexConjugateValues(ComplexFloatArray& destination);
+  void getComplexConjugateValues(ComplexFloatArray destination);
   
    /**
     Complex dot product between arrays.
     @param[in] operand2 The second operand of the dot product
     @param[out] result The array where the result of the dot product is stored 
   */  
-  void complexDotProduct(ComplexFloatArray& operand2, ComplexFloat& result);
+  void complexDotProduct(ComplexFloatArray operand2, ComplexFloat& result);
 
    /**
     Complex by complex multiplication between arrays.
     @param[in] operand2 The second operand of the multiplication
     @param[out] result The array where the result of the multiplication is stored 
   */  
-  void complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result);
+  void complexByComplexMultiplication(ComplexFloatArray operand2, ComplexFloatArray result);
   
    /**
     Complex by real multiplication between arrays.
     @param[in] operand2 The second operand of the multiplication
     @param[out] result The array where the result of the multiplication is stored 
   */ 
-  void complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result);
+  void complexByRealMultiplication(FloatArray operand2, ComplexFloatArray result);
 
   /**
    * Element-wise sum between complex arrays.
@@ -226,12 +226,12 @@ public:
   /** Get the real part of the elements of the array.
    * @param[out] buf The array where the real part will be stored.
    */   
-  void getRealValues(FloatArray& buf);
+  void getRealValues(FloatArray buf);
   
   /** Get the imaginary part of the elements of the array.
    * @param[out] buf The array where the imaginary part will be stored.
   */   
-  void getImaginaryValues(FloatArray& buf);
+  void getImaginaryValues(FloatArray buf);
   
   /** Array by scalar multiplication.
    * @param factor The value by which all the elements of the array are multiplied.
@@ -297,7 +297,7 @@ public:
    * @return <code>true</code> if the arrays have the same size and the value of each of the elements of the one 
    * match the value of the corresponding element of the other, or <code>false</code> otherwise.
   */
-  bool equals(const ComplexFloatArray& other) const{
+  bool equals(const ComplexFloatArray other) const{
     if(size!=other.getSize()){
       return false;
     }

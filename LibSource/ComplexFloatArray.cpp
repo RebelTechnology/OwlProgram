@@ -13,7 +13,7 @@ float ComplexFloatArray::mag(const int i){
   return result;
 }
 
-void ComplexFloatArray::getMagnitudeValues(FloatArray& destination){
+void ComplexFloatArray::getMagnitudeValues(FloatArray destination){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_cmplx_mag_f32((float*)data, (float*)destination, size);
@@ -37,7 +37,7 @@ float ComplexFloatArray::mag2(const int i){
   return result;
 }
 
-void ComplexFloatArray::getMagnitudeSquaredValues(FloatArray& destination){
+void ComplexFloatArray::getMagnitudeSquaredValues(FloatArray destination){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_cmplx_mag_squared_f32((float*)data, (float*)destination, size);
@@ -48,7 +48,7 @@ void ComplexFloatArray::getMagnitudeSquaredValues(FloatArray& destination){
 #endif  
 }
 
-void ComplexFloatArray::complexDotProduct(ComplexFloatArray& operand2, ComplexFloat& result){
+void ComplexFloatArray::complexDotProduct(ComplexFloatArray operand2, ComplexFloat& result){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_cmplx_dot_prod_f32 ( (float*)data, (float*)operand2, size, &(result.re), &(result.im) );
@@ -66,7 +66,7 @@ void ComplexFloatArray::complexDotProduct(ComplexFloatArray& operand2, ComplexFl
 #endif  
 }
 
-void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result){
+void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray operand2, ComplexFloatArray result){
   ASSERT(operand2.size == size && result.size >= size, "Arrays size mismatch");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -114,7 +114,7 @@ void ComplexFloatArray::subtract(ComplexFloatArray operand2){
   subtract(operand2, *this);
 }
 
-void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray& destination){
+void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray destination){
   ASSERT(size==destination.getSize(), "Wrong array size");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -129,7 +129,7 @@ void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray& destination
 #endif  
 }
 
-void ComplexFloatArray::complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result){
+void ComplexFloatArray::complexByRealMultiplication(FloatArray operand2, ComplexFloatArray result){
   ASSERT(size==operand2.getSize(), "Wrong size"); 
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -175,13 +175,13 @@ float ComplexFloatArray::getMaxMagnitudeValue(){ //this is probably slower than 
   return maxMag;
 }
 
-void ComplexFloatArray::getRealValues(FloatArray& buf){
+void ComplexFloatArray::getRealValues(FloatArray buf){
   for(int n=0; n<size; n++){
     buf[n]=data[n].re;
   }
 }
 
-void ComplexFloatArray::getImaginaryValues(FloatArray& buf){
+void ComplexFloatArray::getImaginaryValues(FloatArray buf){
   for(int n=0; n<size; n++){
     buf[n]=data[n].im;
   }
