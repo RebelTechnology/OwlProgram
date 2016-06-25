@@ -67,7 +67,7 @@ void ComplexFloatArray::complexDotProduct(ComplexFloatArray& operand2, ComplexFl
 }
 
 void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray& operand2, ComplexFloatArray& result){
-  ASSERT(size==operand2.getSize(), "Wrong size");
+  ASSERT(operand2.size == size && result.size >= size, "Arrays size mismatch");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_cmplx_mult_cmplx_f32( (float*)data, (float*)operand2, (float*)result, size );  
@@ -82,8 +82,40 @@ void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray& operan
 #endif  
 }
 
+void ComplexFloatArray::add(ComplexFloatArray operand2, ComplexFloatArray destination){
+  ASSERT(operand2.size == size && destination.size >= size, "Arrays size mismatch");
+#ifdef ARM_CORTEX
+  arm_add_f32((float*)data, (float*)operand2.data, (float*)destination.data, size*2);
+#else
+  for(int n=0; n<size; n++){
+    destination[n].re = data[n].re + operand2[n].re;
+    destination[n].im = data[n].im + operand2[n].im;
+  }
+#endif /* ARM_CORTEX */  
+}
+
+void ComplexFloatArray::add(ComplexFloatArray operand2){
+  add(operand2, *this);
+}
+
+void ComplexFloatArray::subtract(ComplexFloatArray operand2, ComplexFloatArray destination){
+  ASSERT(operand2.size == size && destination.size >= size, "Arrays size mismatch");
+#ifdef ARM_CORTEX
+  arm_sub_f32((float*)data, (float*)operand2.data, (float*)destination.data, size*2);
+#else
+  for(int n=0; n<size; n++){
+    destination[n].re = data[n].re - operand2[n].re;
+    destination[n].im = data[n].im - operand2[n].im;
+  }
+#endif /* ARM_CORTEX */  
+}
+
+void ComplexFloatArray::subtract(ComplexFloatArray operand2){
+  subtract(operand2, *this);
+}
+
 void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray& destination){
-  ASSERT(size==destination.getSize(), "Wrong size");
+  ASSERT(size==destination.getSize(), "Wrong array size");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_cmplx_conj_f32( (float*)data, (float*)destination, size );  
@@ -106,7 +138,7 @@ void ComplexFloatArray::complexByRealMultiplication(FloatArray& operand2, Comple
   float *pSrcCmplx=(float*)data;
   float *pSrcReal=(float*)operand2;
   float *pCmplxDst=(float*)result;
-  for(int n=0; n<size; n++) {        
+  for(int n=0; n<size; n++) {
       pCmplxDst[(2*n)+0] = pSrcCmplx[(2*n)+0] * pSrcReal[n];        
       pCmplxDst[(2*n)+1] = pSrcCmplx[(2*n)+1] * pSrcReal[n];        
   }        

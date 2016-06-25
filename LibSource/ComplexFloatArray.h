@@ -163,6 +163,37 @@ public:
     @param[out] result The array where the result of the multiplication is stored 
   */ 
   void complexByRealMultiplication(FloatArray& operand2, ComplexFloatArray& result);
+
+  /**
+   * Element-wise sum between complex arrays.
+   * Sets each element in **destination** to the complex sum of the corresponding element of the array and **operand2**
+   * @param[in] operand2 second operand for the sum
+   * @param[out] destination the destination array
+  */
+  void add(ComplexFloatArray operand2, ComplexFloatArray destination);
+
+  /**
+   * In-place element-wise sum between complex arrays.
+   * Adds each element of **operand2** to the corresponding element in the array.
+   * @param operand2 second operand for the sum
+  */
+  void add(ComplexFloatArray operand2);
+
+  /**
+   * Element-wise difference between complex arrays.
+   * Sets each element in **destination** to the complex difference between the corresponding element of the array and **operand2**
+   * @param[in] operand2 second operand for the subtraction
+   * @param[out] destination the destination array
+  */
+  void subtract(ComplexFloatArray operand2, ComplexFloatArray destination);
+
+  /**
+   * In-place element-wise difference between complex arrays.
+   * Sutracts each element of **operand2** from the corresponding element in the array.
+   * @param operand2 second operand for the sum
+  */
+  void subtract(ComplexFloatArray operand2);
+
   int getSize() const{
     return size;
   }
@@ -183,8 +214,8 @@ public:
    * A subset of the array.
    * Returns an array that points to subset of the memory used by the original array.
    * @param[in] offset the first element of the subset.
-   * @param[in] length the number of elments in the new FloatArray.
-   * @return the newly created FloatArray.
+   * @param[in] length the number of elments in the new ComplexFloatArray.
+   * @return the newly created ComplexFloatArray.
    * @remarks no memory is allocated by this method. The memory is still shared with the original array.
    * The memory should not be de-allocated elsewhere (e.g.: by calling ComplexFloatArray::destroy() on the original ComplexFloatArray) 
    * as long as the ComplexFloatArray returned by this method is still in use.

@@ -212,9 +212,11 @@ void FloatArray::scale(float factor){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   scale(factor, *this);
 }
+
 void FloatArray::clip(){
   clip(1);
 }
+
 void FloatArray::clip(float max){
   for(int n=0; n<size; n++){
     if(data[n]>max)
@@ -326,7 +328,7 @@ void FloatArray::add(float scalar){
 }
 
 void FloatArray::subtract(FloatArray operand2, FloatArray destination){ //allows in-place
-  ASSERT(operand2.size == size && destination.size==size, "Arrays must be same size");
+  ASSERT(operand2.size == size && destination.size >= size, "Arrays size mismatch");
   /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   /* despite not explicitely documented in the CMSIS documentation,
