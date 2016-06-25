@@ -15,14 +15,14 @@ PatchProcessor* getInitialisingPatchProcessor(){
 }
 
 void doSetPatchParameter(uint8_t id, int16_t value){
-  ProgramVector vec = getProgramVector();
+  ProgramVector* vec = getProgramVector();
   if(vec->checksum >= PROGRAM_VECTOR_CHECKSUM_V12 &&
      vec->setPatchParameter != NULL && vec->parameters[id] != value)
     vec->setPatchParameter(id, value);
 }
 
 void doSetButton(uint8_t id, uint16_t value, uint16_t samples){
-  ProgramVector vec = getProgramVector();
+  ProgramVector* vec = getProgramVector();
   if(vec->checksum >= PROGRAM_VECTOR_CHECKSUM_V12 &&
      vec->setButton != NULL &&
      // if it is not a MIDI note, check that value has changed
