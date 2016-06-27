@@ -20,11 +20,11 @@ public:
     getProgramVector()->serviceCall(OWL_SERVICE_ARM_CFFT_INIT_F32, args, 2);
     // Supported FFT Lengths are 32, 64, 128, 256, 512, 1024, 2048, 4096.
   }
-  void fft(ComplexFloatArray& inout){
+  void fft(ComplexFloatArray inout){
     ASSERT(inout.getSize() >= getSize(), "Input array too small");
     arm_cfft_f32(&instance, (float*)inout, 0, 1); //forward
   }
-  void ifft(ComplexFloatArray& inout){
+  void ifft(ComplexFloatArray inout){
     ASSERT(inout.getSize() >= getSize(), "Input array too small");
    arm_cfft_f32(&instance, (float*)inout, 1, 1); //inverse
   }
@@ -55,12 +55,12 @@ public:
     cfgifft = kiss_fft_alloc(len, 1,0, 0);
     temp = ComplexFloatArray::create(getSize());
   }
-  void fft(ComplexFloatArray& inout){
+  void fft(ComplexFloatArray inout){
     ASSERT(inout.getSize() >= getSize(), "Input array too small");
     kiss_fft(cfgfft, (kiss_fft_cpx*)(float*)inout.getData(), (kiss_fft_cpx*)(float*)temp.getData());
     inout.copyFrom(temp);
   }
-  void ifft(ComplexFloatArray& inout){
+  void ifft(ComplexFloatArray inout){
     ASSERT(inout.getSize() >= getSize(), "Input array too small");
     kiss_fft(cfgifft, (kiss_fft_cpx*)(float*)inout, (kiss_fft_cpx*)(float*)temp.getData());
     temp.scale(1.0f/getSize());

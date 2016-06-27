@@ -53,7 +53,7 @@ public:
    * @remarks Calling this method will mess up the content of the **input** array.
    * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   */
-  void fft(FloatArray& input, ComplexFloatArray& output);
+  void fft(FloatArray input, ComplexFloatArray output);
   
   /**
    * Perform the inverse FFT.
@@ -64,7 +64,7 @@ public:
    * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
    * 
   */
-  void ifft(ComplexFloatArray& input, FloatArray& output);
+  void ifft(ComplexFloatArray input, FloatArray output);
     
   /**
    * Get the size of the FFT
