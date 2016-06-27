@@ -2,7 +2,7 @@
 #define __PatchRegistry_h__
 
 #include <string>
-#include "StompBox.h"
+#include "Patch.h"
 #include "device.h"
 
 class PatchRegistry;

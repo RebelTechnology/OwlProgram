@@ -3,7 +3,7 @@
 #include "SampleBuffer.hpp"
 #include "PatchProcessor.h"
 #include "message.h"
-#include "StompBox.h"
+#include "Patch.h"
 #include "patch.h"
 #include "main.h"
 #include "heap.h"

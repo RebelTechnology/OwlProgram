@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "StompBox.h"
+#include "Patch.h"
 #include "device.h"
 #ifdef ARM_CORTEX
 #include "arm_math.h"
