@@ -33,6 +33,9 @@ extern "C"{
   char* WEB_getStatus();
   char* WEB_getPatchName();
   char* WEB_getParameterName(int pid);
+
+  void *pvPortMalloc( size_t xWantedSize );
+  void vPortFree( void *pv );
 }
 
 extern "C"{
@@ -221,4 +224,11 @@ void programStatus(ProgramVectorAudioStatus status){}
 
 int serviceCall(int service, void** params, int len){
   return -1;
+}
+
+void *pvPortMalloc( size_t xWantedSize ){
+  return malloc(xWantedSize);
+}
+void vPortFree( void *pv ){
+  free(pv);
 }
