@@ -227,8 +227,14 @@ int serviceCall(int service, void** params, int len){
 }
 
 void *pvPortMalloc( size_t xWantedSize ){
+#ifdef malloc
+#undef malloc
+#endif
   return malloc(xWantedSize);
 }
 void vPortFree( void *pv ){
+#ifdef free
+#undef free
+#endif
   free(pv);
 }
