@@ -1,6 +1,6 @@
 #include <cstddef>
 #include <string.h>
-#include "StompBox.h"
+#include "Patch.h"
 #include "device.h"
 #include "ProgramVector.h"
 #include "PatchProcessor.h"

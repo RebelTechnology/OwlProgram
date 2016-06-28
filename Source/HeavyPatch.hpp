@@ -1,7 +1,7 @@
 #ifndef __HeavyPatch_hpp__
 #define __HeavyPatch_hpp__
 
-#include "StompBox.h"
+#include "Patch.h"
 #include "basicmaths.h"
 #include "Heavy_owl.h"
 

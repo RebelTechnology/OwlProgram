@@ -2,7 +2,7 @@
 #define __PatchProcessor_h__
 
 #include <stdint.h>
-#include "StompBox.h"
+#include "Patch.h"
 #include "device.h"
 
 class ParameterUpdater {

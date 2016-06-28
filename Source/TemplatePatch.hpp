@@ -29,7 +29,7 @@
 #ifndef __TemplatePatch_hpp__
 #define __TemplatePatch_hpp__
 
-#include "StompBox.h"
+#include "Patch.h"
 
 class TemplatePatch : public Patch {
 public:
