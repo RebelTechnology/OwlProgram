@@ -52,7 +52,7 @@ export PATCHFILE PATCHIN PATCHOUT
 export HEAVYTOKEN HEAVY
 export LDSCRIPT CPPFLAGS EMCCFLAGS ASFLAGS
 
-DEPS += $(BUILD)/patch.cpp $(BUILD)/patch.h $(BUILD)/Source/startup.s 
+DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
 
 all: patch
 
@@ -62,10 +62,10 @@ all: patch
 	@echo Building patch $(PATCHNAME)
 	@mkdir -p $(BUILD)/Source
 
-$(BUILD)/patch.cpp: .FORCE
+$(BUILD)/registerpatch.cpp: .FORCE
 	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $@
 
-$(BUILD)/patch.h: .FORCE
+$(BUILD)/registerpatch.h: .FORCE
 	@echo "#include \"$(PATCHFILE)\"" > $@
 
 $(BUILD)/Source/startup.s: .FORCE

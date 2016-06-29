@@ -4,7 +4,7 @@
 #include "PatchProcessor.h"
 #include "message.h"
 #include "Patch.h"
-#include "patch.h"
+#include "registerpatch.h"
 #include "main.h"
 #include "heap.h"
 
@@ -57,7 +57,7 @@ void setup(ProgramVector* pv){
   size_t before = xPortGetFreeHeapSize();
 #endif
 #endif
-#include "patch.cpp"
+#include "registerpatch.cpp"
 #ifdef DEBUG_MEM
   // todo xPortGetFreeHeapSize() before and after
   // extern uint32_t total_heap_used;
