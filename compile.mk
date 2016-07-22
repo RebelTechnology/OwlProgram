@@ -6,7 +6,9 @@ CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp FastFourierTransform.cpp
 CPP_SRC += ShortArray.cpp
 CPP_SRC += Envelope.cpp VoltsPerOctave.cpp Window.cpp
 CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
-CPP_SRC += PatchProgram.cpp SmoothValue.cpp PatchParameter.cpp
+CPP_SRC += SmoothValue.cpp PatchParameter.cpp
+CPP_SRC += PatchProgram.cpp 
+# CPP_SRC += ShortPatchProgram.cpp 
 
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
@@ -74,6 +76,10 @@ vpath %.cpp $(GENSOURCE)
 vpath %.c $(GENSOURCE)
 vpath %.s $(GENSOURCE)
 vpath %.c Libraries/syscalls
+
+$(BUILD)/ShortPatchProgram.o: $(SOURCE)/ShortPatchProgram.cpp $(DEPS)
+	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/ShortPatchProgram.cpp -o $@
+	@$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/ShortPatchProgram.cpp > $(@:.o=.d)
 
 $(BUILD)/PatchProgram.o: $(SOURCE)/PatchProgram.cpp $(DEPS)
 	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/PatchProgram.cpp -o $@
