@@ -104,6 +104,18 @@ void ComplexShortArray::destroy(ComplexShortArray array){
   delete array.data;
 }
 
+void ComplexShortArray::setAll(int16_t value){
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+#ifdef ARM_CORTEX
+  arm_fill_q15(value, (int16_t*)data, size*2 ); //note the *2 multiplier which accounts for real and imaginary parts
+#else
+  ComplexFloat val;
+  val.re=value;
+  val.im=value;
+  setAll(val);
+#endif /* ARM_CORTEX */
+}
+
 #if 0
 void ComplexShortArray::add(ComplexShortArray operand2, ComplexShortArray destination){
   ASSERT(operand2.size == size && destination.size >= size, "Arrays size mismatch");
@@ -273,7 +285,7 @@ void ComplexShortArray::copyFrom(ComplexFloat* other, int length){
 #endif /* ARM_CORTEX */
 }
 
-void ComplexShortArray::setAll(float value){
+void ComplexShortArray::setAll(int16_t value){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_fill_f32(value, (float *)data, size *2 ); //note the *2 multiplier which accounts for real and imaginary parts

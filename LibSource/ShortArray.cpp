@@ -131,7 +131,7 @@ int16_t ShortArray::getRms(){
 #ifdef ARM_CORTEX  
   arm_rms_q15 (data, size, &result);
 #else
-  assert("TODO");
+  ASSERT(false, "TODO");
   result=0;
   int16_t *pSrc= data;
   for(int n=0; n<size; n++){
@@ -484,8 +484,17 @@ void ShortArray::correlateInitialized(ShortArray operand2, ShortArray destinatio
 }
 
 void ShortArray::shift(int shiftValue){
-  arm_shift_q15(data, shiftValue, data, size);
-}
+#ifdef ARM_CORTEX
+    arm_shift_q15(data, shiftValue, data, size);
+#else
+    if(shiftValue > 0)
+      for(int n=0; n<size; n++)
+	data[n] <<= shiftValue;
+    else
+      for(int n=0; n<size; n++)
+	data[n] >>= -shiftValue;
+#endif
+  }
 
 ShortArray ShortArray::create(int size){
   ShortArray fa(new int16_t[size], size);

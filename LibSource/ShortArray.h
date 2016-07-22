@@ -621,7 +621,16 @@ public:
    * @param shiftValue number of positions to shift. A positive value will shift left, a negative value will shift right.
    */
   void shift(int shiftValue){
+#ifdef ARM_CORTEX
     arm_shift_q31(data, shiftValue, data, size);
+#else
+    if(shiftValue > 0)
+      for(int n=0; n<size; n++)
+	data[n] <<= shiftValue;
+    else
+      for(int n=0; n<size; n++)
+	data[n] >>= -shiftValue;
+#endif
   }
 };
 #endif // __ShortArray_h__
