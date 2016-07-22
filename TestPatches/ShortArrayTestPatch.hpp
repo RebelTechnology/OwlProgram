@@ -43,14 +43,14 @@ public:
       ar.getMin(&value, &index);
       CHECK(value == -3);
       CHECK(index == 5);
-      CHECK(value == getMinValue());
-      CHECK(index == getMinIndex());
+      CHECK(value == ar.getMinValue());
+      CHECK(index == ar.getMinIndex());
 
       ar.getMax(&value, &index);
       CHECK(value == 4);
-      CHECK*index == 7);
-      CHECK(value == getMaxValue());
-      CHECK(index == getMaxIndex());
+      CHECK(index == 7);
+      CHECK(value == ar.getMaxValue());
+      CHECK(index == ar.getMaxIndex());
     }
     {
       TEST("clear,noise");
@@ -78,12 +78,12 @@ public:
       ShortArray ar = ShortArray::create(100);
       ShortArray ar2 = ShortArray::create(100);
       ar.noise();
-      TEST(ar.equals(ar));
+      CHECK(ar.equals(ar));
       ar.copyTo(ar2);
-      TEST(ar2.equals(ar));
-      ar.clean();
+      CHECK(ar2.equals(ar));
+      ar.clear();
       ar.copyFrom(ar2);
-      TEST(ar.equals(ar));
+      CHECK(ar.equals(ar));
     }
     {
       TEST("rectify");
@@ -107,13 +107,13 @@ public:
       ShortArray ar2 = ShortArray::create(1000);
       ar.noise();
       ar.copyTo(ar2);
-      ar2.reverse;
+      ar2.reverse();
       for(int n = 0; n < ar.getSize(); ++n){
-        CHECK(ar[n]) == ar2[ar2.getSize() - n - 1]); 
+        CHECK(ar[n] == ar2[ar2.getSize() - n - 1]); 
       }
       ar.reverse(ar2);
       for(int n = 0; n < ar.getSize(); ++n){
-        CHECK(ar[n]) == ar2[ar2.getSize() - n - 1]); 
+        CHECK(ar[n] == ar2[ar2.getSize() - n - 1]); 
       }
     }
     {
@@ -134,6 +134,7 @@ public:
     {
       TEST("negate");
       ShortArray ar = ShortArray::create(1000);
+      ShortArray ar2 = ShortArray::create(1000);
       ar.noise();
       ar2.copyFrom(ar);
       ar2.negate();
@@ -150,10 +151,10 @@ public:
       ShortArray ar = ShortArray::create(1000);
       ar.noise();
       int32_t rms=0;
-      for(int n=0; n<ar.getSize; n++){
-        rms+=fa[n]*fa[n];
+      for(int n=0; n<ar.getSize(); n++){
+        rms+=ar[n]*ar[n];
       } 
-      rms=(int16_t)(sqrt(rms/size)i + 0.5);
+      rms=(int16_t)(sqrt(rms/ar.getSize()) + 0.5);
       CHECK_CLOSE(rms, ar.getRms(), 5);
     }
   }
