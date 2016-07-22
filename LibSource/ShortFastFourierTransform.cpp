@@ -23,14 +23,14 @@ void ShortFastFourierTransform::init(int aSize){
 void ShortFastFourierTransform::fft(ShortArray in, ComplexShortArray out){
   ASSERT(in.getSize() >= getSize(), "Input array too small");
   ASSERT(out.getSize() >= getSize(), "Output array too small");
-  arm_rfft_init_q15(&instance, len, 0, 0);
+  arm_rfft_init_q15(&instance, len, 0, 1);
   arm_rfft_q15(&instance, (int16_t*)in.getData(), (int16_t*)out.getData());
 }
 
 void ShortFastFourierTransform::ifft(ComplexShortArray in, ShortArray out){
   ASSERT(in.getSize() >= getSize(), "Input array too small");
   ASSERT(out.getSize() >= getSize(), "Output array too small");
-  arm_rfft_init_q15(&instance, len, 1, 0);
+  arm_rfft_init_q15(&instance, len, 1, 1);
   arm_rfft_q15(&instance, (int16_t*)in.getData(), (int16_t*)out.getData());
 }
 
