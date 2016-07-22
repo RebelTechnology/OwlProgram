@@ -2184,10 +2184,10 @@ arm_status arm_rfft_init_q15(
     /*  Initialization of coef modifier depending on the FFT length */
     switch (S->fftLenReal)
     {
-    case 8192u:
-        S->twidCoefRModifier = 1u;
-        S->pCfft = &arm_cfft_sR_q15_len4096;
-        break;
+    //case 8192u:
+    //    S->twidCoefRModifier = 1u;
+    //    S->pCfft = &arm_cfft_sR_q15_len4096;
+    //    break;
     case 4096u:
         S->twidCoefRModifier = 2u;
         S->pCfft = &arm_cfft_sR_q15_len2048;
