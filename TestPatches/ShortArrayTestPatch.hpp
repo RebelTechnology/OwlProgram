@@ -14,7 +14,9 @@ public:
       TEST("create");
       ShortArray array = ShortArray::create(512);
       CHECK_EQUAL(array.getSize(), 512);
-      CHECK((short*)array != NULL);      
+      REQUIRE(array.getData() != NULL);
+      for(int i=0; i<512; ++i)
+	CHECK_CLOSE(array[i], 0.0, DEFAULT_TOLERANCE);
     }
   }
 };
