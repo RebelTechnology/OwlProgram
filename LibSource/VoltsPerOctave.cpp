@@ -17,11 +17,11 @@ VoltsPerOctave::VoltsPerOctave(bool input) : tune(0.0) {
   }else{
     if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE){
       if(input){
-	multiplier = -4.29;
-	offset = -0.06382;
+        multiplier = -4.29;
+        offset = -0.06382;
       }else{
-	multiplier = -4.642;
-	offset = 0.1208;
+        multiplier = -4.642;
+        offset = 0.1208;
       }
     }else{
       multiplier = 2.0f;
@@ -43,4 +43,8 @@ void VoltsPerOctave::getFrequency(FloatArray samples, FloatArray output){
   //   output[i] = voltsToHertz(output[i]);
   for(int i=0; i<samples.getSize(); ++i)
     output[i] = getFrequency(samples[i]);
+}
+
+void VoltsPerOctave::getFrequency(FloatArray samples){
+  getFrequency(samples, samples);
 }
