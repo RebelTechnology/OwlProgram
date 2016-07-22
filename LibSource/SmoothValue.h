@@ -61,16 +61,17 @@ typedef SmoothValue<int> SmoothInt;
  * Only updates the value if the absolute difference is greater than delta
  */
 template<typename T>
-class StiffValue {
+class StiffValue {  
 private:
-  T delta;
   T value;
 public:
-  StiffValue(){}
+  T delta;
+  StiffValue()
+    : value(0.0), delta(0.02){}
   StiffValue(T d)
-   : delta(d){}
+    : value(0.0), delta(d){}
   StiffValue(T d, T initialValue)
-   : delta(d), value(initialValue) {}
+    : value(initialValue), delta(d){}
   void update(T newValue){
     if(abs(value-newValue) > delta)
       value = newValue;
