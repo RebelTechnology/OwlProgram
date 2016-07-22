@@ -3,6 +3,8 @@
 
 #include "ShortArray.h"
 #include "basicmaths.h"
+class ComplexIntArray;
+
 /**
 * A structure defining a fixed point complex number as two members of type int16_t.
 */
@@ -264,7 +266,7 @@ public:
    * }
    * @endcode
   */
-  ComplexShort& operator [](const unsigned int index){
+  ComplexShort& operator [](const int index){
     return data[index];
   }
   
@@ -273,26 +275,17 @@ public:
    * 
    * <code>const</code> version of operator[]
   */
-  ComplexShort& operator [](const unsigned int i) const{
+  ComplexShort& operator [](const int i) const{
     return data[i];
   }
 
-  /**
+  /*
    * Casting operator to ComplexShort*
    * @return A ComplexShort* pointer to the data stored in the ComplexShortArray
   */  
   operator ComplexShort*() {
     return data;
   }
-  
-  /**
-   * Casting operator to int16_t*
-   * @return A int16_t* pointer to the data stored in the ComplexShortArray
-  */ 
-  operator int16_t*() {
-    return (int16_t *)data;
-  }
-  
   /**
    * Get the data stored in the ComplexShortArray.
    * @return a ComplexShort* pointer to the data stored in the ComplexShortArray
@@ -523,5 +516,70 @@ public:
   ComplexIntArray(ComplexInt* array, unsigned int size) :
     data(array), size(size) {}
 
+  static ComplexIntArray create(unsigned int size){
+    return ComplexIntArray(new ComplexInt[size], size);
+  }
+
+  static void destroy(ComplexIntArray array){
+    delete array.data;
+  }
+
+  ComplexInt& operator [](const int index){
+    return data[index];
+  }
+  
+  ComplexInt& operator [](const int i) const{
+    return data[i];
+  }
+
+  void add(ComplexIntArray operand2, ComplexIntArray destination){
+    //ASSERT(operand2.size == size && destination.size >= size, "Arrays size mismatch");
+#ifdef ARM_CORTEX
+    arm_add_q31((int32_t*)data, (int32_t*)operand2.getData(), (int32_t*)destination.getData(), size*2);
+#else
+    for(int n=0; n<size; n++){
+      destination[n].re = data[n].re + operand2[n].re;
+      destination[n].im = data[n].im + operand2[n].im;
+    }
+#endif /* ARM_CORTEX */  
+  }
+
+  void add(ComplexIntArray operand2){
+    add(operand2, *this);
+  }
+  
+  void copyFrom(ComplexShortArray operand2){
+#ifdef ARM_CORTEX
+    arm_q15_to_q31((int16_t*)operand2.getData(), (int32_t*)data, size * 2);
+#else
+    for(int n = 0; n < size; ++n){
+      data[n].re = operand2[n].re;
+      data[n].im = operand2[n].im ;
+    }
+#endif
+  }
+  
+  void copyTo(ComplexShortArray operand2){
+#ifdef ARM_CORTEX
+    arm_q31_to_q15((int32_t*)data, (int16_t*)operand2.getData(), size * 2);
+#else
+    for(int n = 0; n < size; ++n){
+      data[n].re = (int16_t)operand2[n].re;
+      data[n].im = (int16_t)operand2[n].im ;
+    }
+#endif
+  }
+  
+  operator ComplexInt*() {
+    return data;
+  }
+
+  ComplexInt* getData(){
+    return data;
+  }
+
+  unsigned int getSize(){
+    return size;
+  }
 };
 #endif // __ComplexShortArray_h__

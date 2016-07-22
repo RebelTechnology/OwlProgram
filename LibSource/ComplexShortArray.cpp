@@ -79,11 +79,11 @@ void ComplexShortArray::complexDotProduct(ComplexShortArray operand2, ComplexFlo
 }
 #endif /* 0 */
 
-void ComplexShortArray::complexByComplexMultiplication(ComplexShortArray operand2, ComplexIntArray result){
-  ASSERT(operand2.size == size && result.size >= size, "Arrays size mismatch");
+void ComplexShortArray::complexByComplexMultiplication(ComplexShortArray operand2, ComplexShortArray result){
+  //ASSERT(operand2.size == size && result.getSize() >= size, "Arrays size mismatch");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
-  arm_cmplx_mult_cmplx_q15((int16_t*)data, (int16_t*)operand2, (int32_t*)result, size );  
+  arm_cmplx_mult_cmplx_q15((int16_t*)getData(), (int16_t*)operand2.getData(), (int16_t*)result.getData(), size );  
 #else
   assert(false, "TODO");
   float *pSrcA=(float*)data;
@@ -94,6 +94,14 @@ void ComplexShortArray::complexByComplexMultiplication(ComplexShortArray operand
     pDst[(2*n)+1] = pSrcA[(2*n)+0] * pSrcB[(2*n)+1] + pSrcA[(2*n)+1] * pSrcB[(2*n)+0];        
   }        
 #endif  
+}
+
+ComplexShortArray ComplexShortArray::create(unsigned int size){
+  return ComplexShortArray(new ComplexShort[size], size);
+}
+
+void ComplexShortArray::destroy(ComplexShortArray array){
+  delete array.data;
 }
 
 #if 0
@@ -212,14 +220,6 @@ void ComplexShortArray::scale(float factor){
     data[n].im *= factor;
   }
 #endif
-}
-
-ComplexShortArray ComplexShortArray::create(int size){
-  return ComplexShortArray(new ComplexFloat[size], size);
-}
-
-void ComplexShortArray::destroy(ComplexShortArray array){
-  delete array.data;
 }
 
 /* Copies real values from a ShortArray, sets imaginary values to 0
@@ -343,5 +343,4 @@ void ComplexShortArray::setMagnitude(ShortArray magnitude, int offset, int count
     destination.getData()[n].setPolar(magnitude[n], getData()[n].getPhase());
   }
 #endif /* if 0 */
-}
 
