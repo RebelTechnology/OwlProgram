@@ -269,6 +269,14 @@ public:
   void multiply(float scalar);
   
   /**
+   * Array-scalar multiplication.
+   * Multiplies the values in the array by **scalar**.
+   * @param scalar to be subtracted from the array
+   * @param destination the destination array
+  */
+  void multiply(float scalar, FloatArray destination);
+
+/**
    * Convolution between arrays.
    * Sets **destination** to the result of the convolution between the array and **operand2**
    * @param[in] operand2 the second operand for the convolution
