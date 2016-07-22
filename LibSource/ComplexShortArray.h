@@ -25,11 +25,11 @@ struct ComplexShort {
   int16_t getMagnitude(){
   #ifdef ARM_CORTEX
     int16_t out;
-    int16_t[2] in = {re, im};
+    int16_t in[2] = {re, im};
     arm_cmplx_mag_q15(in, &out, 1);
   // function above returns 2.14, so we shift it back to 1.15
   // but first we check we do not lose data.
-    assert(!(out & (1 << 14)));
+  // TODO: make sure it saturates
     out = out >> 1;
     return out;
   #else
@@ -500,7 +500,7 @@ struct ComplexInt {
   Computes and returns the magnitude of the complex number.
   @return The magnitude of the complex number.
   */
-}
+};
 
 class ComplexIntArray {
 private:
@@ -523,6 +523,5 @@ public:
   ComplexIntArray(ComplexInt* array, unsigned int size) :
     data(array), size(size) {}
 
-
-}
+};
 #endif // __ComplexShortArray_h__

@@ -55,21 +55,23 @@ public:
     {
       TEST("clear,noise");
       ShortArray ar = ShortArray::create(1000);
-      int32_t acc;
+      int32_t acc = 0;
       for(int n = 0; n < ar.getSize(); ++n){
         acc += abs(ar[n]);
       }
+      // A newly created arra should be init'd to 0
       CHECK(acc==0);
+      acc = 0;
       ar.noise();
       for(int n = 0; n < ar.getSize(); ++n){
         acc += abs(ar[n]);
       }
-      CHECK(acc>=0);
+      CHECK(acc > 0);
       ar.clear();
       for(int n = 0; n < ar.getSize(); ++n){
-        acc += abs(ar[n]);
+        CHECK(ar[n] == 0);
       }
-      CHECK(acc==0);
+      ar.noise();
       CHECK(ar.getMinValue() < -200);
       CHECK(ar.getMaxValue() > 200);
     }
@@ -147,15 +149,18 @@ public:
       }
     }
     {
-      TEST("reciprocal");
+      TEST("rms");
       ShortArray ar = ShortArray::create(1000);
+      ShortArray ar2 = ShortArray::create(1000);
       ar.noise();
-      int32_t rms=0;
-      for(int n=0; n<ar.getSize(); n++){
-        rms+=ar[n]*ar[n];
+      ar.reciprocal(ar2);
+      float acc = 0;
+      for(int n=0; n<ar.getSize(); ++n){
+        acc += ar[n] * ar[n] / (float)ar.getSize(); 
       } 
-      rms=(int16_t)(sqrt(rms/ar.getSize()) + 0.5);
+      int rms=(sqrtf(acc + 0.5));
       CHECK_CLOSE(rms, ar.getRms(), 5);
     }
+   //TODO: test everything else
   }
 };

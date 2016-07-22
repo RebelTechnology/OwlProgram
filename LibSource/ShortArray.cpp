@@ -131,6 +131,7 @@ int16_t ShortArray::getRms(){
 #ifdef ARM_CORTEX  
   arm_rms_q15 (data, size, &result);
 #else
+  assert("TODO");
   result=0;
   int16_t *pSrc= data;
   for(int n=0; n<size; n++){
@@ -405,12 +406,11 @@ void ShortArray::noise(){
 }
 
 void ShortArray::noise(int16_t min, int16_t max){
-  int16_t amplitude = fabs(max-min);
+  uint16_t amplitude = abs((int32_t)max-(int32_t)min);
   int16_t offset = min;
-  ASSERT(getSize()>10, "10<getSize");
-  ASSERT(size==getSize(), "getSize");
+  //debugMessage("amp off", amplitude,offset);
   for(int n=0; n<size; n++){
-    data[n]=(rand()/(RAND_MAX+1.0f)) * amplitude + offset;
+    data[n]=(rand()/((float)RAND_MAX)) * amplitude + offset;
   }
 }
 

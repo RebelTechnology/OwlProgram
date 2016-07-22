@@ -32,7 +32,6 @@ public:
   }
 
   void processAudio(AudioBuffer &buffer){
-    debugMessage("this");
     FloatArray sig = buffer.getSamples(LEFT_CHANNEL);
     if(success){
       static float phase=0;
@@ -42,7 +41,7 @@ public:
         phase+=inc;
         phase= phase>2*M_PI ? phase-2*M_PI : phase;
       }
-      debugMessage("Tests passed", passed);
+//      debugMessage("Tests passed", passed);
     }else{
       for(int n=0; n<getBlockSize(); n++){
         sig[n]+=0.2*rand()/(float)RAND_MAX;
