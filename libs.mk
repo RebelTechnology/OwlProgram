@@ -40,6 +40,9 @@ OBJS += $(DSPLIB)/SupportFunctions/arm_q15_to_float.o
 OBJS += $(DSPLIB)/SupportFunctions/arm_copy_f32.o
 OBJS += $(DSPLIB)/SupportFunctions/arm_fill_f32.o
 
+OBJS += $(DSPLIB)/SupportFunctions/arm_copy_q15.o
+OBJS += $(DSPLIB)/SupportFunctions/arm_fill_q15.o
+
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_abs_f32.o
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_add_f32.o
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_dot_prod_f32.o

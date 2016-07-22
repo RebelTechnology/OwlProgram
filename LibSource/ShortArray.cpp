@@ -211,10 +211,10 @@ int16_t ShortArray::getVariance(){
 // #endif
 // }
 
-void ShortArray::scale(int16_t factor){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  scale(factor, *this);
-}
+// void ShortArray::scale(int16_t factor){
+// /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+//   scale(factor, *this);
+// }
 
 void ShortArray::clip(){
   clip(1);
