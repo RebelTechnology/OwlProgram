@@ -118,7 +118,7 @@ void ShortArray::reverse(){//in place
 void ShortArray::reciprocal(ShortArray& destination){
   int16_t* data = getData();
   for(int n=0; n<getSize(); n++)
-    destination[n] = 1.0f/data[n];
+    destination[n] = (int16_t)(0.5 + 1.0f/data[n]);
 }
 
 void ShortArray::reciprocal(){//in place
@@ -401,7 +401,7 @@ void ShortArray::negate(){
 }
 
 void ShortArray::noise(){
-  noise(-1, 1);
+  noise(-32768, 32767);
 }
 
 void ShortArray::noise(int16_t min, int16_t max){
@@ -481,6 +481,10 @@ void ShortArray::correlateInitialized(ShortArray operand2, ShortArray destinatio
   //and we flip back operand2, so that the input is not modified
   operand2.reverse();
 #endif /* ARM_CORTEX */  
+}
+
+void ShortArray::shift(int shiftValue){
+  arm_shift_q15(data, shiftValue, data, size);
 }
 
 ShortArray ShortArray::create(int size){

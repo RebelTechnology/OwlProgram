@@ -32,6 +32,7 @@ public:
   }
 
   void processAudio(AudioBuffer &buffer){
+    debugMessage("this");
     FloatArray sig = buffer.getSamples(LEFT_CHANNEL);
     if(success){
       static float phase=0;
