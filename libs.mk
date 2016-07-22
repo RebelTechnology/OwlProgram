@@ -14,6 +14,9 @@ OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_bitreversal2.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_f32.o
+OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_init_q15.o
+OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_q15.o
+OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_q15.o
 
 OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df1_init_f32.o
 OBJS += $(DSPLIB)/FilteringFunctions/arm_biquad_cascade_df1_f32.o
