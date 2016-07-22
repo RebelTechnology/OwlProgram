@@ -156,7 +156,7 @@
     #define hv_malloc(_n) malloc(_n)
     #define hv_free(x) free(x)
   #endif
-#elif ARM_CORTEX
+#elif defined ARM_CORTEX
   #include "alloca.h"
   #define hv_alloca(_n)  alloca(_n)
   #define hv_malloc(_n) pvPortMalloc(_n)
@@ -274,6 +274,11 @@ static inline hv_int32_t __hv_utils_min_i(hv_int32_t x, hv_int32_t y) { return (
 #define HV_SPINLOCK_ACQUIRE(_x) \
 while (InterlockedCompareExchange(&_x, true, false)) { }
 #define HV_SPINLOCK_RELEASE(_x) (_x = false)
+#elif defined ARM_CORTEX
+/* no spinlock if we don't have pre-emptive scheduling */
+#define hv_atomic_bool volatile bool
+#define HV_SPINLOCK_ACQUIRE(_x) { extern volatile bool _msgLock; _msgLock = true; }
+#define HV_SPINLOCK_RELEASE(_x) { extern volatile bool _msgLock; _msgLock = false; }
 #elif __cplusplus || __has_include(<stdatomic.h>)
 #if !__cplusplus
 #include <stdatomic.h>
