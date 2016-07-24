@@ -378,7 +378,13 @@ void FloatArray::multiply(FloatArray operand2){ //in-place
 
 void FloatArray::multiply(float scalar){
   for(int n=0; n<size; n++){
-   data[n]*=scalar;
+    data[n]*=scalar;
+  }
+}
+
+void FloatArray::multiply(float scalar, FloatArray destination){
+  for(int n=0; n<size; n++){
+    destination[n] = data[n] * scalar;
   } 
 }
 

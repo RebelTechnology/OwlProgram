@@ -14,10 +14,12 @@
 #define HV_OWL_PARAM_G "Channel-G"
 #define HV_OWL_PARAM_H "Channel-H"
 #define HV_OWL_PARAM_PUSH "Channel-Push"
+#define HV_OWL_PARAM_NOTEOUT "noteout"
 #define HEAVY_MESSAGE_POOL_SIZE  4 // in kB (default 10kB)
 #define HEAVY_MESSAGE_QUEUE_SIZE 1 // in kB (default 2kB)
 
 extern "C" {
+  volatile bool _msgLock = false;
   static bool isButtonPressed(PatchButtonId bid){
     return getProgramVector()->buttons & (1<<bid);
   }
@@ -47,6 +49,8 @@ extern "C" {
       else
 	pressed = !isButtonPressed(PUSHBUTTON);
       setButton(PUSHBUTTON, pressed);
+    }else if(strcmp(receiverName, HV_OWL_PARAM_NOTEOUT) == 0){
+      debugMessage("noteout", (float)hv_msg_getNumElements(m), hv_msg_getFloat(m, 0), hv_msg_getFloat(m, 1));
     }
   }
 }
@@ -93,6 +97,8 @@ public:
   }
   
   void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){
+    if(_msgLock)
+      return;
     if(bid == PUSHBUTTON){
       hv_sendFloatToReceiver(context, receiverHash[8], value ? 1.0 : 0.0);
     }else if(bid >= MIDI_NOTE_BUTTON){
@@ -120,6 +126,7 @@ public:
     float paramF = getParameterValue(PARAMETER_F);
     float paramG = getParameterValue(PARAMETER_G);
     float paramH = getParameterValue(PARAMETER_H);
+    _msgLock = true;
     hv_sendFloatToReceiver(context, receiverHash[0], paramA);
     hv_sendFloatToReceiver(context, receiverHash[1], paramB);
     hv_sendFloatToReceiver(context, receiverHash[2], paramC);
@@ -128,7 +135,8 @@ public:
     hv_sendFloatToReceiver(context, receiverHash[5], paramF);
     hv_sendFloatToReceiver(context, receiverHash[6], paramG);
     hv_sendFloatToReceiver(context, receiverHash[7], paramH);
-    float* outputs[] = {buffer.getSamples(LEFT_CHANNEL), buffer.getSamples(RIGHT_CHANNEL) };    
+    _msgLock = false;
+    float* outputs[] = {buffer.getSamples(LEFT_CHANNEL), buffer.getSamples(RIGHT_CHANNEL)};
     hv_owl_process(context, outputs, outputs, getBlockSize());		     
   }
   

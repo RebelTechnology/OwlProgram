@@ -121,6 +121,32 @@ class Oscillator {
     previous_waveshape_ = 0.0f;
   }
   
+
+  template<bool interpolate_parameters>
+  void Render(
+      float* frequency,
+      float pw,
+      float waveshape,
+      float* out,
+      size_t size) {
+    ControlRateSource<false> master_frequency_source(
+        0.0f, &previous_master_frequency_, size);
+    AudioRateSource slave_frequency_source(
+        frequency);
+    ControlRateSource<interpolate_parameters> pw_source(
+        pw, &previous_pw_, size);
+    ControlRateSource<interpolate_parameters> waveshape_source(
+        waveshape, &previous_waveshape_, size);
+
+    Render<false>(
+        master_frequency_source,
+        slave_frequency_source,
+        pw_source,
+        waveshape_source,
+        out,
+        size);
+  }
+  
   template<bool interpolate_parameters>
   void Render(
       float frequency,

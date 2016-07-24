@@ -37,6 +37,7 @@ public:
     return log2f(hertz/440.0f);
   }
   void getFrequency(FloatArray samples, FloatArray output);
+  void getFrequency(FloatArray samples);
 };
 
 #endif /* __VoltsPerOctave_hpp__ */
