@@ -24,7 +24,7 @@ CPPFLAGS += -ILibraries/CMSIS/Include
 CPPFLAGS += -DARM_CORTEX -DARM_MATH_CM0 -m32
 
 # Tools
-TOOLROOT=i686-pc-cygwin-
+# TOOLROOT=i686-pc-cygwin-
 # TOOLROOT=x86_64-pc-cygwin-
 CC=$(TOOLROOT)gcc
 LD=$(TOOLROOT)gcc
