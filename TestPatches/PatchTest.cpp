@@ -1,16 +1,13 @@
 #ifndef TESTCLASS 
-#define TESTCLASS ShortArrayTestPatch
+#define TESTCLASS ShortFastFourierTestPatch
 #endif
-// #ifndef TESTFILE 
-// #define TESTFILE "ShortArrayTestPatch.hpp"
-// #endif
 
-// #include TESTFILE
 #include "message.h"
 #include "TestPatch.hpp"
 #include "ProgramVector.h"
 #include "PatchProcessor.h"
 #include "ShortArrayTestPatch.hpp"
+#include "ShortFastFourierTestPatch.hpp"
 #include <stdio.h>
 
 extern "C" {
