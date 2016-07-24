@@ -3,7 +3,7 @@ BUILDROOT ?= .
 C_SRC   = basicmaths.c
 C_SRC   += kiss_fft.c
 # CPP_SRC = PatchTest.cpp
-CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp FastFourierTransform.cpp 
+CPP_SRC += FloatArray.cpp ComplexShortArray.cpp ComplexFloatArray.cpp FastFourierTransform.cpp ShortFastFourierTransform.cpp 
 CPP_SRC += ShortArray.cpp
 CPP_SRC += Envelope.cpp VoltsPerOctave.cpp Window.cpp
 CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
@@ -21,7 +21,7 @@ CPPFLAGS += -I$(GENSOURCE)
 CPPFLAGS += -I$(TESTPATCHES)
 CPPFLAGS += -ILibraries -ILibraries/KissFFT
 CPPFLAGS += -ILibraries/CMSIS/Include
-CPPFLAGS += -DARM_CORTEX -DARM_MATH_CM0 -m32
+CPPFLAGS += -DARM_CORTEX -DARM_MATH_CM0
 
 # Tools
 # TOOLROOT=i686-pc-cygwin-
@@ -167,16 +167,16 @@ OBJS += $(DSPLIB)/BasicMathFunctions/arm_add_q31.o
 # include $(BUILDROOT)/libs.mk
 
 test: $(TESTPATCHES)/PatchTest.cpp $(DEPS) $(OBJS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTPATCHES)/PatchTest.cpp -I$(BUILD) $(OBJS) -o $(BUILD)/$@
-	$(BUILD)/$@
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTPATCHES)/PatchTest.cpp -I$(BUILD) $(OBJS) -o $(BUILD)/$@
+	@$(BUILD)/$@
 
 # compile and generate dependency info
 $(BUILD)/%.o: %.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+	@$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 	@$(CC) -MM -MT"$@" $(CPPFLAGS) $(CFLAGS) $< > $(@:.o=.d)
 
 $(BUILD)/%.o: %.cpp
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 	@$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) $< > $(@:.o=.d)
 
 -include $(OBJS:.o=.d) $(SOLO_OBJS:.o=.d) $(MULTI_OBJS:.o=.d)
