@@ -74,6 +74,7 @@ OBJS += $(DSPLIB)/ComplexMathFunctions/arm_cmplx_mult_real_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_cfft_radix8_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_bitreversal.o
+OBJS += $(DSPLIB)/TransformFunctions/arm_bitreversal2.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_fast_f32.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_init_q15.o
 OBJS += $(DSPLIB)/TransformFunctions/arm_rfft_q15.o

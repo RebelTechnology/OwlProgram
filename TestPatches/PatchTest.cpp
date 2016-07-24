@@ -10,6 +10,7 @@
 #include "ShortFastFourierTestPatch.hpp"
 #include <stdio.h>
 
+#if 0
 extern "C" {
   // http://www.keil.com/forum/60479/
   void arm_bitreversal_32(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTab)
@@ -39,6 +40,8 @@ extern "C" {
   ASSERT(false, "arm_bitreversal_16");
 }
 }
+#endif
+
 PatchProcessor processor;
 ProgramVector programVector;
 
@@ -48,7 +51,6 @@ void assert_failed(const char* msg, const char* location, int line){
 void debugMessage(char const* msg, int i){
   printf("%s %d\n", msg, i);
 }
-
 Patch::Patch(){}
 Patch::~Patch(){}
 PatchProcessor::PatchProcessor(){}
