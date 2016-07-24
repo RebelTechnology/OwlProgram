@@ -36,6 +36,7 @@ extern "C" {
     void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTab)
 {
   #warning TODO!
+  ASSERT(false, "arm_bitreversal_16");
 }
 }
 PatchProcessor processor;
