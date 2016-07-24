@@ -15,6 +15,7 @@ public:
   }
   virtual void setSampleRate(float value){}
   virtual void setFrequency(float value){}
+  virtual void reset(){}
 };
 
 #endif /* OSCILLATOR_HPP */
