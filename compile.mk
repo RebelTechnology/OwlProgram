@@ -47,11 +47,23 @@ LDFLAGS += -fpic
 LDFLAGS += -fpie
 LDFLAGS += -flto
 
-CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11
+CXXFLAGS = -fno-rtti -fno-exceptions -std=gnu++11
 
 ifdef HEAVY
 CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
 endif
+
+CC=gcc
+LD=gcc
+AR=ar
+AS=as
+NM=nm
+CXX=g++
+GDB=gdb
+SIZE=size
+RANLIB=ranlib
+OBJCOPY=objcopy
+OBJDUMP=objdump
 
 # object files
 OBJS  = $(C_SRC:%.c=$(BUILD)/%.o) $(CPP_SRC:%.cpp=$(BUILD)/%.o)

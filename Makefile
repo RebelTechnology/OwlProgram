@@ -30,6 +30,11 @@ PATCHNAME   ?= $(HEAVY)
 PATCHCLASS  ?= HeavyPatch
 PATCHFILE   ?= HeavyPatch.hpp
 DEPS        += heavy
+else ifdef TEST
+PATCHNAME   ?= $(TEST)
+PATCHCLASS  ?= $(PATCHNAME)Patch
+PATCHFILE   ?= $(PATCHNAME)Patch.hpp
+DEPS        += test
 else
 # options for C++ compilation
 PATCHNAME   ?= "Template"
