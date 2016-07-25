@@ -12,7 +12,7 @@
 void ShortArray::getMin(int16_t* value, int* index){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
-  unsigned long idx;
+  uint32_t idx;
   arm_min_q15(data, size, value, &idx);
   *index = (int)idx;
 #else
@@ -48,7 +48,7 @@ void ShortArray::getMax(int16_t* value, int* index){
   ASSERT(size>0, "Wrong size");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX 
-  unsigned long idx;
+  uint32_t idx;
   arm_max_q15(data, size, value, &idx);
   *index = (int)idx;
 #else

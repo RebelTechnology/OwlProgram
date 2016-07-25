@@ -86,6 +86,7 @@ OBJS += $(DSPLIB)/FilteringFunctions/arm_fir_decimate_init_q15.o
 OBJS += $(DSPLIB)/FilteringFunctions/arm_fir_interpolate_q15.o
 OBJS += $(DSPLIB)/FilteringFunctions/arm_fir_interpolate_init_q15.o
 OBJS += $(DSPLIB)/SupportFunctions/arm_copy_q15.o
+
 OBJS += $(DSPLIB)/SupportFunctions/arm_fill_q15.o
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_abs_q15.o
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_add_q15.o
@@ -94,6 +95,8 @@ OBJS += $(DSPLIB)/BasicMathFunctions/arm_mult_q15.o
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_negate_q15.o
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_scale_q15.o
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_sub_q15.o
+OBJS += $(DSPLIB)/BasicMathFunctions/arm_shift_q15.o
+
 OBJS += $(DSPLIB)/StatisticsFunctions/arm_max_q15.o
 OBJS += $(DSPLIB)/StatisticsFunctions/arm_mean_q15.o
 OBJS += $(DSPLIB)/StatisticsFunctions/arm_min_q15.o
