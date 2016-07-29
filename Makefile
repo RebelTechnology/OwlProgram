@@ -1,11 +1,7 @@
 BUILDROOT ?= .
 
 ifndef CONFIG
-ifndef TEST
   CONFIG=Release
-else
-  CONFIG=Debug
-endif
 endif
 
 DEPS = .FORCE
