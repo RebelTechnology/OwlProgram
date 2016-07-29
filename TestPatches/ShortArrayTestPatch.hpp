@@ -1,7 +1,6 @@
 #include "TestPatch.hpp"
 #include "ShortArray.h"
 #include <limits.h>
-#include <stdio.h>
 
 class ShortArrayTestPatch : public TestPatch {
 public:
@@ -315,9 +314,6 @@ public:
         int32_t value = ar[n] - subValue;
         value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
         ar3[n] = (int16_t)value;
-        if(ar3[n] != ar4[n]){
-          printf("[%d] ar: %d, ar3: %d, ar4: %d\n", n, ar[n], ar3[n], ar4[n]);
-        }
       }
       CHECK(ar3.equals(ar4));
     }
@@ -350,10 +346,6 @@ public:
         value = value >> 15;
         value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
         ar3[n] = (int16_t)value;
-        if(ar3[n] != ar4[n]){
-          printf("[%d] ar: %d, ar3: %d, ar4: %d\n", n, ar[n], ar3[n], ar4[n]);
-          return;
-        }
       }
       CHECK(ar3.equals(ar4));
     }
