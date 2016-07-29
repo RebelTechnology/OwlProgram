@@ -465,6 +465,9 @@ public:
    * @remarks a ShortArray object that has not been created by the ShortArray::create() method might cause an exception if passed as an argument to this method.
   */
   static void destroy(ShortArray array);
+
+  void setFloatValue(uint32_t n, float value);
+  float getFloatValue(uint32_t n);
 };
 
 
@@ -623,6 +626,7 @@ public:
 #ifdef ARM_CORTEX
     arm_shift_q31(data, shiftValue, data, size);
 #else
+    ASSERT(false, "TODO");
     if(shiftValue > 0)
       for(int n=0; n<size; n++)
 	data[n] <<= shiftValue;

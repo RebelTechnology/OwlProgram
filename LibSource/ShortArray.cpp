@@ -2,6 +2,7 @@
 #include "basicmaths.h"
 #include "message.h"
 #include <string.h>
+#include <limits.h>
 
  ShortArray::ShortArray() :
    data(NULL), size(0) {}
@@ -369,7 +370,7 @@ void ShortArray::subtract(int16_t scalar)
     inA1 = *__SIMD32(pSrcA)++;
     inA2 = *__SIMD32(pSrcA)++;
     inB1 = *__SIMD32(pSrcB); //HERE: not incrementing pSrcB
-    inB2 = *__SIMD32(pSrcB);
+    inB2 = *__SIMD32(pSrcB); //HERE: not incrementing pSrcB
 
     *__SIMD32(pDst)++ = __QSUB16(inA1, inB1);
     *__SIMD32(pDst)++ = __QSUB16(inA2, inB2);
@@ -416,9 +417,87 @@ void ShortArray::multiply(ShortArray operand2){ //in-place
 }
 
 void ShortArray::multiply(int16_t scalar){
-  for(int n=0; n<size; n++){
-   data[n]*=scalar;
-  } 
+  // this method is modelled on  arm_mult_q15 
+  // from <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  // just avoid incrementing the pSrcB pointer(see below)
+#ifdef ARM_CORTEX
+  q15_t * pSrcA = data;
+  int16_t scalarDouble[2] = {scalar, scalar};
+  q15_t * pSrcB = scalarDouble;
+  q15_t * pDst = data;
+  uint32_t blockSize = size;
+
+  uint32_t blkCnt;                               /* loop counters */
+/* Run the below code for Cortex-M4 and Cortex-M3 */
+  q31_t inA1, inA2, inB1, inB2;                  /* temporary input variables */
+  q15_t out1, out2, out3, out4;                  /* temporary output variables */
+  q31_t mul1, mul2, mul3, mul4;                  /* temporary variables */
+
+  /* loop Unrolling */
+  blkCnt = blockSize >> 2u;
+
+  /* First part of the processing with loop unrolling.  Compute 4 outputs at a time.        
+   ** a second loop below computes the remaining 1 to 3 samples. */
+  while(blkCnt > 0u)
+  {
+    /* read two samples at a time from sourceA */
+    inA1 = *__SIMD32(pSrcA)++;
+    /* read two samples at a time from sourceB */
+    inB1 = *__SIMD32(pSrcB); // HERE: do not increment pSrcB
+    /* read two samples at a time from sourceA */
+    inA2 = *__SIMD32(pSrcA)++;
+    /* read two samples at a time from sourceB */
+    inB2 = *__SIMD32(pSrcB);  // HERE: do not increment pSrcB
+
+    /* multiply mul = sourceA * sourceB */
+    mul1 = (q31_t) ((q15_t) (inA1 >> 16) * (q15_t) (inB1 >> 16));
+    mul2 = (q31_t) ((q15_t) inA1 * (q15_t) inB1);
+    mul3 = (q31_t) ((q15_t) (inA2 >> 16) * (q15_t) (inB2 >> 16));
+    mul4 = (q31_t) ((q15_t) inA2 * (q15_t) inB2);
+
+    /* saturate result to 16 bit */
+    out1 = (q15_t) __SSAT(mul1 >> 15, 16);
+    out2 = (q15_t) __SSAT(mul2 >> 15, 16);
+    out3 = (q15_t) __SSAT(mul3 >> 15, 16);
+    out4 = (q15_t) __SSAT(mul4 >> 15, 16);
+
+    /* store the result */
+#ifndef ARM_MATH_BIG_ENDIAN
+
+    *__SIMD32(pDst)++ = __PKHBT(out2, out1, 16);
+    *__SIMD32(pDst)++ = __PKHBT(out4, out3, 16);
+
+#else
+
+    *__SIMD32(pDst)++ = __PKHBT(out2, out1, 16);
+    *__SIMD32(pDst)++ = __PKHBT(out4, out3, 16);
+
+#endif //      #ifndef ARM_MATH_BIG_ENDIAN
+
+    /* Decrement the blockSize loop counter */
+    blkCnt--;
+  }
+
+  /* If the blockSize is not a multiple of 4, compute any remaining output samples here.    
+   ** No loop unrolling is used. */
+  blkCnt = blockSize % 0x4u;
+
+  while(blkCnt > 0u)
+  {
+    /* C = A * B */
+    /* Multiply the inputs and store the result in the destination buffer */
+    //HERE: not incrementing pSrcB
+    *pDst++ = (q15_t) __SSAT((((q31_t) (*pSrcA++) * (*pSrcB)) >> 15), 16); 
+
+    /* Decrement the blockSize loop counter */
+    blkCnt--;
+  }
+#else 
+  #warning TODO
+  for(int n = 0; n < size; ++n){
+    
+  }
+#endif
 }
 
 void ShortArray::negate(ShortArray& destination){//allows in-place
@@ -522,13 +601,20 @@ void ShortArray::shift(int shiftValue){
 #ifdef ARM_CORTEX
     arm_shift_q15(data, shiftValue, data, size);
 #else
-#warning TODO: saturated shift
-    if(shiftValue > 0)
-      for(int n=0; n<size; n++)
-	data[n] <<= shiftValue;
-    else
-      for(int n=0; n<size; n++)
-	data[n] >>= -shiftValue;
+    for(int n = 0; n < getSize(); ++n){
+      int16_t value = data[n];
+      if(shiftValue > 0){
+        int32_t v = (int32_t)value << shiftValue;
+        if(v < SHRT_MIN)
+          v = SHRT_MIN;
+        else if (v > SHRT_MAX)
+          v = SHRT_MAX;
+        value = (int16_t)v;
+      } else {
+        value = value >> -shiftValue;
+      }
+      data[n] = value;
+    } 
 #endif
   }
 
