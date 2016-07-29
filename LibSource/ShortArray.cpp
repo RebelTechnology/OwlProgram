@@ -627,3 +627,34 @@ ShortArray ShortArray::create(int size){
 void ShortArray::destroy(ShortArray array){
   delete array.data;
 }
+
+void ShortArray::setFloatValue(uint32_t n, float value){
+  data[n] = value * -SHRT_MIN;
+}
+
+float ShortArray::getFloatValue(uint32_t n){
+  return data[n] / (float)-SHRT_MIN;
+}
+void ShortArray::copyFrom(FloatArray source){
+  ASSERT(source.getSize() == size, "Size does not match");
+#ifdef ARM_CORTEX
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  arm_float_to_q15((float*)source, data, size);
+#else
+  for(int n = 0; n < size; ++n){
+    setFloatValue(n, source[n]);
+  }
+#endif
+}
+
+void ShortArray::copyTo(FloatArray destination){
+  ASSERT(destination.getSize() == size, "Size does not match");
+#ifdef ARM_CORTEX
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  arm_q15_to_float(data, (float*)destination, size);
+#else
+  for(int n = 0; n < size; ++n){
+    destination[n] = getFloatValue(n);
+  }
+#endif
+}

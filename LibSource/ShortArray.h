@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "basicmaths.h"
+#include "FloatArray.h"
 
 /**
  * This class contains useful methods for manipulating arrays of int16_ts.
@@ -340,6 +341,13 @@ public:
   void copyTo(int16_t* destination, int length);
 
   /**
+   * Copies the content of the array to a FloatArray, interpreting the content
+   * of the ShortArray as 1.15.
+   * @param[out] destination the destination array
+  */
+  void copyTo(FloatArray destination);
+
+  /**
    * Copies the content of an array into another array.
    * @param[in] source the source array
   */
@@ -352,6 +360,13 @@ public:
   */
   void copyFrom(int16_t* source, int length);
   
+  /**
+   * Copies the content of a FloatArray into a ShortArray, converting
+   * the float elements to fixed-point 1.15.
+   * @param[in] source the source array
+  */
+  void copyFrom(FloatArray source);
+
   /**
    * Copies the content of an array into a subset of the array.
    * Copies **samples** elements from **source** to **destinationOffset** in the current array.
@@ -627,12 +642,6 @@ public:
     arm_shift_q31(data, shiftValue, data, size);
 #else
     ASSERT(false, "TODO");
-    if(shiftValue > 0)
-      for(int n=0; n<size; n++)
-	data[n] <<= shiftValue;
-    else
-      for(int n=0; n<size; n++)
-	data[n] >>= -shiftValue;
 #endif
   }
 };

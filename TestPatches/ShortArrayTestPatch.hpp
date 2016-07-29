@@ -416,6 +416,28 @@ public:
         shiftValue = -shiftValue;
       }
     }
+    {
+      TEST("float");
+      ShortArray ar = ShortArray::create(1023);
+      FloatArray fa = FloatArray::create(1023);
+      for(int n = 0; n < ar.getSize(); ++n){
+        float value = rand() / (float)RAND_MAX * 2 - 1;
+        ar.setFloatValue(n, value);
+        CHECK_CLOSE(ar[n], value * (float)-SHRT_MIN, 2);
+        CHECK_CLOSE(ar.getFloatValue(n), ar[n] / (float)-SHRT_MIN, 0.0004f);
+        CHECK_CLOSE(ar.getFloatValue(n), value, 0.0004f);
+      }
+      fa.noise();
+      ar.copyFrom(fa);
+      for(int n = 0; n < ar.getSize(); ++n){
+        CHECK_CLOSE(ar.getFloatValue(n), fa[n], 0.0004f);
+      }
+      fa.clear();
+      ar.copyTo(fa);
+      for(int n = 0; n < ar.getSize(); ++n){
+        CHECK_CLOSE(ar.getFloatValue(n), fa[n], 0.0004f);
+      }
+    }
   }
   //TODO: destroy all the created arrays
 };
