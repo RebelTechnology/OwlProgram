@@ -22,10 +22,14 @@ public:
       }
     }
     {
-      TEST("getSize");
-      int size = 123;
-      ShortArray array = ShortArray::create(size);
-      CHECK_EQUAL(size, array.getSize());
+      TEST("getSize, getData");
+      const int size = 123;
+      ShortArray ar = ShortArray::create(size);
+      CHECK_EQUAL(size, ar.getSize());
+      int16_t data[size];
+      ShortArray ar2 = ShortArray(data, size);
+      CHECK_EQUAL(size, ar2.getSize());
+      CHECK_EQUAL(data, ar2.getData());
     }
     {
       TEST("minmax");
@@ -230,7 +234,6 @@ public:
       ShortArray ar3 = ShortArray::create(1000);
       ar.noise();
       int16_t m, M;
-      int count = 0;
       int16_t range = 5350;
       m = -range;
       M = range;
@@ -273,6 +276,48 @@ public:
       CHECK(ar3.equals(ar4));
       ar4.clear();
       ar.add(ar2, ar4);
+      CHECK(ar3.equals(ar4));
+      ar4.clear();
+      int32_t addValue = 124;
+      ar4.copyFrom(ar);
+      ar4.add(addValue);
+      for(int n = 0; n < ar.getSize(); ++n){
+        int32_t value = ar[n] + addValue;
+        value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
+        ar3[n] = (int16_t)value;
+      }
+      CHECK(ar3.equals(ar4));
+    }
+    {
+      TEST("subtract");
+      ShortArray ar = ShortArray::create(1000);
+      ShortArray ar2 = ShortArray::create(1000);
+      ShortArray ar3 = ShortArray::create(1000);
+      ShortArray ar4 = ShortArray::create(1000);
+      ar.noise();
+      ar2.noise();
+      for(int n = 0; n < ar.getSize(); ++n){
+        int32_t value = ar[n] - ar2[n];
+        value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
+        ar3[n] = (int16_t)value;
+      }
+      ar4.copyFrom(ar);
+      ar4.subtract(ar2);
+      CHECK(ar3.equals(ar4));
+      ar4.clear();
+      ar.subtract(ar2, ar4);
+      CHECK(ar3.equals(ar4));
+      ar4.clear();
+      int32_t subValue = 124;
+      ar4.copyFrom(ar);
+      ar4.subtract(subValue);
+      for(int n = 0; n < ar.getSize(); ++n){
+        int32_t value = ar[n] - subValue;
+        value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
+        ar3[n] = (int16_t)value;
+        if(ar3[n] != ar4[n])
+          printf("ar: %d, ar3: %d, ar4: %d\n", ar[n], ar3[n], ar4[n]);
+      }
       CHECK(ar3.equals(ar4));
     }
   }
