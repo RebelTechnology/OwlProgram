@@ -29,12 +29,13 @@ extern "C" {
   }
 }
 
-    void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTab)
+void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTab)
 {
   #warning TODO!
   // ASSERT(false, "arm_bitreversal_16");
 }
 }
+
 PatchProcessor processor;
 ProgramVector programVector;
 
@@ -83,8 +84,8 @@ PatchProcessor* getInitialisingPatchProcessor(){
 
 static TestPatch* testpatch = NULL;
 void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, TestPatch* patch){
-  if(patch == NULL)
-    error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
+  //if(patch == NULL)
+  //  error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
   testpatch = patch;
 }
 

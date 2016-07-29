@@ -1,5 +1,7 @@
 #include "TestPatch.hpp"
 #include "ShortArray.h"
+#include <limits.h>
+#include <stdio.h>
 
 class ShortArrayTestPatch : public TestPatch {
 public:
@@ -165,6 +167,118 @@ public:
       int rms=(sqrtf(acc + 0.5));
       CHECK_CLOSE(rms, ar.getRms(), 5);
     }
-   //TODO: test everything else
+    {
+      TEST("mean");
+      ShortArray ar = ShortArray::create(1000);
+      ar.noise();
+      int32_t sum = 0;
+      for(int n = 0; n < ar.getSize(); ++n){
+        sum += ar[n];
+      }
+      int32_t mean = sum / ar.getSize();
+      mean = mean > SHRT_MAX ? SHRT_MAX : mean;
+      mean = mean < SHRT_MIN ? SHRT_MIN : mean;
+
+      CHECK_CLOSE(mean, ar.getMean(), 30);
+    }
+    {
+      TEST("power");
+      ShortArray ar = ShortArray::create(1000);
+      ar.noise();
+      int64_t power = 0;
+      for(int n = 0; n < ar.getSize(); ++n){
+        power += ar[n] * ar[n];
+      }
+      CHECK_CLOSE(power, ar.getPower(), 30);
+    }
+    {
+      TEST("std");
+      // TODO
+    }
+    {
+      TEST("variance");
+    }
+    {
+      TEST("scale");
+      ShortArray ar = ShortArray::create(1000);
+      ShortArray ar2 = ShortArray::create(1000);
+      ShortArray ar3 = ShortArray::create(1000);
+      ar.noise();
+      ar3.copyFrom(ar);
+      uint8_t shift = 0;
+      uint16_t factor = 0.5 * SHRT_MAX;
+      ar.scale(factor, shift, ar2); 
+      ar3.scale(factor, shift);
+
+      for(int n=0; n < ar.getSize(); ++n){
+        int32_t value = factor *ar[n];
+        int16_t shortValue;
+        if(shift > 0)
+          value = value << shift;
+        else 
+          value = value >> -shift;
+        if(value > 1 << 30)
+          shortValue = SHRT_MAX;
+        else if(value < ((int32_t)~(1 << 30)) - 1)
+          shortValue = SHRT_MIN;
+        else
+          shortValue = value >> 15;
+        CHECK(ar2[n] == shortValue);
+        CHECK(ar3[n] == shortValue);
+      }
+    }
+    {
+      TEST("clip");
+      ShortArray ar = ShortArray::create(1000);
+      ShortArray ar2 = ShortArray::create(1000);
+      ShortArray ar3 = ShortArray::create(1000);
+      ar.noise();
+      int16_t m, M;
+      int count = 0;
+      int16_t range = 5350;
+      m = -range;
+      M = range;
+      ar2.copyFrom(ar);
+      ar2.clip(range); 
+      for(int n = 0; n < ar.getSize(); ++n){
+        int16_t value = ar[n];
+        value = value > M ? M : value;
+        value = value < m ? m : value;
+        ar3[n] = (int16_t)value;
+      }
+      CHECK(ar3.equals(ar2));
+      m = -1233;
+      M = 4214; 
+      ar2.copyFrom(ar);
+      ar2.clip(m, M); 
+      for(int n = 0; n < ar.getSize(); ++n){
+        int16_t value = ar[n];
+        value = value > M ? M : value;
+        value = value < m ? m : value;
+        ar3[n] = (int16_t)value;
+      }
+      CHECK(ar3.equals(ar2));
+    }
+    {
+      TEST("add");
+      ShortArray ar = ShortArray::create(1000);
+      ShortArray ar2 = ShortArray::create(1000);
+      ShortArray ar3 = ShortArray::create(1000);
+      ShortArray ar4 = ShortArray::create(1000);
+      ar.noise();
+      ar2.noise();
+      for(int n = 0; n < ar.getSize(); ++n){
+        int32_t value = ar[n] + ar2[n];
+        value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
+        ar3[n] = (int16_t)value;
+      }
+      ar4.copyFrom(ar);
+      ar4.add(ar2);
+      CHECK(ar3.equals(ar4));
+      ar4.clear();
+      ar.add(ar2, ar4);
+      CHECK(ar3.equals(ar4));
+    }
   }
+  //TODO: destroy all the created arrays
 };
