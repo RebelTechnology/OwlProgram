@@ -40,7 +40,9 @@ ProgramVector programVector;
 
 void assert_failed(const char* msg, const char* location, int line){
   printf("Assertion failed: %s, in %s line %d\n", msg, location, line);
+  exit(-1);
 }
+
 void debugMessage(char const* msg, int i){
   printf("%s %d\n", msg, i);
 }
