@@ -197,21 +197,6 @@ float FloatArray::getVariance(){
 #endif
   return result;
 }
-void FloatArray::scale(float factor, FloatArray destination){//supports in-place
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX  
-  arm_scale_f32(data, factor, destination, size);
-#else
-  for(int n=0; n<size; n++){
-    destination[n]=factor*data[n];
-  }
-#endif
-}
-
-void FloatArray::scale(float factor){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  scale(factor, *this);
-}
 
 void FloatArray::clip(){
   clip(1);
@@ -377,9 +362,13 @@ void FloatArray::multiply(FloatArray operand2){ //in-place
 }
 
 void FloatArray::multiply(float scalar){
+#ifdef ARM_CORTEX
+  arm_scale_f32(data, scalar, data, size);
+#else
   for(int n=0; n<size; n++){
    data[n]*=scalar;
   } 
+#endif
 }
 
 void FloatArray::negate(FloatArray& destination){//allows in-place

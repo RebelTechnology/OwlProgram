@@ -168,21 +168,7 @@ public:
    * Gets the variance of the values in the array.
   */
   float getVariance();
-  
-  /**
-   * Array by scalar multiplication.
-   * Array by scalar multiplication, same as multiply(float).
-   * @param[out] destination the destination array
-   * @param[in] factor the scaling factor
-  */
-  void scale(float factor, FloatArray destination);
-  
-  /**
-   * Array by scalar multiplication, in-place.
-   * @param[in] factor the scaling factor
-  */
-  void scale(float factor);
-  
+
   /**
    * Clips the elements in the array in the range [-1, 1].
   */
