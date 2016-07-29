@@ -4,11 +4,21 @@
 #include <string.h>
 #include <limits.h>
 
- ShortArray::ShortArray() :
-   data(NULL), size(0) {}
+#ifndef ARM_CORTEX
+static int16_t saturateTo16(int64_t value){
+  if(value > SHRT_MAX)
+    value = SHRT_MAX;
+  else if(value < SHRT_MIN)
+    value = SHRT_MIN;
+  return value;
+}
+#endif
 
- ShortArray::ShortArray(int16_t* d, int s) :
-   data(d), size(s) {}
+ShortArray::ShortArray() :
+ data(NULL), size(0) {}
+
+ShortArray::ShortArray(int16_t* d, int s) :
+ data(d), size(s) {}
 
 void ShortArray::getMin(int16_t* value, int* index){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
@@ -126,14 +136,6 @@ void ShortArray::reciprocal(){//in place
   reciprocal(*this);
 }
 
-int16_t saturate64To16(int64_t value){
-  if(value > SHRT_MAX)
-    value = SHRT_MAX;
-  else if(value < SHRT_MIN)
-    value = SHRT_MIN;
-  return value;
-}
-
 int16_t ShortArray::getRms(){
   int16_t result;
 #ifdef ARM_CORTEX  
@@ -145,7 +147,7 @@ int16_t ShortArray::getRms(){
     value += data[n] * data[n];
   }
   value = sqrtf(value / size);
-  result = saturate64To16(value);
+  result = saturateTo16(value);
 #endif
   return result;
 }
@@ -161,7 +163,7 @@ int16_t ShortArray::getMean(){
     value += data[n];
   }
   value = value / size;
-  result = saturate64To16(value);
+  result = saturateTo16(value);
 #endif
   return result;
 }
@@ -206,25 +208,6 @@ int16_t ShortArray::getVariance(){
   result=(sumOfSquares - sum*sum/size) / (size - 1);
 #endif
   return result;
-}
-
-
-void ShortArray::scale(int16_t factor, int8_t shift, ShortArray destination){
-  ASSERT(destination.getSize() == size, "size does not match");
-#ifdef ARM_CORTEX
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  arm_scale_q15(data, factor, shift, destination, size);
-#else
-  for(int n = 0; n < size; ++n){
-    int32_t value = data[n] * factor;
-    destination[n] = saturate64To16(value >> 15);
-  } 
-  #endif
-}
-
-void ShortArray::scale(int16_t factor, int8_t shift){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  scale(factor, shift, *this);
 }
 
 void ShortArray::clip(int16_t max){
@@ -322,7 +305,7 @@ void ShortArray::add(ShortArray operand2, ShortArray destination){ //allows in-p
 #else
   for(int n=0; n<size; n++){
     int32_t value = data[n] + operand2[n];
-    destination[n] = saturate64To16(value);
+    destination[n] = saturateTo16(value);
   }
 #endif /* ARM_CORTEX */
 }
@@ -334,12 +317,56 @@ void ShortArray::add(ShortArray operand2){ //in-place
 
 void ShortArray::add(int16_t scalar){
 #ifdef ARM_CORTEX
-  #warning TODO CMSIS
-#endif
+  int16_t doubleScalar[2] = {scalar, scalar};
+  q15_t * pSrcA = data;
+  q15_t * pSrcB = (int16_t*)&doubleScalar;
+  q15_t * pDst = data;
+  uint32_t blockSize = size;
+  
+  uint32_t blkCnt;                               /* loop counter */
+/* Run the below code for Cortex-M4 and Cortex-M3 */
+  q31_t inA1, inA2, inB1, inB2;
+
+  /*loop Unrolling */
+  blkCnt = blockSize >> 2u;
+
+  /* First part of the processing with loop unrolling.  Compute 4 outputs at a time.    
+   ** a second loop below computes the remaining 1 to 3 samples. */
+  while(blkCnt > 0u)
+  {
+    /* C = A + B */
+    /* Add and then store the results in the destination buffer. */
+    inA1 = *__SIMD32(pSrcA)++;
+    inA2 = *__SIMD32(pSrcA)++;
+    inB1 = *__SIMD32(pSrcB); //HERE: do not increment pSrcB
+    inB2 = *__SIMD32(pSrcB); //HERE: do not increment pSrcB
+
+    *__SIMD32(pDst)++ = __QADD16(inA1, inB1);
+    *__SIMD32(pDst)++ = __QADD16(inA2, inB2);
+
+    /* Decrement the loop counter */
+    blkCnt--;
+  }
+
+  /* If the blockSize is not a multiple of 4, compute any remaining output samples here.    
+   ** No loop unrolling is used. */
+  blkCnt = blockSize % 0x4u;
+
+  while(blkCnt > 0u)
+  {
+    /* C = A + B */
+    /* Add and then store the results in the destination buffer. */
+    *pDst++ = (q15_t) __QADD16(*pSrcA++, *pSrcB); //HERE: do not increment pSrcB
+
+    /* Decrement the loop counter */
+    blkCnt--;
+  }
+#else
   for(int n=0; n < size; ++n){
     int32_t value = data[n] + scalar;
-    data[n] = saturate64To16(value);
+    data[n] = saturateTo16(value);
   } 
+#endif
 }
 
 void ShortArray::subtract(ShortArray operand2, ShortArray destination){ //allows in-place
@@ -354,7 +381,7 @@ void ShortArray::subtract(ShortArray operand2, ShortArray destination){ //allows
 #else
   for(int n=0; n < size; ++n){
     int32_t value = data[n] - operand2[n];
-    destination[n] = saturate64To16(value);
+    destination[n] = saturateTo16(value);
   }
 #endif /* ARM_CORTEX */
 }
@@ -418,7 +445,7 @@ void ShortArray::subtract(int16_t scalar)
 #else
   for(int n = 0; n < size; ++n){
     int32_t value = data[n] - scalar;
-    data[n] = saturate64To16(value);
+    data[n] = saturateTo16(value);
   } 
 #endif
 }
@@ -435,7 +462,7 @@ void ShortArray::multiply(ShortArray operand2, ShortArray destination){ //allows
 #else
   for(int n=0; n<size; n++){
     int32_t value = data[n] * operand2[n];
-    destination[n] = saturate64To16(value >> 15);
+    destination[n] = saturateTo16(value >> 15);
   }
 
 #endif /* ARM_CORTEX */
@@ -451,81 +478,11 @@ void ShortArray::multiply(int16_t scalar){
   // from <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   // just avoid incrementing the pSrcB pointer(see below)
 #ifdef ARM_CORTEX
-  q15_t * pSrcA = data;
-  int16_t scalarDouble[2] = {scalar, scalar};
-  q15_t * pSrcB = scalarDouble;
-  q15_t * pDst = data;
-  uint32_t blockSize = size;
-
-  uint32_t blkCnt;                               /* loop counters */
-/* Run the below code for Cortex-M4 and Cortex-M3 */
-  q31_t inA1, inA2, inB1, inB2;                  /* temporary input variables */
-  q15_t out1, out2, out3, out4;                  /* temporary output variables */
-  q31_t mul1, mul2, mul3, mul4;                  /* temporary variables */
-
-  /* loop Unrolling */
-  blkCnt = blockSize >> 2u;
-
-  /* First part of the processing with loop unrolling.  Compute 4 outputs at a time.        
-   ** a second loop below computes the remaining 1 to 3 samples. */
-  while(blkCnt > 0u)
-  {
-    /* read two samples at a time from sourceA */
-    inA1 = *__SIMD32(pSrcA)++;
-    /* read two samples at a time from sourceB */
-    inB1 = *__SIMD32(pSrcB); // HERE: do not increment pSrcB
-    /* read two samples at a time from sourceA */
-    inA2 = *__SIMD32(pSrcA)++;
-    /* read two samples at a time from sourceB */
-    inB2 = *__SIMD32(pSrcB);  // HERE: do not increment pSrcB
-
-    /* multiply mul = sourceA * sourceB */
-    mul1 = (q31_t) ((q15_t) (inA1 >> 16) * (q15_t) (inB1 >> 16));
-    mul2 = (q31_t) ((q15_t) inA1 * (q15_t) inB1);
-    mul3 = (q31_t) ((q15_t) (inA2 >> 16) * (q15_t) (inB2 >> 16));
-    mul4 = (q31_t) ((q15_t) inA2 * (q15_t) inB2);
-
-    /* saturate result to 16 bit */
-    out1 = (q15_t) __SSAT(mul1 >> 15, 16);
-    out2 = (q15_t) __SSAT(mul2 >> 15, 16);
-    out3 = (q15_t) __SSAT(mul3 >> 15, 16);
-    out4 = (q15_t) __SSAT(mul4 >> 15, 16);
-
-    /* store the result */
-#ifndef ARM_MATH_BIG_ENDIAN
-
-    *__SIMD32(pDst)++ = __PKHBT(out2, out1, 16);
-    *__SIMD32(pDst)++ = __PKHBT(out4, out3, 16);
-
-#else
-
-    *__SIMD32(pDst)++ = __PKHBT(out2, out1, 16);
-    *__SIMD32(pDst)++ = __PKHBT(out4, out3, 16);
-
-#endif //      #ifndef ARM_MATH_BIG_ENDIAN
-
-    /* Decrement the blockSize loop counter */
-    blkCnt--;
-  }
-
-  /* If the blockSize is not a multiple of 4, compute any remaining output samples here.    
-   ** No loop unrolling is used. */
-  blkCnt = blockSize % 0x4u;
-
-  while(blkCnt > 0u)
-  {
-    /* C = A * B */
-    /* Multiply the inputs and store the result in the destination buffer */
-    //HERE: not incrementing pSrcB
-    *pDst++ = (q15_t) __SSAT((((q31_t) (*pSrcA++) * (*pSrcB)) >> 15), 16); 
-
-    /* Decrement the blockSize loop counter */
-    blkCnt--;
-  }
+  arm_scale_q15(data, scalar, 0, data, size);
 #else 
   for(int n = 0; n < size; ++n){
     int32_t value = data[n] * scalar;
-    data[n] = saturate64To16(value >> 15);
+    data[n] = saturateTo16(value >> 15);
   }
 #endif
 }

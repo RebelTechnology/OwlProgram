@@ -217,38 +217,6 @@ public:
       TEST("variance");
     }
     {
-      TEST("scale");
-      ShortArray ar = ShortArray::create(1000);
-      ShortArray ar2 = ShortArray::create(1000);
-      ShortArray ar3 = ShortArray::create(1000);
-      ar.noise();
-      ar3.copyFrom(ar);
-      uint8_t shift = 0;
-      uint16_t factor = 0.5 * SHRT_MAX;
-      ar.scale(factor, shift, ar2); 
-      ar3.scale(factor, shift);
-
-      for(int n=0; n < ar.getSize(); ++n){
-        int32_t value = factor *ar[n];
-        int16_t shortValue;
-        if(shift > 0)
-          value = value << shift;
-        else 
-          value = value >> -shift;
-        if(value > 1 << 30)
-          shortValue = SHRT_MAX;
-        else if(value < ((int32_t)~(1 << 30)) - 1)
-          shortValue = SHRT_MIN;
-        else
-          shortValue = value >> 15;
-        CHECK(ar2[n] == shortValue);
-        CHECK(ar3[n] == shortValue);
-      }
-      ShortArray::destroy(ar);
-      ShortArray::destroy(ar2);
-      ShortArray::destroy(ar3);
-    }
-    {
       TEST("clip");
       ShortArray ar = ShortArray::create(1000);
       ShortArray ar2 = ShortArray::create(1000);
