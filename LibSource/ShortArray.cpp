@@ -126,19 +126,26 @@ void ShortArray::reciprocal(){//in place
   reciprocal(*this);
 }
 
+int16_t saturate64To16(int64_t value){
+  if(value > SHRT_MAX)
+    value = SHRT_MAX;
+  else if(value < SHRT_MIN)
+    value = SHRT_MIN;
+  return value;
+}
+
 int16_t ShortArray::getRms(){
   int16_t result;
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX  
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   arm_rms_q15 (data, size, &result);
 #else
-  ASSERT(false, "TODO");
-  result=0;
-  int16_t *pSrc= data;
-  for(int n=0; n<size; n++){
-    result += pSrc[n]*pSrc[n];
+  int64_t value = 0;
+  for(int n=0; n < size; ++n){
+    value += data[n] * data[n];
   }
-  result=sqrtf(result/size);
+  value = sqrtf(value / size);
+  result = saturate64To16(value);
 #endif
   return result;
 }
@@ -149,11 +156,12 @@ int16_t ShortArray::getMean(){
 #ifdef ARM_CORTEX  
   arm_mean_q15 (data, size, &result);
 #else
-  result=0;
+  int32_t value = 0;
   for(int n=0; n < size; n++){
-    result+=data[n];
+    value += data[n];
   }
-  result=result/size;
+  value = value / size;
+  result = saturate64To16(value);
 #endif
   return result;
 }
@@ -202,8 +210,16 @@ int16_t ShortArray::getVariance(){
 
 
 void ShortArray::scale(int16_t factor, int8_t shift, ShortArray destination){
+  ASSERT(destination.getSize() == size, "size does not match");
+#ifdef ARM_CORTEX
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   arm_scale_q15(data, factor, shift, destination, size);
+#else
+  for(int n = 0; n < size; ++n){
+    int32_t value = data[n] * factor;
+    destination[n] = saturate64To16(value >> 15);
+  } 
+  #endif
 }
 
 void ShortArray::scale(int16_t factor, int8_t shift){
@@ -305,7 +321,8 @@ void ShortArray::add(ShortArray operand2, ShortArray destination){ //allows in-p
   arm_add_q15(data, operand2.data, destination.data, size);
 #else
   for(int n=0; n<size; n++){
-    destination[n]=data[n]+operand2[n];
+    int32_t value = data[n] + operand2[n];
+    destination[n] = saturate64To16(value);
   }
 #endif /* ARM_CORTEX */
 }
@@ -316,25 +333,30 @@ void ShortArray::add(ShortArray operand2){ //in-place
 }
 
 void ShortArray::add(int16_t scalar){
-  for(int n=0; n<size; n++){
-    data[n]+=scalar;
+#ifdef ARM_CORTEX
+  #warning TODO CMSIS
+#endif
+  for(int n=0; n < size; ++n){
+    int32_t value = data[n] + scalar;
+    data[n] = saturate64To16(value);
   } 
 }
 
 void ShortArray::subtract(ShortArray operand2, ShortArray destination){ //allows in-place
   ASSERT(operand2.size == size && destination.size >= size, "Arrays size mismatch");
+#ifdef ARM_CORTEX
   /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-//#ifdef ARM_CORTEX
   /* despite not explicitely documented in the CMSIS documentation,
       this has been tested to behave properly even when pSrcA==pDst
       void 	arm_sub_q15 (int16_t32_t *pSrcA, int16_t32_t *pSrcB, int16_t32_t *pDst, uint32_t blockSize)
   */
   arm_sub_q15(data, operand2.data, destination.data, size);
-//  #else
-//  for(int n=0; n<size; n++){
-//    destination[n]=data[n]-operand2[n];
-//  }
-//  #endif /* ARM_CORTEX */
+#else
+  for(int n=0; n < size; ++n){
+    int32_t value = data[n] - operand2[n];
+    destination[n] = saturate64To16(value);
+  }
+#endif /* ARM_CORTEX */
 }
 
 void ShortArray::subtract(ShortArray operand2){ //in-place
@@ -344,7 +366,8 @@ void ShortArray::subtract(ShortArray operand2){ //in-place
 
 void ShortArray::subtract(int16_t scalar) 
 {
-  // this method is modelled on  arm_sub_q15 
+#ifdef ARM_CORTEX
+  // this method is modelled on arm_sub_q15 
   // from <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   // just avoid incrementing the pSrcB pointer(see below)
   int16_t *pSrcA = data;
@@ -392,6 +415,12 @@ void ShortArray::subtract(int16_t scalar)
     /* Decrement the loop counter */
     blkCnt--;
   }
+#else
+  for(int n = 0; n < size; ++n){
+    int32_t value = data[n] - scalar;
+    data[n] = saturate64To16(value);
+  } 
+#endif
 }
 
 void ShortArray::multiply(ShortArray operand2, ShortArray destination){ //allows in-place
@@ -405,7 +434,8 @@ void ShortArray::multiply(ShortArray operand2, ShortArray destination){ //allows
     arm_mult_q15(data, operand2.data, destination, size);
 #else
   for(int n=0; n<size; n++){
-    destination[n]=data[n]*operand2[n];
+    int32_t value = data[n] * operand2[n];
+    destination[n] = saturate64To16(value >> 15);
   }
 
 #endif /* ARM_CORTEX */
@@ -493,9 +523,9 @@ void ShortArray::multiply(int16_t scalar){
     blkCnt--;
   }
 #else 
-  #warning TODO
   for(int n = 0; n < size; ++n){
-    
+    int32_t value = data[n] * scalar;
+    data[n] = saturate64To16(value >> 15);
   }
 #endif
 }
@@ -635,6 +665,7 @@ void ShortArray::setFloatValue(uint32_t n, float value){
 float ShortArray::getFloatValue(uint32_t n){
   return data[n] / (float)-SHRT_MIN;
 }
+
 void ShortArray::copyFrom(FloatArray source){
   ASSERT(source.getSize() == size, "Size does not match");
 #ifdef ARM_CORTEX

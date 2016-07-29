@@ -641,7 +641,9 @@ public:
 #ifdef ARM_CORTEX
     arm_shift_q31(data, shiftValue, data, size);
 #else
-    ASSERT(false, "TODO");
+    #warning TODO
+    
+    //ASSERT(false, "TODO");
 #endif
   }
 };
