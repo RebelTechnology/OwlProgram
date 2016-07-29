@@ -323,17 +323,17 @@ void ShortArray::add(int16_t scalar){
 void ShortArray::subtract(ShortArray operand2, ShortArray destination){ //allows in-place
   ASSERT(operand2.size == size && destination.size >= size, "Arrays size mismatch");
   /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
+//#ifdef ARM_CORTEX
   /* despite not explicitely documented in the CMSIS documentation,
       this has been tested to behave properly even when pSrcA==pDst
       void 	arm_sub_q15 (int16_t32_t *pSrcA, int16_t32_t *pSrcB, int16_t32_t *pDst, uint32_t blockSize)
   */
   arm_sub_q15(data, operand2.data, destination.data, size);
-  #else
-  for(int n=0; n<size; n++){
-    destination[n]=data[n]-operand2[n];
-  }
-  #endif /* ARM_CORTEX */
+//  #else
+//  for(int n=0; n<size; n++){
+//    destination[n]=data[n]-operand2[n];
+//  }
+//  #endif /* ARM_CORTEX */
 }
 
 void ShortArray::subtract(ShortArray operand2){ //in-place
@@ -341,10 +341,56 @@ void ShortArray::subtract(ShortArray operand2){ //in-place
   subtract(operand2, *this);
 }
 
-void ShortArray::subtract(int16_t scalar){
-  for(int n=0; n<size; n++){
-    data[n]-=scalar;
-  } 
+void ShortArray::subtract(int16_t scalar) 
+{
+  // this method is modelled on  arm_sub_q15 
+  // from <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  // just avoid incrementing the pSrcB pointer(see below)
+  int16_t *pSrcA = data;
+  int16_t scalarDouble[2] = {scalar, scalar};
+  int16_t *pSrcB = scalarDouble; 
+  int16_t *pDst = data;
+  uint32_t blockSize = size;
+
+  uint32_t blkCnt;                               /* loop counter */
+/* Run the below code for Cortex-M4 and Cortex-M3 */
+  q31_t inA1, inA2;
+  q31_t inB1, inB2;
+
+  /*loop Unrolling */
+  blkCnt = blockSize >> 2u;
+
+  /* First part of the processing with loop unrolling.  Compute 4 outputs at a time.    
+   ** a second loop below computes the remaining 1 to 3 samples. */
+  while(blkCnt > 0u)
+  {
+    /* C = A - B */
+    /* Subtract and then store the results in the destination buffer two samples at a time. */
+    inA1 = *__SIMD32(pSrcA)++;
+    inA2 = *__SIMD32(pSrcA)++;
+    inB1 = *__SIMD32(pSrcB); //HERE: not incrementing pSrcB
+    inB2 = *__SIMD32(pSrcB);
+
+    *__SIMD32(pDst)++ = __QSUB16(inA1, inB1);
+    *__SIMD32(pDst)++ = __QSUB16(inA2, inB2);
+
+    /* Decrement the loop counter */
+    blkCnt--;
+  }
+
+  /* If the blockSize is not a multiple of 4, compute any remaining output samples here.    
+   ** No loop unrolling is used. */
+  blkCnt = blockSize % 0x4u;
+
+  while(blkCnt > 0u)
+  {
+    /* C = A - B */
+    /* Subtract and then store the result in the destination buffer. */
+    *pDst++ = (q15_t) __QSUB16(*pSrcA++, *pSrcB++);
+
+    /* Decrement the loop counter */
+    blkCnt--;
+  }
 }
 
 void ShortArray::multiply(ShortArray operand2, ShortArray destination){ //allows in-place
