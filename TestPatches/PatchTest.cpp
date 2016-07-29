@@ -32,7 +32,7 @@ extern "C" {
     void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTab)
 {
   #warning TODO!
-  ASSERT(false, "arm_bitreversal_16");
+  // ASSERT(false, "arm_bitreversal_16");
 }
 }
 PatchProcessor processor;
@@ -43,8 +43,32 @@ void assert_failed(const char* msg, const char* location, int line){
   exit(-1);
 }
 
-void debugMessage(char const* msg, int i){
-  printf("%s %d\n", msg, i);
+void debugMessage(char const* msg, int a){
+  printf("%s %d\n", msg, a);
+}
+
+void debugMessage(char const* msg, float a){
+  printf("%s %f\n", msg, a);
+}
+
+void debugMessage(char const* msg, int a, int b){
+  printf("%s %d %d\n", msg, a, b);
+}
+
+void debugMessage(char const* msg, float a, float b){
+  printf("%s %f %f\n", msg, a, b);
+}
+
+void debugMessage(char const* msg, int a, int b, int c){
+  printf("%s %d %d %d\n", msg, a, b, c);
+}
+
+void debugMessage(char const* msg, float a, float b, float c){
+  printf("%s %f %f %f\n", msg, a, b, c);
+}
+
+void debugMessage(char const* msg){
+  printf("%s\n", msg);
 }
 
 Patch::Patch(){}
