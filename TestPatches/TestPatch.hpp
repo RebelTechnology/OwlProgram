@@ -3,12 +3,13 @@
 
 #include "Patch.h"
 
-#define TEST(name) do{ errormessage = (char*)("Test " name " failed line"); }while(0);
-#define CHECK(cond) if(!(cond)){ fail(errormessage, __LINE__); }else{ pass(); }
-#define CHECK_EQUAL(a, b) if((a) != (b)){ fail(errormessage, __LINE__); }else{ pass(); }
-// #define CHECK_CLOSE(a, b) if(abs(a-b)>DEFAULT_TOLERANCE){ fail(errormessage, __LINE__); }else{ pass(); }
-#define CHECK_CLOSE(a, b, c) if(abs((a)-(b))>(c)){ fail(errormessage, __LINE__); }else{ pass(); }
-#define REQUIRE(cond) if(!(cond)){ assert_failed(errormessage, "", __LINE__); }else{ pass(); }
+#define TEST(name) do{ errormessage = (char*)("Test " name " failed line"); }while(0)
+#define CHECK(cond) if(!(cond)){ fail("CHECK(" #cond ") fail", __LINE__); }else{ pass(); }
+// #define CHECK_EQUAL(a, b) if((a) != (b)){ fail("CHECK_EQUAL(" #a ", " #b ") fail", __LINE__); }else{ pass(); }
+#define CHECK_CLOSE(a, b, c) if(abs((a)-(b))>(c)){ fail("CHECK_CLOSE(" #a ", " #b ", " #c ") fail", __LINE__); }else{ pass(); }
+#define CHECK_EQUAL(a, b) check_equal(a, b, __LINE__)
+// #define CHECK_CLOSE(a, b, c) check_close(a, b, __LINE__)
+#define REQUIRE(cond) if(!(cond)){ assert_failed("REQUIRE(" #cond ") fail", "", __LINE__); }else{ pass(); }
 
 /** Abstract base class for tests */
 class TestPatch : public Patch {
@@ -22,9 +23,31 @@ public:
   void pass(){
     passed++;
   }
-  void fail(const char* message, int line){
-    if(success)
-      debugMessage(message, line);
+  template<typename T>
+  void check_equal(T a, T b, int line){
+    if(a != b){
+      debugMessage("CHECK_EQUAL", a, b);
+      debugMessage(errormessage, line);
+      success = false;
+      failed++;
+    }else{
+      pass();
+    }
+  }
+  template<typename T>
+  void check_close(T a, T b, T c, int line){
+    if(a != b){
+      debugMessage("CHECK_CLOSE", a, b, c);
+      debugMessage(errormessage, line);
+      success = false;
+      failed++;
+    }else{
+      pass();
+    }
+  }
+  void fail(const char* condition, int line){
+    debugMessage(condition);
+    debugMessage(errormessage, line);
     success = false;
     failed++;
   }

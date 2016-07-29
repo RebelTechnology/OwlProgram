@@ -23,6 +23,7 @@ CPPFLAGS += -I$(TESTPATCHES)
 CPPFLAGS += -ILibraries -ILibraries/KissFFT
 CPPFLAGS += -ILibraries/CMSIS/Include
 CPPFLAGS += -DARM_CORTEX -DARM_MATH_CM0
+CPPFLAGS +=  -fno-builtin -ffreestanding
 
 # Tools
 # TOOLROOT=i686-pc-cygwin-

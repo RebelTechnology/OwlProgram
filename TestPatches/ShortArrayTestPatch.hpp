@@ -10,7 +10,8 @@ public:
       TEST("Default ctor");
       ShortArray empty;
       CHECK_EQUAL(empty.getSize(), 0);
-      CHECK_EQUAL((short*)empty, NULL);
+      // CHECK_EQUAL((short*)empty, (short*)NULL);
+      CHECK(empty.getData() == NULL);
     }
     {
       TEST("create");
@@ -153,6 +154,9 @@ public:
       for(int n = 0; n < ar.getSize(); ++n){
         CHECK(ar2[n] == -ar[n]);
       }
+        CHECK(ar[0] == 534);
+        CHECK_EQUAL(ar[0], ar[44]);
+        REQUIRE(ar[5] == 534);
     }
     {
       TEST("rms");
