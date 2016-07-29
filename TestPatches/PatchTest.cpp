@@ -1,17 +1,10 @@
-#ifndef TESTCLASS 
-#define TESTCLASS ShortArrayTestPatch
-#endif
-// #ifndef TESTFILE 
-// #define TESTFILE "ShortArrayTestPatch.hpp"
-// #endif
-
-// #include TESTFILE
 #include "message.h"
 #include "TestPatch.hpp"
 #include "ProgramVector.h"
 #include "PatchProcessor.h"
-#include "ShortArrayTestPatch.hpp"
 #include <stdio.h>
+
+#include "registerpatch.h"
 
 extern "C" {
   // http://www.keil.com/forum/60479/
@@ -36,17 +29,21 @@ extern "C" {
   }
 }
 
-  void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTab)
-  {
-    #warning TODO!
-  }
+void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTab)
+{
+  #warning TODO!
+  ASSERT(false, "arm_bitreversal_16");
 }
+}
+
 PatchProcessor processor;
 ProgramVector programVector;
 
 void assert_failed(const char* msg, const char* location, int line){
   printf("Assertion failed: %s, in %s line %d\n", msg, location, line);
+  exit(-1);
 }
+
 void debugMessage(char const* msg, int i){
   printf("%s %d\n", msg, i);
 }
@@ -61,11 +58,21 @@ PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
 }
 
+static TestPatch* testpatch = NULL;
+void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, TestPatch* patch){
+  if(patch == NULL)
+    error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
+  testpatch = patch;
+}
+
+#define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
+
 int main(int argc, char** argv){
-  TestPatch* patch = new TESTCLASS();
+#include "registerpatch.cpp"
+  ASSERT(testpatch != NULL, "Missing test patch");    
   int ret = 0;
-  printf("Passed %d Failed %d\n", patch->passed, patch->failed);
-  if(patch->success){
+  printf("Passed %d Failed %d\n", testpatch->passed, testpatch->failed);
+  if(testpatch->success){
     printf("Success\n");
   }else{
     printf("Fail\n");

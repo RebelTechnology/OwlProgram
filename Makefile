@@ -34,7 +34,6 @@ else ifdef TEST
 PATCHNAME   ?= $(TEST)
 PATCHCLASS  ?= $(PATCHNAME)Patch
 PATCHFILE   ?= $(PATCHNAME)Patch.hpp
-DEPS        += test
 else
 # options for C++ compilation
 PATCHNAME   ?= "Template"
@@ -125,6 +124,9 @@ map: patch ## build map file (Build/patch.map)
 as: patch ## build assembly file (Build/patch.s)
 	@$(MAKE) -s -f compile.mk as
 	@echo Built $(PATCHNAME) assembly in $(BUILD)/$(TARGET).s
+
+test: $(DEPS) ## run test patch
+	@$(MAKE) -s -f test.mk test
 
 help: ## show this help
 	@echo 'Usage: make [target] ...'

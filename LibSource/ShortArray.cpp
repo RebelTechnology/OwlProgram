@@ -476,6 +476,7 @@ void ShortArray::shift(int shiftValue){
 #ifdef ARM_CORTEX
     arm_shift_q15(data, shiftValue, data, size);
 #else
+#warning TODO: saturated shift
     if(shiftValue > 0)
       for(int n=0; n<size; n++)
 	data[n] <<= shiftValue;
