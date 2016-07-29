@@ -3,7 +3,7 @@ BUILDROOT ?= .
 C_SRC   = basicmaths.c
 C_SRC   += kiss_fft.c
 # CPP_SRC = PatchTest.cpp
-CPP_SRC += FloatArray.cpp ComplexShortArray.cpp ComplexFloatArray.cpp FastFourierTransform.cpp ShortFastFourierTransform.cpp 
+CPP_SRC += FloatArray.cpp
 CPP_SRC += ShortArray.cpp
 CPP_SRC += Envelope.cpp VoltsPerOctave.cpp Window.cpp
 CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
@@ -22,7 +22,7 @@ CPPFLAGS += -I$(GENSOURCE)
 CPPFLAGS += -I$(TESTPATCHES)
 CPPFLAGS += -ILibraries -ILibraries/KissFFT
 CPPFLAGS += -ILibraries/CMSIS/Include
-CPPFLAGS += -DARM_CORTEX -DARM_MATH_CM0
+CPPFLAGS +=  -DARM_MATH_CM0
 CPPFLAGS +=  -fno-builtin -ffreestanding
 
 # Tools
