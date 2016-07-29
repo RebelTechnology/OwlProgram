@@ -171,23 +171,22 @@ public:
   int16_t getVariance();
   
   /**
-   * Array by scalar multiplication.
-   * Array by scalar multiplication, same as multiply(int16_t).
-   * @param[out] destination the destination array
-   * @param[in] factor the scaling factor
+   * Scales the content of the array by the given factor.
+   *
+   * @param factor is the fractional portion of the scale value, in 1.15 format
+   * The input data *pSrc and scaleFract are in 1.15 format. 
+   * These are multiplied to yield a 2.30 intermediate result and
+   * this is shifted with saturation to 1.15 format.
+   * @param shift the number of bits to shift the intermediate result by.
+   * @param destination the output array
   */
-  void scale(int16_t factor, ShortArray destination);
+  void scale(int16_t factor, int8_t shift, ShortArray destination);
   
   /**
    * Array by scalar multiplication, in-place.
    * @param[in] factor the scaling factor
   */
-  void scale(int16_t factor);
-  
-  /**
-   * Clips the elements in the array in the range [-1, 1].
-  */
-  void clip();
+  void scale(int16_t factor, int8_t shift);
   
   /**
    * Clips the elements in the array in the range [-**range**, **range**].

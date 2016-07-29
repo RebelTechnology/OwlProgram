@@ -149,7 +149,7 @@ int16_t ShortArray::getMean(){
   arm_mean_q15 (data, size, &result);
 #else
   result=0;
-  for(int n=0; n<size; n++){
+  for(int n=0; n < size; n++){
     result+=data[n];
   }
   result=result/size;
@@ -165,7 +165,7 @@ int64_t ShortArray::getPower(){
 #else
   result=0;
   int16_t *pSrc = data;
-  for(int n=0; n<size; n++){
+  for(int n=0; n < size; n++){
     result += (int32_t)pSrc[n]*pSrc[n];
   }
 #endif
@@ -199,26 +199,15 @@ int16_t ShortArray::getVariance(){
   return result;
 }
 
-// todo
-// void arm_scale_q15(q15_t*, q15_t, int8_t, q15_t*, uint32_t)
-// void ShortArray::scale(int16_t factor, ShortArray destination){//supports in-place
-// /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-// #ifdef ARM_CORTEX  
-//   arm_scale_q15(data, factor, destination, size);
-// #else
-//   for(int n=0; n<size; n++){
-//     destination[n]=factor*data[n];
-//   }
-// #endif
-// }
 
-// void ShortArray::scale(int16_t factor){
-// /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-//   scale(factor, *this);
-// }
+void ShortArray::scale(int16_t factor, int8_t shift, ShortArray destination){
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  arm_scale_q15(data, factor, shift, destination, size);
+}
 
-void ShortArray::clip(){
-  clip(1);
+void ShortArray::scale(int16_t factor, int8_t shift){
+/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  scale(factor, shift, *this);
 }
 
 void ShortArray::clip(int16_t max){
@@ -367,12 +356,12 @@ void ShortArray::multiply(ShortArray operand2, ShortArray destination){ //allows
       void 	arm_mult_q15 (int16_t32_t *pSrcA, int16_t32_t *pSrcB, int16_t32_t *pDst, uint32_t blockSize)
   */
     arm_mult_q15(data, operand2.data, destination, size);
-  #else
+#else
   for(int n=0; n<size; n++){
     destination[n]=data[n]*operand2[n];
   }
 
-  #endif /* ARM_CORTEX */
+#endif /* ARM_CORTEX */
 }
 
 void ShortArray::multiply(ShortArray operand2){ //in-place
@@ -390,11 +379,11 @@ void ShortArray::negate(ShortArray& destination){//allows in-place
   /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_negate_q15(data, destination.getData(), size); 
-  #else
+#else
   for(int n=0; n<size; n++){
     destination[n]=-data[n];
   }
-  #endif /* ARM_CORTEX */
+#endif /* ARM_CORTEX */
 }
 void ShortArray::negate(){
   /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
