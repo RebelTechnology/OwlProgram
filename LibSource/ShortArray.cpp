@@ -386,7 +386,7 @@ void ShortArray::subtract(int16_t scalar)
   {
     /* C = A - B */
     /* Subtract and then store the result in the destination buffer. */
-    *pDst++ = (q15_t) __QSUB16(*pSrcA++, *pSrcB++);
+    *pDst++ = (q15_t) __QSUB16(*pSrcA++, *pSrcB); //HERE: not incrementing pSrcB
 
     /* Decrement the loop counter */
     blkCnt--;
