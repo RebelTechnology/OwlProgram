@@ -290,10 +290,10 @@ public:
     }
     {
       TEST("subtract");
-      ShortArray ar = ShortArray::create(1000);
-      ShortArray ar2 = ShortArray::create(1000);
-      ShortArray ar3 = ShortArray::create(1000);
-      ShortArray ar4 = ShortArray::create(1000);
+      ShortArray ar = ShortArray::create(1023);
+      ShortArray ar2 = ShortArray::create(1023);
+      ShortArray ar3 = ShortArray::create(1023);
+      ShortArray ar4 = ShortArray::create(1023);
       ar.noise();
       ar2.noise();
       for(int n = 0; n < ar.getSize(); ++n){
@@ -308,18 +308,115 @@ public:
       ar.subtract(ar2, ar4);
       CHECK(ar3.equals(ar4));
       ar4.clear();
-      int32_t subValue = 124;
+      int32_t subValue = 1000;
       ar4.copyFrom(ar);
       ar4.subtract(subValue);
       for(int n = 0; n < ar.getSize(); ++n){
         int32_t value = ar[n] - subValue;
         value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
         ar3[n] = (int16_t)value;
-        if(ar3[n] != ar4[n])
-          printf("ar: %d, ar3: %d, ar4: %d\n", ar[n], ar3[n], ar4[n]);
+        if(ar3[n] != ar4[n]){
+          printf("[%d] ar: %d, ar3: %d, ar4: %d\n", n, ar[n], ar3[n], ar4[n]);
+        }
       }
       CHECK(ar3.equals(ar4));
+    }
+    {
+      TEST("multiply");
+      ShortArray ar = ShortArray::create(1023);
+      ShortArray ar2 = ShortArray::create(1023);
+      ShortArray ar3 = ShortArray::create(1023);
+      ShortArray ar4 = ShortArray::create(1023);
+      ar.noise();
+      ar2.noise();
+      for(int n = 0; n < ar.getSize(); ++n){
+        int32_t value = ar[n] * ar2[n];
+        value = value >> 15;
+        value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
+        ar3[n] = (int16_t)value;
+      }
+      ar4.copyFrom(ar);
+      ar4.multiply(ar2);
+      CHECK(ar3.equals(ar4));
+      ar4.clear();
+      ar.multiply(ar2, ar4);
+      CHECK(ar3.equals(ar4));
+      ar4.clear();
+      int32_t mulValue = 1000;
+      ar4.copyFrom(ar);
+      ar4.multiply(mulValue);
+      for(int n = 0; n < ar.getSize(); ++n){
+        int32_t value = ar[n] * mulValue;
+        value = value >> 15;
+        value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
+        ar3[n] = (int16_t)value;
+        if(ar3[n] != ar4[n]){
+          printf("[%d] ar: %d, ar3: %d, ar4: %d\n", n, ar[n], ar3[n], ar4[n]);
+          return;
+        }
+      }
+      CHECK(ar3.equals(ar4));
+    }
+    {
+      TEST("setAll");
+      ShortArray ar = ShortArray::create(1023);
+      ar.noise();
+      int16_t value = -1255;
+      ar.setAll(value);
+      for(int n = 0; n < ar.getSize(); ++n){
+        CHECK(ar[n] == value);
+      }
+    }
+    {
+      TEST("subArray");
+      ShortArray ar = ShortArray::create(1023);
+      ShortArray ar2 = ShortArray::create(1023);
+      int32_t offset = 249;
+      int32_t length = 167;
+      ShortArray sub = ar.subArray(offset, length);
+      CHECK(sub.getSize() == length);
+      CHECK(sub.getData() == ar.getData() + offset);
+      for(int n = 0; n < sub.getSize(); ++n){
+        CHECK(sub[n] == ar2[n + offset]);
+      }
+    }
+    {
+      TEST("convolve");
+      //TODO
+    }
+    {
+      TEST("correlate");
+      //TODO
+    }
+    {
+      TEST("shift");
+      ShortArray ar = ShortArray::create(1023);
+      ShortArray ar2 = ShortArray::create(1023);
+      ShortArray ar3 = ShortArray::create(1023);
+      int shiftValue = 1;
+      for(int k = 0; k < 2; ++k){
+        ar.noise();
+        ar2.copyFrom(ar);
+        ar2.shift(shiftValue);
+        for(int n = 0; n < ar.getSize(); ++n){
+          int16_t value = ar[n];
+          if(shiftValue > 0){
+            int32_t v = (int32_t)value << shiftValue;
+            if(v < SHRT_MIN)
+              v = SHRT_MIN;
+            else if (v > SHRT_MAX)
+              v = SHRT_MAX;
+            value = (int16_t)v;
+          } else {
+            value = value >> -shiftValue;
+          }
+          ar3[n] = value;
+        } 
+        CHECK(ar3.equals(ar2));
+        shiftValue = -shiftValue;
+      }
     }
   }
   //TODO: destroy all the created arrays
 };
+
