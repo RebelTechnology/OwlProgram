@@ -1,14 +1,10 @@
-#ifndef TESTCLASS 
-#define TESTCLASS ShortFastFourierTestPatch
-#endif
-
 #include "message.h"
 #include "TestPatch.hpp"
 #include "ProgramVector.h"
 #include "PatchProcessor.h"
-#include "ShortArrayTestPatch.hpp"
-#include "ShortFastFourierTestPatch.hpp"
 #include <stdio.h>
+
+#include "registerpatch.h"
 
 extern "C" {
   // http://www.keil.com/forum/60479/
@@ -59,11 +55,21 @@ PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
 }
 
+static TestPatch* testpatch = NULL;
+void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, TestPatch* patch){
+  if(patch == NULL)
+    error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
+  testpatch = patch;
+}
+
+#define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
+
 int main(int argc, char** argv){
-  TestPatch* patch = new TESTCLASS();
+#include "registerpatch.cpp"
+  ASSERT(testpatch != NULL, "Missing test patch");    
   int ret = 0;
-  printf("Passed %d Failed %d\n", patch->passed, patch->failed);
-  if(patch->success){
+  printf("Passed %d Failed %d\n", testpatch->passed, testpatch->failed);
+  if(testpatch->success){
     printf("Success\n");
   }else{
     printf("Fail\n");
