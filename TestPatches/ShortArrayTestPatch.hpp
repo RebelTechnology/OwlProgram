@@ -19,6 +19,7 @@ public:
       for(int i=0; i<512; ++i){
 	CHECK_CLOSE(array[i], 0.0, DEFAULT_TOLERANCE);
       }
+      ShortArray::destroy(array);
     }
     {
       TEST("getSize, getData");
@@ -29,6 +30,7 @@ public:
       ShortArray ar2 = ShortArray(data, size);
       CHECK_EQUAL(size, ar2.getSize());
       CHECK(data == ar2.getData());
+      ShortArray::destroy(ar);
     }
     {
       TEST("minmax");
@@ -56,6 +58,7 @@ public:
       CHECK(index == 7);
       CHECK(value == ar.getMaxValue());
       CHECK(index == ar.getMaxIndex());
+      ShortArray::destroy(ar);
     }
     {
       TEST("clear,noise");
@@ -79,6 +82,7 @@ public:
       ar.noise();
       CHECK(ar.getMinValue() < -200);
       CHECK(ar.getMaxValue() > 200);
+      ShortArray::destroy(ar);
     }
     {
       TEST("copy,equal");
@@ -91,6 +95,8 @@ public:
       ar.clear();
       ar.copyFrom(ar2);
       CHECK(ar.equals(ar));
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
     }
     {
       TEST("rectify");
@@ -107,6 +113,8 @@ public:
       for(int n = 0; n < ar.getSize(); ++n){
         CHECK(abs(ar[n]) == ar2[n]); 
       }
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
     }
     {
       TEST("reverse");
@@ -122,6 +130,8 @@ public:
       for(int n = 0; n < ar.getSize(); ++n){
         CHECK(ar[n] == ar2[ar2.getSize() - n - 1]); 
       }
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
     }
     {
       TEST("reciprocal");
@@ -137,6 +147,8 @@ public:
       for(int n = 0; n < ar.getSize(); ++n){
         CHECK_CLOSE(ar2[n], (0.5 + 1.f/ar[n]), 2);
       }
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
     }
     {
       TEST("negate");
@@ -152,6 +164,8 @@ public:
       for(int n = 0; n < ar.getSize(); ++n){
         CHECK(ar2[n] == -ar[n]);
       }
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
     }
     {
       TEST("rms");
@@ -165,6 +179,8 @@ public:
       } 
       int rms=(sqrtf(acc + 0.5));
       CHECK_CLOSE(rms, ar.getRms(), 5);
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
     }
     {
       TEST("mean");
@@ -179,6 +195,7 @@ public:
       mean = mean < SHRT_MIN ? SHRT_MIN : mean;
 
       CHECK_CLOSE(mean, ar.getMean(), 30);
+      ShortArray::destroy(ar);
     }
     {
       TEST("power");
@@ -189,6 +206,7 @@ public:
         power += ar[n] * ar[n];
       }
       CHECK_CLOSE(power, ar.getPower(), 30);
+      ShortArray::destroy(ar);
     }
     {
       TEST("std");
@@ -225,6 +243,9 @@ public:
         CHECK(ar2[n] == shortValue);
         CHECK(ar3[n] == shortValue);
       }
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
+      ShortArray::destroy(ar3);
     }
     {
       TEST("clip");
@@ -256,6 +277,9 @@ public:
         ar3[n] = (int16_t)value;
       }
       CHECK(ar3.equals(ar2));
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
+      ShortArray::destroy(ar3);
     }
     {
       TEST("add");
@@ -286,6 +310,10 @@ public:
         ar3[n] = (int16_t)value;
       }
       CHECK(ar3.equals(ar4));
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
+      ShortArray::destroy(ar3);
+      ShortArray::destroy(ar4);
     }
     {
       TEST("subtract");
@@ -316,6 +344,10 @@ public:
         ar3[n] = (int16_t)value;
       }
       CHECK(ar3.equals(ar4));
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
+      ShortArray::destroy(ar3);
+      ShortArray::destroy(ar4);
     }
     {
       TEST("multiply");
@@ -348,6 +380,10 @@ public:
         ar3[n] = (int16_t)value;
       }
       CHECK(ar3.equals(ar4));
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
+      ShortArray::destroy(ar3);
+      ShortArray::destroy(ar4);
     }
     {
       TEST("setAll");
@@ -358,6 +394,7 @@ public:
       for(int n = 0; n < ar.getSize(); ++n){
         CHECK(ar[n] == value);
       }
+      ShortArray::destroy(ar);
     }
     {
       TEST("subArray");
@@ -371,6 +408,8 @@ public:
       for(int n = 0; n < sub.getSize(); ++n){
         CHECK(sub[n] == ar2[n + offset]);
       }
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
     }
     {
       TEST("convolve");
@@ -407,6 +446,9 @@ public:
         CHECK(ar3.equals(ar2));
         shiftValue = -shiftValue;
       }
+      ShortArray::destroy(ar);
+      ShortArray::destroy(ar2);
+      ShortArray::destroy(ar3);
     }
     {
       TEST("float");
@@ -429,6 +471,8 @@ public:
       for(int n = 0; n < ar.getSize(); ++n){
         CHECK_CLOSE(ar.getFloatValue(n), fa[n], 0.0004f);
       }
+      ShortArray::destroy(ar);
+      FloatArray::destroy(fa);
     }
   }
   //TODO: destroy all the created arrays
