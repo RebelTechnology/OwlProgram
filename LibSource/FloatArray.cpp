@@ -365,15 +365,17 @@ void FloatArray::multiply(float scalar){
 #ifdef ARM_CORTEX
   arm_scale_f32(data, scalar, data, size);
 #else
-  for(int n=0; n<size; n++){
+  for(int n=0; n<size; n++)
     data[n]*=scalar;
-  }
+#endif
 }
 
 void FloatArray::multiply(float scalar, FloatArray destination){
-  for(int n=0; n<size; n++){
+#ifdef ARM_CORTEX
+  arm_scale_f32(data, scalar, destination, size);
+#else
+  for(int n=0; n<size; n++)
     destination[n] = data[n] * scalar;
-  } 
 #endif
 }
 
