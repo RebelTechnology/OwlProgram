@@ -7,10 +7,8 @@ class Oscillator {
 public:
   Oscillator(){}
   virtual ~Oscillator(){}
-  virtual float getNextSample() = 0;
-  virtual float getNextSample(float fm){
-    return getNextSample();
-  }
+  virtual float getNextSample(){ return 0.0f; }
+  virtual float getNextSample(float fm){ return 0.0f; }
   /* Fills @param output with samples */
   virtual void getSamples(FloatArray output){
     for(int i=0; i<output.getSize(); ++i)
