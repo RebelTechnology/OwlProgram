@@ -14,7 +14,7 @@
 #define HV_OWL_PARAM_G "Channel-G"
 #define HV_OWL_PARAM_H "Channel-H"
 #define HV_OWL_PARAM_PUSH "Channel-Push"
-#define HV_OWL_PARAM_NOTEOUT "noteout"
+#define HV_OWL_PARAM_NOTEOUT "__hv_noteout"
 #define HEAVY_MESSAGE_POOL_SIZE  4 // in kB (default 10kB)
 #define HEAVY_MESSAGE_QUEUE_SIZE 1 // in kB (default 2kB)
 
@@ -61,10 +61,10 @@ private:
   HvMessage* notein;
 public:
   HeavyPatch() {
-    registerParameter(PARAMETER_E, HV_OWL_PARAM_A);
-    registerParameter(PARAMETER_E, HV_OWL_PARAM_B);
-    registerParameter(PARAMETER_E, HV_OWL_PARAM_C);
-    registerParameter(PARAMETER_E, HV_OWL_PARAM_D);
+    registerParameter(PARAMETER_A, HV_OWL_PARAM_A);
+    registerParameter(PARAMETER_B, HV_OWL_PARAM_B);
+    registerParameter(PARAMETER_C, HV_OWL_PARAM_C);
+    registerParameter(PARAMETER_D, HV_OWL_PARAM_D);
     registerParameter(PARAMETER_E, HV_OWL_PARAM_E);
     receiverHash[0] = hv_stringToHash(HV_OWL_PARAM_A);
     receiverHash[1] = hv_stringToHash(HV_OWL_PARAM_B);
