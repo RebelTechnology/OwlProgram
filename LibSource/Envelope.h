@@ -28,6 +28,9 @@ private:
 
 public:
   AdsrEnvelope(float newSampleRate);
+  void setSampleRate(float sampleRate){
+    samplePeriod = 1.0/sampleRate;
+  }
   void setAttack(float newAttack);
   void setDecay(float newDecay);
   void setRelease(float newRelase);
@@ -44,7 +47,7 @@ public:
   void attenuate(FloatArray buf); // increments envelope by buffer length
 private:
   static const float minTime;
-  const float samplePeriod;
+  float samplePeriod;
   EnvelopeStage stage;
   EnvelopeTrigger trig;
   bool retrigger;
