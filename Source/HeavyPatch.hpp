@@ -50,7 +50,9 @@ extern "C" {
 	pressed = !isButtonPressed(PUSHBUTTON);
       setButton(PUSHBUTTON, pressed);
     }else if(strcmp(receiverName, HV_OWL_PARAM_NOTEOUT) == 0){
-      debugMessage("noteout", (float)hv_msg_getNumElements(m), hv_msg_getFloat(m, 0), hv_msg_getFloat(m, 1));
+      uint8_t note = hv_msg_getFloat(m, 0)*128;
+      uint16_t velocity = hv_msg_getFloat(m, 1)*4096;
+      setButton((PatchButtonId)(MIDI_NOTE_BUTTON+note), velocity);
     }
   }
 }
