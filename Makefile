@@ -30,6 +30,12 @@ PATCHNAME   ?= $(HEAVY)
 PATCHCLASS  ?= HeavyPatch
 PATCHFILE   ?= HeavyPatch.hpp
 DEPS        += heavy
+else ifdef GEN
+# options for Max/MSP Gen compilation
+PATCHNAME   ?= $(GEN)
+PATCHCLASS  ?= GenPatch
+PATCHFILE   ?= GenPatch.hpp
+DEPS        += gen
 else
 # options for C++ compilation
 PATCHNAME   ?= "Template"
@@ -89,6 +95,9 @@ faust: .FORCE
 
 heavy: .FORCE
 	@$(MAKE) -s -f heavy.mk heavy
+
+gen: .FORCE
+	@$(MAKE) -s -f gen.mk gen
 
 sysex: patch $(BUILD)/$(TARGET).syx ## package patch binary as MIDI sysex
 	@echo Built sysex $(PATCHNAME) in $(BUILD)/$(TARGET).syx
