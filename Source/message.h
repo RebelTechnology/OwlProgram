@@ -28,8 +28,6 @@
  extern "C" {
 #endif
 
-   char* ftoa(float val, int base);
-   char* itoa(int val, int base);
    void debugMessage(const char* msg);
    void error(int8_t code, const char* reason);
    void assert_failed(const char* msg, const char* location, int line);
