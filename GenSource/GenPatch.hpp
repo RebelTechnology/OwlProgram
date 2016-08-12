@@ -20,12 +20,13 @@ private:
   int8_t parameterindices[GEN_OWL_PARAM_COUNT];
   int8_t buttonindex;
   CommonState *context;
+  int numParams;
 public:
   GenPatch() {
     memset(parameterindices, -1, GEN_OWL_PARAM_COUNT);
     buttonindex = -1;
     context = (CommonState *)gen::create(getSampleRate(), 0);
-    int numParams = gen::num_params();
+    numParams = gen::num_params();
     for(int i = 0; i < numParams; i++){
       if(strcmp(GEN_OWL_PARAM_A, gen::getparametername(context, i)) == 0)
 	parameterindices[0] = i;
@@ -57,7 +58,6 @@ public:
 
   t_param scaleParameter(CommonState *context, int index, t_param value)
   {
-    int numParams = gen::num_params();
     if (index < numParams) {
       t_param min = gen::getparametermin(context, index);
       t_param max = gen::getparametermax(context, index);
@@ -73,28 +73,14 @@ public:
   }
 
   void processAudio(AudioBuffer &buffer) {
-    int blockSize = getBlockSize();
-    int numParams = gen::num_params();
-
     for(int i=0; i<GEN_OWL_PARAM_COUNT; ++i){
       int8_t index = parameterindices[i];
       if(index != -1)
 	gen::setparameter(context, index, scaleParameter(context, index, getParameterValue((PatchParameterId)i)), NULL);
     }
 
-    // static bool pushbutton = false;
-    // if(isButtonPressed(PUSHBUTTON) != pushbutton){
-    //   pushbutton = isButtonPressed(PUSHBUTTON);
-    //   if (pushbutton) {
-    //     float *buf = buffer.getSamples(0);
-    //     for (int i = 0; i < blockSize; i++) {
-    //       *buf++ = 1.;
-    //     }
-    //   }
-    // }
-
     float* outputs[] = {buffer.getSamples(0), buffer.getSamples(1) };
-    gen::perform(context, outputs, 2, outputs, 2, blockSize);
+    gen::perform(context, outputs, 2, outputs, 2, buffer.getSize());
   }
 };
 

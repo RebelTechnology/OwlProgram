@@ -80,7 +80,6 @@ typedef t_atom_long t_max_err;		///< an integer value suitable to be returned as
 #include "basicmaths.h"
 #undef RAND_MAX
 #define RAND_MAX UINT32_MAX
-
 // add C74 stuff
 #define exp(x) fasterexp(x)
 #define pow(x,y) fasterpow(x,y)
@@ -118,29 +117,6 @@ extern "C" {
 	//extern double pow ( double, double );
 	*/
 	extern double gen_msp_pow ( double, double );
-
-// OWL -- we have to use these
-#ifdef ARM_CORTEX
-/* #include "basicmaths.h" */
-/* #include "arm_math.h" */
-/* #define sin(x) arm_sin_f32(x) */
-/* #define sinf(x) arm_sin_f32(x) */
-/* #define cos(x) arm_cos_f32(x) */
-/* #define cosf(x) arm_cos_f32(x) */
-/* #define sqrt(x) arm_sqrtf(x) */
-/* #define sqrtf(x) arm_sqrtf(x) */
-/* #define rand(...) arm_rand32() */
-/* #undef RAND_MAX */
-/* #define RAND_MAX UINT32_MAX */
-
-/* // add C74 stuff */
-/* #define exp(x) fasterexp(x) */
-/* #define pow(x,y) fasterpow(x,y) */
-/* #define tan(x) fastertanfull(x) */
-/* // add log variants */
-#endif //ARM_CORTEX
-
-// OWL
 
 	/*
 	extern double sqrt( double );
