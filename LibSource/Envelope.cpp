@@ -11,13 +11,16 @@ void EnvelopeGenerator::calculateMultiplier(double startLevel,
 
 const float AdsrEnvelope::minTime = 0.001;
 
-AdsrEnvelope::AdsrEnvelope(float sampleRate) : 
-  samplePeriod(1.0/sampleRate),
+AdsrEnvelope::AdsrEnvelope() : AdsrEnvelope(1) {}
+
+AdsrEnvelope::AdsrEnvelope(unsigned int timeBase) : 
   stage(kIdle),
   trig(kGate),
   level(0.0),
   gateState(false),
-  gateTime(-1) {
+  gateTime(-1)
+{
+  setTimeBase(timeBase);
   setAttack(0.0);
   setDecay(0.0);
   setSustain(1.0);
@@ -72,6 +75,14 @@ void AdsrEnvelope::gate(bool state, int delay){
     gateState = state;
   }
   trig = kGate;
+}
+
+void AdsrEnvelope::setTimeBase(unsigned int newTimeBase){
+  attackIncrement = attackIncrement * newTimeBase / timeBase;
+  decayIncrement = decayIncrement * newTimeBase / timeBase;
+  releaseIncrement = releaseIncrement * newTimeBase / timeBase;
+  timeBase = newTimeBase;
+  samplePeriod = timeBase / Patch::getSampleRate();
 }
 
 void AdsrEnvelope::setLevel(float newLevel){

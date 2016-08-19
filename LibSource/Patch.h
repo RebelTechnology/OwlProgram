@@ -113,4 +113,13 @@ public:
   virtual void processAudio(AudioBuffer& output) = 0;
 };
 
+class Frequency {
+  static float normal(float _hz){
+    return _hz * 2 / Patch::getSampleRate();
+  }
+  static float hz(float _normal){
+    return _normal * (Patch::getSampleRate() / 2);
+  }
+};
+
 #endif // __Patch_h__

@@ -29,34 +29,39 @@
 #ifndef __EnvelopeTestPatch_hpp__
 #define __EnvelopeTestPatch_hpp__
 
-#include "StompBox.h"
+#include "Patch.h"
 #include "Envelope.h"
+#include "SineOscillator.hpp"
 
 class EnvelopeTestPatch : public Patch {
 public:
-  AdsrEnvelope env;
+  static const unsigned int numEnvs = 2;
+  AdsrEnvelope env[numEnvs];
   FloatArray envBuffer;
-  EnvelopeTestPatch():
-    env(getSampleRate())
+  SineOscillator osc;
+  EnvelopeTestPatch()
   {
     registerParameter(PARAMETER_A, "Attack");
     registerParameter(PARAMETER_B, "Decay");
     registerParameter(PARAMETER_C, "Sustain");
     registerParameter(PARAMETER_D, "Release");
     envBuffer = FloatArray::create(getBlockSize());
-    debugMessage("__");
+    env[0].setTimeBase(1); // run at sampling rate
+    env[1].setTimeBase(getBlockSize()); //run at block rate
   }
   ~EnvelopeTestPatch(){
     FloatArray::destroy(envBuffer);
   }
   void processAudio(AudioBuffer &buffer){
-    env.setAttack(getParameterValue(PARAMETER_A)*4);
-    env.setDecay(getParameterValue(PARAMETER_B)*4);
-    env.setSustain(getParameterValue(PARAMETER_C));
-    env.setRelease(getParameterValue(PARAMETER_D)*4);
+    for(int n = 0; n < numEnvs; ++n){
+      env[n].setAttack(getParameterValue(PARAMETER_A)*4);
+      env[n].setDecay(getParameterValue(PARAMETER_B)*4);
+      env[n].setSustain(getParameterValue(PARAMETER_C));
+      env[n].setRelease(getParameterValue(PARAMETER_D)*4);
+    }
 
-    FloatArray fa=buffer.getSamples(0);
-    fa.noise();
+    FloatArray fa = buffer.getSamples(0);
+    FloatArray fb = buffer.getSamples(1);
     static int lastButton = GREEN_BUTTON; //to avoid automatic triggering on startup
     int button;
     if(isButtonPressed(GREEN_BUTTON))
@@ -66,7 +71,9 @@ public:
     
     // use next two lines to test gate. Gate will be on as long as the red light is on
     bool gate = (button == RED_BUTTON);
-    env.gate(gate);
+    for(int n = 0; n < numEnvs; ++n){
+      env[n].gate(gate);
+    }
     
     // use next 7 lines to test trigger
     //  env.setRetrigger(false);
@@ -77,11 +84,20 @@ public:
     //  }
     //  lastButton = button;
     
-    env.getEnvelope(envBuffer);
+    // env[0] is at sampling rate 
+    osc.setFrequency(300);
+    fa.noise();
+    osc.getSamples(fa);
+    fb.copyFrom(fa);
+    env[0].getEnvelope(envBuffer);
     fa.multiply(envBuffer);
-    fa.multiply(0.2);
     
-    static float maxValue = 0;
+    // env[1] is at block rate, note the zipper noise ! 
+    float amplitude = env[1].getNextSample();
+    fb.multiply(amplitude);
+
+    fa.multiply(0.2);
+    fb.multiply(0.2);
   }
 };
 
