@@ -2,26 +2,37 @@
 #include "basicmaths.h"
 #include <stdint.h>
 
-WavetableOscillator* WavetableOscillator::create(float sr, int size) {
+WavetableOscillator* WavetableOscillator::create(int size) {
   FloatArray wave = FloatArray::create(size);
   for(int i=0; i<size; ++i)
     wave[i] = sin(2*M_PI*i/(size-1));    
-  return new WavetableOscillator(sr, wave);
+  debugMessage("values", wave[10], wave[100], wave[101]);
+  return new WavetableOscillator(wave);
+}
+static void destroy(WavetableOscillator* wavetableOscillator){
+  FloatArray::destroy(wavetableOscillator->getTable());
+  delete wavetableOscillator;
 }
 
-WavetableOscillator::WavetableOscillator(float sr, const FloatArray wavetable): 
-  multiplier(1.0/sr),
-  wave(wavetable),
-  acc(0.0), inc(0.1)
+WavetableOscillator::WavetableOscillator(const FloatArray wavetable): 
+  WavetableOscillator::WavetableOscillator(1, wavetable)
 {}
 
-void WavetableOscillator::setSampleRate(float value){
-  multiplier = 1.0/value;
+WavetableOscillator::WavetableOscillator(unsigned int timeBase, const FloatArray wavetable): 
+  wave(wavetable),
+  acc(0.0), inc(0.1)
+{
+  setTimeBase(timeBase);
 }
 
-void WavetableOscillator::setFrequency(float freq){
-  //    inc = max(0.0, min(0.5, freq*multiplier));
-  inc = freq*multiplier;  
+void WavetableOscillator::setFrequency(float newFreq){
+  freq = newFreq;
+  inc = freq * timeBaseOverFs;  
+}
+
+void WavetableOscillator::setTimeBase(unsigned int samples){
+  timeBaseOverFs = samples / Patch::getSampleRate();
+  setFrequency(freq);
 }
 
 float WavetableOscillator::getSample(float phase){
@@ -39,7 +50,11 @@ float WavetableOscillator::getNextSample(){
   return s;
 }
 
-void WavetableOscillator::getSamples(FloatArray samples){
-  for(int i=0; i<samples.getSize();++i)
-    samples[i] = getNextSample();
+void WavetableOscillator::setTable(FloatArray table){
+  wave = table;
 }
+
+FloatArray WavetableOscillator::getTable(){
+  return wave;
+}
+
