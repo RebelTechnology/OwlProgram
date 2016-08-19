@@ -49,19 +49,20 @@ public:
   }
   void processAudio(AudioBuffer &buffer){
     float frequency = getParameterValue(PARAMETER_A) * 500 + 100;
-    float lfoRate = (getParameterValue(PARAMETER_B) - 0.05) * 30 ;
+    float parameterB = getParameterValue(PARAMETER_B);
     float fmFreq = getParameterValue(PARAMETER_C) * 1000;
     float fmWidth = getParameterValue(PARAMETER_D) * 1;
 
     FloatArray fa=buffer.getSamples(0);
     FloatArray fb=buffer.getSamples(1);
-    lfo.setFrequency(lfoRate);
     float lfoValue;
     // make the lfo knob inactive when close to 0
-    if (lfoRate < 0)
+    if (parameterB < 0.05){
       lfoValue = 1;
-    else
+    } else {
+      lfo.setPeriod(1 - (parameterB * 0.9 + 0.1));
       lfoValue = lfo.getNextSample();
+    }
     // smooth the LFO value
     for(int n = 0; n < fb.getSize(); ++n){
       static float oldLfoValue = 0;

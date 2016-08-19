@@ -1,3 +1,6 @@
+#ifndef SINEOSCILLATOR_HPP
+#define SINEOSCILLATOR_HPP
+
 #include "Oscillator.h"
 
 class SineOscillator : public Oscillator {
@@ -54,3 +57,4 @@ public:
     setFrequency(freq);
   }
 };
+#endif /* SINEOSCILLATOR_HPP */
