@@ -33,12 +33,14 @@
 #include "BiquadFilter.h"
 
 class BiquadFilterTestPatch : public Patch {
+  FloatParameter cutoff;
+  FloatParameter resonance;
 public:
   BiquadFilter *filter;
   BiquadFilterTestPatch(){
-    registerParameter(PARAMETER_A, "Cutoff");
-    registerParameter(PARAMETER_B, "Resonance");
-    int stages=3;
+    cutoff = getFloatParameter("Cutoff", 0, 0.99, 0.5, 0.9);
+    resonance = getFloatParameter("Resonance", 0.001, 10, 0.5, 0.98);
+    int stages=1;
     filter=BiquadFilter::create(stages);
     float cutoff=0.2;
     float resonance=2;
@@ -91,11 +93,12 @@ public:
     FloatArray::destroy(y1);
     debugMessage("All tests passed");
   }
+
   void processAudio(AudioBuffer &buffer){
-    float cutoff=getParameterValue(PARAMETER_A);
-    float resonance=10*getParameterValue(PARAMETER_B);
+
     FloatArray fa=buffer.getSamples(0);
     fa.noise();
+    debugMessage("cutoff, resonance", cutoff, resonance);
     filter->setLowPass(cutoff, resonance);
     filter->process(fa, fa, fa.getSize());
     buffer.getSamples(1).copyFrom(fa);

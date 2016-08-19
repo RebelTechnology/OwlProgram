@@ -46,11 +46,13 @@ public:
   FloatArray getCoefficients(){
     return coefficients;
   }
+
   FloatArray getState(){
     return state;
   }
 
   static void setLowPass(float* coefficients, float fc, float q){
+    q = max(0.001, q);
     float omega = M_PI*fc/2;
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
@@ -62,6 +64,7 @@ public:
   }
 
   static void setHighPass(float* coefficients, float fc, float q){
+    q = max(0.001, q);
     float omega = M_PI*fc/2;
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
@@ -73,6 +76,7 @@ public:
   }
 
   static void setBandPass(float* coefficients, float fc, float q){
+    q = max(0.001, q);
     float omega = M_PI*fc/2;
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
@@ -84,6 +88,7 @@ public:
   }
 
   static void setNotch(float* coefficients, float fc, float q){
+    q = max(0.001, q);
     float omega = M_PI*fc/2;
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
@@ -95,6 +100,7 @@ public:
   }
 
   static void setPeak(float* coefficients, float fc, float q, float gain){
+    q = max(0.001, q);
     float omega = M_PI*fc/2;
     float K = tanf(omega);
     float V = fabs(gain-0.5)*60 + 1; // Gain
