@@ -128,20 +128,6 @@ public:
       assert(tempFa1[n]==fa[size-1-n], "reverse() in-place");
     }
     
-    //test scale
-    {
-      tempFa1.copyFrom(fa);
-      float factor=0.5;
-      tempFa1.scale(factor); //in-place
-      for(int n=0; n<size; n++){
-        assert(tempFa1[n]==fa[n]*factor, "scale() in-place");
-      }
-      tempFa1.setAll(0);
-      fa.scale(factor, tempFa1); //scale and copy
-      for(int n=0; n<size; n++){
-        assert(tempFa1[n]==fa[n]*factor, "scale() in-place");
-      }
-    }
     //test clip
     {
       tempFa1.copyFrom(fa);
@@ -151,12 +137,13 @@ public:
         assert(abs(tempFa1[n])<=clip, "clip to value");
       }
       tempFa1.copyFrom(fa);
-      tempFa1.scale(3);
+      tempFa1.multiply(3);
       tempFa1.clip();
       for(int n=0; n<size; n++){
         assert(abs(tempFa1[n])<=1, "clip to 1");
       }
-      fa.scale(3, tempFa1);
+	  tempFa1.copyFrom(fa);
+      tempFa1.multiply(3);
       float min=0.1;
       float max=0.5;
       tempFa1.clip(min, max);
@@ -288,6 +275,7 @@ public:
     }
     
     //test convolve
+	if(0)
     { 
       tempFa1.noise();
       int size2=123;
@@ -451,7 +439,7 @@ public:
         rms+=fa[n]*fa[n];
       } 
       rms=sqrt(rms/size);
-      assert(fa.getRms()==rms,"getRms()");
+      assertt(fa.getRms(), rms, "getRms()", 0.0001);
     }      
 
     //test power
@@ -460,7 +448,7 @@ public:
       for(int n=0; n<size; n++){
         power+=fa[n]*fa[n];
       } 
-      assert(power==fa.getPower(),"getPower()");
+      assertt(power, fa.getPower(), "getPower()", 0.0001);
     }    
     
     //quantities needed for mean, variance, standardDeviation
@@ -473,7 +461,7 @@ public:
       }
       //test mean
       float mean=sum/size;
-      assert(mean==fa.getMean(),"mean()");
+      assertt(mean, fa.getMean(),"mean()", 0.001);
       //test variance
       //variance is The average of the squared differences from the Mean."
       float var=0;
