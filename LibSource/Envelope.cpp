@@ -18,7 +18,8 @@ AdsrEnvelope::AdsrEnvelope(unsigned int timeBase) :
   trig(kGate),
   level(0.0),
   gateState(false),
-  gateTime(-1)
+  gateTime(-1),
+  timeBase(1)
 {
   setTimeBase(timeBase);
   setAttack(0.0);
