@@ -2,10 +2,13 @@ BUILDROOT ?= .
 
 C_SRC   = basicmaths.c heap_5.c # sbrk.c
 CPP_SRC = main.cpp operators.cpp message.cpp Patch.cpp PatchProcessor.cpp
-CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp FastFourierTransform.cpp 
+CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp ComplexShortArray.cpp FastFourierTransform.cpp ShortFastFourierTransform.cpp 
+CPP_SRC += ShortArray.cpp
 CPP_SRC += Envelope.cpp VoltsPerOctave.cpp Window.cpp
 CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
-CPP_SRC += PatchProgram.cpp SmoothValue.cpp PatchParameter.cpp
+CPP_SRC += SmoothValue.cpp PatchParameter.cpp
+CPP_SRC += PatchProgram.cpp 
+# CPP_SRC += ShortPatchProgram.cpp 
 
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
@@ -44,11 +47,23 @@ LDFLAGS += -fpic
 LDFLAGS += -fpie
 LDFLAGS += -flto
 
-CXXFLAGS = -fno-rtti -fno-exceptions -std=c++11
+CXXFLAGS = -fno-rtti -fno-exceptions -std=gnu++11
 
 ifdef HEAVY
 CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
 endif
+
+CC=gcc
+LD=gcc
+AR=ar
+AS=as
+NM=nm
+CXX=g++
+GDB=gdb
+SIZE=size
+RANLIB=ranlib
+OBJCOPY=objcopy
+OBJDUMP=objdump
 
 # object files
 OBJS  = $(C_SRC:%.c=$(BUILD)/%.o) $(CPP_SRC:%.cpp=$(BUILD)/%.o)
@@ -73,6 +88,10 @@ vpath %.cpp $(GENSOURCE)
 vpath %.c $(GENSOURCE)
 vpath %.s $(GENSOURCE)
 vpath %.c Libraries/syscalls
+
+$(BUILD)/ShortPatchProgram.o: $(SOURCE)/ShortPatchProgram.cpp $(DEPS)
+	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/ShortPatchProgram.cpp -o $@
+	@$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/ShortPatchProgram.cpp > $(@:.o=.d)
 
 $(BUILD)/PatchProgram.o: $(SOURCE)/PatchProgram.cpp $(DEPS)
 	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/PatchProgram.cpp -o $@

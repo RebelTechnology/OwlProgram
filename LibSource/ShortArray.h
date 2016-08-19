@@ -1,20 +1,22 @@
-#ifndef __FloatArray_h__
-#define __FloatArray_h__
+#ifndef __ShortArray_h__
+#define __ShortArray_h__
 
-#include <cstddef>
+#include <stdint.h>
+#include "basicmaths.h"
+#include "FloatArray.h"
 
 /**
- * This class contains useful methods for manipulating arrays of floats.
+ * This class contains useful methods for manipulating arrays of int16_ts.
  * It also provides a convenient handle to the array pointer and the size of the array.
- * FloatArray objects can be passed by value without copying the contents of the array.
+ * ShortArray objects can be passed by value without copying the contents of the array.
  */
-class FloatArray {
+class ShortArray {
 private:
-  float* data;
+  int16_t* data;
   int size;
 public:
-  FloatArray();
-  FloatArray(float* data, int size);
+  ShortArray();
+  ShortArray(int16_t* data, int size);
 
   int getSize() const{
     return size;
@@ -38,26 +40,26 @@ public:
    * @param[out] index will be set to the index of the minimum value after the call
    * 
    */
-  void getMin(float* value, int* index);
+  void getMin(int16_t* value, int* index);
   
   /**
    * Get the maximum value in the array and its index
    * @param[out] value will be set to the maximum value after the call
    * @param[out] index will be set to the index of the maximum value after the call
   */
-  void getMax(float* value, int* index);
+  void getMax(int16_t* value, int* index);
   
   /**
    * Get the minimum value in the array
    * @return the minimum value contained in the array
   */
-  float getMinValue();
+  int16_t getMinValue();
   
   /**
    * Get the maximum value in the array
    * @return the maximum value contained in the array
    */
-  float getMaxValue();
+  int16_t getMaxValue();
   
   /**
    * Get the index of the minimum value in the array
@@ -71,14 +73,14 @@ public:
    */
   int getMaxIndex();
   
-  float getDb(); //TODO: not implemented
+  int16_t getDb(); //TODO: not implemented
   
   /**
    * Absolute value of the array.
    * Stores the absolute value of the elements in the array into destination.
    * @param[out] destination the destination array.
   */
-  void rectify(FloatArray& destination);
+  void rectify(ShortArray& destination);
   
   /**
    * Absolute value of the array.
@@ -91,7 +93,7 @@ public:
    * Copies the elements of the array in reversed order into destination.
    * @param[out] destination the destination array.
   */
-  void reverse(FloatArray& destination);
+  void reverse(ShortArray& destination);
   
   /**
    * Reverse the array.
@@ -104,7 +106,7 @@ public:
    * Stores the reciprocal of the elements in the array into destination.
    * @param[out] destination the destination array.
   */
-  void reciprocal(FloatArray& destination);
+  void reciprocal(ShortArray& destination);
   
   /**
    * Reciprocal of the array.
@@ -117,7 +119,7 @@ public:
    * Stores the opposite of the elements in the array into destination.
    * @param[out] destination the destination array.
   */
-  void negate(FloatArray& destination);
+  void negate(ShortArray& destination);
   
   /**
    * Negate the array.
@@ -137,55 +139,50 @@ public:
    * @param min minimum value in the range
    * @param max maximum value in the range 
    */
-  void noise(float min, float max);
+  void noise(int16_t min, int16_t max);
   
   /**
    * Root mean square value of the array.
    * Gets the root mean square of the values in the array.
   */
-  float getRms();
+  int16_t getRms();
   
   /**
    * Mean of the array.
    * Gets the mean (or average) of the values in the array.
   */
-  float getMean();
+  int16_t getMean();
   
   /**
    * Power of the array.
    * Gets the power of the values in the array.
   */
-  float getPower();
+  int64_t getPower();
   
   /**
    * Standard deviation of the array.
    * Gets the standard deviation of the values in the array.
   */
-  float getStandardDeviation();
+  int16_t getStandardDeviation();
   
   /**
    * Variance of the array.
    * Gets the variance of the values in the array.
   */
-  float getVariance();
-
-  /**
-   * Clips the elements in the array in the range [-1, 1].
-  */
-  void clip();
+  int16_t getVariance();
   
   /**
    * Clips the elements in the array in the range [-**range**, **range**].
    * @param range clipping value.
   */
-  void clip(float range);
+  void clip(int16_t range);
   
   /**
    * Clips the elements in the array in the range [**min**, **max**].
    * @param min minimum value
    * @param max maximum value
   */
-  void clip(float min, float max);
+  void clip(int16_t min, int16_t max);
   
   /**
    * Element-wise sum between arrays.
@@ -193,21 +190,21 @@ public:
    * @param[in] operand2 second operand for the sum
    * @param[out] destination the destination array
   */
-  void add(FloatArray operand2, FloatArray destination);
+  void add(ShortArray operand2, ShortArray destination);
   
   /**
    * Element-wise sum between arrays.
    * Adds each element of **operand2** to the corresponding element in the array.
    * @param operand2 second operand for the sum
   */
-  void add(FloatArray operand2); //in-place
+  void add(ShortArray operand2); //in-place
   
   /**
    * Array-scalar sum.
    * Adds **scalar** to the values in the array.
    * @param scalar value to be added to the array
   */
-  void add(float scalar);
+  void add(int16_t scalar);
   
   /**
    * Element-wise difference between arrays.
@@ -215,7 +212,7 @@ public:
    * @param[in] operand2 second operand for the subtraction
    * @param[out] destination the destination array
   */
-  void subtract(FloatArray operand2, FloatArray destination);
+  void subtract(ShortArray operand2, ShortArray destination);
   
   
   /**
@@ -223,14 +220,14 @@ public:
    * Subtracts from each element of the array the corresponding element in **operand2**.
    * @param[in] operand2 second operand for the subtraction
   */
-  void subtract(FloatArray operand2); //in-place
+  void subtract(ShortArray operand2); //in-place
   
   /**
    * Array-scalar subtraction.
    * Subtracts **scalar** from the values in the array.
    * @param scalar to be subtracted from the array
   */
-  void subtract(float scalar);
+  void subtract(int16_t scalar);
   
 /**
    * Element-wise multiplication between arrays.
@@ -238,37 +235,29 @@ public:
    * @param[in] operand2 second operand for the product
    * @param[out] destination the destination array
   */
-  void multiply(FloatArray operand2, FloatArray destination);
+  void multiply(ShortArray operand2, ShortArray destination);
   
    /**
    * Element-wise multiplication between arrays.
    * Multiplies each element in the array by the corresponding element in **operand2**.
    * @param operand2 second operand for the sum
   */
-  void multiply(FloatArray operand2); //in-place
+  void multiply(ShortArray operand2); //in-place
   
   /**
    * Array-scalar multiplication.
    * Multiplies the values in the array by **scalar**.
    * @param scalar to be multiplied with the array elements
   */
-  void multiply(float scalar);
+  void multiply(int16_t scalar);
   
   /**
-   * Array-scalar multiplication.
-   * Multiplies the values in the array by **scalar**.
-   * @param scalar to be subtracted from the array
-   * @param destination the destination array
-  */
-  void multiply(float scalar, FloatArray destination);
-
-/**
    * Convolution between arrays.
    * Sets **destination** to the result of the convolution between the array and **operand2**
    * @param[in] operand2 the second operand for the convolution
    * @param[out] destination array. It must have a minimum size of this+other-1.
   */
-  void convolve(FloatArray operand2, FloatArray destination);
+  void convolve(ShortArray operand2, ShortArray destination);
   
   /** 
    * Partial convolution between arrays.
@@ -280,7 +269,7 @@ public:
    * @remarks **destination[n]** is left unchanged for n<offset and the result is stored from destination[offset] onwards
    * that is, in the same position where they would be if a full convolution was performed.
   */
-  void convolve(FloatArray operand2, FloatArray destination, int offset, int samples);
+  void convolve(ShortArray operand2, ShortArray destination, int offset, int samples);
   
   /** 
    * Correlation between arrays.
@@ -288,7 +277,7 @@ public:
    * @param[in] operand2 the second operand for the correlation
    * @param[out] destination the destination array. It must have a minimum size of 2*max(srcALen, srcBLen)-1
   */
-  void correlate(FloatArray operand2, FloatArray destination);
+  void correlate(ShortArray operand2, ShortArray destination);
   
   /**
    * Correlation between arrays.
@@ -297,55 +286,85 @@ public:
    * @param[out] destination array. It must have a minimum size of 2*max(srcALen, srcBLen)-1
    * @remarks It is the same as correlate(), but destination must have been initialized to 0 in advance. 
   */
-  void correlateInitialized(FloatArray operand2, FloatArray destination);
+  void correlateInitialized(ShortArray operand2, ShortArray destination);
 
   /**
    * Set all the values in the array.
    * Sets all the elements of the array to **value**.
    * @param[in] value all the elements are set to this value.
   */
-  void setAll(float value);
+  void setAll(int16_t value);
   
   /**
    * A subset of the array.
    * Returns a array that points to subset of the memory used by the original array.
    * @param[in] offset the first element of the subset.
-   * @param[in] length the number of elments in the new FloatArray.
-   * @return the newly created FloatArray.
+   * @param[in] length the number of elments in the new ShortArray.
+   * @return the newly created ShortArray.
    * @remarks no memory is allocated by this method. The memory is still shared with the original array.
-   * The memory should not be de-allocated elsewhere (e.g.: by calling FloatArray::destroy() on the original FloatArray) 
-   * as long as the FloatArray returned by this method is still in use.
-   * @remarks Calling FloatArray::destroy() on a FloatArray instance created with this method might cause an exception.
+   * The memory should not be de-allocated elsewhere (e.g.: by calling ShortArray::destroy() on the original ShortArray) 
+   * as long as the ShortArray returned by this method is still in use.
+   * @remarks Calling ShortArray::destroy() on a ShortArray instance created with this method might cause an exception.
   */
-  FloatArray subArray(int offset, int length);
+  ShortArray subArray(int offset, int length);
   
   /**
    * Copies the content of the array to another array.
    * @param[out] destination the destination array
   */
-  void copyTo(FloatArray destination);
+  void copyTo(ShortArray destination);
 
   /**
    * Copies the content of the array to a location in memory.
    * @param[out] destination a pointer to the beginning of the memory location to copy to.
-   * The **length***sizeof(float) bytes of memory starting at this location must have been allocated before calling this method.
+   * The **length***sizeof(int16_t) bytes of memory starting at this location must have been allocated before calling this method.
    * @param[in] length number of samples to copy
   */
-  void copyTo(float* destination, int length);
+  void copyTo(int16_t* destination, int length);
+
+  /**
+   * Copies the content of the array to a FloatArray, interpreting the content
+   * of the ShortArray as 1.15.
+   * @param[out] destination the destination array
+  */
+  void copyTo(FloatArray destination);
 
   /**
    * Copies the content of an array into another array.
    * @param[in] source the source array
   */
-  void copyFrom(FloatArray source);
+  void copyFrom(ShortArray source);
   
   /**
-   * Copies an array of float into the array.
+   * Copies an array of int16_t into the array.
    * @param[in] source a pointer to the beginning of the portion of memory to read from.
    * @param[in] length number of samples to copy.
   */
-  void copyFrom(float* source, int length);
+  void copyFrom(int16_t* source, int length);
   
+  /**
+   * Copies the content of a FloatArray into a ShortArray, converting
+   * the float elements to fixed-point 1.15.
+   * @param[in] source the source array
+  */
+  void copyFrom(FloatArray source);
+
+  /**
+   * Converts a float to int16 and stores it.
+   *
+   * @param n the array element to write to.
+   * @value the value to write
+   */
+  void setFloatValue(uint32_t n, float value);
+
+  /**
+   * Returns an element of the array converted to float.
+   *
+   * @param n the array element to read.
+   * @return the floating point representation of the element.
+   */
+  float getFloatValue(uint32_t n);
+
   /**
    * Copies the content of an array into a subset of the array.
    * Copies **samples** elements from **source** to **destinationOffset** in the current array.
@@ -354,7 +373,7 @@ public:
    * @param[in] samples the number of samples to copy
    *
   */
-  void insert(FloatArray source, int destinationOffset, int samples);
+  void insert(ShortArray source, int destinationOffset, int samples);
 
   /**
    * Copies the content of an array into a subset of the array.
@@ -364,7 +383,7 @@ public:
    * @param[in] destinationOffset the offset into the destination array
    * @param[in] samples the number of samples to copy
   */
-  void insert(FloatArray source, int sourceOffset, int destinationOffset, int samples);
+  void insert(ShortArray source, int sourceOffset, int destinationOffset, int samples);
   
   /**
    * Copies values within an array.
@@ -383,13 +402,13 @@ public:
    * Example usage:
    * @code
    * int size=1000;
-   * float content[size]; 
-   * FloatArray floatArray(content, size);
+   * int16_t content[size]; 
+   * ShortArray int16_tArray(content, size);
    * for(int n=0; n<size; n++)
-   *   content[n]==floatArray[n]; //now the FloatArray can be indexed as if it was an array
+   *   content[n]==int16_tArray[n]; //now the ShortArray can be indexed as if it was an array
    * @endcode
   */
-  float& operator [](const int index){
+  int16_t& operator [](const int index){
     return data[index];
   }
   
@@ -397,7 +416,7 @@ public:
    * Allows to index the array using array-style brackets.
    * **const** version of operator[]
   */
-  float& operator [](const int index) const{
+  int16_t& operator [](const int index) const{
     return data[index];
   }
   
@@ -408,7 +427,7 @@ public:
    * @return **true** if the arrays have the same size and the value of each of the elements of the one 
    * match the value of the corresponding element of the other, or **false** otherwise.
   */
-  bool equals(const FloatArray& other) const{
+  bool equals(const ShortArray& other) const{
     if(size!=other.getSize()){
       return false;
     }
@@ -421,37 +440,45 @@ public:
   }
   
   /**
-   * Casting operator to float*
-   * @return a float* pointer to the data stored in the FloatArray
+   * Casting operator to int16_t*
+   * @return a int16_t* pointer to the data stored in the ShortArray
   */
-  operator float*(){
+  operator int16_t*(){
     return data;
   }
   
   /**
-   * Get the data stored in the FloatArray.
-   * @return a float* pointer to the data stored in the FloatArray
+   * Get the data stored in the ShortArray.
+   * @return a int16_t* pointer to the data stored in the ShortArray
   */
-  float* getData(){
+  int16_t* getData(){
     return data;
   }
   
   /**
-   * Creates a new FloatArray.
-   * Allocates size*sizeof(float) bytes of memory and returns a FloatArray that points to it.
-   * @param size the size of the new FloatArray.
-   * @return a FloatArray which **data** point to the newly allocated memory and **size** is initialized to the proper value.
-   * @remarks a FloatArray created with this method has to be destroyed invoking the FloatArray::destroy() method.
+   * Bitshift the array values, saturating.
+   *
+   * @param shiftValue number of positions to shift. A positive value will shift left, a negative value will shift right.
+   */
+  void shift(int shiftValue);
+
+  /**
+   * Creates a new ShortArray.
+   * Allocates size*sizeof(int16_t) bytes of memory and returns a ShortArray that points to it.
+   * @param size the size of the new ShortArray.
+   * @return a ShortArray which **data** point to the newly allocated memory and **size** is initialized to the proper value.
+   * @remarks a ShortArray created with this method has to be destroyed invoking the ShortArray::destroy() method.
   */
-  static FloatArray create(int size);
+  static ShortArray create(int size);
   
   /**
-   * Destroys a FloatArray created with the create() method.
-   * @param array the FloatArray to be destroyed.
-   * @remarks the FloatArray object passed as an argument should not be used again after invoking this method.
-   * @remarks a FloatArray object that has not been created by the FloatArray::create() method might cause an exception if passed as an argument to this method.
+   * Destroys a ShortArray created with the create() method.
+   * @param array the ShortArray to be destroyed.
+   * @remarks the ShortArray object passed as an argument should not be used again after invoking this method.
+   * @remarks a ShortArray object that has not been created by the ShortArray::create() method might cause an exception if passed as an argument to this method.
   */
-  static void destroy(FloatArray array);
+  static void destroy(ShortArray array);
 };
 
-#endif // __FloatArray_h__
+
+#endif // __ShortArray_h__
