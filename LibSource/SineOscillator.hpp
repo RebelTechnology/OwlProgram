@@ -21,9 +21,6 @@ public:
     freq = newFreq;
     incr = freq * 2 * M_PI * timeBaseOverFs;
   }
-  void setPeriod(float newPeriod){
-    setFrequency( min(Patch::getSampleRate(), 1/newPeriod));
-  }
   void setPhase(float ph){
     phase = ph;
     while(phase >= 2*M_PI)
