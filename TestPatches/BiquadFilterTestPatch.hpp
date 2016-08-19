@@ -29,7 +29,8 @@
 #ifndef __BiquadFilterTestPatch_hpp__
 #define __BiquadFilterTestPatch_hpp__
 
-#include "StompBox.h"
+#include "Patch.h"
+#include "BiquadFilter.h"
 
 class BiquadFilterTestPatch : public Patch {
 public:
@@ -94,7 +95,7 @@ public:
     float cutoff=getParameterValue(PARAMETER_A);
     float resonance=10*getParameterValue(PARAMETER_B);
     FloatArray fa=buffer.getSamples(0);
-    // fa.noise();
+    fa.noise();
     filter->setLowPass(cutoff, resonance);
     filter->process(fa, fa, fa.getSize());
     buffer.getSamples(1).copyFrom(fa);

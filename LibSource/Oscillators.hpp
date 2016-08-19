@@ -76,44 +76,6 @@ public:
   }
 };
 
-class SineOscillator : public Oscillator {
-private:
-  const float fs;
-  float phase;
-  float incr;
-public:
-  SineOscillator(float sr)
-    : fs(sr), phase(0.0f), incr(0.0f){}
-  void setFrequency(float freq){
-    incr = freq*2*M_PI/fs;
-  }
-  void setPhase(float ph){
-    phase = ph;
-    while(phase >= 2*M_PI)
-      phase -= 2*M_PI;
-  }
-  void reset(){
-    phase = 0.0f;
-  }
-  float getPhase(){
-    return phase;
-  }
-  float getNextSample(){
-    float sample = sinf(phase);
-    phase += incr;
-    if(phase >= 2*M_PI)
-      phase -= 2*M_PI;
-    return sample;
-  }
-  float getNextSample(float fm){
-    float sample = sinf(phase);
-    phase += incr + fm;
-    if(phase >= 2*M_PI)
-      phase -= 2*M_PI;
-    return sample;
-  }  
-};
-
 class ImpulseOscillator : public Oscillator {
 private:
   bool triggered = false;
