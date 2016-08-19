@@ -20,7 +20,10 @@ public:
   void setFrequency(float newFreq){
     freq = newFreq;
     incr = freq * 2 * M_PI * timeBaseOverFs;
-    //debugMessage("incr: ", incr);
+  }
+  void setPeriod(float newPeriod){
+    newPeriod = max(newPeriod, 0.001);
+    setFrequency( 1 / newPeriod);
   }
   void setPhase(float ph){
     phase = ph;
