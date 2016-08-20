@@ -1,12 +1,13 @@
+#include "Patch.h"
 #include "WavetableOscillator.h"
 #include "basicmaths.h"
 #include <stdint.h>
+#include "message.h"
 
 WavetableOscillator* WavetableOscillator::create(int size) {
   FloatArray wave = FloatArray::create(size);
   for(int i=0; i<size; ++i)
     wave[i] = sin(2*M_PI*i/(size-1));    
-  debugMessage("values", wave[10], wave[100], wave[101]);
   return new WavetableOscillator(wave);
 }
 static void destroy(WavetableOscillator* wavetableOscillator){
@@ -47,6 +48,16 @@ float WavetableOscillator::getNextSample(){
   acc += inc;
   if(acc > 1.0)
     acc -= 1.0;
+  return s;
+}
+
+float WavetableOscillator::getNextSample(float fm){
+  float s = getSample(acc);
+  acc += inc + fm;
+  while(acc > 1.0)
+    acc -= 1.0;
+  while(acc < -1.0)
+    acc += 1.0;
   return s;
 }
 

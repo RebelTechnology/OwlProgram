@@ -17,6 +17,7 @@ public:
   void setFrequency(float newFreq);
   float getSample(float phase);
   float getNextSample();
+  float getNextSample(float fm);
   void setTimeBase(unsigned int samples);
   void setTable(FloatArray table);
   FloatArray getTable();
