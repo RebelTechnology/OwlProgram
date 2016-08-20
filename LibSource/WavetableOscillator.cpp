@@ -38,9 +38,19 @@ void WavetableOscillator::setTimeBase(unsigned int samples){
 
 float WavetableOscillator::getSample(float phase){
   uint32_t size = wave.getSize();
-  uint32_t index = phase*(size-1);
-  index = min(index, size-1);
-  return wave[index];
+  float index = phase * size;
+  uint32_t fix = (int)index;
+  float frac = index - fix;
+  float value;
+  if(index >= size){
+    index -= size;
+  }
+  if(index == size - 1){
+    value = interpolate(wave[size - 1], wave[0], frac);
+  } else {
+    value = interpolate(wave[index], wave[index + 1], frac);
+  }
+  return value;
 }
 
 float WavetableOscillator::getNextSample(){
@@ -56,7 +66,7 @@ float WavetableOscillator::getNextSample(float fm){
   acc += inc + fm;
   while(acc > 1.0)
     acc -= 1.0;
-  while(acc < -1.0)
+  while(acc < 0.0)
     acc += 1.0;
   return s;
 }

@@ -11,6 +11,9 @@ private:
   float acc;
   float inc;
   float freq;
+  float interpolate(float x0, float x1, float frac){
+    return x0 * (1 - frac) + x1 * frac;
+  }
 public:
   WavetableOscillator(const FloatArray wavetable);
   WavetableOscillator(unsigned int timeBase, const FloatArray wavetable);
