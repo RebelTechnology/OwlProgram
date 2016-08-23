@@ -47,9 +47,11 @@ public:
       else if(strcmp(GEN_OWL_PARAM_PUSH, gen::getparametername(context, i)) == 0)
 	buttonindex = i;
     }
-    for(int i=0; i<GEN_OWL_PARAM_COUNT; ++i)
-      if(parameterindices[i] != -1)
+    for(int i=0; i<GEN_OWL_PARAM_COUNT; ++i){
+      if(parameterindices[i] != -1){
 	registerParameter((PatchParameterId)i, gen::getparametername(context, parameterindices[i]));
+      }
+    }
   }
 
   ~GenPatch() {
@@ -58,12 +60,11 @@ public:
 
   t_param scaleParameter(CommonState *context, int index, t_param value)
   {
-    if (index < numParams) {
-      t_param min = gen::getparametermin(context, index);
-      t_param max = gen::getparametermax(context, index);
-      return value * (max-min) + min;
-    }
-    return 0;
+    if(gen::getparameterhasminmax(context, index) == 0)
+      return value;
+    t_param min = gen::getparametermin(context, index);
+    t_param max = gen::getparametermax(context, index);
+    return value * (max-min) + min;
   }
 
   void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){
