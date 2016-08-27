@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 #include "registerpatch.h"
-
 extern "C" {
   // http://www.keil.com/forum/60479/
   void arm_bitreversal_32(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTab)
@@ -77,6 +76,7 @@ Patch::~Patch(){}
 PatchProcessor::PatchProcessor(){}
 PatchProcessor::~PatchProcessor(){}
 int Patch::getBlockSize(){return 128;}
+float Patch::getSampleRate(){return 48000;}
 
 PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
