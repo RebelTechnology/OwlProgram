@@ -10,6 +10,7 @@ WavetableOscillator* WavetableOscillator::create(int size) {
     wave[i] = sin(2*M_PI*i/(size-1));    
   return new WavetableOscillator(wave);
 }
+
 static void destroy(WavetableOscillator* wavetableOscillator){
   FloatArray::destroy(wavetableOscillator->getTable());
   delete wavetableOscillator;
@@ -21,14 +22,15 @@ WavetableOscillator::WavetableOscillator(const FloatArray wavetable):
 
 WavetableOscillator::WavetableOscillator(unsigned int timeBase, const FloatArray wavetable): 
   wave(wavetable),
-  acc(0.0), inc(0.1)
+  acc(0), inc(1)
 {
   setTimeBase(timeBase);
+  intSize = wave.getSize() << fracBits;
 }
 
 void WavetableOscillator::setFrequency(float newFreq){
   freq = newFreq;
-  inc = freq * timeBaseOverFs;  
+  inc = freq * timeBaseOverFs * intSize;
 }
 
 void WavetableOscillator::setTimeBase(unsigned int samples){
@@ -36,7 +38,46 @@ void WavetableOscillator::setTimeBase(unsigned int samples){
   setFrequency(freq);
 }
 
+float WavetableOscillator::getCurrentSample(){
+  int index = acc >> fracBits; 
+  return wave[index];
+}
+
+// NOTE: phase is normalized between 0 and 1
 float WavetableOscillator::getSample(float phase){
+  int index = phase * intSize;
+  index = index >> fracBits;
+  return wave[index];
+}
+
+float WavetableOscillator::getNextSample(){
+  float s = getCurrentSample();
+  acc += inc;
+  if(acc >= intSize)
+    acc -= intSize;
+  return s;
+}
+
+float WavetableOscillator::getNextSample(float fm){
+  float s = getCurrentSample();
+  acc += inc + fm * intSize;
+  while(acc >= intSize)
+    acc -= intSize;
+  while(acc < 0)
+    acc += intSize;
+  return s;
+}
+
+void WavetableOscillator::setTable(FloatArray table){
+  wave = table;
+}
+
+FloatArray WavetableOscillator::getTable(){
+  return wave;
+}
+
+#if 0
+float SmoothWavetableOscillator::getSample(float phase){
   uint32_t size = wave.getSize();
   float index = phase * size;
   uint32_t fix = (int)index;
@@ -52,30 +93,4 @@ float WavetableOscillator::getSample(float phase){
   }
   return value;
 }
-
-float WavetableOscillator::getNextSample(){
-  float s = getSample(acc);
-  acc += inc;
-  if(acc > 1.0)
-    acc -= 1.0;
-  return s;
-}
-
-float WavetableOscillator::getNextSample(float fm){
-  float s = getSample(acc);
-  acc += inc + fm;
-  while(acc > 1.0)
-    acc -= 1.0;
-  while(acc < 0.0)
-    acc += 1.0;
-  return s;
-}
-
-void WavetableOscillator::setTable(FloatArray table){
-  wave = table;
-}
-
-FloatArray WavetableOscillator::getTable(){
-  return wave;
-}
-
+#endif
