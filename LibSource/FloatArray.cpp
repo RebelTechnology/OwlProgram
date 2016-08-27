@@ -477,6 +477,26 @@ void FloatArray::correlateInitialized(FloatArray operand2, FloatArray destinatio
 #endif /* ARM_CORTEX */  
 }
 
+void FloatArray::ramp(float from, float to){
+    // note that you could lose precision here, but
+    // for reasonably small sizes it is alright.
+    // e.g.: for size==101, the error is around 0.000001
+    // when going from 1.5 to 1.
+    //
+  float interval = (to - from) / (size - 1);
+  data[0] = from;
+  // still we make sure that we end on the exact
+  // value requested
+  data[size - 1] = to;
+  for(unsigned int n = 1; n < size - 1; ++n){
+    data[n] = data[n - 1] + interval;
+    // If you care about precision you should
+    // use
+    //data[n] = from + interval * n;
+    // instead
+  }
+}
+
 FloatArray FloatArray::create(int size){
   FloatArray fa(new float[size], size);
   fa.clear();

@@ -1,7 +1,7 @@
 #ifndef __FloatArrayTestPatch_hpp__
 #define __FloatArrayTestPatch_hpp__
 
-#include "StompBox.h"
+#include "Patch.h"
 
 class FloatArrayTestPatch : public Patch {
 private:
@@ -11,7 +11,7 @@ private:
   bool assertt(float first, float second, const char *message, float tolerance){ //assert with tolerance
     bool cond=false;
     float tol=tolerance;
-    if(abs(second-first)<tol){
+    if(fabsf(second-first)<tol){
       cond=true;
     }
     return assert(cond, message);
@@ -93,7 +93,23 @@ public:
         assert(tempFa1[n]==value, "setAll()");
       }
     }
-    
+
+	//test ramp
+   {
+      float from = 1.5;
+	  float to = 1;
+      tempFa1.ramp(from, to);
+      for(int n = 0; n < size; ++n){
+        assertt(tempFa1[n], from + (to - from) / (tempFa1.getSize() - 1) * n, "ramp()", 0.000001);
+      }
+      from = -1;
+      to = 1;
+      tempFa1.ramp(from, to);
+      for(int n = 0; n < size; ++n){
+        assertt(tempFa1[n], from + (to - from) / (tempFa1.getSize() - 1) * n, "ramp()", 0.000001);
+      }
+    } 
+
     //test copyTo
     fa.copyTo(tempFa1);
     for(int n=0; n<size; n++){
@@ -499,7 +515,7 @@ public:
     }
   };
   void processAudio(AudioBuffer &buffer){
-    float *sig=buffer.getSamples(0);
+    FloatArray sig=buffer.getSamples(0);
     if(success==false){
       for(int n=0; n<getBlockSize(); n++){
         sig[n]+=0.05*rand()/(float)RAND_MAX;

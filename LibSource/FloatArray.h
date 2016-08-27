@@ -437,6 +437,17 @@ public:
   }
   
   /**
+   * Write a linear ramp to the array.
+   *
+   * The step will be (\p to - \p from) / (size - 1)
+   *
+   * @param from the starting value of the ramp
+   * @param to the end value of the ramp
+   *
+   */
+  void ramp(float from, float to);
+
+  /**
    * Creates a new FloatArray.
    * Allocates size*sizeof(float) bytes of memory and returns a FloatArray that points to it.
    * @param size the size of the new FloatArray.
