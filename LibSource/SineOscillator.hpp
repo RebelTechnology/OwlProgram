@@ -19,12 +19,12 @@ public:
   }
   void setFrequency(float newFreq){
     freq = newFreq;
-    incr = freq * 2 * M_PI * timeBaseOverFs;
+    incr = freq * timeBaseOverFs;
   }
   void setPhase(float ph){
     phase = ph;
-    while(phase >= 2*M_PI)
-      phase -= 2*M_PI;
+    while(phase >= 1)
+      phase -= 1;
   }
   void reset(){
     phase = 0.0f;
@@ -33,22 +33,22 @@ public:
     return phase;
   }
   float getNextSample(){
-    float sample = sinf(phase);
+    float sample = sinf(2 * M_PI * phase);
     phase += incr;
-    if(phase >= 2*M_PI) 
-      phase -= 2*M_PI;
+    if(phase >= 1) 
+      phase -= 1;
     return sample;
   }
   float getNextSample(float fm){
-    float sample = sinf(phase);
+    float sample = sinf(2 * M_PI * phase);
     phase += incr + fm;
-    // if fm is very large, then phase could go above 4*M_PI
-    while(phase >= 2*M_PI)
-      phase -= 2*M_PI;
+    // if fm is very large, then phase could go above 2
+    while(phase >= 1)
+      phase -= 1;
     // a if -fm > incr, then the phase could go negative and we need to
     // account for that.
-    while(phase < -2*M_PI)
-      phase += 2*M_PI;
+    while(phase < 1)
+      phase += 1;
     return sample;
   }
   void setTimeBase(unsigned int samples){
