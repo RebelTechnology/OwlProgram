@@ -24,6 +24,10 @@ public:
   float getNextSample(float fm);
   void setTimeBase(unsigned int samples);
   void setTable(FloatArray table);
+  int32_t getAccumulator();
+  void setAccumulator(int32_t value);
+  float getPhase();
+  void setPhase(float phase);
   FloatArray getTable();
   static WavetableOscillator* create(int size);
   static void destroy(WavetableOscillator* wavetableOscillator);

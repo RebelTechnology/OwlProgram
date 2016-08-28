@@ -42,6 +42,22 @@ WavetableOscillator::WavetableOscillator(unsigned int timeBase, const FloatArray
   setTimeBase(timeBase);
 }
 
+int32_t WavetableOscillator::getAccumulator(){
+  return acc;
+}
+
+void WavetableOscillator::setAccumulator(int32_t value){
+  acc = value;
+}
+
+float WavetableOscillator::getPhase(){
+  return acc / (float)intSize;
+}
+
+void WavetableOscillator::setPhase(float phase){
+  acc = phase * intSize;
+}
+
 void WavetableOscillator::setFrequency(float newFreq){
   freq = newFreq;
   inc = freq * timeBaseOverFs * intSize;

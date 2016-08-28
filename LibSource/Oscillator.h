@@ -21,6 +21,8 @@ public:
   }
   virtual void setSampleRate(float value){}
   virtual void setFrequency(float value){}
+  virtual void setPhase(float phase);
+  virtual float getPhase();
   virtual void setTimeBase(unsigned int samples){}
   virtual void setPeriod(float seconds){
     setFrequency( min(Patch::getSampleRate(), 1/seconds));
