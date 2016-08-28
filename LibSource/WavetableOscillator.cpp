@@ -82,8 +82,10 @@ void SmoothWavetableOscillator::setTable(const FloatArray wavetable){
   // check size is a multiple of two smaller than 2^(32-fracBits)
   bool powerOf2 = false;
   for(unsigned int n = 1; n < 32 - fracBits; ++n){
-    if(1 << n == size)
+    if(1 << n == size){
       powerOf2 = true;
+      break;
+    }
   }
   ASSERT(powerOf2, "SmoothWavetableOscillator: the table must have size 2^n + 1\n");
   ASSERT(wave[size] == wave[0], "SmoothWavetableOscillator: The last value of the table must be the same as the first\n");
