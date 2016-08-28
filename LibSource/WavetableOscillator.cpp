@@ -79,7 +79,6 @@ FloatArray WavetableOscillator::getTable(){
 void SmoothWavetableOscillator::setTable(const FloatArray wavetable){
   wave = wavetable;
   unsigned int size = wave.getSize() - 1;
-  ASSERT(wave[size] == wave[0], "SmoothWavetableOscillator: The last value of the table must be the same as the first\n");
   // check size is a multiple of two smaller than 2^(32-fracBits)
   bool powerOf2 = false;
   for(unsigned int n = 1; n < 32 - fracBits; ++n){
@@ -87,12 +86,12 @@ void SmoothWavetableOscillator::setTable(const FloatArray wavetable){
       powerOf2 = true;
   }
   ASSERT(powerOf2, "SmoothWavetableOscillator: the table must have size 2^n + 1\n");
+  ASSERT(wave[size] == wave[0], "SmoothWavetableOscillator: The last value of the table must be the same as the first\n");
   intSize = size << fracBits;
 }
 
 float SmoothWavetableOscillator::getCurrentSample(){
   unsigned int index = acc >> fracBits;
   float frac = (acc & ((1 << fracBits) - 1)) / (float)(1 << fracBits);
-  debugMessage("frac is", frac);
   return interpolate(wave[index], wave[index + 1], frac);
 }
