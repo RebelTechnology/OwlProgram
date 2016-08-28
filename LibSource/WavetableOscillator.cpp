@@ -16,16 +16,22 @@ static void destroy(WavetableOscillator* wavetableOscillator){
   delete wavetableOscillator;
 }
 
+WavetableOscillator::WavetableOscillator(): 
+  //TODO: once #55 is fixed, this can be set to call the overloaded constructor
+  //WavetableOscillator::WavetableOscillator(1,FloatArray::create(0))
+  acc(0), inc(1)
+{
+  setTimeBase(1);
+}
+
 WavetableOscillator::WavetableOscillator(const FloatArray wavetable): 
   WavetableOscillator::WavetableOscillator(1, wavetable)
 {}
 
 WavetableOscillator::WavetableOscillator(unsigned int timeBase, const FloatArray wavetable): 
-  wave(wavetable),
   acc(0), inc(1)
 {
   setTimeBase(timeBase);
-  intSize = wave.getSize() << fracBits;
 }
 
 void WavetableOscillator::setFrequency(float newFreq){
@@ -40,13 +46,6 @@ void WavetableOscillator::setTimeBase(unsigned int samples){
 
 float WavetableOscillator::getCurrentSample(){
   int index = acc >> fracBits; 
-  return wave[index];
-}
-
-// NOTE: phase is normalized between 0 and 1
-float WavetableOscillator::getSample(float phase){
-  int index = phase * intSize;
-  index = index >> fracBits;
   return wave[index];
 }
 
@@ -70,27 +69,30 @@ float WavetableOscillator::getNextSample(float fm){
 
 void WavetableOscillator::setTable(FloatArray table){
   wave = table;
+  intSize = wave.getSize() << fracBits;
 }
 
 FloatArray WavetableOscillator::getTable(){
   return wave;
 }
 
-#if 0
-float SmoothWavetableOscillator::getSample(float phase){
-  uint32_t size = wave.getSize();
-  float index = phase * size;
-  uint32_t fix = (int)index;
-  float frac = index - fix;
-  float value;
-  if(index >= size){
-    index -= size;
+void SmoothWavetableOscillator::setTable(const FloatArray wavetable){
+  wave = wavetable;
+  unsigned int size = wave.getSize() - 1;
+  ASSERT(wave[size] == wave[0], "SmoothWavetableOscillator: The last value of the table must be the same as the first\n");
+  // check size is a multiple of two smaller than 2^(32-fracBits)
+  bool powerOf2 = false;
+  for(unsigned int n = 1; n < 32 - fracBits; ++n){
+    if(1 << n == size)
+      powerOf2 = true;
   }
-  if(index == size - 1){
-    value = interpolate(wave[size - 1], wave[0], frac);
-  } else {
-    value = interpolate(wave[index], wave[index + 1], frac);
-  }
-  return value;
+  ASSERT(powerOf2, "SmoothWavetableOscillator: the table must have size 2^n + 1\n");
+  intSize = size << fracBits;
 }
-#endif
+
+float SmoothWavetableOscillator::getCurrentSample(){
+  unsigned int index = acc >> fracBits;
+  float frac = (acc & ((1 << fracBits) - 1)) / (float)(1 << fracBits);
+  debugMessage("frac is", frac);
+  return interpolate(wave[index], wave[index + 1], frac);
+}
