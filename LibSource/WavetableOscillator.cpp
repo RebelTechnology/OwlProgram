@@ -95,3 +95,24 @@ float SmoothWavetableOscillator::getCurrentSample(){
   float frac = (acc & ((1 << fracBits) - 1)) / (float)(1 << fracBits);
   return interpolate(wave[index], wave[index + 1], frac);
 }
+
+float SmoothWavetableOscillator4::getCurrentSample(){
+  unsigned int index = acc >> fracBits;
+  float frac = (acc & ((1 << fracBits) - 1)) / (float)(1 << fracBits);
+  return interpolate4(&wave[index - 1], frac);
+}
+
+float SmoothWavetableOscillator4::interpolate4(float* w, float frac){
+  float a = w[0];
+  float b = w[1];
+  float c = w[2];
+  float d = w[3];
+  float cminusb = c - b;
+  // borrowed this verbatim from tabosc4~ in PureData/src/d_array.c
+  float out = b + frac * (
+      cminusb - 0.1666667f * (1.-frac) * (
+          (d - a - 3.0f * cminusb) * frac + (d + 2.0f*a - 3.0f*b)
+      )
+  );
+  return out;
+}

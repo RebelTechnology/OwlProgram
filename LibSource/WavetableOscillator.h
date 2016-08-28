@@ -37,7 +37,15 @@ public:
   static float interpolate(float x0, float x1, float frac){
     return x0 * (1 - frac) + x1 * frac;
   }
-  // should include a check of the table size and content
+  void setTable(const FloatArray wavetable);
+};
+
+class SmoothWavetableOscillator4 : public WavetableOscillator {
+private:
+  float getCurrentSample();
+public:
+  using WavetableOscillator::WavetableOscillator;
+  static float interpolate4(float* w, float frac);
   void setTable(const FloatArray wavetable);
 };
 #endif /* __WavetableOscillator_h__ */
