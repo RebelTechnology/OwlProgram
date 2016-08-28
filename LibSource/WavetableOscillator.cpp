@@ -4,6 +4,14 @@
 #include <stdint.h>
 #include "message.h"
 
+static bool isPowerOf2(uint32_t value, unsigned int maxPower = 32){
+  for(unsigned int n = 0; n < maxPower; ++n){
+    if(1 << n == value){
+      return true;
+    }
+  }
+}
+
 WavetableOscillator* WavetableOscillator::create(int size) {
   FloatArray wave = FloatArray::create(size);
   for(int i=0; i<size; ++i)
@@ -80,14 +88,7 @@ void SmoothWavetableOscillator::setTable(const FloatArray wavetable){
   wave = wavetable;
   unsigned int size = wave.getSize() - 1;
   // check size is a multiple of two smaller than 2^(32-fracBits)
-  bool powerOf2 = false;
-  for(unsigned int n = 1; n < 32 - fracBits; ++n){
-    if(1 << n == size){
-      powerOf2 = true;
-      break;
-    }
-  }
-  ASSERT(powerOf2, "SmoothWavetableOscillator: the table must have size 2^n + 1\n");
+  ASSERT(isPowerOf2(size, 32 - fracBits), "SmoothWavetableOscillator: the table must have size 2^n + 1\n");
   ASSERT(wave[size] == wave[0], "SmoothWavetableOscillator: The last value of the table must be the same as the first\n");
   intSize = size << fracBits;
 }
@@ -118,3 +119,17 @@ float SmoothWavetableOscillator4::interpolate4(float* w, float frac){
   );
   return out;
 }
+
+void SmoothWavetableOscillator4::setTable(const FloatArray wavetable){
+  unsigned int size = wavetable.getSize() - 3;
+  // check size is a multiple of two smaller than 2^(32-fracBits)
+  ASSERT(isPowerOf2(size, 32 - fracBits), "The table must have size 2^n + 3\n");
+  for(unsigned int n = 0; n < 3; ++n){
+    if(wavetable[n] != wavetable[n + size]){
+      ASSERT(false, "The last 3 values of the table must be the same as the first 3\n");
+    }
+  }
+  wave = FloatArray(&wavetable[1], size);
+  intSize = size << fracBits;
+}
+
