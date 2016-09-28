@@ -15,43 +15,80 @@
 #define GEN_OWL_PARAM_PUSH "Push"
 #define GEN_OWL_PARAM_COUNT 8
 
-class GenPatch : public Patch {
-private:
-  int8_t parameterindices[GEN_OWL_PARAM_COUNT];
-  int8_t buttonindex;
-  CommonState *context;
-  int numParams;
+class GenParameter {
 public:
-  GenPatch() {
-    memset(parameterindices, -1, GEN_OWL_PARAM_COUNT);
-    buttonindex = -1;
-    context = (CommonState *)gen::create(getSampleRate(), 0);
-    numParams = gen::num_params();
+  PatchParameterId id;
+  float min = 0.0;
+  float max = 0.9999999;
+  uint8_t index = -1;
+  void configure(CommonState *context, PatchParameterId pid, const char* name){
+    id = pid;
+    int numParams = gen::num_params();
     for(int i = 0; i < numParams; i++){
-      if(strcmp(GEN_OWL_PARAM_A, gen::getparametername(context, i)) == 0)
-	parameterindices[0] = i;
-      else if(strcmp(GEN_OWL_PARAM_B, gen::getparametername(context, i)) == 0)
-	parameterindices[1] = i;
-      else if(strcmp(GEN_OWL_PARAM_C, gen::getparametername(context, i)) == 0)
-	parameterindices[2] = i;
-      else if(strcmp(GEN_OWL_PARAM_D, gen::getparametername(context, i)) == 0)
-	parameterindices[3] = i;
-      else if(strcmp(GEN_OWL_PARAM_E, gen::getparametername(context, i)) == 0)
-	parameterindices[4] = i;
-      else if(strcmp(GEN_OWL_PARAM_F, gen::getparametername(context, i)) == 0)
-	parameterindices[5] = i;
-      else if(strcmp(GEN_OWL_PARAM_G, gen::getparametername(context, i)) == 0)
-	parameterindices[6] = i;
-      else if(strcmp(GEN_OWL_PARAM_H, gen::getparametername(context, i)) == 0)
-	parameterindices[7] = i;
-      else if(strcmp(GEN_OWL_PARAM_PUSH, gen::getparametername(context, i)) == 0)
-	buttonindex = i;
-    }
-    for(int i=0; i<GEN_OWL_PARAM_COUNT; ++i){
-      if(parameterindices[i] != -1){
-	registerParameter((PatchParameterId)i, gen::getparametername(context, parameterindices[i]));
+      if(strcmp(name, gen::getparametername(context, i)) == 0){
+	index = i;
+	if(gen::getparameterhasminmax(context, index)){
+	  min = gen::getparametermin(context, i);
+	  max = gen::getparametermax(context, i);
+	}
+	break;
       }
     }
+  }
+  void update(CommonState *context, float value){
+    if(index != -1){
+      value = value * (max-min) + min;
+      gen::setparameter(context, index, value, NULL);
+    }
+  }
+};
+
+class GenButton {
+public:
+  PatchButtonId id;
+  float min = 0.0;
+  float max = 0.9999999;
+  uint8_t index = -1;
+  void configure(CommonState *context, PatchButtonId bid, const char* name){
+    id = bid;
+    int numParams = gen::num_params();
+    for(int i = 0; i < numParams; i++){
+      if(strcmp(name, gen::getparametername(context, i)) == 0){
+	index = i;
+	if(gen::getparameterhasminmax(context, index)){
+	  min = gen::getparametermin(context, i);
+	  max = gen::getparametermax(context, i);
+	}
+	break;
+      }
+    }
+  }
+  void update(CommonState *context, float value){
+    if(index != -1){
+      value = value * (max-min) + min;
+      gen::setparameter(context, index, value, NULL);
+    }
+  }
+};
+
+class GenPatch : public Patch {
+private:
+  CommonState *context;
+  GenParameter params[GEN_OWL_PARAM_COUNT];
+  GenButton pushbutton;
+public:
+  GenPatch() {
+    context = (CommonState *)gen::create(getSampleRate(), 0);
+    params[0].configure(context, PARAMETER_A, GEN_OWL_PARAM_A);
+    params[1].configure(context, PARAMETER_B, GEN_OWL_PARAM_B);
+    params[2].configure(context, PARAMETER_C, GEN_OWL_PARAM_C);
+    params[3].configure(context, PARAMETER_D, GEN_OWL_PARAM_D);
+    params[4].configure(context, PARAMETER_E, GEN_OWL_PARAM_E);
+    for(int i=0; i<GEN_OWL_PARAM_COUNT; ++i){
+      if(params[i].index != -1)
+	registerParameter(params[i].id, gen::getparametername(context, params[i].index));
+    }
+    pushbutton.configure(context, PUSHBUTTON, GEN_OWL_PARAM_PUSH);
   }
 
   ~GenPatch() {
@@ -69,17 +106,12 @@ public:
 
   void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){
     if(bid == PUSHBUTTON)
-      if(buttonindex != -1)
-	gen::setparameter(context, buttonindex, scaleParameter(context, buttonindex, value), NULL);
+      pushbutton.update(context, value/4096.0f);
   }
 
   void processAudio(AudioBuffer &buffer) {
-    for(int i=0; i<GEN_OWL_PARAM_COUNT; ++i){
-      int8_t index = parameterindices[i];
-      if(index != -1)
-	gen::setparameter(context, index, scaleParameter(context, index, getParameterValue((PatchParameterId)i)), NULL);
-    }
-
+    for(int i=0; i<GEN_OWL_PARAM_COUNT; ++i)
+      params[i].update(context, getParameterValue((PatchParameterId)(PARAMETER_A+i)));
     float* outputs[] = {buffer.getSamples(0), buffer.getSamples(1) };
     gen::perform(context, outputs, 2, outputs, 2, buffer.getSize());
   }
