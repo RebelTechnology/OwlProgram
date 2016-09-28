@@ -19,7 +19,7 @@ class GenParameter {
 public:
   PatchParameterId id;
   float min = 0.0;
-  float max = 0.9999999;
+  float max = 1.0;
   uint8_t index = -1;
   void configure(CommonState *context, PatchParameterId pid, const char* name){
     id = pid;
@@ -28,8 +28,8 @@ public:
       if(strcmp(name, gen::getparametername(context, i)) == 0){
 	index = i;
 	if(gen::getparameterhasminmax(context, index)){
-	  min = gen::getparametermin(context, i);
-	  max = gen::getparametermax(context, i);
+	  min = gen::getparametermin(context, index);
+	  max = gen::getparametermax(context, index);
 	}
 	break;
       }
@@ -47,7 +47,7 @@ class GenButton {
 public:
   PatchButtonId id;
   float min = 0.0;
-  float max = 0.9999999;
+  float max = 1.0;
   uint8_t index = -1;
   void configure(CommonState *context, PatchButtonId bid, const char* name){
     id = bid;
@@ -56,8 +56,8 @@ public:
       if(strcmp(name, gen::getparametername(context, i)) == 0){
 	index = i;
 	if(gen::getparameterhasminmax(context, index)){
-	  min = gen::getparametermin(context, i);
-	  max = gen::getparametermax(context, i);
+	  min = gen::getparametermin(context, index);
+	  max = gen::getparametermax(context, index);
 	}
 	break;
       }
@@ -84,6 +84,9 @@ public:
     params[2].configure(context, PARAMETER_C, GEN_OWL_PARAM_C);
     params[3].configure(context, PARAMETER_D, GEN_OWL_PARAM_D);
     params[4].configure(context, PARAMETER_E, GEN_OWL_PARAM_E);
+    params[5].configure(context, PARAMETER_F, GEN_OWL_PARAM_F);
+    params[6].configure(context, PARAMETER_G, GEN_OWL_PARAM_G);
+    params[7].configure(context, PARAMETER_H, GEN_OWL_PARAM_H);
     for(int i=0; i<GEN_OWL_PARAM_COUNT; ++i){
       if(params[i].index != -1)
 	registerParameter(params[i].id, gen::getparametername(context, params[i].index));
@@ -95,18 +98,9 @@ public:
     gen::destroy(context);
   }
 
-  t_param scaleParameter(CommonState *context, int index, t_param value)
-  {
-    if(gen::getparameterhasminmax(context, index) == 0)
-      return value;
-    t_param min = gen::getparametermin(context, index);
-    t_param max = gen::getparametermax(context, index);
-    return value * (max-min) + min;
-  }
-
   void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){
     if(bid == PUSHBUTTON)
-      pushbutton.update(context, value/4096.0f);
+      pushbutton.update(context, value/4095.0f);
   }
 
   void processAudio(AudioBuffer &buffer) {
