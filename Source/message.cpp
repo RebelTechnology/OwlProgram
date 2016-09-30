@@ -8,7 +8,7 @@ static char buffer[64];
 
 const char hexnumerals[] = "0123456789abcdef";
 
-static char* itoa(int val, int base){
+char* itoa(int val, int base){
   static char buf[13] = {0};
   int i = 11;
   unsigned int part = abs(val);
