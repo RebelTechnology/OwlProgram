@@ -12,7 +12,7 @@
 void FloatArray::getMin(float* value, int* index){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
-  unsigned long idx;
+  uint32_t idx;
   arm_min_f32(data, size, value, &idx);
   *index = (int)idx;
 #else
@@ -48,7 +48,7 @@ void FloatArray::getMax(float* value, int* index){
   ASSERT(size>0, "Wrong size");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX 
-  unsigned long idx;
+  uint32_t idx;
   arm_max_f32(data, size, value, &idx);
   *index = (int)idx;
 #else
@@ -196,21 +196,6 @@ float FloatArray::getVariance(){
   result=(sumOfSquares - sum*sum/size) / (size - 1);
 #endif
   return result;
-}
-void FloatArray::scale(float factor, FloatArray destination){//supports in-place
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX  
-  arm_scale_f32(data, factor, destination, size);
-#else
-  for(int n=0; n<size; n++){
-    destination[n]=factor*data[n];
-  }
-#endif
-}
-
-void FloatArray::scale(float factor){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  scale(factor, *this);
 }
 
 void FloatArray::clip(){
@@ -377,15 +362,21 @@ void FloatArray::multiply(FloatArray operand2){ //in-place
 }
 
 void FloatArray::multiply(float scalar){
-  for(int n=0; n<size; n++){
+#ifdef ARM_CORTEX
+  arm_scale_f32(data, scalar, data, size);
+#else
+  for(int n=0; n<size; n++)
     data[n]*=scalar;
-  }
+#endif
 }
 
 void FloatArray::multiply(float scalar, FloatArray destination){
-  for(int n=0; n<size; n++){
+#ifdef ARM_CORTEX
+  arm_scale_f32(data, scalar, destination, size);
+#else
+  for(int n=0; n<size; n++)
     destination[n] = data[n] * scalar;
-  } 
+#endif
 }
 
 void FloatArray::negate(FloatArray& destination){//allows in-place
