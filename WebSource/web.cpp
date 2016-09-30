@@ -1,7 +1,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include "ProgramVector.h"
-#include "StompBox.h"
+#include "Patch.h"
 #include "device.h"
 #include "main.h"
 #include "message.h"
