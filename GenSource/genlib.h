@@ -74,7 +74,7 @@ typedef t_ptr_uint t_ptr_size;		///< unsigned pointer-sized value for counting (
 typedef t_ptr_int t_atom_long;		///< the type that is an A_LONG in a #t_atom  @ingroup misc
 typedef t_atom_long t_max_err;		///< an integer value suitable to be returned as an error code  @ingroup misc
 
-#ifdef ARM_CORTEX
+/* #ifdef ARM_CORTEX */
 // OWL
 #define malloc_size(x) sizeof(x)
 #include "basicmaths.h"
@@ -85,7 +85,7 @@ typedef t_atom_long t_max_err;		///< an integer value suitable to be returned as
 #define pow(x,y) fasterpow(x,y)
 #define tan(x) fastertanfull(x)
 // add log variants
-#endif
+/* #endif */
 
 extern "C" {
 

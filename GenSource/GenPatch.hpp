@@ -20,7 +20,7 @@ public:
   PatchParameterId id;
   float min = 0.0;
   float max = 1.0;
-  uint8_t index = -1;
+  int8_t index = -1;
   void configure(CommonState *context, PatchParameterId pid, const char* name){
     id = pid;
     int numParams = gen::num_params();
@@ -48,7 +48,7 @@ public:
   PatchButtonId id;
   float min = 0.0;
   float max = 1.0;
-  uint8_t index = -1;
+  int8_t index = -1;
   void configure(CommonState *context, PatchButtonId bid, const char* name){
     id = bid;
     int numParams = gen::num_params();

@@ -22,7 +22,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "genlib_exportfunctions.h"
 #include <stdlib.h>
 #include <stdio.h>
-// #include <string.h>
+#include <string.h> // for memcpy
 // #ifndef GEN_WINDOWS
 // 	#include <malloc.h>
 // #define malloc_size malloc_usable_size
