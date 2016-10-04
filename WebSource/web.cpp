@@ -51,7 +51,7 @@ unsigned long systicks(){
   return clock();
 }
 
-#define NOF_PARAMETERS 16
+#define NOF_PARAMETERS 40
 static int blocksize;
 static char* patchName = NULL;
 static int16_t parameters[NOF_PARAMETERS];
