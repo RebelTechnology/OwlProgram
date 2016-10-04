@@ -16,6 +16,10 @@
 
 #include "HvMessage.h"
 #include "message.h"
+#include <string.h>
+
+char* itoa(int val, int base);
+char* ftoa(float val, int base);
 
 HvMessage *msg_init(HvMessage *m, hv_size_t numElements, hv_uint32_t timestamp) {
   m->timestamp = timestamp;
