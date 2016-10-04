@@ -24,6 +24,7 @@ public:
   }
   Control<PID>& operator=(const float value){
     set(value);
+    return *this;
   }
   operator float(){
     return get();
