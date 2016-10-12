@@ -4,9 +4,9 @@ GENSOURCE    = $(BUILD)/Source
 
 # emscripten
 EMCC      ?= emcc
-EMCCFLAGS ?= -fno-rtti -fno-exceptions -s ASSERTIONS=1 # -std=c++11
+EMCCFLAGS ?= -fno-rtti -fno-exceptions -s ASSERTIONS=1 -Wall -std=c++11
 EMCCFLAGS += -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(GENSOURCE) -I$(BUILD)
-EMCCFLAGS += -I$(BUILD)/HeavySource
+EMCCFLAGS += -I$(BUILD)/Source
 EMCCFLAGS +=  -ILibraries -ILibraries/KissFFT -DHV_SIMD_NONE
 EMCCFLAGS += -Wno-warn-absolute-paths
 EMCCFLAGS += -Wno-unknown-warning-option
