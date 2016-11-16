@@ -13,7 +13,10 @@ public:
     set(value);
   }
   void set(const float value){
-    doSetPatchParameter(PID, (int16_t)(value*4096));
+    if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && PID < 4)
+      doSetPatchParameter(PID, 4095 - (int16_t)(value*4096.0f));
+    else
+      doSetPatchParameter(PID, (int16_t)(value*4096));
   }
   float get(){
     if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && PID < 4){
