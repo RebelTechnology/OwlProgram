@@ -24,6 +24,8 @@ public:
   /* put a block of output samples into @param samples, 
      with frequency determined by samples in @param frequency */
   void getSamples(FloatArray output, FloatArray frequency);
+  static PolyBlepOscillator* create(float sr);
+  static void destroy(PolyBlepOscillator* osc);
 };
 
 #endif /* __PolyBlepOscillator_h__ */

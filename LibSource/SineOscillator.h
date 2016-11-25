@@ -46,6 +46,12 @@ public:
       phase -= 2*M_PI;
     return sample;
   }  
+  static SineOscillator* create(float sr){
+    return new SineOscillator(sr);
+  }
+  static void destroy(SineOscillator* osc){
+    delete osc;
+  }
 };
 
 #endif /* SINE_OSCILLATOR_H */

@@ -18,6 +18,7 @@ public:
   float getNextSample();
   void getSamples(FloatArray samples);
   static WavetableOscillator* create(float sr, int size);
+  static void destroy(WavetableOscillator* osc);
 };
 
 class BandPassWavetableOscillator : public Oscillator {

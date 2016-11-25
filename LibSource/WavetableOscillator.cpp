@@ -9,6 +9,11 @@ WavetableOscillator* WavetableOscillator::create(float sr, int size) {
   return new WavetableOscillator(sr, wave);
 }
 
+void WavetableOscillator::destroy(WavetableOscillator* osc){
+  FloatArray::destroy(osc->wave);
+  delete osc;
+}
+
 WavetableOscillator::WavetableOscillator(float sr, const FloatArray wavetable): 
   multiplier(1.0/sr),
   wave(wavetable),
