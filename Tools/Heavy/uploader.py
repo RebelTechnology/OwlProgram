@@ -50,6 +50,15 @@ class UploaderException(Exception):
 # the maxmimum file upload size of 1MB
 __HV_MAX_UPLOAD_SIZE = 1 * 1024*1024
 
+__SUPPORTED_GENERATOR_SET = {
+    "c", "js",
+    "pdext", "pdext-osx",
+    "unity", "unity-osx", "unity-win-x86", "unity-win-x86_64", "unity-unix-x86_64", "unity-android-armv7s", "unity-android-arm64",
+    "wwise", "wwise-osx", "wwise-win-x86_64",
+    "vst2", "vst2-osx", "vst2-win-x86_64", "vst2-unix-x86_64", "vst2-unix-x86_64"
+    "fabric", "fabric-osx", "fabric-win-x86_64"
+}
+
 def __zip_dir(in_dir, zip_path, file_filter=None):
     """Recursively zip an entire directory with an optional file filter
     """
@@ -78,7 +87,7 @@ def __get_file_url_for_generator(json_api, g):
 
 
 
-def upload(input_dir, output_dirs=None, name=None, generators=None, b=False, y=False, release=None, domain=None, x=False, z=False, noverify=False, verbose=False, token=None):
+def upload(input_dir, output_dirs=None, name=None, generators=None, b=False, y=False, release=None, release_override=False, domain=None, x=False, z=False, noverify=False, verbose=False, token=None):
     """ Upload a directory to the Heavy Cloud Service.
 
         Parameters
@@ -106,6 +115,10 @@ def upload(input_dir, output_dirs=None, name=None, generators=None, b=False, y=F
 
         release : str, optional
             The name of the release to use for compiling.
+
+        release_override : bool, optional
+            Disable the validity check for a requested release. Forces sending a
+            release request to the server.
 
         x : bool, optional
             If True, don't save the returned token. False by default.
@@ -155,30 +168,31 @@ def upload(input_dir, output_dirs=None, name=None, generators=None, b=False, y=F
 
         # parse the optional release argument
         if release:
-            # check the validity of the current release
-            releases_json = requests.get(urlparse.urljoin(domain, "/a/releases")).json()
-            if release in releases_json:
-                today = datetime.datetime.now()
-                valid_until = datetime.datetime.strptime(releases_json[release]["validUntil"], "%Y-%m-%d")
-                if today > valid_until:
-                    print "{0}Warning:{1} The release \"{2}\" expired on {3}. It may be removed at any time!".format(
-                        Colours.yellow, Colours.end,
-                        release,
-                        releases_json[release]["validUntil"])
-                elif (valid_until - today) <= datetime.timedelta(weeks=4):
-                    print "{0}Warning:{1} The release \"{2}\" will expire soon on {3}.".format(
-                        Colours.yellow, Colours.end,
-                        release,
-                        releases_json[release]["validUntil"])
-            else:
-                print "{0}Error:{1} The release \"{2}\" is not available. Available releases are:".format(
-                    Colours.red, Colours.end,
-                    release)
-                for k,v in releases_json.items():
-                    print "* {0} ({1})".format(
-                        k,
-                        v["releaseDate"])
-                raise UploaderException(ErrorCodes.CODE_RELEASE_NOT_AVAILABLE)
+            if not release_override:
+                # check the validity of the current release
+                releases_json = requests.get(urlparse.urljoin(domain, "/a/releases")).json()
+                if release in releases_json:
+                    today = datetime.datetime.now()
+                    valid_until = datetime.datetime.strptime(releases_json[release]["validUntil"], "%Y-%m-%d")
+                    if today > valid_until:
+                        print "{0}Warning:{1} The release \"{2}\" expired on {3}. It may be removed at any time!".format(
+                            Colours.yellow, Colours.end,
+                            release,
+                            releases_json[release]["validUntil"])
+                    elif (valid_until - today) <= datetime.timedelta(weeks=4):
+                        print "{0}Warning:{1} The release \"{2}\" will expire soon on {3}.".format(
+                            Colours.yellow, Colours.end,
+                            release,
+                            releases_json[release]["validUntil"])
+                else:
+                    print "{0}Error:{1} The release \"{2}\" is not available. Available releases are:".format(
+                        Colours.red, Colours.end,
+                        release)
+                    for k,v in releases_json.items():
+                        print "* {0} ({1})".format(
+                            k,
+                            v["releaseDate"])
+                    raise UploaderException(ErrorCodes.CODE_RELEASE_NOT_AVAILABLE)
 
             post_data["release"] = release
 
@@ -203,14 +217,7 @@ def upload(input_dir, output_dirs=None, name=None, generators=None, b=False, y=F
         post_data["name"] = name
 
         # the outputs to generate (always include c)
-        __SUPPORTED_GENERATOR_SET = {
-            "c", "js",
-            "pdext", "pdext-osx",
-            "unity", "unity-osx", "unity-win-x86", "unity-win-x86_64",
-            "wwise", "wwise-win-x86_64",
-            "vst2", "vst2-osx", "vst2-win-x86_64",
-        }
-        post_data["gen"] = list(({"c"} | {s.lower() for s in set(generators)}) & __SUPPORTED_GENERATOR_SET)
+        post_data["gen"] = list(({"c"} | {s.lower() for s in set(generators or ["c"])}) & __SUPPORTED_GENERATOR_SET)
 
         # upload the job, get the response back
         # NOTE(mhroth): multipart-encoded file can only be sent as a flat dictionary,
@@ -362,16 +369,19 @@ def upload(input_dir, output_dirs=None, name=None, generators=None, b=False, y=F
     except requests.ConnectionError as e:
         print "{0}Error:{1} Could not connect to server. Is the server down? Is the internet down?\n{2}".format(Colours.red, Colours.end, e)
         exit_code = ErrorCodes.CODE_CONNECTION_ERROR
-    except requests.ConnectTimeout as e:
+    except requests.Timeout as e:
         print "{0}Error:{1} Connection to server timed out. The server might be overloaded. Try again later?\n{2}".format(Colours.red, Colours.end, e)
         exit_code = ErrorCodes.CODE_CONNECTION_TIMEOUT
     except requests.HTTPError as e:
-        print "{0}Error:{1} An HTTP error has occurred.\n{2}".format(Colours.red, Colours.end, e)
+        if e.response.status_code == requests.codes.unauthorized:
+            print "{0}Error:{1} Unknown username or password.".format(Colours.red, Colours.end)
+        else:
+            print "{0}Error:{1} An HTTP error has occurred with URL {2}\n{3}".format(Colours.red, Colours.end, e.request.path_url, e)
         exit_code = ErrorCodes.CODE_CONNECTION_400_500
     except Exception as e:
         exit_code = ErrorCodes.CODE_EXCEPTION
-        print "{0}Error:{1} {2}".format(Colours.red, Colours.end, e)
-        print "Getting a weird error? Get the latest uploader at https://enzienaudio.com/static/uploader.py"
+        print "{0}Error:{1} ({2}) {3}".format(Colours.red, Colours.end, e.__class__, e)
+        print "Getting a weird error? Get the latest uploader at https://enzienaudio.com/static/uploader.py, or check for issues at https://github.com/enzienaudio/heavy/issues."
     finally:
         if temp_dir:
             shutil.rmtree(temp_dir) # delete the temporary directory no matter what
@@ -394,10 +404,7 @@ def main():
         "-g", "--gen",
         nargs="+",
         default=["c"],
-        help="List of generator outputs. Currently supported generators are "
-            "'c', 'js', 'pdext', 'pdext-osx', 'unity', 'unity-osx', "
-            "'unity-win-x86', 'unity-win-x86_64', 'wwise', 'wwise-win-x86_64', "
-            "'vst2' ,'vst2-osx', 'vst2-win-x86_64', and 'vst2-win-x86'.")
+        help="List of generator outputs. Currently supported generators are '" + "', '".join(sorted(__SUPPORTED_GENERATOR_SET)) + "'.")
     parser.add_argument(
         "-b",
         help="All files will be placed in the output directory, placed in their own subdirectory corresponding to the generator name.",
@@ -415,6 +422,10 @@ def main():
     parser.add_argument(
         "-r", "--release",
         help="Optionally request a specific release of Heavy to use while compiling.")
+    parser.add_argument(
+        "-rr",
+        help="Send a request for a specific release to the server without checking for validity first.",
+        action="count")
     parser.add_argument(
         "-d", "--domain",
         default="https://enzienaudio.com",
@@ -448,6 +459,7 @@ def main():
         b=args.b,
         y=args.y,
         release=args.release,
+        release_override=args.rr,
         domain=args.domain,
         x=args.x,
         z=args.z,
