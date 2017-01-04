@@ -8,7 +8,7 @@
 #define GEN_OWL_PARAM_B "B"
 #define GEN_OWL_PARAM_C "C"
 #define GEN_OWL_PARAM_D "D"
-#define GEN_OWL_PARAM_E "E"
+#define GEN_OWL_PARAM_E "Exp"
 #define GEN_OWL_PARAM_F "F"
 #define GEN_OWL_PARAM_G "G"
 #define GEN_OWL_PARAM_H "H"
@@ -25,7 +25,7 @@ public:
     id = pid;
     int numParams = gen::num_params();
     for(int i = 0; i < numParams; i++){
-      if(strcmp(name, gen::getparametername(context, i)) == 0){
+      if(strcasecmp(name, gen::getparametername(context, i)) == 0){
 	index = i;
 	if(gen::getparameterhasminmax(context, index)){
 	  min = gen::getparametermin(context, index);
@@ -53,7 +53,7 @@ public:
     id = bid;
     int numParams = gen::num_params();
     for(int i = 0; i < numParams; i++){
-      if(strcmp(name, gen::getparametername(context, i)) == 0){
+      if(strcasecmp(name, gen::getparametername(context, i)) == 0){
 	index = i;
 	if(gen::getparameterhasminmax(context, index)){
 	  min = gen::getparametermin(context, index);
