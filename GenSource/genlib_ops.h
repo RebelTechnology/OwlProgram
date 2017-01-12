@@ -127,12 +127,12 @@ inline t_sample safediv(t_sample num, t_sample denom) {
 
 // fixnan for case of negative base and non-integer exponent:
 inline t_sample safepow(t_sample base, t_sample exponent) {
-	return fixnan(pow(base, exponent));
+	return fixnan(powf(base, exponent));
 }
 
 inline t_sample absdiff(t_sample a, t_sample b) { return fabs(a-b); }
 
-inline t_sample exp2(t_sample v) { return pow(2., v); }
+inline t_sample exp2(t_sample v) { return powf(2., v); }
 
 inline t_sample trunc(t_sample v) {
 	t_sample epsilon = (v<0.0) * -2 * 1E-9 + 1E-9;
@@ -461,9 +461,9 @@ inline t_sample scale(t_sample in, t_sample inlow, t_sample inhigh, t_sample out
 
 	value = (in - inlow) * inscale;
 	if (value > 0.0)
-		value = pow(value, power);
+		value = powf(value, power);
 	else if (value < 0.0)
-		value = -pow(-value, power);
+		value = -powf(-value, power);
 	value = (value * outdiff) + outlow;
 
 	return value;
@@ -515,23 +515,23 @@ inline t_sample fract(t_sample x) { double unused; return (t_sample)modf((double
 // log2(x) = log(x)/log(2)
 template<typename T>
 inline T log2(T x) {
-	return log(x)*GENLIB_1_OVER_LOG_2;
+	return logf(x)*GENLIB_1_OVER_LOG_2;
 }
 
 inline t_sample atodb(t_sample in) {
-	return (in <=0.) ? -999. : (20. * log10(in));
+	return (in <=0.) ? -999. : (20. * log10f(in));
 }
 
 inline t_sample dbtoa(t_sample in) {
-	return pow(10., in * 0.05);
+	return powf(10., in * 0.05);
 }
 
 inline t_sample ftom(t_sample in, t_sample tuning=440.) {
-	return 69. + 17.31234050465299 * log(safediv(in, tuning));
+	return 69. + 17.31234050465299 * logf(safediv(in, tuning));
 }
 
 inline t_sample mtof(t_sample in, t_sample tuning=440.) {
-	return tuning * exp(.057762265 * (in - 69.0));
+	return tuning * expf(.057762265 * (in - 69.0));
 }
 
 inline t_sample mstosamps(t_sample ms, t_sample samplerate=44100.) {
