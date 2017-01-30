@@ -4,7 +4,9 @@ GENSOURCE    = $(BUILD)/Source
 
 # emscripten
 EMCC      ?= emcc
-EMCCFLAGS ?= -fno-rtti -fno-exceptions -s ASSERTIONS=1 -Wall -std=c++11
+EMCCFLAGS += -fno-rtti -fno-exceptions
+# EMCCFLAGS += -s ASSERTIONS=1 -Wall
+EMCCFLAGS += -Dnullptr=NULL
 EMCCFLAGS += -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(GENSOURCE) -I$(BUILD)
 EMCCFLAGS += -I$(BUILD)/Source
 EMCCFLAGS +=  -ILibraries -ILibraries/KissFFT -DHV_SIMD_NONE

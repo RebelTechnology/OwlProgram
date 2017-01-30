@@ -1,4 +1,4 @@
-HEAVYRELEASE ?= r2016.07.05 
+HEAVYRELEASE ?= r2017.01
 # release version, see https://enzienaudio.com/a/releases
 HEAVYFILE    ?= $(HEAVY).pd
 HEAVYNAME    ?= owl
