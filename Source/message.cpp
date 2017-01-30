@@ -8,8 +8,7 @@ static char buffer[64];
 
 const char hexnumerals[] = "0123456789abcdef";
 
-// itoa and ftoa are used by HvMessage.c
-char* itoa(int val, int base){
+char* msg_itoa(int val, int base){
   static char buf[13] = {0};
   int i = 11;
   unsigned int part = abs(val);
@@ -22,7 +21,7 @@ char* itoa(int val, int base){
   return &buf[i+1];
 }
 
-char* ftoa(float val, int base){
+char* msg_ftoa(float val, int base){
   static char buf[16] = {0};
   int i = 14;
   // print 4 decimal points
@@ -51,7 +50,7 @@ void debugMessage(const char* msg, int a){
   char* p = buffer;
   p = stpncpy(p, msg, 48);
   p = stpcpy(p, (const char*)" ");
-  p = stpcpy(p, itoa(a, 10));
+  p = stpcpy(p, msg_itoa(a, 10));
   getProgramVector()->message = buffer;
 }
 
@@ -59,9 +58,9 @@ void debugMessage(const char* msg, int a, int b){
   char* p = buffer;
   p = stpncpy(p, msg, 32);
   p = stpcpy(p, (const char*)" ");
-  p = stpcpy(p, itoa(a, 10));
+  p = stpcpy(p, msg_itoa(a, 10));
   p = stpcpy(p, (const char*)" ");
-  p = stpcpy(p, itoa(b, 10));
+  p = stpcpy(p, msg_itoa(b, 10));
   getProgramVector()->message = buffer;
 }
 
@@ -69,11 +68,11 @@ void debugMessage(const char* msg, int a, int b, int c){
   char* p = buffer;
   p = stpncpy(p, msg, 32);
   p = stpcpy(p, (const char*)" ");
-  p = stpcpy(p, itoa(a, 10));
+  p = stpcpy(p, msg_itoa(a, 10));
   p = stpcpy(p, (const char*)" ");
-  p = stpcpy(p, itoa(b, 10));
+  p = stpcpy(p, msg_itoa(b, 10));
   p = stpcpy(p, (const char*)" ");
-  p = stpcpy(p, itoa(c, 10));
+  p = stpcpy(p, msg_itoa(c, 10));
   getProgramVector()->message = buffer;
 }
 
@@ -81,7 +80,7 @@ void debugMessage(const char* msg, float a){
   char* p = buffer;
   p = stpncpy(p, msg, 48);
   p = stpcpy(p, (const char*)" ");
-  p = stpcpy(p, ftoa(a, 10));
+  p = stpcpy(p, msg_ftoa(a, 10));
   getProgramVector()->message = buffer;
 }
 
@@ -89,9 +88,9 @@ void debugMessage(const char* msg, float a, float b){
   char* p = buffer;
   p = stpncpy(p, msg, 32);
   p = stpcpy(p, (const char*)" ");
-  p = stpcpy(p, ftoa(a, 10));
+  p = stpcpy(p, msg_ftoa(a, 10));
   p = stpcpy(p, (const char*)" ");
-  p = stpcpy(p, ftoa(b, 10));
+  p = stpcpy(p, msg_ftoa(b, 10));
   getProgramVector()->message = buffer;
 }
 
@@ -99,11 +98,11 @@ void debugMessage(const char* msg, float a, float b, float c){
   char* p = buffer;
   p = stpncpy(p, msg, 32);
   p = stpcpy(p, (const char*)" ");
-  p = stpcpy(p, ftoa(a, 10));
+  p = stpcpy(p, msg_ftoa(a, 10));
   p = stpcpy(p, (const char*)" ");
-  p = stpcpy(p, ftoa(b, 10));
+  p = stpcpy(p, msg_ftoa(b, 10));
   p = stpcpy(p, (const char*)" ");
-  p = stpcpy(p, ftoa(c, 10));
+  p = stpcpy(p, msg_ftoa(c, 10));
   getProgramVector()->message = buffer;
 }
 
@@ -123,7 +122,7 @@ void assert_failed(const char* msg, const char* location, int line){
   p = stpcpy(p, (const char*)" in ");
   p = stpncpy(p, location, 32);
   p = stpcpy(p, (const char*)" line ");
-  p = stpcpy(p, itoa(line, 10));
+  p = stpcpy(p, msg_itoa(line, 10));
   getProgramVector()->message = buffer;
   if(getProgramVector()->programStatus != NULL)
     getProgramVector()->programStatus(AUDIO_ERROR_STATUS);
