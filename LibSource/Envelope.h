@@ -28,6 +28,7 @@ private:
 
 public:
   AdsrEnvelope(float newSampleRate);
+  virtual ~AdsrEnvelope();
   void setSampleRate(float sampleRate){
     samplePeriod = 1.0/sampleRate;
   }

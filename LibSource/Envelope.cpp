@@ -25,6 +25,8 @@ AdsrEnvelope::AdsrEnvelope(float sampleRate) :
   setRetrigger(false);
 }
 
+AdsrEnvelope::~AdsrEnvelope(){}
+
 void AdsrEnvelope::setAttack(float newAttack){
   newAttack = newAttack > minTime ? newAttack : minTime;
   attackIncrement = samplePeriod / newAttack;
