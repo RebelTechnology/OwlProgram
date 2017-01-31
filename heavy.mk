@@ -8,6 +8,9 @@ HEAVYARGS    ?= -r $(HEAVYRELEASE)
 ifdef HEAVYTOKEN
 HEAVYARGS    += -t $(HEAVYTOKEN)
 endif
+ifdef HEAVYSERVICETOKEN
+HEAVYARGS    += --service_token $(HEAVYSERVICETOKEN)
+endif
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@mkdir -p $(HEAVYDIR)

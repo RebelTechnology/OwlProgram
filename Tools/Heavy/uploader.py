@@ -94,7 +94,7 @@ def __get_file_url_stub_for_generator(json_api, g):
 
 
 
-def upload(input_dir, output_dirs=None, name=None, owner=None, generators=None, b=False, y=False, release=None, release_override=False, domain=None, verbose=False, token=None, clear_token=False):
+def upload(input_dir, output_dirs=None, name=None, owner=None, generators=None, b=False, y=False, release=None, release_override=False, domain=None, verbose=False, token=None, clear_token=False, service_token=None):
     """ Upload a directory to the Heavy Cloud Service.
 
         Parameters
@@ -192,9 +192,27 @@ def upload(input_dir, output_dirs=None, name=None, owner=None, generators=None, 
                 # if an owner is not supplied, default to the user name in the token
                 owner = payload["name"]
         except Exception as e:
-            print "The user token is not valid. Generate a new one at https://enzienaudio.com/h/<username>/settings."
+            print "The user token is invalid. Generate a new one at https://enzienaudio.com/h/<username>/settings."
             exit_code = ErrorCodes.CODE_INVALID_TOKEN
             raise e
+
+        # if there is a user-supplied service token, do a basic validity check
+        if service_token:
+            try:
+                # check the valifity of the token
+                payload = json.loads(base64.urlsafe_b64decode(token.split(".")[1]))
+                payload["startDate"] = datetime.datetime.strptime(payload["startDate"], "%Y-%m-%dT%H:%M:%S.%f")
+
+                # ensure that the token is valid
+                now = datetime.datetime.utcnow()
+                assert payload["startDate"] <= now
+
+                assert "service" in payload, "'service' field required in service token payload."
+            except Exception as e:
+                print "The supplied service token is invalid. A default token will be used."
+                service_token = __HV_UPLOADER_SERVICE_TOKEN
+        else:
+            service_token = __HV_UPLOADER_SERVICE_TOKEN
 
         # parse the optional release argument
         if release:
@@ -254,7 +272,7 @@ def upload(input_dir, output_dirs=None, name=None, owner=None, generators=None, 
             headers={
                 "Accept": "application/json",
                 "Authorization": "Bearer " + token,
-                "X-Heavy-Service-Token": __HV_UPLOADER_SERVICE_TOKEN
+                "X-Heavy-Service-Token": service_token
             },
             files={"file": (os.path.basename(zip_path), open(zip_path, "rb"), "application/zip")})
         r.raise_for_status()
@@ -292,8 +310,10 @@ def upload(input_dir, output_dirs=None, name=None, owner=None, generators=None, 
                         file_url,
                         headers={
                             "Authorization": "Bearer " + token,
-                            "X-Heavy-Service-Token": __HV_UPLOADER_SERVICE_TOKEN
-                        })
+                            "X-Heavy-Service-Token": service_token
+                        },
+                        timeout=None # some builds can take a very long time
+                    )
                     r.raise_for_status()
 
                     # write the reply to a temporary file
@@ -407,6 +427,9 @@ def main():
         "--clear_token",
         help="Clears the exsiting token and asks for a new one from the command line.",
         action="count")
+    parser.add_argument(
+        "--service_token",
+        help="Use a custom service token.")
     args = parser.parse_args()
 
     exit_code, reponse_obj = upload(
@@ -422,7 +445,8 @@ def main():
         domain=args.domain,
         verbose=args.verbose,
         token=args.token,
-        clear_token=args.clear_token)
+        clear_token=args.clear_token,
+        service_token=args.service_token)
 
     # exit and return the exit code
     sys.exit(exit_code)
