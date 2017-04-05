@@ -50,9 +50,10 @@ endif
 PATCHIN     ?= 2
 PATCHOUT    ?= 2
 SLOT        ?= 0
-OWLDEVICE   ?= "OWL-MIDI"
+OWLDEVICE   ?= "Player"
 BUILD       ?= $(BUILDROOT)/Build
-LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
+# LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
+LDSCRIPT    ?= $(BUILDROOT)/Source/STM32F746ZGTx_FLASH.ld
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
 FIRMWARESENDER = Tools/FirmwareSender
 
@@ -108,7 +109,7 @@ sysex: patch $(BUILD)/$(TARGET).syx ## package patch binary as MIDI sysex
 
 run: patch ## upload patch to attached OWL via MIDI
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to run
-	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out $(OWLDEVICE) -run
+	@$(FIRMWARESENDER) -v -d 200 -in $(BUILD)/$(TARGET).bin -out $(OWLDEVICE) -run
 
 store: patch ## upload and save patch to attached OWL
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to store in slot $(SLOT)

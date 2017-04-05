@@ -32,12 +32,12 @@ int main(void){
 #endif /* STARTUP_CODE */
 
 /* Defined by the linker */
-  extern char _fastheap, _fasteheap; // internal RAM dedicated to heap
-  extern char _eprogram, _eram; // remaining program space
+  // extern char _fastheap, _fasteheap; // internal RAM dedicated to heap
+  // extern char _eprogram, _eram; // remaining program space (assuming stack in CCM)
   extern char _heap, _eheap; // external memory
   const HeapRegion_t xHeapRegions[] = {
-    { ( uint8_t * )&_fastheap, (size_t)(&_fasteheap - &_fastheap) },
-    { ( uint8_t * )&_eprogram, (size_t)(&_eram - &_eprogram) },
+    // { ( uint8_t * )&_fastheap, (size_t)(&_fasteheap - &_fastheap) },
+    // { ( uint8_t * )&_eprogram, (size_t)(&_eram - &_eprogram) },
     { ( uint8_t * )&_heap, (size_t)(&_eheap - &_heap) },
     { NULL, 0 } /* Terminates the array. */
   };
@@ -48,6 +48,9 @@ int main(void){
 #endif /* STARTUP_CODE */
 
   ProgramVector* pv = getProgramVector();
+  // if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V13)
+  //   pv->drawCallback = onDrawCallback;
+
   if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V12){
     // set event callbacks
     pv->buttonChangedCallback = onButtonChanged;

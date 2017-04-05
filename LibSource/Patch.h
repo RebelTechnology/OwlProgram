@@ -5,6 +5,7 @@
 #include "FloatArray.h"
 #include "PatchParameter.h"
 #include "SmoothValue.h"
+#include "ScreenBuffer.h"
 
 enum PatchParameterId {
   PARAMETER_A,
@@ -111,6 +112,8 @@ public:
   virtual void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){}
   /* virtual void parameterChanged(PatchParameterId pid, float value, int samples){} */
   virtual void processAudio(AudioBuffer& output) = 0;
+  virtual void processScreen(ScreenBuffer&){}
+
 };
 
 #endif // __Patch_h__

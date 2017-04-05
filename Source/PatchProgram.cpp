@@ -7,6 +7,7 @@
 #include "registerpatch.h"
 #include "main.h"
 #include "heap.h"
+#include "ScreenBuffer.h"
 
 PatchProcessor processor;
 
@@ -38,6 +39,14 @@ void onButtonChanged(uint8_t id, uint16_t value, uint16_t samples){
 void onEncoderChanged(uint8_t id, int16_t delta, uint16_t samples){
   if(processor.patch != NULL)
     processor.patch->encoderChanged((PatchParameterId)id, delta, samples);
+}
+
+void onDrawCallback(uint8_t* pixels, uint16_t width, uint16_t height){
+  if(processor.patch != NULL){
+    ScreenBuffer screen(width, height);
+    screen.setBuffer(pixels);
+    processor.patch->processScreen(screen);
+  }
 }
 
 #define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
