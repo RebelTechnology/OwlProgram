@@ -48,19 +48,18 @@ int main(void){
 #endif /* STARTUP_CODE */
 
   ProgramVector* pv = getProgramVector();
-  // if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V13)
-  //   pv->drawCallback = onDrawCallback;
-
+  if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V13)
+    pv->drawCallback = onDrawCallback;
   if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V12){
     // set event callbacks
     pv->buttonChangedCallback = onButtonChanged;
     pv->encoderChangedCallback = onEncoderChanged;
-  }else if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V11){
-    // no event callbacks
-  }else{
+  }
+  if(pv->checksum <= PROGRAM_VECTOR_CHECKSUM_V11){
     error(CHECKSUM_ERROR_STATUS, "ProgramVector checksum error");
     return -1;
   }
+
   if(pv->audio_blocksize <= 0 || pv->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){     
     error(CONFIGURATION_ERROR_STATUS, "Invalid blocksize");
     return -1;
