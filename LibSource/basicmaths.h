@@ -54,6 +54,9 @@
    float arm_sqrtf(float in);
    uint32_t arm_rand32();
 
+   /** generate a random number between 0 and 1 */
+   float randf();
+
    // fast approximations
    float fastexpf(float x);
    float fastlog2f(float x);
