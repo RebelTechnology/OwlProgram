@@ -52,10 +52,8 @@
 #endif
 
    float arm_sqrtf(float in);
+   void arm_srand32(uint32_t s);
    uint32_t arm_rand32();
-
-   /** generate a random number between 0 and 1 */
-   float randf();
 
    // fast approximations
    float fastexpf(float x);
@@ -63,6 +61,9 @@
    float fastpow2f(float x);
    float fastpowf(float a, float b);
    float fastatan2f(float a, float b);
+
+   /** generate a random number between 0 and 1 */
+   float randf();
 
 #ifdef __cplusplus
 }
