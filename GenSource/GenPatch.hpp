@@ -78,7 +78,7 @@ private:
   GenButton pushbutton;
 public:
   GenPatch() {
-    context = (CommonState *)gen::create(getSampleRate(), 0);
+    context = (CommonState *)gen::create(getSampleRate(), getBlockSize());
     params[0].configure(context, PARAMETER_A, GEN_OWL_PARAM_A);
     params[1].configure(context, PARAMETER_B, GEN_OWL_PARAM_B);
     params[2].configure(context, PARAMETER_C, GEN_OWL_PARAM_C);
