@@ -39,6 +39,7 @@
 }
 
 void debugMessage(const char* msg, int);
+void debugMessage(const char* msg, int, int);
 void debugMessage(const char* msg, int, int, int);
 void debugMessage(const char* msg, float);
 void debugMessage(const char* msg, float, float);
