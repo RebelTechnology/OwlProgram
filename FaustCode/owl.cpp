@@ -272,6 +272,22 @@ public:
 
 };
 
+extern "C" {
+  void doSetButton(uint8_t id, uint16_t state, uint16_t samples);
+  int owl_pushbutton(int value){
+    static bool state = 0;
+    static uint16_t counter = 0;
+    value = (bool)value;
+    if(state != value){
+      state = value;
+      doSetButton(PUSHBUTTON, state, counter);
+    }
+    if(++counter > getProgramVector()->audio_blocksize)
+      counter = 0;
+    return value;
+  }
+}
+
 #endif // __FaustPatch_h__
 
 
