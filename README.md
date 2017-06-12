@@ -52,8 +52,8 @@ To compile and run a FAUST patch
 * copy .dsp file and dependencies into `PatchSource`, e.g. `LowShelf.dsp`
 * `make FAUST=LowShelf run`
 
-Note: assign OWL parameters with slider metadata: `[OWL:PARAMETER_A]`, `[OWL:PARAMETER_B]` et c. For example:
-```gain = vslider("gain[OWL:PARAMETER_C]", 1,0,1,0.1);```
+Note: assign OWL parameters with slider metadata: `[OWL:A]`, `[OWL:B]` et c. For example:
+```gain = vslider("gain[OWL:C]", 1,0,1,0.1);```. Assign push button with e.g. ```gate = button("gate[OWL:Push]");```
 
 ## Building Pure Data patches
 Requires an account with Enzien Audio [5]
