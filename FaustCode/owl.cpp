@@ -37,10 +37,10 @@
 #ifndef __FaustPatch_h__
 #define __FaustPatch_h__
 
-#include "StompBox.h"
 #include <cstddef>
 #include <string.h>
 #include <strings.h>
+#include "Patch.h"
 
 
 #ifndef __FaustCommonInfrastructure__
