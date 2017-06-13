@@ -36,6 +36,7 @@
 #ifndef __FaustPatch_h__
 #define __FaustPatch_h__
 
+#include <new>
 #include <cstddef>
 #include <string.h>
 #include <strings.h>
@@ -215,7 +216,6 @@ struct OwlMemoryManager : public dsp_memory_manager {
     virtual void destroy(void* ptr)
     {
       delete (uint8_t*)ptr;
-      // free(ptr);
     }    
 };
 
@@ -249,16 +249,15 @@ public:
 
     FaustPatch() : fUI(this)
     {
-      fDSP = new mydsp();
+      fDSP = new ((mydsp*)mem.allocate(sizeof(mydsp))) mydsp();
       fDSP->classInit(int(getSampleRate()), &mem);
       fDSP->instanceInit(int(getSampleRate()));
       fDSP->buildUserInterface(&fUI);			// Maps owl parameters and faust widgets 
     }
 
     ~FaustPatch(){
-	mem.destroy(fDSP);
-	delete fDSP;
-      }
+      mem.destroy(fDSP);
+    }
     
     void processAudio(AudioBuffer &buffer)
     {
