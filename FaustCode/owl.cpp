@@ -41,19 +41,16 @@
 #include <strings.h>
 #include "Patch.h"
 
-
 #ifndef __FaustCommonInfrastructure__
 #define __FaustCommonInfrastructure__
 
-#include "faust/gui/UI.h"
 #include "faust/dsp/dsp.h"
+#include "faust/gui/UI.h"
 
 struct Meta
 {
     virtual void declare(const char* key, const char* value) = 0;
 };
-
-
 
 /**************************************************************************************
 
@@ -206,7 +203,9 @@ class OwlUI : public UI
     }
 };
 
-// Simple heap based custom memory manager
+  /* Simple heap based memory manager.
+   * Uses overloaded new/delete operators on OWL hardware.
+   */
 struct OwlMemoryManager : public dsp_memory_manager {
     void* allocate(size_t size)
     {
@@ -251,8 +250,8 @@ public:
     FaustPatch() : fUI(this)
     {
       fDSP = new mydsp();
-      fDSP->classInit(int(getSampleRate(), &mem);
-      // fDSP.init(int(getSampleRate()));		// Init Faust code with the OWL sampling rate
+      fDSP->classInit(int(getSampleRate()), &mem);
+      fDSP->instanceInit(int(getSampleRate()));
       fDSP->buildUserInterface(&fUI);			// Maps owl parameters and faust widgets 
     }
 
