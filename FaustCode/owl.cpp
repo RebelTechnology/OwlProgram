@@ -47,7 +47,7 @@
 #define __FaustCommonInfrastructure__
 
 
-#include "faust/audio/dsp.h"
+#include "faust/dsp/dsp.h"
 #include "faust/gui/UI.h"
 
 
