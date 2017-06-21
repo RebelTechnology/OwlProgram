@@ -81,10 +81,16 @@ typedef t_atom_long t_max_err;		///< an integer value suitable to be returned as
 #undef RAND_MAX
 #define RAND_MAX UINT32_MAX
 // add C74 stuff
-#define exp(x) fasterexp(x)
 #define pow(x,y) fasterpow(x,y)
+#define exp(x) fasterexp(x)
 #define tan(x) fastertanfull(x)
-// add log variants
+// ensure 32-bit versions of math functions
+#define log(x) logf(x)
+#define log2(x) log2f(x)
+#define log10(x) log10f(x)
+#define exp2(x) exp2f(x)
+#define exp10(x) exp10f(x)
+#define tanh(x) tanhf(x)
 /* #endif */
 
 extern "C" {

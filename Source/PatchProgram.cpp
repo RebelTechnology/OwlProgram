@@ -29,6 +29,12 @@ void doSetButton(uint8_t id, uint16_t value, uint16_t samples){
      // if it is not a MIDI note, check that value has changed
      (id > 31 || (bool)(vec->buttons&(1<<id)) != (bool)value))
     vec->setButton((PatchButtonId)id, value, samples);
+  if(id < 32){
+    if(value)
+      vec->buttons |= (1<<id);
+    else
+      vec->buttons &= ~(1<<id);
+  }
 }
 
 void onButtonChanged(uint8_t id, uint16_t value, uint16_t samples){

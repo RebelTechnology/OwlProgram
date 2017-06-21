@@ -510,7 +510,7 @@ inline T1 ltp(T1 x, T2 y) { return ((((x) < T1(y))) ? (x) : T1(0)); }
 template<typename T1, typename T2>
 inline T1 ltep(T1 x, T2 y) { return ((((x) <= T1(y))) ? (x) : T1(0)); }
 
-inline t_sample fract(t_sample x) { double unused; return (t_sample)modf((double)x, &unused); }
+inline t_sample fract(t_sample x) { float unused; return (t_sample)modff((float)x, &unused); }
 
 // log2(x) = log(x)/log(2)
 template<typename T>
