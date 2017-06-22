@@ -75,6 +75,10 @@ int Patch::getElapsedCycles(){
   return *DWT_CYCCNT;
 }
 
+void Patch::processScreen(ScreenBuffer& screen){
+  screen.clear();
+}
+
 #include "MemoryBuffer.hpp"
 AudioBuffer* AudioBuffer::create(int channels, int samples){
   return new ManagedMemoryBuffer(channels, samples);

@@ -111,8 +111,8 @@ public:
   virtual void encoderChanged(PatchParameterId pid, int16_t delta, uint16_t samples){};
   virtual void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){}
   /* virtual void parameterChanged(PatchParameterId pid, float value, int samples){} */
-  virtual void processAudio(AudioBuffer& output) = 0;
-  virtual void processScreen(ScreenBuffer&){}
+  virtual void processAudio(AudioBuffer& audio) = 0;
+  virtual void processScreen(ScreenBuffer& screen);
 
 };
 

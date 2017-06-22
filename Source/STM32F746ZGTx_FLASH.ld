@@ -8,15 +8,13 @@ _Min_Stack_Size = 0x800; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
+/* FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 1024K */
 /* RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 320K */
-RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 256K
-PATCHRAM (xrw)  : ORIGIN = 0x20040000, LENGTH = 64K
-FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 1024K
+/* RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 256K */
+/* PATCHRAM (xrw)  : ORIGIN = 0x20040000, LENGTH = 64K */
+PATCHRAM (xrw)  : ORIGIN = 0x20030000, LENGTH = 128K
 EXTRAM (rw)     : ORIGIN = 0xD0000000, LENGTH = 1M
 }
-
-_eheap  = 0xd0100000;
-_estack = 0x20050000;
 
 /* Define output sections */
 SECTIONS
@@ -127,9 +125,9 @@ SECTIONS
     _programvector = ABSOLUTE(.);
       *(.pv)
     . = ALIGN(8);
-    /* PROVIDE ( _eprogram = . ); */
+    PROVIDE ( _eprogram = . );
   } >PATCHRAM
-  /* _eram = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM); */
+  _eram = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM);
 
   /* .fastheap (NOLOAD) : */
   /* { */
@@ -140,18 +138,15 @@ SECTIONS
   /* _fasteheap = ORIGIN(CCMHEAP) + LENGTH(CCMHEAP); */
 
   /* User_stack section, used to check that there is enough RAM left */
+  . = ALIGN(8);
   ._user_stack (NOLOAD) :
   {
-    . = ALIGN(8);
     PROVIDE ( _stack = . );
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
-
   } >PATCHRAM
-/* _estack = 0x2001c000;    /\* end of PATCHRAM *\/ */
-/*   } >CCMRAM */
-/* _estack = 0x10010000;    /\* end of CCM RAM *\/ */
-
+  _estack = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM);
+  /* _estack = ORIGIN(CCMRAM) + LENGTH(CCMRAM); */
 
   /* External SRAM, used for heap memory */
   .extdata (NOLOAD) :
@@ -162,6 +157,7 @@ SECTIONS
     PROVIDE ( _heap = . );
     . = . + _Min_Heap_Size;
   } >EXTRAM
+  _eheap = ORIGIN(EXTRAM) + LENGTH(EXTRAM);
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
