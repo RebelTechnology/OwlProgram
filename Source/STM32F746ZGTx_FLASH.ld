@@ -8,12 +8,8 @@ _Min_Stack_Size = 0x800; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-/* FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 1024K */
-/* RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 320K */
-/* RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 256K */
-/* PATCHRAM (xrw)  : ORIGIN = 0x20040000, LENGTH = 64K */
 PATCHRAM (xrw)  : ORIGIN = 0x20030000, LENGTH = 128K
-EXTRAM (rw)     : ORIGIN = 0xD0000000, LENGTH = 1M
+EXTRAM (rw)     : ORIGIN = 0xD0100000, LENGTH = 1M /* offset 1M to avoid dodgy ram on Player b2 */
 }
 
 /* Define output sections */
