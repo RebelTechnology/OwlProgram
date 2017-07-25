@@ -19,10 +19,7 @@ MEMORY
   LOADERRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 48K
   PATCHRAM (rwx)   : ORIGIN = 0x2000c000, LENGTH = 64K    /* total RAM is 112kb */
   NVRAM (rw)       : ORIGIN = 0x40024000, LENGTH = 4K
-  BANK1_SRAM1 (rx) : ORIGIN = 0x60000000, LENGTH = 0K
-  BANK1_SRAM2 (rx) : ORIGIN = 0x64000000, LENGTH = 0K
-  BANK1_SRAM3 (rx) : ORIGIN = 0x68000000, LENGTH = 1M
-  BANK1_SRAM4 (rx) : ORIGIN = 0x6c000000, LENGTH = 0K
+  EXTRAM (rx)      : ORIGIN = 0x68000000, LENGTH = 1M
 }
 
 /* Define output sections */
@@ -163,7 +160,7 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >CCMRAM
-  _estack = 0x10010000;    /* end of CCMRAM */
+  _estack = ORIGIN(CCMRAM) + LENGTH(CCMRAM);
 
   /* External SRAM, used for heap memory */
   .extdata (NOLOAD) :
@@ -173,8 +170,8 @@ SECTIONS
     . = ALIGN(8);
     PROVIDE ( _heap = . );
     . = . + _Min_Heap_Size;
-  } >BANK1_SRAM3
-    _eheap = 0x68100000;
+  } >EXTRAM
+  _eheap = ORIGIN(EXTRAM) + LENGTH(EXTRAM);
 
 
   /* Remove information from the standard libraries */
