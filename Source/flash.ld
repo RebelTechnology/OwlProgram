@@ -132,8 +132,10 @@ SECTIONS
       *(.pv)
     . = ALIGN(8);
     PROVIDE ( _eprogram = . );
+    PROVIDE ( _stack = . );
   } >PATCHRAM
   _eram = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM);
+  _estack = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM);
 
   .fastheap (NOLOAD) :
   {
@@ -152,15 +154,15 @@ SECTIONS
     . = ALIGN(8);
   } >CCMRAM
 
-  /* User_stack section, used to check that there is enough RAM left */
-  ._user_stack (NOLOAD) :
-  {
-    . = ALIGN(8);
-    PROVIDE ( _stack = . );
-    . = . + _Min_Stack_Size;
-    . = ALIGN(8);
-  } >CCMRAM
-  _estack = ORIGIN(CCMRAM) + LENGTH(CCMRAM);
+  /* /\* User_stack section, used to check that there is enough RAM left *\/ */
+  /* ._user_stack (NOLOAD) : */
+  /* { */
+  /*   . = ALIGN(8); */
+  /*   PROVIDE ( _stack = . ); */
+  /*   . = . + _Min_Stack_Size; */
+  /*   . = ALIGN(8); */
+  /* } >CCMRAM */
+  /* _estack = ORIGIN(CCMRAM) + LENGTH(CCMRAM); */
 
   /* External SRAM, used for heap memory */
   .extdata (NOLOAD) :

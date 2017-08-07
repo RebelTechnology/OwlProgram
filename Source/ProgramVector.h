@@ -29,6 +29,11 @@
     AUDIO_ERROR_STATUS 
   } ProgramVectorAudioStatus;
 
+  typedef struct {
+    uint8_t* location;
+    uint32_t size;
+  } MemorySegment;
+
    typedef struct {
      uint8_t checksum;
      uint8_t hardware_version;
@@ -52,8 +57,7 @@
      void (*setButton)(uint8_t id, uint16_t state, uint16_t samples);
      void (*setPatchParameter)(uint8_t id, int16_t value);
      void (*buttonChangedCallback)(uint8_t bid, uint16_t state, uint16_t samples);
-     void (*encoderChangedCallback)(uint8_t bid, int16_t delta, uint16_t samples);
-     /* void (*drawCallback)(uint8_t* pixels, uint16_t screen_width, uint16_t screen_height); */
+     MemorySegment* heapLocations;
    } ProgramVector;
 
 #define CHECKSUM_ERROR_STATUS      -10

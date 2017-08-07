@@ -41,11 +41,6 @@ void onButtonChanged(uint8_t id, uint16_t value, uint16_t samples){
     processor.patch->buttonChanged((PatchButtonId)id, value, samples);
 }
 
-void onEncoderChanged(uint8_t id, int16_t delta, uint16_t samples){
-  if(processor.patch != NULL)
-    processor.patch->encoderChanged((PatchParameterId)id, delta, samples);
-}
-
 #define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
 
 void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){
