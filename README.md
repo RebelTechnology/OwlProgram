@@ -26,6 +26,8 @@ See http://hoxtonowl.com for more details of the Open Ware Laboratory.
 * make as: build assembly file (Build/patch.s)
 * make help: print target information
 
+Make sure to do a `make clean` before compiling a new patch, or add `clean` to your make target, otherwise the previous patch name will be retained.
+
 ## Make options
 * PATCHNAME: specify name of patch, e.g. SimpleDelay
 * PATCHCLASS: name of patch class, e.g. SimpleDelayPatch
@@ -36,6 +38,8 @@ See http://hoxtonowl.com for more details of the Open Ware Laboratory.
 * TARGET: changes the output prefix, default 'patch'
 
 If you follow the convention of SimpleDelay then you don't have to specify `PATCHCLASS` and `PATCHFILE`, they will be deduced from `PATCHNAME`.
+
+Note that when storing user programs, the current OWL firmware has four user defined patches, numbered 37 to 40. These correspond to slot number 0 to 3.
 
 ## Building C++ patches
 First copy all patch files to `PatchSource` folder, then issue the appropriate make command.
