@@ -51,12 +51,13 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
   processor.setPatch(patch);
 }
 
-SampleBuffer* samples;
+static SampleBuffer* samples;
 void setup(ProgramVector* pv){
 #ifdef DEBUG_MEM
 #ifdef ARM_CORTEX
   size_t before = xPortGetFreeHeapSize();
 #endif
+  samples = new SampleBuffer(pv->audio_blocksize);
 #endif
 #include "registerpatch.cpp"
 #ifdef DEBUG_MEM
@@ -67,8 +68,6 @@ void setup(ProgramVector* pv){
   getProgramVector()->heap_bytes_used = before - xPortGetFreeHeapSize();
 #endif
 #endif
-  // samples = new SampleBuffer(getBlockSize());
-  samples = new SampleBuffer();
 }
 
 void processBlock(ProgramVector* pv){

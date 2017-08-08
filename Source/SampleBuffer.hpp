@@ -8,19 +8,24 @@
 #ifdef ARM_CORTEX
 #include "arm_math.h"
 #endif //ARM_CORTEX
+
 class SampleBuffer : public AudioBuffer {
 protected:
-  // FloatArray left;//[AUDIO_MAX_BLOCK_SIZE];
-  // FloatArray right;//[AUDIO_MAX_BLOCK_SIZE];
-  float left[AUDIO_MAX_BLOCK_SIZE];
-  float right[AUDIO_MAX_BLOCK_SIZE];
+  FloatArray left;
+  FloatArray right;
+  // float left[AUDIO_MAX_BLOCK_SIZE];
+  // float right[AUDIO_MAX_BLOCK_SIZE];
   uint16_t size;
 public:
+  SampleBuffer(int blocksize){
+    left = FloatArray::create(blocksize);
+    right = FloatArray::create(blocksize);
+  }
   void split(int32_t* data, uint16_t blocksize){
     uint16_t* input = (uint16_t*)data;
     size = blocksize;
-    float* l = left;
-    float* r = right;
+    float* l = (float*)left;
+    float* r = (float*)right;
     uint32_t blkCnt = size;
     int32_t qint;
     while(blkCnt > 0u){
@@ -38,8 +43,8 @@ public:
     }
   }
   void comb(int32_t* output){
-    float* l = left;
-    float* r = right;
+    float* l = (float*)left;
+    float* r = (float*)right;
     uint32_t blkCnt = size;
     uint16_t* dst = (uint16_t*)output;
     int32_t qint;
@@ -63,23 +68,16 @@ public:
     }
   }
   void clear(){
-    memset(left, 0, getSize()*sizeof(float));
-    memset(right, 0, getSize()*sizeof(float));
+    left.clear();
+    right.clear();
   }
   inline FloatArray getSamples(int channel){
-    return channel == 0 ? FloatArray(left, size) : FloatArray(right, size);
+    return channel == LEFT_CHANNEL ? left : right;
+    // return channel == 0 ? FloatArray(left, size) : FloatArray(right, size);
   }
-  // inline float* getSamples(int channel){
-  //   return channel == 0 ? left : right;
-  // }
   inline int getChannels(){
-    return AUDIO_CHANNELS;
+    return 2;
   }
-  // void setSize(uint16_t sz){
-  // // size is set by split()
-  //   if(sz <= AUDIO_MAX_BLOCK_SIZE)
-  //     size = sz;
-  // }
   inline int getSize(){
     return size;
   }
