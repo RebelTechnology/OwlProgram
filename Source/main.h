@@ -8,7 +8,7 @@
 #endif
 
    void setup(ProgramVector* pv);
-   void processBlock(ProgramVector* pv);
+   void run(ProgramVector* pv);
 
    void doSetPatchParameter(uint8_t id, int16_t value);
    void doSetButton(uint8_t id, uint16_t state, uint16_t samples);

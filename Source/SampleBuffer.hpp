@@ -21,7 +21,36 @@ public:
     left = FloatArray::create(blocksize);
     right = FloatArray::create(blocksize);
   }
-  void split(int32_t* data, uint16_t blocksize){
+  void split32(int32_t* input, uint16_t blocksize){
+    // ASSERT((blocksize & 0x3) == 0, "invalid blocksize");
+    size = blocksize;
+    float* l = left;
+    float* r = right;
+    uint32_t cnt = size >> 1u; // *2/4
+    while(cnt > 0u){
+      *l++ = (float)(int32_t)((*input++)<<8) / 2147483648.0f;
+      *r++ = (float)(int32_t)((*input++)<<8) / 2147483648.0f;
+      *l++ = (float)(int32_t)((*input++)<<8) / 2147483648.0f;
+      *r++ = (float)(int32_t)((*input++)<<8) / 2147483648.0f;
+      cnt--;
+    }
+  }
+  void comb32(int32_t* output){
+    int32_t* dest = output;
+    int32_t tmp;
+    // Seems CS4271 ADC samples are signed, DAC are unsigned. I2S Standard mode.
+    for(int i=0; i<size; ++i){
+      // tmp = (int32_t)(left[i] * 0x800000);
+      // *dest++ = (uint32_t)(tmp+0x800000);
+      // tmp = (int32_t)(right[i] * 0x800000);
+      // *dest++ = (uint32_t)(tmp+0x800000);
+      tmp = ((int32_t)(left[i] * 2147483648.0f));
+      *dest++ = tmp>>8;
+      tmp = ((int32_t)(right[i] * 2147483648.0f));
+      *dest++ = tmp>>8;
+    }
+  }
+  void split16(int32_t* data, uint16_t blocksize){
     uint16_t* input = (uint16_t*)data;
     size = blocksize;
     float* l = (float*)left;
@@ -42,7 +71,7 @@ public:
       blkCnt--;
     }
   }
-  void comb(int32_t* output){
+  void comb16(int32_t* output){
     float* l = (float*)left;
     float* r = (float*)right;
     uint32_t blkCnt = size;

@@ -8,8 +8,7 @@
 #include "main.h"
 #include "heap.h"
 
-PatchProcessor processor;
-
+static PatchProcessor processor;
 PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
 }
@@ -53,26 +52,26 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
 
 static SampleBuffer* samples;
 void setup(ProgramVector* pv){
-#ifdef DEBUG_MEM
-#ifdef ARM_CORTEX
-  size_t before = xPortGetFreeHeapSize();
-#endif
   samples = new SampleBuffer(pv->audio_blocksize);
-#endif
 #include "registerpatch.cpp"
-#ifdef DEBUG_MEM
-  // todo xPortGetFreeHeapSize() before and after
-  // extern uint32_t total_heap_used;
-  // pv->heap_bytes_used = total_heap_used;
-#ifdef ARM_CORTEX
-  getProgramVector()->heap_bytes_used = before - xPortGetFreeHeapSize();
-#endif
-#endif
 }
 
-void processBlock(ProgramVector* pv){
-  samples->split(pv->audio_input, pv->audio_blocksize);
-  processor.setParameterValues(pv->parameters);
-  processor.patch->processAudio(*samples);
-  samples->comb(pv->audio_output);
+void run(ProgramVector* pv){
+  if(pv->audio_format == AUDIO_FORMAT_24B32){
+    for(;;){
+      pv->programReady();
+      samples->split32(pv->audio_input, pv->audio_blocksize);
+      processor.setParameterValues(pv->parameters);
+      processor.patch->processAudio(*samples);
+      samples->comb32(pv->audio_output);
+    }
+  }else{
+    for(;;){
+      pv->programReady();
+      samples->split16(pv->audio_input, pv->audio_blocksize);
+      processor.setParameterValues(pv->parameters);
+      processor.patch->processAudio(*samples);
+      samples->comb16(pv->audio_output);
+    }
+  }
 }

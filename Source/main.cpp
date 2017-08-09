@@ -77,10 +77,9 @@ int main(void){
     return -1;
   }
 
+  size_t before = xPortGetFreeHeapSize();
   setup(pv);
+  pv->heap_bytes_used = before - xPortGetFreeHeapSize();
 
-  for(;;){
-    pv->programReady();
-    processBlock(pv);
-  }
+  run(pv); // never returns
 }
