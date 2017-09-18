@@ -219,6 +219,15 @@ inline void* hv_realloc(void *ptr, size_t size){
 #define HV_FORCE_INLINE inline __attribute__((always_inline))
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+  // Returns a 32-bit hash of any string. Returns 0 if string is NULL.
+  hv_uint32_t hv_string_to_hash(const char *str);
+#ifdef __cplusplus
+}
+#endif
+
 // Math
 #ifndef ARM_CORTEX
 #include <math.h>
