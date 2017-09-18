@@ -271,8 +271,8 @@ static inline hv_int32_t __hv_utils_min_i(hv_int32_t x, hv_int32_t y) { return (
 #define hv_floor_f(a) floorf(a)
 #define hv_round_f(a) roundf(a)
 #define hv_pow_f(a, b) powf(a, b)
-#if HV_EMSCRIPTEN
-#define hv_fma_f(a, b, c) ((a*b)+c) // emscripten does not support fmaf (yet?)
+#if HV_EMSCRIPTEN || defined ARM_CORTEX
+#define hv_fma_f(a, b, c) ((a*b)+c) // emscripten does not support fmaf (yet?). Inefficient on ARM Cortex M
 #else
 #define hv_fma_f(a, b, c) fmaf(a, b, c)
 #endif
