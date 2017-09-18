@@ -1,3 +1,4 @@
+#include <string> /* include this here to avoid errors with std::min/std::max later */
 #include "ProgramVector.h"
 #include "ServiceCall.h"
 #include "SampleBuffer.hpp"
