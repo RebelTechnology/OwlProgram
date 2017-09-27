@@ -10,10 +10,10 @@
  */
 class VoltsPerOctave {
 private:
-  float offset;
-  float multiplier;
   float tune;
 public:
+  float offset;
+  float multiplier;
   VoltsPerOctave(bool input = true);
   VoltsPerOctave(float offset, float multiplier);
   // Tune the frequency converter to octaves up or down.
