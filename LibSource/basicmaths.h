@@ -55,11 +55,14 @@
    void arm_srand32(uint32_t s);
    uint32_t arm_rand32();
 
+   // fast lookup based exponentials
+   float fast_pow(float x, float y);
+   float fast_exp(float x);
+   float fast_exp2(float x);
+   float fast_exp10(float x);
+
    // fast approximations
-   float fastexpf(float x);
    float fastlog2f(float x);
-   float fastpow2f(float x);
-   float fastpowf(float a, float b);
    float fastatan2f(float a, float b);
 
    /** generate a random number between 0 and 1 */
@@ -84,16 +87,21 @@
 #define sinh(x) sinhf(x)
 #define cosh(x) coshf(x)
 
+// fast lookup-based exponentials
+#define pow(x, y) fast_pow(x, y)
+#define powf(x, y) fast_pow(x, y)
+#define exp(x) fast_exp(x)
+#define expf(x) fast_exp(x)
+#define exp2(x) fast_exp2(x)
+#define exp2f(x) fast_exp2(x)
+#define exp10(x) fast_exp10(x)
+#define exp10f(x) fast_exp10(x)
+
 #ifdef __FAST_MATH__ /* set by gcc option -ffast-math */
 // fast approximate math functions
 #define atan2(x, y) fastatan2f(x, y)
 #define atan2f(x, y) fastatan2f(x, y)
-/* #define pow(x, y) fastpowf(x, y) */
-/* #define powf(x, y) fastpowf(x, y) */
-/* Fast exponentiation function, y = e^x */
-/* 1.0 / ln(2) = 1.442695041f */
-/* #define exp(x) fastpow2f(x * 1.442695041f) */
-/* #define expf(x) fastpow2f(x * 1.442695041f) */
+
 #endif
 
 #undef RAND_MAX

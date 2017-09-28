@@ -1,5 +1,7 @@
 #include "basicmaths.h"
 #include <stdint.h>
+#include "fastpow.h"
+#include "FastPowTable.h"
 
 // todo: see
 // http://www.hxa.name/articles/content/fast-pow-adjustable_hxa7241_2007.html
@@ -42,11 +44,6 @@ float arm_sqrtf(float in){
 /* http://stackoverflow.com/questions/6475373/optimizations-for-pow-with-const-non-integer-exponent */
 /* http://www.hxa.name/articles/content/fast-pow-adjustable_hxa7241_2007.html */
 /* https://hackage.haskell.org/package/approximate-0.2.2.3/src/cbits/fast.c */
-float fastpowf(float a, float b) {
-  union { float d; int x; } u = { a };
-  u.x = (int)(b * (u.x - 1064866805) + 1064866805);
-  return u.d;
-}
 
 /* ----------------------------------------------------------------------
 ** Fast approximation to the log2() function.  It uses a two step
@@ -77,42 +74,6 @@ float fastlog2f(float X){
   return(Y);
 }
 
-#if 1
-/* Andrew Simper's pow(2, x) aproximation from the music-dsp list */
-float fastpow2f(float x)
-{
-  int32_t *px = (int32_t*)(&x); // store address of float as long pointer
-  const float tx = (x-0.5f) + (3<<22); // temporary value for truncation
-  const long  lx = *((int32_t*)&tx) - 0x4b400000; // integer power of 2
-  const float dx = x-(float)(lx); // float remainder of power of 2
-  x = 1.0f + dx*(0.6960656421638072f + // cubic apporoximation of 2^x
-		 dx*(0.224494337302845f +  // for x in the range [0, 1]
-		     dx*(0.07944023841053369f)));
-  *px += (lx<<23); // add integer power of 2 to exponent
-  return x;
-}
-#else
-/* union version by Steve Harris steve@plugin.org.uk */
-/* 32 bit "pointer cast" union */
-typedef union {
-        float f;
-        int32_t i;
-} ls_pcast32;
-float fastpow2f(float x){
-  ls_pcast32 *px, tx, lx;
-  float dx;
-  px = (ls_pcast32 *)&x; // store address of float as long pointer
-  tx.f = (x-0.5f) + (3<<22); // temporary value for truncation
-  lx.i = tx.i - 0x4b400000; // integer power of 2
-  dx = x - (float)lx.i; // float remainder of power of 2
-  x = 1.0f + dx * (0.6960656421638072f + // cubic apporoximation of 2^x
-		   dx * (0.224494337302845f +  // for x in the range [0, 1]
-			 dx * (0.07944023841053369f)));
-  (*px).i += (lx.i << 23); // add integer power of 2 to exponent
-  return (*px).f;
-}
-#endif
-
 /* Fast arctan2
  * from http://dspguru.com/dsp/tricks/fixed-point-atan2-with-self-normalization
  */
@@ -132,4 +93,20 @@ float fastatan2f(float y, float x){
     return(-angle); // negate if in quad III or IV
   else
     return(angle);
+}
+
+float fast_pow(float x, float y){
+  return powFastLookup(x, logf(x)*1.44269504088896, fast_pow_table, FAST_POW_PRECISION);
+}
+    
+float fast_exp(float x){
+  return powFastLookup(x, 1.44269504088896, fast_pow_table, FAST_POW_PRECISION);
+}
+
+float fast_exp2(float x){
+  return powFastLookup(x, 1, fast_pow_table, FAST_POW_PRECISION);
+}
+
+float fast_exp10(float x){
+  return powFastLookup(x, 3.32192809488736, fast_pow_table, FAST_POW_PRECISION);
 }
