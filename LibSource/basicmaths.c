@@ -114,11 +114,17 @@ float fast_exp10f(float x){
 }
 
 float fast_logf(float x){
-  return logFastLookup(x, fast_log_table, fast_log_precision);
+  return icsi_log(x, fast_log_table, fast_log_precision);
+}
+
+float fast_log10f(float x){
+  /* log10 (x) equals log (x) / log (10). */
+  const float loge10 = logf(10);
+  return icsi_log(x, fast_log_table, fast_log_precision) / loge10;
 }
 
 float fast_log2f(float x){
-  /* log10 (x) equals log (x) / log (10). */
-  const float loge10 = logf(10);
-  return logFastLookup(x, fast_log_table, fast_log_precision) / loge10;
+  /* log2 (x) equals log (x) / log (2). */
+  const float loge2 = logf(2);
+  return icsi_log(x, fast_log_table, fast_log_precision) / loge2;
 }
