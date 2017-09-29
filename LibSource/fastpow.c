@@ -18,18 +18,18 @@ static const float _2p23 = 8388608.0f;
 
 void powFastSetTable
 (
-   unsigned int* const pTable,
-   const unsigned int  precision
+   uint32_t* const pTable,
+   const uint32_t  precision
 )
 {
    /* step along table elements and x-axis positions */
    float zeroToOne = 1.0f / ((float)(1 << precision) * 2.0f);        /* A */
-   int   i;                                                          /* B */
+   int32_t i;                                                        /* B */
    for( i = 0;  i < (1 << precision);  ++i )                         /* C */
    {
       /* make y-axis value for table element */
       const float f = ((float)powf( 2.0f, zeroToOne ) - 1.0f) * _2p23;
-      pTable[i] = (unsigned int)( f < _2p23 ? f : (_2p23 - 1.0f) );
+      pTable[i] = (uint32_t)( f < _2p23 ? f : (_2p23 - 1.0f) );
       zeroToOne += 1.0f / (float)(1 << precision);
    }                                                                 /* D */
 }
@@ -46,15 +46,15 @@ float powFastLookup
 (
    const float         val,
    const float         ilog2,
-   const unsigned int* pTable,
-   const unsigned int  precision
+   const uint32_t* pTable,
+   const uint32_t  precision
 )
 {
    /* build float bits */
-   const int i = (int)( (val * (_2p23 * ilog2)) + (127.0f * _2p23) );
+   const int32_t i = (int32_t)( (val * (_2p23 * ilog2)) + (127.0f * _2p23) );
 
    /* replace mantissa with lookup */
-   const int it = (i & 0xFF800000) | pTable[(i & 0x7FFFFF) >>        /* E */
+   const int32_t it = (i & 0xFF800000) | pTable[(i & 0x7FFFFF) >>        /* E */
       (23 - precision)];                                             /* F */
 
    /* convert bits to float */

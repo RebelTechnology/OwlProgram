@@ -10,13 +10,13 @@ public:
     {
       TEST("FastPow");
       float maxPerc = 0;
-      float threshold = 0.02; // maximum relative error accepted
+      float threshold = 0.04; // maximum relative error accepted
       int errs = 0;
       int tests = 0;
       for(int n = -1000; n < 1000; n++){
         float base = rand()/(float)RAND_MAX * 10;
         float exponent = n*10/1000.f;
-        float approx = fast_pow(base, exponent);
+        float approx = fast_powf(base, exponent);
         float exact = powf(base, exponent);
         float err = fabsf(approx - exact);
         float perc = err/exact * 100;

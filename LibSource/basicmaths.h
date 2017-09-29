@@ -102,6 +102,16 @@
 #define exp10(x) fast_exp10f(x)
 #define exp10f(x) fast_exp10f(x)
 
+// fast lookup-based logarithmics
+#define log(x) fast_logf(x)
+#define logf(x) fast_logf(x)
+#define log2(x) fast_log2f(x)
+#define log2f(x) fast_log2f(x)
+#define log10(x) fast_log10f(x)
+#define log10f(x) fast_log10f(x)
+
+// #define log1pf(x) fast_logf(1+x)
+
 #ifdef __FAST_MATH__ /* set by gcc option -ffast-math */
 // fast approximate math functions
 #define atan2(x, y) fastatan2f(x, y)

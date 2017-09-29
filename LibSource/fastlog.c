@@ -23,8 +23,6 @@
 #include "fastlog.h"
 #include <math.h>
 
-#define ICSI_V2
-
 /* Creates the ICSILog lookup table. Must be called
    once before any call to icsi_log().
    n is the number of bits to be taken from the mantissa
@@ -34,7 +32,6 @@
 void fill_icsi_log_table(float* lookup_table, const uint32_t precision){
     /* step along table elements and x-axis positions
       (start with extra half increment, so the steps intersect at their midpoints.) */
-#ifdef ICSI_V2
   float oneToTwo = 1.0f + (1.0f / (float)( 1 <<(precision + 1) ));
   int32_t i;
   for(i = 0; i < (1 << precision); ++i){
@@ -42,44 +39,14 @@ void fill_icsi_log_table(float* lookup_table, const uint32_t precision){
     lookup_table[i] = logf(oneToTwo) / 0.69314718055995f;
     oneToTwo += 1.0f / (float)( 1 << precision );
   }
-#else
-  float numlog;
-  int32_t *const exp_ptr = ((int32_t*)&numlog);
-  int32_t x = *exp_ptr; //x is the float treated as an integer
-  x = 0x3F800000; //set the exponent to 0 so numlog=1.0
-  *exp_ptr = x;
-  int32_t incr = 1 << (23 - precision); //amount to increase the mantissa
-  int32_t size = 1 << precision;
-  int32_t i;
-  for(i=0; i<size; ++i){
-    lookup_table[i] = log2f(numlog); //save the log value
-    x += incr;
-    *exp_ptr = x; //update the float value
-  }
-#endif
 }
 
 float icsi_log(float arg, const float* lookup_table, const uint32_t precision){
-  /* if(arg <= 0)  */
-  /*   return 0; */
-#ifdef ICSI_V2
   /* get access to float bits */
   register const int32_t* const pVal = (const int32_t*)(&arg);
-
   /* extract exponent and mantissa (quantized) */
   register const int32_t exp = ((*pVal >> 23) & 255) - 127;
   register const int32_t man = (*pVal & 0x7FFFFF) >> (23 - precision);
-
   /* exponent plus lookup refinement */
   return ((float)(exp) + lookup_table[man]) * 0.69314718055995f;
-#else
-  int32_t *const exp_ptr = ((int32_t*)&arg);
-  int32_t x = *exp_ptr; //x is treated as integer
-  const int32_t log_2 = ((x >> 23) & 255) - 127;//exponent
-  x &= 0x7FFFFF; //mantissa
-  x = x >> (23-precision); //quantize mantissa
-  arg = lookup_table[x]; //lookup precomputed arg
-  arg = ((arg + log_2)* 0.69314718);
-  return arg; //natural logarithm
-#endif
 }

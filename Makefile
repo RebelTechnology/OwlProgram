@@ -117,6 +117,9 @@ store: patch ## upload and save patch to attached OWL
 docs: ## generate HTML documentation
 	@doxygen Doxyfile
 
+tables: ## compile tools and generate lookup tables
+	@$(MAKE) -s -f tables.mk tables
+
 clean: ## remove generated patch files
 	@rm -rf $(BUILD)/*
 

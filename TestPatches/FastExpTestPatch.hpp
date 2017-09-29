@@ -10,10 +10,10 @@ public:
     {
       TEST("FastExp");
       float maxPerc = 0;
-      float threshold = 0.02; // maximum relative error accepted
+      float threshold = 0.04; // maximum relative error accepted
       int errs = 0;
       int tests = 0;
-      for(int n = -50; n < 50; n++){
+      for(int n = -90; n < 90; n++){
         float x = rand()/(float)RAND_MAX * n;
         float approx = fast_expf(x);
         float exact = expf(x);
