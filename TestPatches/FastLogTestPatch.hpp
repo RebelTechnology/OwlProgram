@@ -10,7 +10,7 @@ public:
     {
       TEST("FastLog");
       float maxPerc = 0;
-      float threshold = 0.25; // maximum relative error accepted
+      float threshold = 0.00025; // maximum relative error accepted
       int errs = 0;
       int tests = 0;
       for(int n = 10; n <= 10000; n++){
@@ -20,7 +20,6 @@ public:
         float err = fabsf(approx - exact);
         float perc = err/exact * 100;
 	CHECK(perc<threshold);
-	// CHECK_CLOSE(approx, exact, threshold);
         maxPerc = maxPerc > perc ? maxPerc : perc;
         if(fabsf(perc) > threshold)
 	  errs++;

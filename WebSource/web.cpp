@@ -242,3 +242,5 @@ void vPortFree( void *pv ){
 #endif
   free(pv);
 }
+
+void setSystemTables(ProgramVector* pv){}
