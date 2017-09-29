@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include "fastpow.h"
 #include "FastPowTable.h"
+#include "fastlog.h"
+#include "FastLogTable.h"
 
 // todo: see
 // http://www.hxa.name/articles/content/fast-pow-adjustable_hxa7241_2007.html
@@ -95,18 +97,28 @@ float fastatan2f(float y, float x){
     return(angle);
 }
 
-float fast_pow(float x, float y){
-  return powFastLookup(x, logf(x)*1.44269504088896, fast_pow_table, FAST_POW_PRECISION);
+float fast_powf(float x, float y){
+  return powFastLookup(y, logf(x)*1.44269504088896f, fast_pow_table, fast_pow_precision);
 }
     
-float fast_exp(float x){
-  return powFastLookup(x, 1.44269504088896, fast_pow_table, FAST_POW_PRECISION);
+float fast_expf(float x){
+  return powFastLookup(x, 1.44269504088896f, fast_pow_table, fast_pow_precision);
 }
 
-float fast_exp2(float x){
-  return powFastLookup(x, 1, fast_pow_table, FAST_POW_PRECISION);
+float fast_exp2f(float x){
+  return powFastLookup(x, 1.0f, fast_pow_table, fast_pow_precision);
 }
 
-float fast_exp10(float x){
-  return powFastLookup(x, 3.32192809488736, fast_pow_table, FAST_POW_PRECISION);
+float fast_exp10f(float x){
+  return powFastLookup(x, 3.32192809488736f, fast_pow_table, fast_pow_precision);
+}
+
+float fast_logf(float x){
+  return logFastLookup(x, fast_log_table, fast_log_precision);
+}
+
+float fast_log2f(float x){
+  /* log10 (x) equals log (x) / log (10). */
+  const float loge10 = logf(10);
+  return logFastLookup(x, fast_log_table, fast_log_precision) / loge10;
 }

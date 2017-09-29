@@ -1,3 +1,6 @@
+/**
+ * gcc Tools/MakePowTable.c -lm -o pow
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -64,12 +67,13 @@ int main(int argc, char** argv) {
   int table_size = (1 << precision);
   lookup_table = (unsigned int*)malloc(sizeof(unsigned int)*table_size);
   powFastSetTable(lookup_table, PRECISION);
-  // fill_icsi_log_table(lookup_table, table_size);
-  printf("/* pow table, precision %d, size %d */\n", precision, table_size);
-  printf("const int icsi_table[%d] = {\n", table_size);
+  printf("/* fast pow lookup table, precision %u, size %u */\n", precision, table_size);
+  printf("const unsigned int fast_pow_precision = %u;\n", precision);
+  printf("const unsigned int fast_pow_table_size = %u;\n", table_size);
+  printf("const unsigned int fast_pow_table[%u] = {\n", table_size);
   int32_t i;
   for(i=0; i<table_size; ++i)
-    printf("%d, ", lookup_table[i]);
+    printf("%u, ", lookup_table[i]);
   printf(" };\n");
   return 0;
 }

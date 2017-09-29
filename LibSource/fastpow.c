@@ -29,7 +29,7 @@ void powFastSetTable
    for( i = 0;  i < (1 << precision);  ++i )                         /* C */
    {
       /* make y-axis value for table element */
-      const float f = ((float)pow( 2.0f, zeroToOne ) - 1.0f) * _2p23;
+      const float f = ((float)powf( 2.0f, zeroToOne ) - 1.0f) * _2p23;
       pTable[i] = (unsigned int)( f < _2p23 ? f : (_2p23 - 1.0f) );
       zeroToOne += 1.0f / (float)(1 << precision);
    }                                                                 /* D */

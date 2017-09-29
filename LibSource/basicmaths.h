@@ -55,11 +55,16 @@
    void arm_srand32(uint32_t s);
    uint32_t arm_rand32();
 
-   // fast lookup based exponentials
-   float fast_pow(float x, float y);
-   float fast_exp(float x);
-   float fast_exp2(float x);
-   float fast_exp10(float x);
+   // fast lookup-based exponentials
+   float fast_powf(float x, float y);
+   float fast_expf(float x);
+   float fast_exp2f(float x);
+   float fast_exp10f(float x);
+
+   // fast lookup-based logarithmics
+   float fast_logf(float x);
+   float fast_log2f(float x);
+   float fast_log10f(float x);
 
    // fast approximations
    float fastlog2f(float x);
@@ -88,14 +93,14 @@
 #define cosh(x) coshf(x)
 
 // fast lookup-based exponentials
-#define pow(x, y) fast_pow(x, y)
-#define powf(x, y) fast_pow(x, y)
-#define exp(x) fast_exp(x)
-#define expf(x) fast_exp(x)
-#define exp2(x) fast_exp2(x)
-#define exp2f(x) fast_exp2(x)
-#define exp10(x) fast_exp10(x)
-#define exp10f(x) fast_exp10(x)
+#define pow(x, y) fast_powf(x, y)
+#define powf(x, y) fast_powf(x, y)
+#define exp(x) fast_expf(x)
+#define expf(x) fast_expf(x)
+#define exp2(x) fast_exp2f(x)
+#define exp2f(x) fast_exp2f(x)
+#define exp10(x) fast_exp10f(x)
+#define exp10f(x) fast_exp10f(x)
 
 #ifdef __FAST_MATH__ /* set by gcc option -ffast-math */
 // fast approximate math functions

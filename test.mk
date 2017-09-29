@@ -2,6 +2,7 @@ BUILDROOT ?= .
 
 C_SRC   = basicmaths.c
 C_SRC   += kiss_fft.c
+C_SRC   += fastpow.c
 # CPP_SRC = PatchTest.cpp
 CPP_SRC += FloatArray.cpp
 CPP_SRC += ShortArray.cpp
