@@ -99,6 +99,27 @@
 
 #ifdef __FAST_MATH__ /* set by gcc option -ffast-math */
 
+// fast lookup-based exponentials
+#define pow(x, y) fast_powf(x, y)
+#define powf(x, y) fast_powf(x, y)
+#define exp(x) fast_expf(x)
+#define expf(x) fast_expf(x)
+#define exp2(x) fast_exp2f(x)
+#define exp2f(x) fast_exp2f(x)
+#define exp10(x) fast_exp10f(x)
+#define exp10f(x) fast_exp10f(x)
+
+// fast lookup-based logarithmics
+#ifdef log2
+#undef log2 /* defined in math.h */
+#endif
+#define log(x) fast_logf(x)
+#define logf(x) fast_logf(x)
+#define log2(x) fast_log2f(x)
+#define log2f(x) fast_log2f(x)
+#define log10(x) fast_log10f(x)
+#define log10f(x) fast_log10f(x)
+
 // fast approximate math functions
 #define atan2(x, y) fast_atan2f(x, y)
 #define atan2f(x, y) fast_atan2f(x, y)
