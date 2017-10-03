@@ -1,7 +1,6 @@
 #include <cstddef>
 #include <string.h>
 #include "Patch.h"
-#include "device.h"
 #include "ProgramVector.h"
 #include "PatchProcessor.h"
 #include "basicmaths.h"
@@ -75,9 +74,11 @@ int Patch::getElapsedCycles(){
   return *DWT_CYCCNT;
 }
 
+#ifdef USE_SCREEN
 void Patch::processScreen(ScreenBuffer& screen){
   screen.clear();
 }
+#endif /* USE_SCREEN */
 
 #include "MemoryBuffer.hpp"
 AudioBuffer* AudioBuffer::create(int channels, int samples){

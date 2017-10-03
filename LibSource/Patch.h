@@ -1,11 +1,14 @@
 #ifndef __Patch_h__
 #define __Patch_h__
 
+#include "device.h"
 #include "basicmaths.h"
 #include "FloatArray.h"
 #include "PatchParameter.h"
 #include "SmoothValue.h"
+#ifdef USE_SCREEN
 #include "ScreenBuffer.h"
+#endif /* USE_SCREEN */
 
 enum PatchParameterId {
   PARAMETER_A,
@@ -112,7 +115,9 @@ public:
   virtual void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){}
   /* virtual void parameterChanged(PatchParameterId pid, float value, int samples){} */
   virtual void processAudio(AudioBuffer& audio) = 0;
+#ifdef USE_SCREEN
   virtual void processScreen(ScreenBuffer& screen);
+#endif /* USE_SCREEN */
 
 };
 
