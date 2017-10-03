@@ -69,6 +69,10 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
 static SampleBuffer* samples;
 void setup(ProgramVector* pv){
   setSystemTables(pv);
+#ifdef USE_SCREEN
+  void* args[] = {(void*)SYSTEM_FUNCTION_DRAW, (void*)&onDrawCallback};
+  getProgramVector()->serviceCall(OWL_SERVICE_REGISTER_CALLBACK, args, 2);
+#endif /* USE_SCREEN */
   samples = new SampleBuffer(pv->audio_blocksize);
 #include "registerpatch.cpp"
 }

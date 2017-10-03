@@ -8,7 +8,8 @@ _Min_Stack_Size = 0x800; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-PATCHRAM (xrw)  : ORIGIN = 0x20030000, LENGTH = 128K
+PATCHRAM (xrw)  : ORIGIN = 0x20030000, LENGTH = 64K
+CCMHEAP  (xrw)  : ORIGIN = 0x20040000, LENGTH = 64K /* use top half of available RAM instead of CCM */
 EXTRAM (rw)     : ORIGIN = 0xD0100000, LENGTH = 1M /* offset 1M to avoid dodgy ram on Player b2 */
 }
 
@@ -125,13 +126,13 @@ SECTIONS
   } >PATCHRAM
   _eram = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM);
 
-  /* .fastheap (NOLOAD) : */
-  /* { */
-  /*   . = ALIGN(8); */
-  /*   PROVIDE ( _fastheap = . ); */
-  /*   . = ALIGN(8); */
-  /* } >CCMHEAP */
-  /* _fasteheap = ORIGIN(CCMHEAP) + LENGTH(CCMHEAP); */
+  .fastheap (NOLOAD) :
+  {
+    . = ALIGN(8);
+    PROVIDE ( _fastheap = . );
+    . = ALIGN(8);
+  } >CCMHEAP
+  _fasteheap = ORIGIN(CCMHEAP) + LENGTH(CCMHEAP);
 
   /* User_stack section, used to check that there is enough RAM left */
   . = ALIGN(8);
