@@ -31,31 +31,40 @@ int main(void){
   memset(_sbss, 0, _ebss-_sbss); // zero fill the BSS segment
 #endif /* STARTUP_CODE */
 
-/* Defined by the linker */
-  // extern char _fastheap, _fasteheap; // internal RAM dedicated to heap
-  // extern char _eprogram, _eram; // remaining program space (assuming stack in CCM)
-  extern char _heap, _eheap; // external memory
-  const HeapRegion_t xHeapRegions[] = {
-    // { ( uint8_t * )&_fastheap, (size_t)(&_fasteheap - &_fastheap) },
-    // { ( uint8_t * )&_eprogram, (size_t)(&_eram - &_eprogram) },
-    { ( uint8_t * )&_heap, (size_t)(&_eheap - &_heap) },
-    { NULL, 0 } /* Terminates the array. */
-  };
-  vPortDefineHeapRegions( xHeapRegions ); // call before static initialisers to allow heap use
+  ProgramVector* pv = getProgramVector();
+  HeapRegion_t regions[5];
+  if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V13 && pv->heapLocations != NULL){
+    int cnt = 0;
+    extern char _eprogram, _eram; // remaining program space
+    MemorySegment* seg = pv->heapLocations;
+    while(seg != NULL && seg->location != NULL && cnt < 5){
+      regions[cnt++] = { seg->location, seg->size };
+      seg++;
+    }
+    regions[cnt] = {NULL, 0}; // terminate the array
+  }else{
+    /* Defined by the linker */
+    extern char _fastheap, _fasteheap; // internal RAM dedicated to heap
+    extern char _eprogram, _eram; // remaining program space
+    extern char _heap, _eheap; // external memory
+    int cnt = 0;
+    regions[cnt++] = { (uint8_t*)&_fastheap, (size_t)(&_fasteheap - &_fastheap) };
+    regions[cnt++] = { (uint8_t*)&_eprogram, (size_t)(&_eram - &_eprogram) };
+    regions[cnt++] = { (uint8_t*)&_heap, (size_t)(&_eheap - &_heap) };
+    regions[cnt] = {NULL, 0}; // terminate the array
+  }
+  vPortDefineHeapRegions(regions); // call before static initialisers to allow heap use
 
 #ifdef STARTUP_CODE
   __libc_init_array(); // Call static constructors
 #endif /* STARTUP_CODE */
 
-  ProgramVector* pv = getProgramVector();
-  if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V13)
-    pv->drawCallback = onDrawCallback;
   if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V12){
     // set event callbacks
     pv->buttonChangedCallback = onButtonChanged;
-    pv->encoderChangedCallback = onEncoderChanged;
-  }
-  if(pv->checksum <= PROGRAM_VECTOR_CHECKSUM_V11){
+  }else if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V11){
+    // no event callbacks
+  }else{
     error(CHECKSUM_ERROR_STATUS, "ProgramVector checksum error");
     return -1;
   }
@@ -65,10 +74,9 @@ int main(void){
     return -1;
   }
 
+  size_t before = xPortGetFreeHeapSize();
   setup(pv);
+  pv->heap_bytes_used = before - xPortGetFreeHeapSize();
 
-  for(;;){
-    pv->programReady();
-    processBlock(pv);
-  }
+  run(pv); // never returns
 }

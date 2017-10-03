@@ -36,6 +36,7 @@ INC_FLAGS += -I$(USB_DEVICE_FILE)/Core/inc -I$(USB_DEVICE_FILE)/Class/cdc/inc
 INC_FLAGS += -I$(USB_OTG_FILE)/inc
 CPPFLAGS += $(ARCH_FLAGS) $(INC_FLAGS) $(DEF_FLAGS)
 CFLAGS += -fno-builtin -std=gnu99 -DARM_CORTEX
+CXXFLAGS += -std=gnu++11
 LDFLAGS += -T$(LDSCRIPT) $(ARCH_FLAGS)
 
 # compile and generate dependency info

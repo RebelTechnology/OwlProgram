@@ -10,10 +10,10 @@
  */
 class VoltsPerOctave {
 private:
-  float offset;
-  float multiplier;
   float tune;
 public:
+  float offset;
+  float multiplier;
   VoltsPerOctave(bool input = true);
   VoltsPerOctave(float offset, float multiplier);
   // Tune the frequency converter to octaves up or down.
@@ -28,7 +28,7 @@ public:
     return (sample-offset) * multiplier;
   }
   float voltsToHertz(float volts){
-    return 440.f * fastpow2f(volts);
+    return 440.f * exp2f(volts);
   }
   float voltsToSample(float volts){
     return volts / multiplier + offset;

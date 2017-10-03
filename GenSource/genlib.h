@@ -81,58 +81,14 @@ typedef t_atom_long t_max_err;		///< an integer value suitable to be returned as
 #undef RAND_MAX
 #define RAND_MAX UINT32_MAX
 // add C74 stuff
-#define pow(x,y) fasterpow(x,y)
-#define exp(x) fasterexp(x)
+/* #define pow(x,y) fasterpow(x,y) */
+/* #define exp(x) fasterexp(x) */
 #define tan(x) fastertanfull(x)
-// ensure 32-bit versions of math functions
-#define log(x) logf(x)
-#define log2(x) log2f(x)
-#define log10(x) log10f(x)
-#define exp2(x) exp2f(x)
-#define exp10(x) exp10f(x)
 #define tanh(x) tanhf(x)
 /* #endif */
 
 extern "C" {
-
-	// TODO: remove (for debugging only)
-	//int printf(const char * fmt, ...);
-
-	// math.h:
-	/*
-	extern double acos( double );
-	extern double asin( double );
-	extern double atan( double );
-	extern double atan2( double, double );
-	extern double cos( double );
-	extern double sin( double );
-	extern double tan( double );
-	extern double acosh( double );
-	extern double asinh( double );
-	extern double atanh( double );
-	extern double cosh( double );
-	extern double sinh( double );
-	extern double tanh( double );
-	extern double exp ( double );
-	extern double log ( double );
-	extern double log10 ( double );
-	extern double fmod ( double, double );
-	extern double modf(double, double *);
-	extern double fabs( double );
-	extern double hypot ( double, double );
-	//extern double pow ( double, double );
-	*/
-	extern double gen_msp_pow ( double, double );
-
-	/*
-	extern double sqrt( double );
-	extern double ceil ( double );
-	extern double floor ( double );
-	extern double trunc ( double );
-	extern double round ( double );
-	extern int abs(int);
-	extern char	*strcpy(char *, const char *);
-	*/
+	/* extern double gen_msp_pow ( double, double ); */
 
 	// string reference handling:
 	void * genlib_obtain_reference_from_string(const char * name);

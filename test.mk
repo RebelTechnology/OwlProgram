@@ -2,12 +2,13 @@ BUILDROOT ?= .
 
 C_SRC   = basicmaths.c
 C_SRC   += kiss_fft.c
-# CPP_SRC = PatchTest.cpp
+C_SRC   += fastpow.c fastlog.c
 CPP_SRC += FloatArray.cpp
 CPP_SRC += ShortArray.cpp
 CPP_SRC += Envelope.cpp VoltsPerOctave.cpp Window.cpp
 CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
 CPP_SRC += SmoothValue.cpp # PatchParameter.cpp
+CPP_SRC += system_tables.cpp
 
 BUILD       ?= $(BUILDROOT)/Build
 

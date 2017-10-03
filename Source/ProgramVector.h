@@ -21,6 +21,9 @@
 #define OUT_OF_MEMORY_ERROR_STATUS   -20
 #define CONFIGURATION_ERROR_STATUS   -30
 
+#define AUDIO_FORMAT_24B16          0x10
+#define AUDIO_FORMAT_24B32          0x20
+
   typedef enum { 
     AUDIO_IDLE_STATUS = 0, 
     AUDIO_READY_STATUS, 
@@ -29,12 +32,17 @@
     AUDIO_ERROR_STATUS 
   } ProgramVectorAudioStatus;
 
+  typedef struct {
+    uint8_t* location;
+    uint32_t size;
+  } MemorySegment;
+
    typedef struct {
      uint8_t checksum;
      uint8_t hardware_version;
      int32_t* audio_input;
      int32_t* audio_output;
-     uint8_t audio_bitdepth;
+     uint8_t audio_format;
      uint16_t audio_blocksize;
      uint32_t audio_samplingrate;
      int16_t* parameters;
@@ -52,8 +60,7 @@
      void (*setButton)(uint8_t id, uint16_t state, uint16_t samples);
      void (*setPatchParameter)(uint8_t id, int16_t value);
      void (*buttonChangedCallback)(uint8_t bid, uint16_t state, uint16_t samples);
-     void (*encoderChangedCallback)(uint8_t bid, int16_t delta, uint16_t samples);
-     void (*drawCallback)(uint8_t* pixels, uint16_t screen_width, uint16_t screen_height);
+     MemorySegment* heapLocations;
    } ProgramVector;
 
 #define CHECKSUM_ERROR_STATUS      -10

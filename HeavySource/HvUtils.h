@@ -219,6 +219,15 @@ inline void* hv_realloc(void *ptr, size_t size){
 #define HV_FORCE_INLINE inline __attribute__((always_inline))
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+  // Returns a 32-bit hash of any string. Returns 0 if string is NULL.
+  hv_uint32_t hv_string_to_hash(const char *str);
+#ifdef __cplusplus
+}
+#endif
+
 // Math
 #ifndef ARM_CORTEX
 #include <math.h>
@@ -271,8 +280,8 @@ static inline hv_int32_t __hv_utils_min_i(hv_int32_t x, hv_int32_t y) { return (
 #define hv_floor_f(a) floorf(a)
 #define hv_round_f(a) roundf(a)
 #define hv_pow_f(a, b) powf(a, b)
-#if HV_EMSCRIPTEN
-#define hv_fma_f(a, b, c) ((a*b)+c) // emscripten does not support fmaf (yet?)
+#if HV_EMSCRIPTEN || defined ARM_CORTEX
+#define hv_fma_f(a, b, c) ((a*b)+c) // emscripten does not support fmaf (yet?). Inefficient on ARM Cortex M
 #else
 #define hv_fma_f(a, b, c) fmaf(a, b, c)
 #endif

@@ -1,5 +1,7 @@
 #include "basicmaths.h"
 #include <stdint.h>
+#include "fastpow.h"
+#include "fastlog.h"
 
 // todo: see
 // http://www.hxa.name/articles/content/fast-pow-adjustable_hxa7241_2007.html
@@ -39,84 +41,10 @@ float arm_sqrtf(float in){
   return out;
 }
 
-/* http://stackoverflow.com/questions/6475373/optimizations-for-pow-with-const-non-integer-exponent */
-/* http://www.hxa.name/articles/content/fast-pow-adjustable_hxa7241_2007.html */
-/* https://hackage.haskell.org/package/approximate-0.2.2.3/src/cbits/fast.c */
-float fastpowf(float a, float b) {
-  union { float d; int x; } u = { a };
-  u.x = (int)(b * (u.x - 1064866805) + 1064866805);
-  return u.d;
-}
-
-/* ----------------------------------------------------------------------
-** Fast approximation to the log2() function.  It uses a two step
-** process.  First, it decomposes the floating-point number into
-** a fractional component F and an exponent E.  The fraction component
-** is used in a polynomial approximation and then the exponent added
-** to the result.  A 3rd order polynomial is used and the result
-** when computing db20() is accurate to 7.984884e-003 dB.
-** http://community.arm.com/thread/6741
-** ------------------------------------------------------------------- */
-const float log2f_approx_coeff[4] = {1.23149591368684f, -4.11852516267426f, 6.02197014179219f, -3.13396450166353f};
-float fastlog2f(float X){
-  const float *C = &log2f_approx_coeff[0];
-  float Y;
-  float F;
-  int E;
-  // This is the approximation to log2()
-  F = frexpf(fabsf(X), &E);
-  //  Y = C[0]*F*F*F + C[1]*F*F + C[2]*F + C[3] + E;
-  Y = *C++;
-  Y *= F;
-  Y += (*C++);
-  Y *= F;
-  Y += (*C++);
-  Y *= F;
-  Y += (*C++);
-  Y += E;
-  return(Y);
-}
-
-#if 1
-/* Andrew Simper's pow(2, x) aproximation from the music-dsp list */
-float fastpow2f(float x)
-{
-  int32_t *px = (int32_t*)(&x); // store address of float as long pointer
-  const float tx = (x-0.5f) + (3<<22); // temporary value for truncation
-  const long  lx = *((int32_t*)&tx) - 0x4b400000; // integer power of 2
-  const float dx = x-(float)(lx); // float remainder of power of 2
-  x = 1.0f + dx*(0.6960656421638072f + // cubic apporoximation of 2^x
-		 dx*(0.224494337302845f +  // for x in the range [0, 1]
-		     dx*(0.07944023841053369f)));
-  *px += (lx<<23); // add integer power of 2 to exponent
-  return x;
-}
-#else
-/* union version by Steve Harris steve@plugin.org.uk */
-/* 32 bit "pointer cast" union */
-typedef union {
-        float f;
-        int32_t i;
-} ls_pcast32;
-float fastpow2f(float x){
-  ls_pcast32 *px, tx, lx;
-  float dx;
-  px = (ls_pcast32 *)&x; // store address of float as long pointer
-  tx.f = (x-0.5f) + (3<<22); // temporary value for truncation
-  lx.i = tx.i - 0x4b400000; // integer power of 2
-  dx = x - (float)lx.i; // float remainder of power of 2
-  x = 1.0f + dx * (0.6960656421638072f + // cubic apporoximation of 2^x
-		   dx * (0.224494337302845f +  // for x in the range [0, 1]
-			 dx * (0.07944023841053369f)));
-  (*px).i += (lx.i << 23); // add integer power of 2 to exponent
-  return (*px).f;
-}
-#endif
-
 /* Fast arctan2
  * from http://dspguru.com/dsp/tricks/fixed-point-atan2-with-self-normalization
  */
-float fastatan2f(float y, float x){
+float fast_atan2f(float y, float x){
   const float coeff_1 = M_PI/4;
   const float coeff_2 = 3*M_PI/4;
   float abs_y = fabs(y)+1e-10; // kludge to prevent 0/0 condition
@@ -132,4 +60,54 @@ float fastatan2f(float y, float x){
     return(-angle); // negate if in quad III or IV
   else
     return(angle);
+}
+
+/* static const float* log_table = fast_log_table; */
+/* static uint32_t log_precision = fast_log_precision; */
+/* static const uint32_t* pow_table = fast_pow_table; */
+/* static uint32_t pow_precision = fast_pow_precision; */
+
+static const float* log_table;
+static uint32_t log_precision;
+static const uint32_t* pow_table;
+static uint32_t pow_precision;
+
+float fast_powf(float x, float y){
+  return powFastLookup(y, logf(x)*1.44269504088896f, pow_table, pow_precision);
+}
+    
+float fast_expf(float x){
+  return powFastLookup(x, 1.44269504088896f, pow_table, pow_precision);
+}
+
+float fast_exp2f(float x){
+  return powFastLookup(x, 1.0f, pow_table, pow_precision);
+}
+
+float fast_exp10f(float x){
+  return powFastLookup(x, 3.32192809488736f, pow_table, pow_precision);
+}
+
+float fast_logf(float x){
+  return icsi_log(x, log_table, log_precision);
+}
+
+float fast_log10f(float x){
+  /* log10 (x) equals log (x) / log (10). */
+  return icsi_log(x, log_table, log_precision) / M_LOG10E;
+}
+
+float fast_log2f(float x){
+  /* log2 (x) equals log (x) / log (2). */
+  return icsi_log(x, log_table, log_precision) / M_LOG2E;
+}
+
+void fast_pow_set_table(const uint32_t* table, int size){
+  pow_table = table;
+  pow_precision = log2i(size);
+}
+
+void fast_log_set_table(const float* table, int size){
+  log_table = table;
+  log_precision = log2i(size);
 }

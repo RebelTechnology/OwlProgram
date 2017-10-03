@@ -82,11 +82,11 @@ int WEB_setup(long fs, int bs){
   blocksize = bs;
   // set up programvector with sample rate, blocksize, callbacks et c
   ProgramVector* pv = getProgramVector();
-  pv->checksum = sizeof(ProgramVector);
+  pv->checksum = PROGRAM_VECTOR_CHECKSUM_V13;
   pv->hardware_version = OWL_PEDAL_HARDWARE;
   pv->audio_input = NULL;
   pv->audio_output = NULL;
-  pv->audio_bitdepth = 32;
+  pv->audio_format = AUDIO_FORMAT_24B32;
   pv->audio_blocksize = bs;
   pv->audio_samplingrate = fs;
   pv->parameters = parameters;
@@ -100,6 +100,7 @@ int WEB_setup(long fs, int bs){
   pv->programStatus = programStatus;
   pv->serviceCall = serviceCall;
   pv->message = NULL;
+  pv->heapLocations = NULL;
   setup(pv);
 
   struct mallinfo minfo = mallinfo();
@@ -241,3 +242,5 @@ void vPortFree( void *pv ){
 #endif
   free(pv);
 }
+
+void setSystemTables(ProgramVector* pv){}

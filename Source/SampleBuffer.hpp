@@ -11,78 +11,89 @@
 
 class SampleBuffer : public AudioBuffer {
 protected:
-  float left[AUDIO_MAX_BLOCK_SIZE];
-  float right[AUDIO_MAX_BLOCK_SIZE];
+  FloatArray left;
+  FloatArray right;
   uint16_t size;
+  const float mul = 1/2147483648.0f;
 public:
-  void split(int32_t* input, uint16_t blocksize){
-    // ASSERT((blocksize & 0x3) == 0, "invalid blocksize");
+  SampleBuffer(int blocksize){
+    left = FloatArray::create(blocksize);
+    right = FloatArray::create(blocksize);
+  }
+  void split32(int32_t* input, uint16_t blocksize){
     size = blocksize;
-    float* l = left;
-    float* r = right;
-    uint32_t cnt = size >> 1u; // *2/4
-    while(cnt > 0u){
-      *l++ = (float)(int32_t)((*input++)<<8) / 2147483648.0f;
-      *r++ = (float)(int32_t)((*input++)<<8) / 2147483648.0f;
-      *l++ = (float)(int32_t)((*input++)<<8) / 2147483648.0f;
-      *r++ = (float)(int32_t)((*input++)<<8) / 2147483648.0f;
-      cnt--;
+    for(int i=0; i<size; ++i){
+      left[i] = (int32_t)((*input++)<<8) * mul;
+      right[i] = (int32_t)((*input++)<<8) * mul;
     }
   }
-  void comb(int32_t* output){
+  void comb32(int32_t* output){
     int32_t* dest = output;
-    int32_t tmp;
-    // Seems CS4271 ADC samples are signed, DAC are unsigned. I2S Standard mode.
     for(int i=0; i<size; ++i){
-      // tmp = (int32_t)(left[i] * 0x800000);
-      // *dest++ = (uint32_t)(tmp+0x800000);
-      // tmp = (int32_t)(right[i] * 0x800000);
-      // *dest++ = (uint32_t)(tmp+0x800000);
-      tmp = ((int32_t)(left[i] * 2147483648.0f));
-      *dest++ = tmp>>8;
-      tmp = ((int32_t)(right[i] * 2147483648.0f));
-      *dest++ = tmp>>8;
+      *dest++ = ((int32_t)(left[i] * 8388608.0f));
+      *dest++ = ((int32_t)(right[i] * 8388608.0f));
     }
-    // float* l = left;
-    // float* r = right;
-    // uint32_t cnt = size >> 1u; // *2/4
-    // while(cnt > 0u){
-    //   // *output++ = ((uint32_t)(*l++ * 2147483648.0f))>>8;
-    //   // *output++ = ((uint32_t)(*r++ * 2147483648.0f))>>8;
-    //   // *output++ = ((uint32_t)(*l++ * 2147483648.0f))>>8;
-    //   // *output++ = ((uint32_t)(*r++ * 2147483648.0f))>>8;
-    //   *output++ = ((uint32_t)(*l++ * 8388608.0f));
-    //   *output++ = ((uint32_t)(*r++ * 8388608.0f));
-    //   *output++ = ((uint32_t)(*l++ * 8388608.0f));
-    //   *output++ = ((uint32_t)(*r++ * 8388608.0f));
-    //   cnt--;
-    // }
   }
-  void set(float value){
-    for(int i=0; i<size; ++i){
-      left[i] = value;
-      right[i] = value;
+  void split16(int32_t* data, uint16_t blocksize){
+    uint16_t* input = (uint16_t*)data;
+    size = blocksize;
+    // for(int i=0; i<size; ++i){
+    //   left[i] = ((input[i*4]<<16) | input[i*4+1]) * mul;
+    //   right[i] = ((input[i*4+2]<<16) | input[i*4+3]) * mul;
+    // }
+    float* l = (float*)left;
+    float* r = (float*)right;
+    int32_t qint;
+    while(blocksize){
+      qint = (*input++)<<16;
+      qint |= *input++;
+      *l++ = qint * mul;
+      qint = (*input++)<<16;
+      qint |= *input++;
+      *r++ = qint * mul;
+      // *l++ = (int32_t)((*input++)<<16|*++input) * mul;
+      // *r++ = (int32_t)((*input++)<<16|*++input) * mul;
+      // *l++ = (int32_t)((*input++)<<16|*++input) * mul;
+      // *r++ = (int32_t)((*input++)<<16|*++input) * mul;
+      blocksize--;
+    }
+  }
+  void comb16(int32_t* output){
+    float* l = (float*)left;
+    float* r = (float*)right;
+    uint32_t blkCnt = size;
+    uint16_t* dst = (uint16_t*)output;
+    int32_t qint;
+    while(blkCnt > 0u){
+#ifdef AUDIO_SATURATE_SAMPLES
+      qint = clip_q63_to_q31((q63_t)(*l++ * 2147483648.0f));
+      *dst++ = qint >> 16;
+      *dst++ = qint & 0xffff;
+      qint = clip_q63_to_q31((q63_t)(*r++ * 2147483648.0f));
+      *dst++ = qint >> 16;
+      *dst++ = qint & 0xffff;
+#else /* AUDIO_SATURATE_SAMPLES */
+      qint = *l++ * 2147483648.0f;
+      *dst++ = qint >> 16;
+      *dst++ = qint & 0xffff;
+      qint = *r++ * 2147483648.0f;
+      *dst++ = qint >> 16;
+      *dst++ = qint & 0xffff;
+#endif /* AUDIO_SATURATE_SAMPLES */
+      blkCnt--;
     }
   }
   void clear(){
-    set(0);
-    // memset(left, 0, getSize()*sizeof(float));
-    // memset(right, 0, getSize()*sizeof(float));
+    left.clear();
+    right.clear();
   }
   inline FloatArray getSamples(int channel){
-    return channel == 0 ? FloatArray(left, size) : FloatArray(right, size);
+    return channel == LEFT_CHANNEL ? left : right;
+    // return channel == 0 ? FloatArray(left, size) : FloatArray(right, size);
   }
-  // inline float* getSamples(int channel){
-  //   return channel == 0 ? left : right;
-  // }
   inline int getChannels(){
     return 2;
   }
-  // void setSize(uint16_t sz){
-  // // size is set by split()
-  //   if(sz <= AUDIO_MAX_BLOCK_SIZE)
-  //     size = sz;
-  // }
   inline int getSize(){
     return size;
   }

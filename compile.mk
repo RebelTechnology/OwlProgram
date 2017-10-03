@@ -1,7 +1,8 @@
 BUILDROOT ?= .
 
-C_SRC   = basicmaths.c heap_5.c # sbrk.c
-CPP_SRC = main.cpp operators.cpp message.cpp Patch.cpp PatchProcessor.cpp
+C_SRC   = basicmaths.c heap_5.c fastpow.c fastlog.c # sbrk.c
+CPP_SRC = main.cpp operators.cpp message.cpp system_tables.cpp
+CPP_SRC += Patch.cpp PatchProcessor.cpp
 CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp ComplexShortArray.cpp FastFourierTransform.cpp ShortFastFourierTransform.cpp 
 CPP_SRC += ShortArray.cpp
 CPP_SRC += ScreenBuffer.cpp
