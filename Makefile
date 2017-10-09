@@ -36,6 +36,12 @@ PATCHNAME   ?= $(GEN)
 PATCHCLASS  ?= GenPatch
 PATCHFILE   ?= GenPatch.hpp
 DEPS        += gen
+else ifdef MAXIMILIAN
+# options for Maximilian compilation
+PATCHNAME   ?= $(MAXIMILIAN)
+PATCHCLASS  ?= MaximilianPatch
+PATCHFILE   ?= MaximilianPatch.hpp
+DEPS        += maximilian
 else ifdef TEST
 PATCHNAME   ?= $(TEST)
 PATCHCLASS  ?= $(PATCHNAME)Patch
@@ -102,6 +108,9 @@ heavy: .FORCE
 
 gen: .FORCE
 	@$(MAKE) -s -f gen.mk gen
+
+maximilian: .FORCE
+	@$(MAKE) -s -f maximilian.mk maximilian
 
 sysex: patch $(BUILD)/$(TARGET).syx ## package patch binary as MIDI sysex
 	@echo Built sysex $(PATCHNAME) in $(BUILD)/$(TARGET).syx
