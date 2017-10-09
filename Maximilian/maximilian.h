@@ -33,6 +33,9 @@
 #ifndef MAXIMILIAN_H
 #define MAXIMILIAN_H
 
+#include <string.h>
+#include "basicmaths.h"
+
 //#define MAXIMILIAN_PORTAUDIO
 //#define MAXIMILIAN_RT_AUDIO
 

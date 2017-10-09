@@ -1,12 +1,12 @@
 #ifndef __MaximilianPatch_hpp__
 #define __MaximilianPatch_hpp__
 
-#include "StompBox.h"
-
+#include "Patch.h"
 #include "maximilian.h"
 
 class MaximilianPatch : public Patch {
 private:
+#include "maximilian-patch.h"
 // #include "maximilian_examples/1.TestTone.cpp"
 // #include "maximilian_examples/2.TwoTones.cpp"
 // #include "maximilian_examples/3.AM1.cpp"
@@ -21,12 +21,13 @@ private:
 // #include "maximilian_examples/10.Filters.cpp"
 // #include "maximilian_examples/11.Mixing.cpp"
 // #include "maximilian_examples/13.Advanced-Filters.cpp"
-#include "maximilian_examples/14.monosynth.cpp" // 32%
+// #include "maximilian_examples/14.monosynth.cpp" // 32%
 // #include "maximilian_examples/15.polysynth.cpp" // 188%
 // #include "maximilian_examples/16.Replicant.cpp" // 110%
 // #include "maximilian_examples/17.Compressor.cpp" // missing maxiSample::load
 // #include "maximilian_examples/19.Enveloping2.cpp" // missing maxiSample::load
 // #include "maximilian_examples/20.FFT_example.cpp" // missing/failing FFT lib
+  float output[2];
 
 public:
   MaximilianPatch(){
@@ -35,7 +36,6 @@ public:
   void processAudio(AudioBuffer &buffer) {
     float* left = buffer.getSamples(LEFT_CHANNEL);
     float* right = buffer.getSamples(RIGHT_CHANNEL);
-    double output[2];
     for(int i=0; i<buffer.getSize(); ++i){
       play(output);
       left[i] = output[0];
