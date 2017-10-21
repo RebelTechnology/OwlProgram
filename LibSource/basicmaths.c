@@ -111,3 +111,7 @@ void fast_log_set_table(const float* table, int size){
   log_table = table;
   log_precision = log2i(size);
 }
+
+uint32_t fast_log2i(uint32_t x){
+  return x == 0 ? 0 : 31 - __builtin_clz (x); /* clz returns the number of leading 0's */
+}
