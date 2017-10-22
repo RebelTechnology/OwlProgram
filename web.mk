@@ -25,6 +25,9 @@ EMCC_SRC  += $(wildcard $(GENSOURCE)/*.c)
 EMCC_SRC  += $(wildcard $(GENSOURCE)/*.cpp)
 EMCC_SRC  += $(wildcard $(PATCHSOURCE)/*.c)
 EMCC_SRC  += $(wildcard $(PATCHSOURCE)/*.cpp)
+ifdef MAXIMILIAN
+EMCC_SRC := $(filter-out $(PATCHSOURCE)/$(MAXIMILIAN).cpp, $(EMCC_SRC))
+endif
 WEBDIR     = $(BUILD)/web
 
 # JavaScript minifiers
