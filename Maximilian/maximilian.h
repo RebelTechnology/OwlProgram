@@ -70,6 +70,40 @@ public:
 	}
 };
 
+class maxiParam {
+ public:
+  // public fields
+  double value;    // current value
+  double minValue; // default 0.0
+  double maxValue; // default 1.0
+  const char* name; // optional
+  unsigned int pid; // parameter ID, default auto-assigned
+  /**
+   * constructor: sets defaults and registers UI components (implementation dependent)
+   */
+  maxiParam();
+  /**
+   * assignment operator 
+   */
+  maxiParam& operator=(const double& other){
+    value = other;
+    return *this;
+  }
+  /**
+   * cast operator, allows maxiParam to be used in place of a double  
+   */
+  operator double() const{
+    return value;
+  }
+  // getters and setters, optional
+  double getValue(){
+    return value;
+  }
+  void update(double v);
+  double scale(double value){
+    return value*(maxValue-minValue)+minValue;
+  }
+};
 
 class maxiOsc {
 	
