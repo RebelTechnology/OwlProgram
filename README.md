@@ -84,6 +84,15 @@ To compile and run a Gen patch called `Foo`:
 
 Note: use OWL parameters in Gen with parameter names: `A`, `B`, `C`, `D`, `Exp`, and `Push`.
 
+## Building Maximilian patches
+Requires your Maximilian code to be in a `.cpp` file.
+
+To compile and run a Maximilian patch called `Foo`:
+* copy `Foo.cpp` into `PatchSource`
+* `make Maximilian=Foo run`
+
+Note: use OWL parameters in Maximilian by adding maxiParam objects to your patch.
+
 # References
 [1] https://launchpad.net/gcc-arm-embedded
 [2] https://github.com/pingdynasty/FirmwareSender
