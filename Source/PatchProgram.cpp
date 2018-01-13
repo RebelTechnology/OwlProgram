@@ -10,10 +10,6 @@
 #include "heap.h"
 #include "system_tables.h"
 
-#ifdef USE_SCREEN
-#include "ScreenBuffer.h"
-#endif /* USE_SCREEN */
-
 static PatchProcessor processor;
 PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
@@ -82,9 +78,13 @@ static SampleBuffer* samples;
 void setup(ProgramVector* pv){
   setSystemTables(pv);
 #ifdef USE_SCREEN
-  void* args[] = {(void*)SYSTEM_FUNCTION_DRAW, (void*)&onDrawCallback};
-  getProgramVector()->serviceCall(OWL_SERVICE_REGISTER_CALLBACK, args, 2);
+  void* drawArgs[] = {(void*)SYSTEM_FUNCTION_DRAW, (void*)&onDrawCallback};
+  getProgramVector()->serviceCall(OWL_SERVICE_REGISTER_CALLBACK, drawArgs, 2);
 #endif /* USE_SCREEN */
+#ifdef USE_MIDI_CALLBACK
+  void* midiArgs[] = {(void*)SYSTEM_FUNCTION_MIDI, (void*)&onMidiCallback};
+  getProgramVector()->serviceCall(OWL_SERVICE_REGISTER_CALLBACK, midiArgs, 2);  
+#endif /* USE_MIDI_CALLBACK */
   samples = new SampleBuffer(pv->audio_blocksize);
 #include "registerpatch.cpp"
 }
