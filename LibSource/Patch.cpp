@@ -88,6 +88,10 @@ void Patch::processScreen(ScreenBuffer& screen){
 }
 #endif /* USE_SCREEN */
 
+#ifdef USE_MIDI_CALLBACK
+void Patch::processMidi(MidiMessage& msg){}
+#endif /* USE_MIDI_CALLBACK */
+
 #include "MemoryBuffer.hpp"
 AudioBuffer* AudioBuffer::create(int channels, int samples){
   return new ManagedMemoryBuffer(channels, samples);

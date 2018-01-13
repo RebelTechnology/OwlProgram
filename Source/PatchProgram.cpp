@@ -56,6 +56,18 @@ void onDrawCallback(uint8_t* pixels, uint16_t width, uint16_t height){
 }
 #endif /* USE_SCREEN */
 
+#ifdef USE_MIDI_CALLBACK
+void onMidiCallback(uint8_t port, uint8_t status, uint8_t d1, uint8_t d2){
+  static MidiMessage msg;
+  if(processor.patch != NULL){
+    msg.data[0] = status;
+    msg.data[1] = d1;
+    msg.data[2] = d2;
+    processor.patch->processMidi(msg);
+  }
+}
+#endif /* USE_MIDI_CALLBACK */
+
 #define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
 
 void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){

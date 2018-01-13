@@ -10,6 +10,18 @@
 #include "ScreenBuffer.h"
 #endif /* USE_SCREEN */
 
+#ifdef USE_MIDI_CALLBACK
+#include "MidiStatus.h"
+class MidiMessage {
+ public:
+  uint8_t data[3];
+  uint16_t size = 3;
+  uint8_t getChannel(){
+    return data[0] & MIDI_CHANNEL_MASK;
+  }
+};
+#endif /* USE_MIDI_CALLBACK */
+
 enum PatchParameterId {
   PARAMETER_A,
   PARAMETER_B,
@@ -118,7 +130,9 @@ public:
 #ifdef USE_SCREEN
   virtual void processScreen(ScreenBuffer& screen);
 #endif /* USE_SCREEN */
-
+#ifdef USE_MIDI_CALLBACK
+  virtual void processMidi(MidiMessage& msg);
+#endif /* USE_MIDI_CALLBACK */
 };
 
 #endif // __Patch_h__
