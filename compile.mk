@@ -28,10 +28,10 @@ PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_C_SRC:.c=.o)))
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
 
 CPPFLAGS += -DARM_CORTEX
-# CPPFLAGS += -DEXTERNAL_SRAM
+CPPFLAGS += -DEXTERNAL_SRAM
 CPPFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
-# CPPFLAGS += -mtune=cortex-m4
-CPPFLAGS += -mtune=cortex-m7
+CPPFLAGS += -mtune=cortex-m4
+# CPPFLAGS += -mtune=cortex-m7
 CPPFLAGS += -fpic
 CPPFLAGS += -fpie
 CPPFLAGS += -fdata-sections

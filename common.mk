@@ -2,8 +2,9 @@
 DSPLIB=Libraries/CMSIS/DSP_Lib/Source
 
 # Tool path
-TOOLROOT ?= Tools/gcc-arm-none-eabi-5_4-2016q3/bin/
+# TOOLROOT ?= Tools/gcc-arm-none-eabi-5_4-2016q3/bin/
 # TOOLROOT ?= Tools/gcc-arm-none-eabi-5_2-2015q4/bin/
+TOOLROOT ?= ~/devel/OwlWare/Tools/gcc-arm-none-eabi-7-2017-q4-major/bin/
 
 CMSIS ?= Libraries/CMSIS/Include/
 
@@ -21,14 +22,14 @@ OBJCOPY=$(TOOLROOT)arm-none-eabi-objcopy
 OBJDUMP=$(TOOLROOT)arm-none-eabi-objdump
 
 # Compilation Flags
-# ARCH_FLAGS = -mcpu=cortex-m4 -mthumb
-# ARCH_FLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
-ARCH_FLAGS = -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-sp-d16
+ARCH_FLAGS = -mcpu=cortex-m4 -mthumb
+ARCH_FLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
+# ARCH_FLAGS = -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-sp-d16
 
 # ARCH_FLAGS += -mfloat-abi=soft -msoft-float
 ARCH_FLAGS += -fsingle-precision-constant
-# DEF_FLAGS = -DARM_MATH_CM4 -DSTM32F4XX -D__FPU_PRESENT -D__FPU_USED=1
-DEF_FLAGS = -DSTM32F745xx -DARM_MATH_CM7 -D__FPU_PRESENT -D__FPU_USED=1
+DEF_FLAGS = -DARM_MATH_CM4 -DSTM32F4XX -D__FPU_PRESENT -D__FPU_USED=1
+# DEF_FLAGS = -DSTM32F745xx -DARM_MATH_CM7 -D__FPU_PRESENT -D__FPU_USED=1
 
 INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(DEVICE) -I$(CMSIS) -I$(PERIPH_FILE)/inc -I$(SOURCE)
 INC_FLAGS += -I$(DEVICE)/Include -I$(CMSIS)
