@@ -2,6 +2,7 @@
 #define __GenPatch_hpp__
 
 #include "Patch.h"
+#include "SmoothValue.h"
 #include "gen.h"
 
 #define GEN_OWL_PARAM_A "A"
@@ -18,6 +19,7 @@
 class GenParameter {
 public:
   PatchParameterId id;
+  SmoothValue value;
   float min = 0.0;
   float max = 1.0;
   int8_t index = -1;
@@ -35,9 +37,9 @@ public:
       }
     }
   }
-  void update(CommonState *context, float value){
+  void update(CommonState *context, float newValue){
     if(index != -1){
-      value = value * (max-min) + min;
+      value = newValue * (max-min) + min;
       gen::setparameter(context, index, value, NULL);
     }
   }
