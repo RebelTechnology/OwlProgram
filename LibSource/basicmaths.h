@@ -84,7 +84,9 @@
 }
 #endif
 
+
 #define malloc(x) pvPortMalloc(x)
+#define calloc(x, y) pvPortMalloc(x*y)
 #define free(x) vPortFree(x)
 
 #ifdef ARM_CORTEX

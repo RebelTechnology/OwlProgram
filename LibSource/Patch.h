@@ -66,14 +66,22 @@ enum PatchParameterId {
   PARAMETER_DE,
   PARAMETER_DF,
   PARAMETER_DG,
-  PARAMETER_DH
+  PARAMETER_DH,
+
+  PARAMETER_FREQ,
+  PARAMETER_GAIN
 };
 
 enum PatchButtonId {
-  BYPASS_BUTTON = 0,
+  BYPASS_BUTTON,
   PUSHBUTTON,
   GREEN_BUTTON,
   RED_BUTTON,
+  GATE_BUTTON,
+  BUTTON_A,
+  BUTTON_B,
+  BUTTON_C,
+  BUTTON_D,
   MIDI_NOTE_BUTTON = 0x80 // values over 127 are mapped to note numbers
 };
 

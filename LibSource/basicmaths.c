@@ -9,6 +9,8 @@
 // http://www.keil.com/forum/7934/
 // http://processors.wiki.ti.com/index.php/ARM_compiler_optimizations
 
+  /* void *_sbrk(intptr_t increment){} */
+
 static uint32_t r32seed = 33641;
 
 void arm_srand32(uint32_t s){
