@@ -56,9 +56,10 @@ void onDrawCallback(uint8_t* pixels, uint16_t width, uint16_t height){
 void onMidiCallback(uint8_t port, uint8_t status, uint8_t d1, uint8_t d2){
   static MidiMessage msg;
   if(processor.patch != NULL){
-    msg.data[0] = status;
-    msg.data[1] = d1;
-    msg.data[2] = d2;
+    msg.data[0] = port;
+    msg.data[1] = status;
+    msg.data[2] = d1;
+    msg.data[3] = d2;
     processor.patch->processMidi(msg);
   }
 }

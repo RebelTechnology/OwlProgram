@@ -15,9 +15,39 @@
 class MidiMessage {
  public:
   uint8_t data[3];
-  uint16_t size = 3;
+  uint8_t getPort(){
+    return (data[0] & 0xf0)>>4;
+  }
   uint8_t getChannel(){
-    return data[0] & MIDI_CHANNEL_MASK;
+    return (data[1] & MIDI_CHANNEL_MASK);
+  }
+  uint8_t getStatus(){
+    return (data[1] & MIDI_STATUS_MASK);
+  }
+  uint8_t getNote(){
+    return data[2];
+  }
+  uint8_t getVelocity(){
+    return data[3];
+  }
+  int16_t getPitchBend(){
+    int16_t pb = (data[2] | (data[3]<<7)) - 8192;
+    return pb;
+  }
+  bool isNoteOn(){
+    return (data[1] & MIDI_STATUS_MASK) == NOTE_ON && getVelocity() != 0;
+  }
+  bool isNoteOff(){
+    return (data[1] & MIDI_STATUS_MASK) == NOTE_OFF || (isNoteOn() && getVelocity() == 0);
+  }
+  bool isControlChange(){
+    return (data[1] & MIDI_STATUS_MASK) == CONTROL_CHANGE;
+  }
+  bool isProgramChange(){
+    return (data[1] & MIDI_STATUS_MASK) == PROGRAM_CHANGE;
+  }
+  bool isPitchBend(){
+    return (data[1] & MIDI_STATUS_MASK) == PITCH_BEND_CHANGE;
   }
 };
 #endif /* USE_MIDI_CALLBACK */
