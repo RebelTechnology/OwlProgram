@@ -50,7 +50,10 @@ enum PatchParameterId {
   PARAMETER_DE,
   PARAMETER_DF,
   PARAMETER_DG,
-  PARAMETER_DH
+  PARAMETER_DH,
+
+  PARAMETER_FREQ,
+  PARAMETER_GAIN
 };
 
 enum PatchButtonId {
@@ -58,6 +61,7 @@ enum PatchButtonId {
   PUSHBUTTON,
   GREEN_BUTTON,
   RED_BUTTON,
+  GATE_BUTTON,
   BUTTON_A,
   BUTTON_B,
   BUTTON_C,
