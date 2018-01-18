@@ -1,6 +1,7 @@
 #include <inttypes.h>
 
 #define USE_SCREEN
+#define SSD1309
 #define USE_MIDI_CALLBACK
 #define DEBUG_MEM
 /* #define STARTUP_CODE */
@@ -13,7 +14,7 @@
 
 #define MAX_BUFFERS_PER_PATCH        8
 #define MAX_NUMBER_OF_PATCHES        32
-#define MAX_NUMBER_OF_PARAMETERS     24
+#define MAX_NUMBER_OF_PARAMETERS     42
 
 #define LED_PORT                     GPIOE
 #define LED_GREEN                    GPIO_Pin_5

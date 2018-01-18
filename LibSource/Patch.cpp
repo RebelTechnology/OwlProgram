@@ -77,14 +77,14 @@ int Patch::getElapsedCycles(){
 #ifdef USE_SCREEN
 void Patch::processScreen(ScreenBuffer& screen){
   screen.clear();
-    ProgramVector* pv = getProgramVector();
-    if(pv->message != NULL)
-      screen.print(2, 36, pv->message);
-    screen.print(2, 46, "cpu/mem: ");
-    screen.print((int)((pv->cycles_per_block)/pv->audio_blocksize)/35);
-    screen.print("% ");
-    screen.print((int)(pv->heap_bytes_used)/1024);
-    screen.print("kB"); 
+  ProgramVector* pv = getProgramVector();
+  if(pv->message != NULL)
+    screen.print(2, 26, pv->message);
+  screen.print(2, 46, "cpu/mem: ");
+  screen.print((int)((pv->cycles_per_block)/pv->audio_blocksize)/35);
+  screen.print("% ");
+  screen.print((int)(pv->heap_bytes_used)/1024);
+  screen.print("kB"); 
 }
 #endif /* USE_SCREEN */
 
