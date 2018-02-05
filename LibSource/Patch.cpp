@@ -1,7 +1,6 @@
 #include <cstddef>
 #include <string.h>
 #include "Patch.h"
-#include "device.h"
 #include "ProgramVector.h"
 #include "PatchProcessor.h"
 #include "basicmaths.h"
@@ -74,6 +73,24 @@ float Patch::getElapsedBlockTime(){
 int Patch::getElapsedCycles(){
   return *DWT_CYCCNT;
 }
+
+#ifdef USE_SCREEN
+void Patch::processScreen(ScreenBuffer& screen){
+  screen.clear();
+    ProgramVector* pv = getProgramVector();
+    if(pv->message != NULL)
+      screen.print(2, 36, pv->message);
+    screen.print(2, 46, "cpu/mem: ");
+    screen.print((int)((pv->cycles_per_block)/pv->audio_blocksize)/35);
+    screen.print("% ");
+    screen.print((int)(pv->heap_bytes_used)/1024);
+    screen.print("kB"); 
+}
+#endif /* USE_SCREEN */
+
+#ifdef USE_MIDI_CALLBACK
+void Patch::processMidi(MidiMessage& msg){}
+#endif /* USE_MIDI_CALLBACK */
 
 #include "MemoryBuffer.hpp"
 AudioBuffer* AudioBuffer::create(int channels, int samples){

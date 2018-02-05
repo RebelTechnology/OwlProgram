@@ -13,8 +13,6 @@ class SampleBuffer : public AudioBuffer {
 protected:
   FloatArray left;
   FloatArray right;
-  // float left[AUDIO_MAX_BLOCK_SIZE];
-  // float right[AUDIO_MAX_BLOCK_SIZE];
   uint16_t size;
   const float mul = 1/2147483648.0f;
 public:

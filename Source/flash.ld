@@ -10,15 +10,9 @@ _Min_Stack_Size = 0x800; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-  BOOTLOADER (rw)  : ORIGIN = 0x08000000, LENGTH = 16K    /* Sector 0 */
-  EEPROM (rw)      : ORIGIN = 0x08004000, LENGTH = 16K    /* Sector 1 */
-  FIRMWARE (rx)    : ORIGIN = 0x08008000, LENGTH = 224K   /* Sector 2 */
-  PATCHFLASH (rx)  : ORIGIN = 0x08040000, LENGTH = 128K   /* Sector 6 */ /* total Flash memory is 1Mb */
   CCMHEAP (rw)     : ORIGIN = 0x10004000, LENGTH = 32K
   CCMRAM (rw)      : ORIGIN = 0x1000c000, LENGTH = 16K    /* total CCM is 64kb */
-  LOADERRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 48K
   PATCHRAM (rwx)   : ORIGIN = 0x2000c000, LENGTH = 64K    /* total RAM is 112kb */
-  NVRAM (rw)       : ORIGIN = 0x40024000, LENGTH = 4K
   EXTRAM (rx)      : ORIGIN = 0x68000000, LENGTH = 1M
 }
 
@@ -32,7 +26,7 @@ SECTIONS
     _startprog = ABSOLUTE(.);         /* define a global symbol at program start */
     KEEP(*(.program_header)) /* Startup code */
     . = ALIGN(8);
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
 
   /* The program code and other data goes into FLASH */
   .text :
@@ -64,36 +58,36 @@ SECTIONS
     . = ALIGN(8);
     _etext = .;        /* define a global symbol at end of code */
     _text_end = .;
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
 
   _text_load = LOADADDR (.text);
-  .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >PATCHRAM /* AT>PATCHFLASH */
+  .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >PATCHRAM
   .ARM : {
     __exidx_start = .;
     *(.ARM.exidx*)
     __exidx_end = .;
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
 
   .preinit_array     :
   {
     PROVIDE_HIDDEN (__preinit_array_start = .);
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
   .init_array :
   {
     PROVIDE_HIDDEN (__init_array_start = .);
     KEEP (*(SORT(.init_array.*)))
     KEEP (*(.init_array*))
     PROVIDE_HIDDEN (__init_array_end = .);
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
   .fini_array :
   {
     PROVIDE_HIDDEN (__fini_array_start = .);
     KEEP (*(.fini_array*))
     KEEP (*(SORT(.fini_array.*)))
     PROVIDE_HIDDEN (__fini_array_end = .);
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
 
   /* used by the startup to initialize data */
   _sidata = .;

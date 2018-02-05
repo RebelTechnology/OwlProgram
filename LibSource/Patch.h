@@ -1,10 +1,26 @@
 #ifndef __Patch_h__
 #define __Patch_h__
 
+#include "device.h"
 #include "basicmaths.h"
 #include "FloatArray.h"
 #include "PatchParameter.h"
 #include "SmoothValue.h"
+#ifdef USE_SCREEN
+#include "ScreenBuffer.h"
+#endif /* USE_SCREEN */
+
+#ifdef USE_MIDI_CALLBACK
+#include "MidiStatus.h"
+class MidiMessage {
+ public:
+  uint8_t data[3];
+  uint16_t size = 3;
+  uint8_t getChannel(){
+    return data[0] & MIDI_CHANNEL_MASK;
+  }
+};
+#endif /* USE_MIDI_CALLBACK */
 
 enum PatchParameterId {
   PARAMETER_A,
@@ -118,7 +134,13 @@ public:
   virtual void encoderChanged(PatchParameterId pid, int16_t delta, uint16_t samples){};
   virtual void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){}
   /* virtual void parameterChanged(PatchParameterId pid, float value, int samples){} */
-  virtual void processAudio(AudioBuffer& output) = 0;
+  virtual void processAudio(AudioBuffer& audio) = 0;
+#ifdef USE_SCREEN
+  virtual void processScreen(ScreenBuffer& screen);
+#endif /* USE_SCREEN */
+#ifdef USE_MIDI_CALLBACK
+  virtual void processMidi(MidiMessage& msg);
+#endif /* USE_MIDI_CALLBACK */
 };
 
 #endif // __Patch_h__

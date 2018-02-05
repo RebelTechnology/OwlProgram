@@ -31,10 +31,6 @@ int main(void){
   memset(_sbss, 0, _ebss-_sbss); // zero fill the BSS segment
 #endif /* STARTUP_CODE */
 
-// #ifdef STARTUP_CODE
-//   __libc_init_array(); // Call static constructors
-// #endif /* STARTUP_CODE */
-
   ProgramVector* pv = getProgramVector();
   HeapRegion_t regions[5];
   if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V13 && pv->heapLocations != NULL){
@@ -72,6 +68,7 @@ int main(void){
     error(CHECKSUM_ERROR_STATUS, "ProgramVector checksum error");
     return -1;
   }
+
   if(pv->audio_blocksize <= 0 || pv->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){     
     error(CONFIGURATION_ERROR_STATUS, "Invalid blocksize");
     return -1;

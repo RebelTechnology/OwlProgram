@@ -1,5 +1,7 @@
 #include <inttypes.h>
 
+#define USE_SCREEN
+#define USE_MIDI_CALLBACK
 #define DEBUG_MEM
 /* #define STARTUP_CODE */
 
