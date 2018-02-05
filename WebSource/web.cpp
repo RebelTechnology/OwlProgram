@@ -1,7 +1,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include "ProgramVector.h"
-#include "StompBox.h"
+#include "Patch.h"
 #include "device.h"
 #include "main.h"
 #include "message.h"
@@ -20,7 +20,6 @@
 
 ProgramVector programVector;
 extern PatchProcessor* getInitialisingPatchProcessor();
-extern char* itoa(int val, int base);
 
 extern "C"{
   /* ASM exported functions */
@@ -51,7 +50,7 @@ unsigned long systicks(){
   return clock();
 }
 
-#define NOF_PARAMETERS 16
+#define NOF_PARAMETERS 40
 static int blocksize;
 static char* patchName = NULL;
 static int16_t parameters[NOF_PARAMETERS];
@@ -83,11 +82,11 @@ int WEB_setup(long fs, int bs){
   blocksize = bs;
   // set up programvector with sample rate, blocksize, callbacks et c
   ProgramVector* pv = getProgramVector();
-  pv->checksum = sizeof(ProgramVector);
+  pv->checksum = PROGRAM_VECTOR_CHECKSUM_V13;
   pv->hardware_version = OWL_PEDAL_HARDWARE;
   pv->audio_input = NULL;
   pv->audio_output = NULL;
-  pv->audio_bitdepth = 32;
+  pv->audio_format = AUDIO_FORMAT_24B32;
   pv->audio_blocksize = bs;
   pv->audio_samplingrate = fs;
   pv->parameters = parameters;
@@ -101,6 +100,7 @@ int WEB_setup(long fs, int bs){
   pv->programStatus = programStatus;
   pv->serviceCall = serviceCall;
   pv->message = NULL;
+  pv->heapLocations = NULL;
   setup(pv);
 
   struct mallinfo minfo = mallinfo();
@@ -164,39 +164,39 @@ char* WEB_getStatus(){
     // p = stpcpy(p, (const char*)"No error");
     p = stpcpy(p, (const char*)"CPU ");
     float percent = (pv->cycles_per_block/pv->audio_blocksize) / (float)3500;
-    p = stpcpy(p, itoa(ceilf(percent*100), 10));
+    p = stpcpy(p, msg_itoa(ceilf(percent*100), 10));
     p = stpcpy(p, (const char*)"% Heap ");
     int mem = pv->heap_bytes_used;
-    p = stpcpy(p, itoa(mem, 10));
+    p = stpcpy(p, msg_itoa(mem, 10));
     break;
   }
   case MEM_ERROR:
     p = stpcpy(p, (const char*)"Memory Error 0x");
-    p = stpcpy(p, itoa(err, 16));
+    p = stpcpy(p, msg_itoa(err, 16));
     break;
   case BUS_ERROR:
     p = stpcpy(p, (const char*)"Bus Error 0x");
-    p = stpcpy(p, itoa(err, 16));
+    p = stpcpy(p, msg_itoa(err, 16));
     break;
   case USAGE_ERROR:
     p = stpcpy(p, (const char*)"Usage Error 0x");
-    p = stpcpy(p, itoa(err, 16));
+    p = stpcpy(p, msg_itoa(err, 16));
     break;
   case NMI_ERROR:
     p = stpcpy(p, (const char*)"Non-maskable Interrupt 0x");
-    p = stpcpy(p, itoa(err, 16));
+    p = stpcpy(p, msg_itoa(err, 16));
     break;
   case HARDFAULT_ERROR:
     p = stpcpy(p, (const char*)"HardFault Error 0x");
-    p = stpcpy(p, itoa(err, 16));
+    p = stpcpy(p, msg_itoa(err, 16));
     break;
   case PROGRAM_ERROR:
     p = stpcpy(p, (const char*)"Missing or Invalid Program 0x");
-    p = stpcpy(p, itoa(err, 16));
+    p = stpcpy(p, msg_itoa(err, 16));
     break;
   default:
     p = stpcpy(p, (const char*)"Unknown Error 0x");
-    p = stpcpy(p, itoa(err, 16));
+    p = stpcpy(p, msg_itoa(err, 16));
     break;
   }
   return buffer;
@@ -242,3 +242,5 @@ void vPortFree( void *pv ){
 #endif
   free(pv);
 }
+
+void setSystemTables(ProgramVector* pv){}

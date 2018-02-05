@@ -43,16 +43,9 @@ float Patch::getParameterValue(PatchParameterId pid){
 
 void Patch::setParameterValue(PatchParameterId pid, float value){
   if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4)
-    doSetPatchParameter(pid, (4095 - value)*4096.0f);
+    doSetPatchParameter(pid, 4095 - (int16_t)(value*4096.0f));
   else
-    doSetPatchParameter(pid, value*4096.0f);
-  // if(pid < getProgramVector()->parameters_size){
-  //   if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4){
-  //     getProgramVector()->parameters[pid] = (4095 - value)*4096.0f;
-  //   }else{
-  //     getProgramVector()->parameters[pid] = value*4096.0f;
-  //   }
-  // }
+    doSetPatchParameter(pid, (int16_t)(value*4096));
 }
 
 void Patch::setButton(PatchButtonId bid, uint16_t value, uint16_t samples){

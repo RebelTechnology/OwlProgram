@@ -16,6 +16,7 @@
 
 #include "HvMessage.h"
 #include "message.h"
+#include <string.h>
 
 HvMessage *msg_init(HvMessage *m, hv_size_t numElements, hv_uint32_t timestamp) {
   m->timestamp = timestamp;
@@ -40,7 +41,7 @@ HvMessage *msg_initWithBang(HvMessage *m, hv_uint32_t timestamp) {
   return m;
 }
 
-HvMessage *msg_initWithSymbol(HvMessage *m, hv_uint32_t timestamp, char *s) {
+HvMessage *msg_initWithSymbol(HvMessage *m, hv_uint32_t timestamp, const char *s) {
   m->timestamp = timestamp;
   m->numElements = 1;
   m->numBytes = sizeof(HvMessage) + (hv_uint16_t) hv_strlen(s);
@@ -102,8 +103,8 @@ bool msg_hasFormat(const HvMessage *m, const char *fmt) {
     switch (fmt[i]) {
       case 'b': if (!msg_isBang(m, i)) return false; break;
       case 'f': if (!msg_isFloat(m, i)) return false; break;
-      case 's': if (!msg_isSymbol(m, i)) return false; break;
       case 'h': if (!msg_isHash(m, i)) return false; break;
+      case 's': if (!msg_isSymbol(m, i)) return false; break;
       default: return false;
     }
   }
@@ -113,7 +114,7 @@ bool msg_hasFormat(const HvMessage *m, const char *fmt) {
 bool msg_compareSymbol(const HvMessage *m, int i, const char *s) {
   switch (msg_getType(m,i)) {
     case HV_MSG_SYMBOL: return !hv_strcmp(msg_getSymbol(m, i), s);
-    case HV_MSG_HASH: return (msg_getHash(m,i) == msg_symbolToHash(s));
+    case HV_MSG_HASH: return (msg_getHash(m,i) == hv_string_to_hash(s));
     default: return false;
   }
 }
@@ -143,42 +144,6 @@ void msg_setElementToFrom(HvMessage *n, int i_n, const HvMessage *const m, int i
   }
 }
 
-hv_uint32_t msg_symbolToHash(const char *s) {
-  // this hash is based MurmurHash2
-  // http://en.wikipedia.org/wiki/MurmurHash
-  // https://sites.google.com/site/murmurhash/
-  static const hv_uint32_t n = 0x5bd1e995;
-  static const hv_int32_t r = 24;
-
-  if (s == NULL) return 0;
-
-  hv_uint32_t len = (hv_uint32_t) hv_strlen(s);
-  hv_uint32_t x = len; // seed (0) ^ len
-
-  while (len >= 4) {
-    hv_uint32_t k = *((hv_uint32_t *) s);
-    k *= n;
-    k ^= k >> r;
-    k *= n;
-    x *= n;
-    x ^= k;
-    s += 4; len -= 4;
-  }
-
-  switch (len) {
-    case 3: x ^= s[2] << 16;
-    case 2: x ^= s[1] << 8;
-    case 1: x ^= s[0]; x *= n;
-    default: break;
-  }
-
-  x ^= x >> 13;
-  x *= n;
-  x ^= x >> 15;
-
-  return x;
-}
-
 hv_uint32_t msg_getHash(const HvMessage *const m, int i) {
   hv_assert(i < msg_getNumElements(m)); // invalid index
   switch (msg_getType(m,i)) {
@@ -187,7 +152,7 @@ hv_uint32_t msg_getHash(const HvMessage *const m, int i) {
       float f = msg_getFloat(m,i);
       return *((hv_uint32_t *) &f);
     }
-    case HV_MSG_SYMBOL: return msg_symbolToHash(msg_getSymbol(m,i));
+    case HV_MSG_SYMBOL: return hv_string_to_hash(msg_getSymbol(m,i));
     case HV_MSG_HASH: return (&(m->elem)+i)->data.h;
     default: return 0;
   }
@@ -204,9 +169,9 @@ char *msg_toString(const HvMessage *m) {
     // length of our string is each atom plus a space, or \0 on the end
     switch (msg_getType(m, i)) {
       case HV_MSG_BANG: len[i] = 5; break;
-      case HV_MSG_FLOAT: len[i] = strnlen(ftoa(msg_getFloat(m, i), 10), 16)+1; break;
+      case HV_MSG_FLOAT: len[i] = strnlen(msg_ftoa(msg_getFloat(m, i), 10), 16)+1; break;
       case HV_MSG_SYMBOL: len[i] = strnlen(msg_getSymbol(m, i), 16)+1; break;
-      case HV_MSG_HASH: len[i] = strnlen(itoa(msg_getHash(m, i), 16), 8)+3; break;
+      case HV_MSG_HASH: len[i] = strnlen(msg_itoa(msg_getHash(m, i), 16), 8)+3; break;
       default: break;
     }
     size += len[i];
@@ -226,15 +191,15 @@ char *msg_toString(const HvMessage *m) {
 	dst = stpcpy(dst, "bang");
 	break;
       case HV_MSG_FLOAT: 
-	ptr = ftoa(msg_getFloat(m, i), 10); 
+	ptr = msg_ftoa(msg_getFloat(m, i), 10); 
 	dst = stpcpy(dst, ptr);
 	break;	
       case HV_MSG_SYMBOL: 
-	ptr = msg_getSymbol(m, i); 
+	ptr = (char*)msg_getSymbol(m, i); 
 	dst = stpcpy(dst, ptr);
 	break;
       case HV_MSG_HASH:
-	ptr = itoa(msg_getHash(m, i), 16);
+	ptr = msg_itoa(msg_getHash(m, i), 16);
 	dst = stpcpy(dst, "0x");
 	dst = stpcpy(dst, ptr);
 	break;

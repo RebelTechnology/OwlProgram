@@ -39,3 +39,11 @@ void PolyBlepOscillator::getSamples(FloatArray output, FloatArray frequency){
   frequency.multiply(multiplier);
   osc.Render<true>(frequency, pw, shape, output, output.getSize());
 }
+
+PolyBlepOscillator* PolyBlepOscillator::create(float sr){
+  return new PolyBlepOscillator(sr);
+}
+
+void PolyBlepOscillator::destroy(PolyBlepOscillator* osc){
+  delete osc;
+}

@@ -27,6 +27,13 @@ class WhiteNoiseOscillator : public Oscillator {
     return (rand()/(RAND_MAX+1.0f)) * 2 - 1;
 #endif
   }
+
+  static WhiteNoiseOscillator* create(){
+    return new WhiteNoiseOscillator();
+  }
+  static void destroy(WhiteNoiseOscillator* osc){
+    delete osc;
+  }
 };
 
 #ifdef ARM_CORTEX
@@ -41,14 +48,12 @@ int inline CTZ(int num){
 
 class PinkNoiseOscillator : public WhiteNoiseOscillator {
 private:
-  enum
-  {
+  enum {
     NumPinkBins  = 16,
     NumPinkBins1 = NumPinkBins-1
   };
- public:
-  PinkNoiseOscillator()
-  {
+public:
+  PinkNoiseOscillator(){
     m_count = 1;
     m_pink  = 0;
     for (int i=0; i<NumPinkBins; i++)
@@ -63,34 +68,30 @@ private:
     float r;
     unsigned long k = CTZ(m_count);
     k = k & NumPinkBins1; 
-
     // get previous value of this octave 
     prevr = m_pinkStore[k]; 
-
     while (true){
       r = WhiteNoiseOscillator::getNextSample();
-
       // store new value 
       m_pinkStore[k] = r;
-
       r -= prevr;
-
       // update total 
       m_pink += r; 
-
       if (m_pink <-4.0f || m_pink > 4.0f) 
 	m_pink -= r;
       else 
 	break;
     }
-
     // update counter 
     m_count++; 
-
     return (WhiteNoiseOscillator::getNextSample() + m_pink)*0.125f; 
   }
-
-
+  static PinkNoiseOscillator* create(){
+    return new PinkNoiseOscillator();
+  }
+  static void destroy(PinkNoiseOscillator* osc){
+    delete osc;
+  }
 private:
   unsigned long  m_count;
   float          m_pink;
@@ -107,7 +108,6 @@ public:
   BrownNoiseOscillator(){
     m_brown = 0.0f;
   }
-
   // returns brown noise random number in the range -0.5 to 0.5
   //
   float getNextSample() {
@@ -122,6 +122,12 @@ public:
     }
     return m_brown*0.0625f;
   }  
+  static BrownNoiseOscillator* create(){
+    return new BrownNoiseOscillator();
+  }
+  static void destroy(BrownNoiseOscillator* osc){
+    delete osc;
+  }
 };
 
 class GaussianNoiseOscillator : public Oscillator {
@@ -138,7 +144,6 @@ public:
 
   static GaussianNoiseOscillator* create(int size){
     GaussianNoiseOscillator* gn = new GaussianNoiseOscillator(FloatArray::create(size));
-
     // generate white gaussian noise:
     // from http://www.musicdsp.org/showone.php?id=168
     /* Setup constants */

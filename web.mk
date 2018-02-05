@@ -4,9 +4,11 @@ GENSOURCE    = $(BUILD)/Source
 
 # emscripten
 EMCC      ?= emcc
-EMCCFLAGS ?= -fno-rtti -fno-exceptions -s ASSERTIONS=1 # -std=c++11
+EMCCFLAGS += -fno-rtti -fno-exceptions
+# EMCCFLAGS += -s ASSERTIONS=1 -Wall
+EMCCFLAGS += -Dnullptr=NULL
 EMCCFLAGS += -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(GENSOURCE) -I$(BUILD)
-EMCCFLAGS += -I$(BUILD)/HeavySource
+EMCCFLAGS += -I$(BUILD)/Source
 EMCCFLAGS +=  -ILibraries -ILibraries/KissFFT -DHV_SIMD_NONE
 EMCCFLAGS += -Wno-warn-absolute-paths
 EMCCFLAGS += -Wno-unknown-warning-option
@@ -16,6 +18,7 @@ EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_proc
 EMCC_SRC   = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/message.cpp
 EMCC_SRC  += WebSource/web.cpp
 EMCC_SRC  += $(LIBSOURCE)/basicmaths.c $(LIBSOURCE)/Patch.cpp $(LIBSOURCE)/FloatArray.cpp $(LIBSOURCE)/ComplexFloatArray.cpp $(LIBSOURCE)/FastFourierTransform.cpp $(LIBSOURCE)/Envelope.cpp $(LIBSOURCE)/VoltsPerOctave.cpp $(LIBSOURCE)/Window.cpp $(LIBSOURCE)/WavetableOscillator.cpp $(LIBSOURCE)/PolyBlepOscillator.cpp $(LIBSOURCE)/SmoothValue.cpp
+# EMCC_SRC  += $(LIBSOURCE)/fastpow.c $(LIBSOURCE)/fastlog.c $(LIBSOURCE)/system_tables.cpp
 EMCC_SRC  += $(PATCH_CPP_SRC) $(PATCH_C_SRC)
 EMCC_SRC  += Libraries/KissFFT/kiss_fft.c
 EMCC_SRC  += $(wildcard $(GENSOURCE)/*.c)

@@ -3,7 +3,7 @@
 
 #include "Patch.h"
 #include "basicmaths.h"
-#include "Heavy_owl.h"
+#include "Heavy_owl.hpp"
 
 #define HV_OWL_PARAM_A "Channel-A"
 #define HV_OWL_PARAM_B "Channel-B"
@@ -16,7 +16,8 @@
 #define HV_OWL_PARAM_PUSH "Channel-Push"
 #define HV_OWL_PARAM_NOTEOUT "__hv_noteout"
 #define HEAVY_MESSAGE_POOL_SIZE  4 // in kB (default 10kB)
-#define HEAVY_MESSAGE_QUEUE_SIZE 1 // in kB (default 2kB)
+#define HEAVY_MESSAGE_IN_QUEUE_SIZE 1 // in kB (default 2kB)
+#define HEAVY_MESSAGE_OUT_QUEUE_SIZE 0 // in kB (default 0kB)
 
 extern "C" {
   volatile bool _msgLock = false;
@@ -29,7 +30,10 @@ extern "C" {
     else
       getProgramVector()->buttons &= ~(1<<bid);
   }
-  static void printHook(double timestampMs, const char *printLabel, const char *msgString, void *userData) {
+  static void printHook(HeavyContextInterface* ctxt, 
+			const char *printLabel, 
+			const char *msgString, 
+			const HvMessage *m) {
     char buf[64];
     char* dst = buf;
     int len = strnlen(printLabel, 48);
@@ -38,10 +42,10 @@ extern "C" {
     dst = stpncpy(dst, msgString, 63-len);
     debugMessage(buf);
   }
-  static void sendHook(double timestampMs, // in milliseconds
+  static void sendHook(HeavyContextInterface* ctxt,
 		       const char *receiverName,
-		       const HvMessage *const m,
-		       void *userData) {
+		       uint32_t sendHash,
+		       const HvMessage *m){
     if(strcmp(receiverName, HV_OWL_PARAM_PUSH) == 0){
       bool pressed;
       if(hv_msg_getNumElements(m) > 0 && hv_msg_isFloat(m, 0))
@@ -59,6 +63,7 @@ extern "C" {
 
 class HeavyPatch : public Patch {
 private:
+
   unsigned int receiverHash[9];
   HvMessage* notein;
 public:
@@ -77,11 +82,12 @@ public:
     receiverHash[6] = hv_stringToHash(HV_OWL_PARAM_G);
     receiverHash[7] = hv_stringToHash(HV_OWL_PARAM_H);
     receiverHash[8] = hv_stringToHash(HV_OWL_PARAM_PUSH);
-    context = hv_owl_new_with_options(getSampleRate(), 
-				      HEAVY_MESSAGE_POOL_SIZE, 
-				      HEAVY_MESSAGE_QUEUE_SIZE);
-    hv_setPrintHook(context, &printHook);
-    hv_setSendHook(context, sendHook);
+    context = new Heavy_owl(getSampleRate(), 
+			    HEAVY_MESSAGE_POOL_SIZE, 
+			    HEAVY_MESSAGE_IN_QUEUE_SIZE, 
+			    HEAVY_MESSAGE_OUT_QUEUE_SIZE);
+    context->setPrintHook(&printHook);
+    context->setSendHook(sendHook);
 
     // create note in message
     notein = (HvMessage*)malloc(hv_msg_getByteSize(5));
@@ -94,7 +100,7 @@ public:
   }
   
   ~HeavyPatch() {
-    hv_owl_free(context);
+    delete context;
     free(notein);
   }
   
@@ -102,7 +108,7 @@ public:
     if(_msgLock)
       return;
     if(bid == PUSHBUTTON){
-      hv_sendFloatToReceiver(context, receiverHash[8], value ? 1.0 : 0.0);
+      context->sendFloatToReceiver(receiverHash[8], value ? 1.0 : 0.0);
     }else if(bid >= MIDI_NOTE_BUTTON){
       // send message to notein object
       unsigned int hash = 0x67E37CA3; // __hv_notein
@@ -115,7 +121,7 @@ public:
       hv_msg_setFloat(notein, 1, velocity);
       // notein expects: note, velocity, channel, command, port
       // not thread safe
-      hv_scheduleMessageForReceiver(context, hash, ms, notein);
+      context->sendMessageToReceiver(hash, ms, notein);
     }
   }
 
@@ -129,21 +135,21 @@ public:
     float paramG = getParameterValue(PARAMETER_G);
     float paramH = getParameterValue(PARAMETER_H);
     _msgLock = true;
-    hv_sendFloatToReceiver(context, receiverHash[0], paramA);
-    hv_sendFloatToReceiver(context, receiverHash[1], paramB);
-    hv_sendFloatToReceiver(context, receiverHash[2], paramC);
-    hv_sendFloatToReceiver(context, receiverHash[3], paramD);
-    hv_sendFloatToReceiver(context, receiverHash[4], paramE);
-    hv_sendFloatToReceiver(context, receiverHash[5], paramF);
-    hv_sendFloatToReceiver(context, receiverHash[6], paramG);
-    hv_sendFloatToReceiver(context, receiverHash[7], paramH);
+    context->sendFloatToReceiver(receiverHash[0], paramA);
+    context->sendFloatToReceiver(receiverHash[1], paramB);
+    context->sendFloatToReceiver(receiverHash[2], paramC);
+    context->sendFloatToReceiver(receiverHash[3], paramD);
+    context->sendFloatToReceiver(receiverHash[4], paramE);
+    context->sendFloatToReceiver(receiverHash[5], paramF);
+    context->sendFloatToReceiver(receiverHash[6], paramG);
+    context->sendFloatToReceiver(receiverHash[7], paramH);
     _msgLock = false;
     float* outputs[] = {buffer.getSamples(LEFT_CHANNEL), buffer.getSamples(RIGHT_CHANNEL)};
-    hv_owl_process(context, outputs, outputs, getBlockSize());		     
+    context->process(outputs, outputs, getBlockSize());
   }
   
 private:
-  Hv_owl *context;
+  HeavyContext* context;
 };
 
 #endif // __HeavyPatch_hpp__

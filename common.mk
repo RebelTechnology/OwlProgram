@@ -2,8 +2,9 @@
 DSPLIB=Libraries/CMSIS/DSP_Lib/Source
 
 # Tool path
-TOOLROOT ?= Tools/gcc-arm-none-eabi-5_4-2016q2/bin/
+# TOOLROOT ?= Tools/gcc-arm-none-eabi-5_4-2016q3/bin/
 # TOOLROOT ?= Tools/gcc-arm-none-eabi-5_2-2015q4/bin/
+TOOLROOT ?= ~/devel/OwlWare/Tools/gcc-arm-none-eabi-7-2017-q4-major/bin/
 
 CMSIS ?= Libraries/CMSIS/Include/
 
@@ -26,13 +27,13 @@ ARCH_FLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # ARCH_FLAGS += -mfloat-abi=soft -msoft-float
 ARCH_FLAGS += -fsingle-precision-constant
 DEF_FLAGS = -DARM_MATH_CM4 -DSTM32F4XX -D__FPU_PRESENT -D__FPU_USED=1
-# DEF_FLAGS = -DUSE_STDPERIPH_DRIVER -DARM_MATH_CM4 -DSTM32F4XX
 INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(DEVICE) -I$(CMSIS) -I$(PERIPH_FILE)/inc -I$(SOURCE)
 INC_FLAGS += -I$(DEVICE)/Include -I$(CMSIS)
 INC_FLAGS += -I$(USB_DEVICE_FILE)/Core/inc -I$(USB_DEVICE_FILE)/Class/cdc/inc
 INC_FLAGS += -I$(USB_OTG_FILE)/inc
 CPPFLAGS += $(ARCH_FLAGS) $(INC_FLAGS) $(DEF_FLAGS)
-CFLAGS += -fno-builtin -std=c99
+CFLAGS += -fno-builtin -std=gnu99 -DARM_CORTEX
+CXXFLAGS += -std=gnu++11
 LDFLAGS += -T$(LDSCRIPT) $(ARCH_FLAGS)
 
 # compile and generate dependency info

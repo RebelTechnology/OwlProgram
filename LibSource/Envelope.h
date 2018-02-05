@@ -1,7 +1,6 @@
 #ifndef ENVELOPE_HPP
 #define ENVELOPE_HPP
 
-#include "Patch.h"
 #include "FloatArray.h"
 
 class Envelope {
@@ -17,7 +16,6 @@ public:
     gate(state, 0);
   }
   virtual void gate(bool state, int gateDelay){}
-  virtual void setTimeBase(unsigned int newTimeBase){}
 };
 
 /**
@@ -29,8 +27,8 @@ private:
   enum EnvelopeTrigger { kGate, kTrigger };
 
 public:
-  AdsrEnvelope();
-  AdsrEnvelope(unsigned int timeBase);
+  AdsrEnvelope(float newSampleRate);
+  virtual ~AdsrEnvelope();
   void setSampleRate(float sampleRate){
     samplePeriod = 1.0/sampleRate;
   }
@@ -38,7 +36,6 @@ public:
   void setDecay(float newDecay);
   void setRelease(float newRelase);
   void setSustain(float newSustain);
-  void setTimeBase(unsigned int timeBase);
   void trigger();
   void trigger(bool state);
   void trigger(bool state, int triggerDelay);
@@ -49,6 +46,12 @@ public:
   float getNextSample(); // increments envelope one step
   void getEnvelope(FloatArray output); // increments envelope by output buffer length
   void attenuate(FloatArray buf); // increments envelope by buffer length
+  static AdsrEnvelope* create(float sr){
+    return new AdsrEnvelope(sr);
+  }
+  static void destroy(AdsrEnvelope* env){
+    delete env;
+  }
 private:
   static const float minTime;
   float samplePeriod;
@@ -62,7 +65,6 @@ private:
   float sustain;
   bool gateState;
   int gateTime;
-  unsigned int timeBase;
 };
 
 #endif /* ENVELOPE_HPP */

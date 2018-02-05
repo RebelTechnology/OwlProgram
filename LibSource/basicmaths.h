@@ -52,20 +52,39 @@
 #endif
 
    float arm_sqrtf(float in);
+   void arm_srand32(uint32_t s);
    uint32_t arm_rand32();
 
+   // fast lookup-based exponentials
+   float fast_powf(float x, float y);
+   float fast_expf(float x);
+   float fast_exp2f(float x);
+   float fast_exp10f(float x);
+   void fast_pow_set_table(const uint32_t* table, int size);
+
+   // fast lookup-based logarithmics
+   float fast_logf(float x);
+   float fast_log2f(float x);
+   float fast_log10f(float x);
+   void fast_log_set_table(const float* table, int size);
+
    // fast approximations
-   float fastexpf(float x);
-   float fastlog2f(float x);
-   float fastpow2f(float x);
-   float fastpowf(float a, float b);
-   float fastatan2f(float a, float b);
+   float fast_atan2f(float a, float b);
+
+   /** generate a random number between 0 and 1 */
+   float randf();
+
+   static inline uint32_t log2i(const uint32_t x){
+     return (31 - __builtin_clz (x));
+   }
 
 #ifdef __cplusplus
 }
 #endif
 
+
 #define malloc(x) pvPortMalloc(x)
+#define calloc(x, y) pvPortMalloc(x*y)
 #define free(x) vPortFree(x)
 
 #ifdef ARM_CORTEX
@@ -76,17 +95,37 @@
 #define sqrt(x) arm_sqrtf(x)
 #define sqrtf(x) arm_sqrtf(x)
 #define rand() arm_rand32()
+#define tanh(x) tanhf(x)
+#define sinh(x) sinhf(x)
+#define cosh(x) coshf(x)
 
 #ifdef __FAST_MATH__ /* set by gcc option -ffast-math */
+
+// fast lookup-based exponentials
+#define pow(x, y) fast_powf(x, y)
+#define powf(x, y) fast_powf(x, y)
+#define exp(x) fast_expf(x)
+#define expf(x) fast_expf(x)
+#define exp2(x) fast_exp2f(x)
+#define exp2f(x) fast_exp2f(x)
+#define exp10(x) fast_exp10f(x)
+#define exp10f(x) fast_exp10f(x)
+
+// fast lookup-based logarithmics
+#ifdef log2
+#undef log2 /* defined in math.h */
+#endif
+#define log(x) fast_logf(x)
+#define logf(x) fast_logf(x)
+#define log2(x) fast_log2f(x)
+#define log2f(x) fast_log2f(x)
+#define log10(x) fast_log10f(x)
+#define log10f(x) fast_log10f(x)
+
 // fast approximate math functions
-#define atan2(x, y) fastatan2f(x, y)
-#define atan2f(x, y) fastatan2f(x, y)
-/* #define pow(x, y) fastpowf(x, y) */
-/* #define powf(x, y) fastpowf(x, y) */
-/* Fast exponentiation function, y = e^x */
-/* 1.0 / ln(2) = 1.442695041f */
-/* #define exp(x) fastpow2f(x * 1.442695041f) */
-/* #define expf(x) fastpow2f(x * 1.442695041f) */
+#define atan2(x, y) fast_atan2f(x, y)
+#define atan2f(x, y) fast_atan2f(x, y)
+
 #endif
 
 #undef RAND_MAX

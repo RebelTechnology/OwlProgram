@@ -30,6 +30,12 @@ PATCHNAME   ?= $(HEAVY)
 PATCHCLASS  ?= HeavyPatch
 PATCHFILE   ?= HeavyPatch.hpp
 DEPS        += heavy
+else ifdef GEN
+# options for Max/MSP Gen compilation
+PATCHNAME   ?= $(GEN)
+PATCHCLASS  ?= GenPatch
+PATCHFILE   ?= GenPatch.hpp
+DEPS        += gen
 else ifdef TEST
 PATCHNAME   ?= $(TEST)
 PATCHCLASS  ?= $(PATCHNAME)Patch
@@ -48,12 +54,12 @@ OWLDEVICE   ?= "OWL-MIDI"
 BUILD       ?= $(BUILDROOT)/Build
 LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
-FIRMWARESENDER = Tools/FirmwareSender
+FIRMWARESENDER ?= Tools/FirmwareSender
 
 export BUILD BUILDROOT TARGET
 export PATCHNAME PATCHCLASS PATCHSOURCE 
 export PATCHFILE PATCHIN PATCHOUT
-export HEAVYTOKEN HEAVY
+export HEAVYTOKEN HEAVYSERVICETOKEN  HEAVY
 export LDSCRIPT CPPFLAGS EMCCFLAGS ASFLAGS
 
 DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
@@ -94,6 +100,9 @@ faust: .FORCE
 heavy: .FORCE
 	@$(MAKE) -s -f heavy.mk heavy
 
+gen: .FORCE
+	@$(MAKE) -s -f gen.mk gen
+
 sysex: patch $(BUILD)/$(TARGET).syx ## package patch binary as MIDI sysex
 	@echo Built sysex $(PATCHNAME) in $(BUILD)/$(TARGET).syx
 
@@ -107,6 +116,9 @@ store: patch ## upload and save patch to attached OWL
 
 docs: ## generate HTML documentation
 	@doxygen Doxyfile
+
+tables: ## compile tools and generate lookup tables
+	@$(MAKE) -s -f tables.mk tables
 
 clean: ## remove generated patch files
 	@rm -rf $(BUILD)/*

@@ -22,12 +22,12 @@ void FastFourierTransform::init(int len){
 
 void FastFourierTransform::fft(FloatArray in, ComplexFloatArray out){
   ASSERT(in.getSize() >= getSize(), "Input array too small");
-  ASSERT(out.getSize() >= getSize(), "Output array too small");
+  ASSERT(out.getSize() >= getSize()/2, "Output array too small");
   arm_rfft_fast_f32(&instance, (float*)in, (float*)out, 0);
 }
 
 void FastFourierTransform::ifft(ComplexFloatArray in, FloatArray out){
-  ASSERT(in.getSize() >= getSize(), "Input array too small");
+  ASSERT(in.getSize() >= getSize()/2, "Input array too small");
   ASSERT(out.getSize() >= getSize(), "Output array too small");
   arm_rfft_fast_f32(&instance, (float*)in, (float*)out, 1);
 }
