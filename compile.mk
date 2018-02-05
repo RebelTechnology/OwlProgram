@@ -5,12 +5,12 @@ CPP_SRC = main.cpp operators.cpp message.cpp system_tables.cpp
 CPP_SRC += Patch.cpp PatchProcessor.cpp
 CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp ComplexShortArray.cpp FastFourierTransform.cpp ShortFastFourierTransform.cpp 
 CPP_SRC += ShortArray.cpp
-CPP_SRC += ScreenBuffer.cpp
 CPP_SRC += Envelope.cpp VoltsPerOctave.cpp Window.cpp
 CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
 CPP_SRC += SmoothValue.cpp PatchParameter.cpp
 CPP_SRC += PatchProgram.cpp 
 # CPP_SRC += ShortPatchProgram.cpp 
+CPP_SRC += ScreenBuffer.cpp
 
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
@@ -30,8 +30,8 @@ PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
 CPPFLAGS += -DARM_CORTEX
 # CPPFLAGS += -DEXTERNAL_SRAM
 CPPFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
-# CPPFLAGS += -mtune=cortex-m4
-CPPFLAGS += -mtune=cortex-m7
+CPPFLAGS += -mtune=cortex-m4
+# CPPFLAGS += -mtune=cortex-m7
 CPPFLAGS += -fpic
 CPPFLAGS += -fpie
 CPPFLAGS += -fdata-sections
