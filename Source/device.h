@@ -5,6 +5,10 @@
 #define DEBUG_MEM
 /* #define STARTUP_CODE */
 
+#ifdef USE_SCREEN
+#define SSD1309
+#endif /* USE_SCREEN */
+
 #define AUDIO_BIGEND
 /* #define AUDIO_SATURATE_SAMPLES // SATURATE adds almost 500 cycles to 24-bit mode */
 #define AUDIO_CHANNELS               2
@@ -13,7 +17,7 @@
 
 #define MAX_BUFFERS_PER_PATCH        8
 #define MAX_NUMBER_OF_PATCHES        32
-#define MAX_NUMBER_OF_PARAMETERS     24
+#define MAX_NUMBER_OF_PARAMETERS     42
 
 #define LED_PORT                     GPIOE
 #define LED_GREEN                    GPIO_Pin_5

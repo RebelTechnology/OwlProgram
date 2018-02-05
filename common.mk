@@ -22,11 +22,13 @@ OBJCOPY=$(TOOLROOT)arm-none-eabi-objcopy
 OBJDUMP=$(TOOLROOT)arm-none-eabi-objdump
 
 # Compilation Flags
-ARCH_FLAGS = -mcpu=cortex-m4 -mthumb
-ARCH_FLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
-# ARCH_FLAGS += -mfloat-abi=soft -msoft-float
-ARCH_FLAGS += -fsingle-precision-constant
-DEF_FLAGS = -DARM_MATH_CM4 -DSTM32F4XX -D__FPU_PRESENT -D__FPU_USED=1
+ARCH_FLAGS = -fsingle-precision-constant -mthumb
+ARCH_FLAGS += -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
+# ARCH_FLAGS += -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-sp-d16
+# ARCH_FLAGS += -mcpu=cortex-m0 -mfloat-abi=soft -msoft-float
+DEF_FLAGS = -DSTM32F4XX -DARM_MATH_CM4 -D__FPU_PRESENT -D__FPU_USED=1
+# DEF_FLAGS = -DSTM32F745xx -DARM_MATH_CM7 -D__FPU_PRESENT -D__FPU_USED=1
+
 INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(DEVICE) -I$(CMSIS) -I$(PERIPH_FILE)/inc -I$(SOURCE)
 INC_FLAGS += -I$(DEVICE)/Include -I$(CMSIS)
 INC_FLAGS += -I$(USB_DEVICE_FILE)/Core/inc -I$(USB_DEVICE_FILE)/Class/cdc/inc

@@ -10,7 +10,7 @@ CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
 CPP_SRC += SmoothValue.cpp PatchParameter.cpp
 CPP_SRC += PatchProgram.cpp 
 # CPP_SRC += ShortPatchProgram.cpp 
-CPP_SRC += ScreenBuffer.cpp
+CPP_SRC += ScreenBuffer.cpp ScreenBufferMono.cpp
 
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
@@ -28,7 +28,7 @@ PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_C_SRC:.c=.o)))
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
 
 CPPFLAGS += -DARM_CORTEX
-# CPPFLAGS += -DEXTERNAL_SRAM
+CPPFLAGS += -DEXTERNAL_SRAM
 CPPFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
 CPPFLAGS += -mtune=cortex-m4
 # CPPFLAGS += -mtune=cortex-m7

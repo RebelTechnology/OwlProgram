@@ -53,6 +53,7 @@ SLOT        ?= 0
 OWLDEVICE   ?= "OWL-MIDI"
 BUILD       ?= $(BUILDROOT)/Build
 LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
+# LDSCRIPT    ?= $(BUILDROOT)/Source/STM32F746ZGTx_FLASH.ld
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
 FIRMWARESENDER ?= Tools/FirmwareSender
 
