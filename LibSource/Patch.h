@@ -166,6 +166,8 @@ public:
   /* virtual void parameterChanged(PatchParameterId pid, float value, int samples){} */
   virtual void processAudio(AudioBuffer& audio) = 0;
 #ifdef USE_SCREEN
+  uint16_t getScreenWidth();
+  uint16_t getScreenHeight();
   virtual void processScreen(ScreenBuffer& screen);
 #endif /* USE_SCREEN */
 #ifdef USE_MIDI_CALLBACK
