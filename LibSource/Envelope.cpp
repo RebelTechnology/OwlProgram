@@ -76,6 +76,10 @@ void AdsrEnvelope::gate(bool state, int delay){
   trig = kGate;
 }
 
+float AdsrEnvelope::getLevel(){
+  return level;
+}
+
 void AdsrEnvelope::setLevel(float newLevel){
   level = newLevel;
 }
