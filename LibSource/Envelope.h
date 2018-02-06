@@ -42,6 +42,7 @@ public:
   void setRetrigger(bool on);
   void gate(bool state);
   void gate(bool state, int gateDelay);
+  float getLevel();
   void setLevel(float newLevel);
   float getNextSample(); // increments envelope one step
   void getEnvelope(FloatArray output); // increments envelope by output buffer length
