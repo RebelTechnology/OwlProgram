@@ -30,6 +30,12 @@ class MidiMessage {
   uint8_t getVelocity(){
     return data[3];
   }
+  uint8_t getControllerNumber(){
+    return data[2];
+  }
+  uint8_t getControllerValue(){
+    return data[3];
+  }
   int16_t getPitchBend(){
     int16_t pb = (data[2] | (data[3]<<7)) - 8192;
     return pb;

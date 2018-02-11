@@ -76,16 +76,27 @@ int Patch::getElapsedCycles(){
 }
 
 #ifdef USE_SCREEN
+  void drawMessage(ScreenBuffer& screen){
+    ProgramVector* pv = getProgramVector();
+    if(pv->message != NULL){
+      screen.setTextSize(1);
+      screen.setTextWrap(true);
+      screen.print(0, 26, pv->message);
+    }    
+  }
+  void drawTitle(const char* title, ScreenBuffer& screen){
+    // draw title
+    screen.setTextSize(2);
+    screen.print(0, 16, title);
+  }
 void Patch::processScreen(ScreenBuffer& screen){
-  screen.clear();
-  ProgramVector* pv = getProgramVector();
-  if(pv->message != NULL)
-    screen.print(2, 26, pv->message);
-  screen.print(2, 46, "cpu/mem: ");
-  screen.print((int)((pv->cycles_per_block)/pv->audio_blocksize)/35);
-  screen.print("% ");
-  screen.print((int)(pv->heap_bytes_used)/1024);
-  screen.print("kB"); 
+  // screen.clear();
+  const char* title = getInitialisingPatchProcessor()->getPatchName();
+  drawTitle(title, screen);
+  drawMessage(screen);
+  // const char title[] = "KickBox";
+  // screen.setTextSize(2);
+  // screen.print(0, 16, title);
 }
 #endif /* USE_SCREEN */
 

@@ -72,7 +72,7 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
     error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
   if(getProgramVector()->registerPatch != NULL)
     getProgramVector()->registerPatch(name, inputs, outputs);
-  processor.setPatch(patch);
+  processor.setPatch(patch, name);
 }
 
 static SampleBuffer* samples;
