@@ -41,10 +41,10 @@ class MidiMessage {
     return pb;
   }
   bool isNoteOn(){
-    return (data[1] & MIDI_STATUS_MASK) == NOTE_ON && getVelocity() != 0;
+    return ((data[1] & MIDI_STATUS_MASK) == NOTE_ON) && getVelocity() != 0;
   }
   bool isNoteOff(){
-    return (data[1] & MIDI_STATUS_MASK) == NOTE_OFF || (isNoteOn() && getVelocity() == 0);
+    return ((data[1] & MIDI_STATUS_MASK) == NOTE_OFF) || (((data[1] & MIDI_STATUS_MASK) == NOTE_ON) && getVelocity() == 0);
   }
   bool isControlChange(){
     return (data[1] & MIDI_STATUS_MASK) == CONTROL_CHANGE;
