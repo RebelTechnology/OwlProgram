@@ -10,7 +10,6 @@ CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
 CPP_SRC += SmoothValue.cpp PatchParameter.cpp
 CPP_SRC += PatchProgram.cpp 
 # CPP_SRC += ShortPatchProgram.cpp 
-CPP_SRC += ScreenBuffer.cpp ScreenBufferDevice.cpp
 
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
@@ -54,6 +53,16 @@ CXXFLAGS = -fno-rtti -fno-exceptions -std=gnu++11
 
 ifdef HEAVY
 CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
+endif
+
+ifeq ($(PLATFORM),PRISM)
+CPPFLAGS    += -DOWL_PRISM
+CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
+endif
+
+ifeq ($(PLATFORM),MAGUS)
+CPPFLAGS    += -DOWL_MAGUS
+CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
 endif
 
 CC=gcc

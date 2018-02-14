@@ -1,10 +1,17 @@
 #include <inttypes.h>
 
+#ifdef OWL_MAGUS
 #define USE_SCREEN
 #define SSD1309
-/* #define SEPS114A */
-
 #define USE_MIDI_CALLBACK
+#endif
+
+#ifdef OWL_PRISM
+#define USE_SCREEN
+#define SEPS114A
+#define USE_MIDI_CALLBACK
+#endif
+
 #define DEBUG_MEM
 /* #define STARTUP_CODE */
 

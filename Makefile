@@ -4,6 +4,10 @@ ifndef CONFIG
   CONFIG=Release
 endif
 
+ifndef PLATFORM
+  PLATFORM=OWL
+endif
+
 DEPS = .FORCE
 TARGET ?= patch
 
@@ -62,6 +66,7 @@ export PATCHNAME PATCHCLASS PATCHSOURCE
 export PATCHFILE PATCHIN PATCHOUT
 export HEAVYTOKEN HEAVYSERVICETOKEN  HEAVY
 export LDSCRIPT CPPFLAGS EMCCFLAGS ASFLAGS
+export PLATFORM
 
 DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
 
