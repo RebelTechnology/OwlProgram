@@ -1,13 +1,12 @@
 #include <inttypes.h>
 
 #define USE_SCREEN
+#define SSD1309
+/* #define SEPS114A */
+
 #define USE_MIDI_CALLBACK
 #define DEBUG_MEM
 /* #define STARTUP_CODE */
-
-#ifdef USE_SCREEN
-#define SSD1309
-#endif /* USE_SCREEN */
 
 #define AUDIO_BIGEND
 /* #define AUDIO_SATURATE_SAMPLES // SATURATE adds almost 500 cycles to 24-bit mode */
