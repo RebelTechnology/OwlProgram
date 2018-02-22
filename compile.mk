@@ -55,13 +55,18 @@ ifdef HEAVY
 CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
 endif
 
-ifeq ($(PLATFORM),PRISM)
+ifeq ($(PLATFORM),Prism)
 CPPFLAGS    += -DOWL_PRISM
 CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
 endif
 
-ifeq ($(PLATFORM),MAGUS)
+ifeq ($(PLATFORM),Magus)
 CPPFLAGS    += -DOWL_MAGUS
+CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
+endif
+
+ifeq ($(PLATFORM),Player)
+CPPFLAGS    += -DOWL_PLAYER
 CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
 endif
 
