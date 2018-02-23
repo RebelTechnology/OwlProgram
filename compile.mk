@@ -55,6 +55,14 @@ ifdef HEAVY
 CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
 endif
 
+ifeq ($(PLATFORM),Alchemist)
+CPPFLAGS    += -DOWL_MICROLAB
+endif
+
+ifeq ($(PLATFORM),Wizard)
+CPPFLAGS    += -DOWL_MINILAB
+endif
+
 ifeq ($(PLATFORM),Prism)
 CPPFLAGS    += -DOWL_PRISM
 CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp

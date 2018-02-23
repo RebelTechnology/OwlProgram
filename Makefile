@@ -114,7 +114,7 @@ sysex: patch $(BUILD)/$(TARGET).syx ## package patch binary as MIDI sysex
 
 run: patch ## upload patch to attached OWL via MIDI
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to run
-	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out $(OWLDEVICE) -run
+	@$(FIRMWARESENDER) -d 20 -in $(BUILD)/$(TARGET).bin -out $(OWLDEVICE) -run
 
 store: patch ## upload and save patch to attached OWL
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to store in slot $(SLOT)
