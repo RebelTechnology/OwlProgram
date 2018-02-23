@@ -30,8 +30,11 @@ public:
   void comb32(int32_t* output){
     int32_t* dest = output;
     for(int i=0; i<size; ++i){
-      *dest++ = ((int32_t)(left[i] * 8388608.0f));
-      *dest++ = ((int32_t)(right[i] * 8388608.0f));
+      // *dest++ = ((int32_t)(left[i] * 8388608.0f));
+      // *dest++ = ((int32_t)(right[i] * 8388608.0f));
+      // Saturate to 24 bits to avoid nasty clipping on cs4271
+      *dest++ = __SSAT((q31_t)(left[i] * 8388608.0f), 24);
+      *dest++ = __SSAT((q31_t)(right[i] * 8388608.0f), 24);
     }
   }
   void split16(int32_t* data, uint16_t blocksize){
