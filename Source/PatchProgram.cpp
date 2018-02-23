@@ -94,10 +94,14 @@ void run(ProgramVector* pv){
   if(pv->audio_format == AUDIO_FORMAT_24B32){
     for(;;){
       pv->programReady();
+#if 0
+  memcpy(pv->audio_output, pv->audio_input, pv->audio_blocksize*2*sizeof(uint32_t));
+#else
       samples->split32(pv->audio_input, pv->audio_blocksize);
       processor.setParameterValues(pv->parameters);
       processor.patch->processAudio(*samples);
       samples->comb32(pv->audio_output);
+#endif
     }
   }else{
     for(;;){
