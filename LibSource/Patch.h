@@ -6,120 +6,14 @@
 #include "FloatArray.h"
 #include "PatchParameter.h"
 #include "SmoothValue.h"
+#include "OpenWareMidiControl.h"
 #ifdef USE_SCREEN
 #include "ScreenBuffer.h"
 #endif /* USE_SCREEN */
 
 #ifdef USE_MIDI_CALLBACK
-#include "MidiStatus.h"
-class MidiMessage {
- public:
-  uint8_t data[3];
-  uint8_t getPort(){
-    return (data[0] & 0xf0)>>4;
-  }
-  uint8_t getChannel(){
-    return (data[1] & MIDI_CHANNEL_MASK);
-  }
-  uint8_t getStatus(){
-    return (data[1] & MIDI_STATUS_MASK);
-  }
-  uint8_t getNote(){
-    return data[2];
-  }
-  uint8_t getVelocity(){
-    return data[3];
-  }
-  uint8_t getControllerNumber(){
-    return data[2];
-  }
-  uint8_t getControllerValue(){
-    return data[3];
-  }
-  int16_t getPitchBend(){
-    int16_t pb = (data[2] | (data[3]<<7)) - 8192;
-    return pb;
-  }
-  bool isNoteOn(){
-    return ((data[1] & MIDI_STATUS_MASK) == NOTE_ON) && getVelocity() != 0;
-  }
-  bool isNoteOff(){
-    return ((data[1] & MIDI_STATUS_MASK) == NOTE_OFF) || (((data[1] & MIDI_STATUS_MASK) == NOTE_ON) && getVelocity() == 0);
-  }
-  bool isControlChange(){
-    return (data[1] & MIDI_STATUS_MASK) == CONTROL_CHANGE;
-  }
-  bool isProgramChange(){
-    return (data[1] & MIDI_STATUS_MASK) == PROGRAM_CHANGE;
-  }
-  bool isPitchBend(){
-    return (data[1] & MIDI_STATUS_MASK) == PITCH_BEND_CHANGE;
-  }
-};
+#include "MidiMessage.h"
 #endif /* USE_MIDI_CALLBACK */
-
-enum PatchParameterId {
-  PARAMETER_A,
-  PARAMETER_B,
-  PARAMETER_C,
-  PARAMETER_D,
-  PARAMETER_E,
-  PARAMETER_F,
-  PARAMETER_G,
-  PARAMETER_H,
-
-  PARAMETER_AA,
-  PARAMETER_AB,
-  PARAMETER_AC,
-  PARAMETER_AD,
-  PARAMETER_AE,
-  PARAMETER_AF,
-  PARAMETER_AG,
-  PARAMETER_AH,
-
-  PARAMETER_BA,
-  PARAMETER_BB,
-  PARAMETER_BC,
-  PARAMETER_BD,
-  PARAMETER_BE,
-  PARAMETER_BF,
-  PARAMETER_BG,
-  PARAMETER_BH,
-
-  PARAMETER_CA,
-  PARAMETER_CB,
-  PARAMETER_CC,
-  PARAMETER_CD,
-  PARAMETER_CE,
-  PARAMETER_CF,
-  PARAMETER_CG,
-  PARAMETER_CH,
-
-  PARAMETER_DA,
-  PARAMETER_DB,
-  PARAMETER_DC,
-  PARAMETER_DD,
-  PARAMETER_DE,
-  PARAMETER_DF,
-  PARAMETER_DG,
-  PARAMETER_DH,
-
-  PARAMETER_FREQ,
-  PARAMETER_GAIN
-};
-
-enum PatchButtonId {
-  BYPASS_BUTTON,
-  PUSHBUTTON,
-  GREEN_BUTTON,
-  RED_BUTTON,
-  BUTTON_A,
-  BUTTON_B,
-  BUTTON_C,
-  BUTTON_D,
-  GATE_BUTTON,
-  MIDI_NOTE_BUTTON = 0x80 // values over 127 are mapped to note numbers
-};
 
 enum PatchChannelId {
   LEFT_CHANNEL = 0,
@@ -178,6 +72,7 @@ public:
 #endif /* USE_SCREEN */
 #ifdef USE_MIDI_CALLBACK
   virtual void processMidi(MidiMessage& msg);
+  virtual void sendMidi(MidiMessage& msg);
 #endif /* USE_MIDI_CALLBACK */
 };
 

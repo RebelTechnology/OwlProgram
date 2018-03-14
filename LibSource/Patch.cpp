@@ -102,6 +102,11 @@ void Patch::processScreen(ScreenBuffer& screen){
 
 #ifdef USE_MIDI_CALLBACK
 void Patch::processMidi(MidiMessage& msg){}
+
+void Patch::sendMidi(MidiMessage& msg){
+  doMidiSend(msg.data[0], msg.data[1], msg.data[2], msg.data[3]);
+}
+
 #endif /* USE_MIDI_CALLBACK */
 
 #include "MemoryBuffer.hpp"
