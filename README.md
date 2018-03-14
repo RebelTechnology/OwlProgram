@@ -85,7 +85,7 @@ To compile and run a Gen patch called `Foo`:
 Note: use OWL parameters in Gen with parameter names: `A`, `B`, `C`, `D`, `Exp`, and `Push`.
 
 # References
-[1] https://launchpad.net/gcc-arm-embedded
+[1] https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
 [2] https://github.com/pingdynasty/FirmwareSender
 [3] http://emscripten.org
 [4] http://faust.grame.fr/
