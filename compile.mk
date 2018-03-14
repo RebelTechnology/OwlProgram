@@ -53,29 +53,21 @@ CXXFLAGS = -fno-rtti -fno-exceptions -std=gnu++11
 
 ifdef HEAVY
 CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
-endif
-
-ifeq ($(PLATFORM),Alchemist)
+else ifeq ($(PLATFORM),Alchemist)
 CPPFLAGS    += -DOWL_MICROLAB
-endif
-
-ifeq ($(PLATFORM),Wizard)
+else ifeq ($(PLATFORM),Wizard)
 CPPFLAGS    += -DOWL_MINILAB
-endif
-
-ifeq ($(PLATFORM),Prism)
+else ifeq ($(PLATFORM),Prism)
 CPPFLAGS    += -DOWL_PRISM
 CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
-endif
-
-ifeq ($(PLATFORM),Magus)
+else ifeq ($(PLATFORM),Magus)
 CPPFLAGS    += -DOWL_MAGUS
 CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
-endif
-
-ifeq ($(PLATFORM),Player)
+else ifeq ($(PLATFORM),Player)
 CPPFLAGS    += -DOWL_PLAYER
 CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
+else
+CPPFLAGS    += -DOWL_CLASSIC
 endif
 
 CC=gcc
