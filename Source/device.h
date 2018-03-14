@@ -23,6 +23,10 @@
 #define AUDIO_MAX_BLOCK_SIZE         512
 #endif
 
+#if !defined OWL_CLASSIC
+#define AUDIO_SATURATE_SAMPLES
+#endif
+
 #define DEBUG_MEM
 /* #define STARTUP_CODE */
 

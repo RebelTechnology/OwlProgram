@@ -1,6 +1,8 @@
 #ifndef __SAMPLEBUFFER_H__
 #define __SAMPLEBUFFER_H__
 
+// https://stackoverflow.com/questions/41675438/fastest-way-to-swap-alternate-bytes-on-arm-cortex-m4-using-gcc
+
 #include <stdint.h>
 #include <string.h>
 #include "Patch.h"
@@ -8,6 +10,9 @@
 #ifdef ARM_CORTEX
 #include "arm_math.h"
 #endif //ARM_CORTEX
+
+#undef AUDIO_SATURATE_SAMPLES
+// #define AUDIO_SATURATE_SAMPLES
 
 class SampleBuffer : public AudioBuffer {
 protected:
@@ -30,35 +35,77 @@ public:
   void comb32(int32_t* output){
     int32_t* dest = output;
     for(int i=0; i<size; ++i){
-      // *dest++ = ((int32_t)(left[i] * 8388608.0f));
-      // *dest++ = ((int32_t)(right[i] * 8388608.0f));
+#ifdef AUDIO_SATURATE_SAMPLES
       // Saturate to 24 bits to avoid nasty clipping on cs4271
       *dest++ = __SSAT((q31_t)(left[i] * 8388608.0f), 24);
       *dest++ = __SSAT((q31_t)(right[i] * 8388608.0f), 24);
+#else
+      *dest++ = ((int32_t)(left[i] * 8388608.0f));
+      *dest++ = ((int32_t)(right[i] * 8388608.0f));
+#endif
     }
   }
+
+// #define MULTIPLIER 2147483648
+#define MULTIPLIER 8388608
+// #define MULTIPLIER 1073741824
+  
+#if 0
+  void split24(int32_t* data, uint16_t blocksize){
+    size = blocksize;
+    uint8_t* input = (uint8_t*)data;
+    int32_t qint;
+    for(int i=0; i<size; ++i){
+      qint =( *input++)<<16;
+      qint |= (*input++)<<24;
+      qint |= (*input++);
+      qint |= (*input++)<<8;
+      left[i] = qint * mul;
+      qint =( *input++)<<16;
+      qint |= (*input++)<<24;
+      qint |= (*input++);
+      qint |= (*input++)<<8;
+      right[i] = qint * mul;
+    }
+  }
+
+  void comb24(int32_t* output){
+    uint8_t* dest = (uint8_t*)output;
+    int32_t qint;
+    for(int i=0; i<size; ++i){
+#ifdef AUDIO_SATURATE_SAMPLES
+      qint = __SSAT((q31_t)(left[i] * MULTIPLIER), 24);
+#else
+      qint = left[i] * MULTIPLIER;
+#endif
+      *dest++ = qint >> 24;
+      *dest++ = qint >> 16;
+      *dest++ = qint >> 8;
+      *dest++ = qint;
+#ifdef AUDIO_SATURATE_SAMPLES
+      qint = __SSAT((q31_t)(right[i] * MULTIPLIER), 24);
+#else
+      qint = right[i] * MULTIPLIER;
+#endif
+      *dest++ = qint >> 24;
+      *dest++ = qint >> 16;
+      *dest++ = qint >> 8;
+      *dest++ = qint;
+    }
+  }
+#endif
+
   void split16(int32_t* data, uint16_t blocksize){
     uint16_t* input = (uint16_t*)data;
     size = blocksize;
-    // for(int i=0; i<size; ++i){
-    //   left[i] = ((input[i*4]<<16) | input[i*4+1]) * mul;
-    //   right[i] = ((input[i*4+2]<<16) | input[i*4+3]) * mul;
-    // }
-    float* l = (float*)left;
-    float* r = (float*)right;
     int32_t qint;
-    while(blocksize){
+    for(int i=0; i<size; ++i){
       qint = (*input++)<<16;
       qint |= *input++;
-      *l++ = qint * mul;
+      left[i] = qint * mul;
       qint = (*input++)<<16;
       qint |= *input++;
-      *r++ = qint * mul;
-      // *l++ = (int32_t)((*input++)<<16|*++input) * mul;
-      // *r++ = (int32_t)((*input++)<<16|*++input) * mul;
-      // *l++ = (int32_t)((*input++)<<16|*++input) * mul;
-      // *r++ = (int32_t)((*input++)<<16|*++input) * mul;
-      blocksize--;
+      right[i] = qint * mul;
     }
   }
   void comb16(int32_t* output){
@@ -68,24 +115,16 @@ public:
     uint16_t* dst = (uint16_t*)output;
     int32_t qint;
     while(blkCnt > 0u){
-#ifdef AUDIO_SATURATE_SAMPLES
-      qint = clip_q63_to_q31((q63_t)(*l++ * 2147483648.0f));
-      *dst++ = qint >> 16;
-      *dst++ = qint & 0xffff;
-      qint = clip_q63_to_q31((q63_t)(*r++ * 2147483648.0f));
-      *dst++ = qint >> 16;
-      *dst++ = qint & 0xffff;
-#else /* AUDIO_SATURATE_SAMPLES */
       qint = *l++ * 2147483648.0f;
       *dst++ = qint >> 16;
       *dst++ = qint & 0xffff;
       qint = *r++ * 2147483648.0f;
       *dst++ = qint >> 16;
       *dst++ = qint & 0xffff;
-#endif /* AUDIO_SATURATE_SAMPLES */
       blkCnt--;
     }
   }
+
   void clear(){
     left.clear();
     right.clear();
