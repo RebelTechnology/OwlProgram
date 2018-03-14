@@ -32,7 +32,7 @@ struct ComplexFloat {
   @return The phase of the complex number.
   */  
   float getPhase(){
-    return atan2(im,re);
+    return atan2f(im,re);
   }
   
   /**
@@ -41,7 +41,7 @@ struct ComplexFloat {
   @param phase The new phase of the complex number
   */
   void setPhase(float phase){
-    float magnitude=getMagnitude();
+    float magnitude = getMagnitude();
     setPolar(magnitude, phase);
   }
   
@@ -51,7 +51,7 @@ struct ComplexFloat {
   @param magnitude The new magnitude of the complex number
   */
   void setMagnitude(float magnitude){
-    float phase=getPhase();
+    float phase = getPhase();
     setPolar(magnitude, phase);
   }
   
@@ -62,8 +62,8 @@ struct ComplexFloat {
   @param phase The new phase of the complex number
   */
   void setPolar(float magnitude, float phase){
-    re=magnitude*cosf(phase);
-    im=magnitude*sinf(phase);
+    re = magnitude*cosf(phase);
+    im = magnitude*sinf(phase);
   }
 };
 
@@ -119,49 +119,49 @@ public:
   float mag(const int i);
   
   /**
-    The magnitudes of the elements of the array.
-    @param[out] destination The array where the magnitude values will be stored.
-  */  
+   * The magnitudes of the elements of the array.
+   * @param[out] destination The array where the magnitude values will be stored.
+   */  
   void getMagnitudeValues(FloatArray destination);
   
   /**
-    The magnitude squared of an element of the array.
-    @param i The index of the element
-    @return The magnitude squared of the element
-  */  
+   * The magnitude squared of an element of the array. Faster than mag().
+   * @param i The index of the element
+   * @return The magnitude squared of the element
+   */  
   float mag2(const int i);
   
   /**
-    The squared magnitudes of the elements of the array.
-    @param[out] destination The array where the magnitude squared values will be stored.
-  */  
+   * The squared magnitudes of the elements of the array. Faster than getMagnitudeValues().
+   * @param[out] destination The array where the magnitude squared values will be stored.
+   */  
   void getMagnitudeSquaredValues(FloatArray destination);
   
-   /**
-    The complex conjugate values of the element of the array.
-    @param[out] destination The array where the complex conjugate values will be stored.
-  */  
+  /**
+   * The complex conjugate values of the element of the array.
+   * @param[out] destination The array where the complex conjugate values will be stored.
+   */  
   void getComplexConjugateValues(ComplexFloatArray destination);
   
-   /**
-    Complex dot product between arrays.
-    @param[in] operand2 The second operand of the dot product
-    @param[out] result The array where the result of the dot product is stored 
-  */  
+  /**
+   * Complex dot product between arrays.
+   * @param[in] operand2 The second operand of the dot product
+   * @param[out] result The array where the result of the dot product is stored 
+   */  
   void complexDotProduct(ComplexFloatArray operand2, ComplexFloat& result);
 
-   /**
-    Complex by complex multiplication between arrays.
-    @param[in] operand2 The second operand of the multiplication
-    @param[out] result The array where the result of the multiplication is stored 
-  */  
+  /**
+   * Complex by complex multiplication between arrays.
+   * @param[in] operand2 The second operand of the multiplication
+   * @param[out] result The array where the result of the multiplication is stored 
+   */  
   void complexByComplexMultiplication(ComplexFloatArray operand2, ComplexFloatArray result);
   
-   /**
-    Complex by real multiplication between arrays.
-    @param[in] operand2 The second operand of the multiplication
-    @param[out] result The array where the result of the multiplication is stored 
-  */ 
+  /**
+   * Complex by real multiplication between arrays.
+   * @param[in] operand2 The second operand of the multiplication
+   * @param[out] result The array where the result of the multiplication is stored 
+   */ 
   void complexByRealMultiplication(FloatArray operand2, ComplexFloatArray result);
 
   /**
@@ -387,6 +387,13 @@ public:
   void setAll(float valueRe, float valueIm);
 
   /**
+   * Get polar coordinates for all the elements in the array.
+   * @param[out] magnitude An array containing the magnitudes.
+   * @param[out] phase An array containing the phases.
+  */
+  void getPolar(FloatArray magnitude, FloatArray phase);
+
+  /**
    * Set all the elements in the array using polar coordinates.
    * @param[in] magnitude An array containing the magnitudes.
    * @param[in] phase An array containing the phases.
@@ -401,6 +408,12 @@ public:
    * @param[in] count Number of elements to set
   */  
   void setPolar(FloatArray magnitude, FloatArray phase, int offset, int count);
+    
+  /**
+   * The phases of the elements of the array.
+   * @param[out] destination The array where the phase values will be stored.
+   */  
+  void getPhaseValues(FloatArray destination);
 
   /**
    * Set the phase of the elements of the array, leaving the magnitude unchanged.

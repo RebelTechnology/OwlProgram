@@ -184,7 +184,7 @@ class OwlUI : public UI
     virtual void addHorizontalBargraph(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT lo, FAUSTFLOAT hi) 									{ skip(); }
     virtual void addVerticalBargraph  (const char* label, FAUSTFLOAT* zone, FAUSTFLOAT lo, FAUSTFLOAT hi) 									{ skip(); }
     // -- soundfiles
-    virtual void addSoundfile(const char* label, const char* filename, Soundfile** sf_zone) {}
+    virtual void addSoundfile(const char* label, const char* filename, Soundfile** sf_zone) { skip(); }
 
 	// -- metadata declarations
 
