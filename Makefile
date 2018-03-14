@@ -50,7 +50,7 @@ endif
 PATCHIN     ?= 2
 PATCHOUT    ?= 2
 SLOT        ?= 0
-OWLDEVICE   ?= "OWL-MIDI"
+OWLDEVICE   ?= OWL-MIDI
 BUILD       ?= $(BUILDROOT)/Build
 LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
@@ -108,11 +108,11 @@ sysex: patch $(BUILD)/$(TARGET).syx ## package patch binary as MIDI sysex
 
 run: patch ## upload patch to attached OWL via MIDI
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to run
-	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out $(OWLDEVICE) -run
+	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out "$(OWLDEVICE)" -run
 
 store: patch ## upload and save patch to attached OWL
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to store in slot $(SLOT)
-	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out $(OWLDEVICE) -store $(SLOT)
+	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out "$(OWLDEVICE)" -store $(SLOT)
 
 docs: ## generate HTML documentation
 	@doxygen Doxyfile
