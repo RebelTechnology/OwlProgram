@@ -5,13 +5,13 @@ See http://hoxtonowl.com for more details of the Open Ware Laboratory.
 # Instructions
 
 ## Prerequisites
-* gcc arm compiler (to make patch binary) [[1](#ref1)]
-* FirmwareSender (to make sysex and run) [[2](#ref2)]
-* emcc (to make web) [3](#ref3)
-* faust2owl (to compile FAUST patches) [[4](#ref4)]
-* Enzien Audio account (to compile PD patches) [[5](#ref5)]
+* gcc arm compiler (to make patch binary) [[1]](#ref1)
+* FirmwareSender (to make sysex and run) [[2]](#ref2)
+* emcc (to make web) [[3]](#ref3)
+* faust2owl (to compile FAUST patches) [[4]](#ref4)
+* Enzien Audio account (to compile PD patches) [[5]](#ref5)
 
-* On Windows, you'll need a MAKE utility [[6](#ref6)].  You'll also need to open common.mk and point TOOLROOT to your gcc installation directory, using a path string without spaces (such as using 8.3 filenames).
+* On Windows, you'll need a MAKE utility [[6]](#ref6).  You'll also need to open common.mk and point TOOLROOT to your gcc installation directory, using a path string without spaces (such as using 8.3 filenames).
 
 ## Make targets
 * make patch: build patch binary
