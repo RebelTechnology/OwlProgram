@@ -87,7 +87,7 @@ Note: use OWL parameters in Gen with parameter names: `A`, `B`, `C`, `D`, `Exp`,
 # References
 <a name="ref1">[1]</a> https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
 
-<a name="ref2">[2]</a> https://github.com/pingdynasty/FirmwareSender
+<a name="ref2">[2]</a> https://github.com/pingdynasty/FirmwareSender/releases
 
 <a name="ref3">[3]</a> http://emscripten.org
 
