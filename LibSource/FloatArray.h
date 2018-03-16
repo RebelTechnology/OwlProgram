@@ -300,6 +300,18 @@ public:
   void correlateInitialized(FloatArray operand2, FloatArray destination);
 
   /**
+   * Convert gains to decibel values: dB = log10(gain)*20
+   * Gain 0.5 = -6dB, 1.0 = 0dB, 2.0 = +6dB
+   */
+  void gainToDecibel(FloatArray destination);
+
+  /**
+   * Convert decibel to gains values: gain = (dB/20)^10
+   * -6dB = 0.5, 0dB = 1.0, +6dB = 2.0
+   */  
+  void decibelToGain(FloatArray destination);
+
+  /**
    * Set all the values in the array.
    * Sets all the elements of the array to **value**.
    * @param[in] value all the elements are set to this value.
