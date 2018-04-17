@@ -119,7 +119,7 @@ int PatchProcessor::getBlockSize(){
 }
 
 void PatchProcessor::setDefaultValue(int pid, float value){
-  doSetPatchParameter(pid, value*4095);
+  doSetPatchParameter(pid, value*4096);
 }
 
 void PatchProcessor::setDefaultValue(int pid, int value){
