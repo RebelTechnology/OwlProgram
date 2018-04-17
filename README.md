@@ -5,13 +5,13 @@ See http://hoxtonowl.com for more details of the Open Ware Laboratory.
 # Instructions
 
 ## Prerequisites
-* gcc arm compiler (to make patch binary) [1]
-* FirmwareSender (to make sysex and run) [2]
-* emcc (to make web) [3]
-* faust2owl (to compile FAUST patches) [4]
-* Enzien Audio account (to compile PD patches) [5]
+* gcc arm compiler (to make patch binary) [[1]](#ref1)
+* FirmwareSender (to make sysex and run) [[2]](#ref2)
+* emcc (to make web) [[3]](#ref3)
+* faust2owl (to compile FAUST patches) [[4]](#ref4)
+* Enzien Audio account (to compile PD patches) [[5]](#ref5)
 
-* On Windows, you'll need a MAKE utility [6].  You'll also need to open common.mk and point TOOLROOT to your gcc installation directory, using a path string without spaces (such as using 8.3 filenames).
+* On Windows, you'll need a MAKE utility [[6]](#ref6).  You'll also need to open common.mk and point TOOLROOT to your gcc installation directory, using a path string without spaces (such as using 8.3 filenames).
 
 ## Make targets
 * make patch: build patch binary
@@ -94,9 +94,14 @@ To compile and run a Maximilian patch called `Foo`:
 Note: use OWL parameters in Maximilian by adding maxiParam objects to your patch.
 
 # References
-[1] https://launchpad.net/gcc-arm-embedded
-[2] https://github.com/pingdynasty/FirmwareSender
-[3] http://emscripten.org
-[4] http://faust.grame.fr/
-[5] https://enzienaudio.com
-[6] http://sourceforge.net/projects/mingw/
+<a name="ref1">[1]</a> https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
+
+<a name="ref2">[2]</a> https://github.com/pingdynasty/FirmwareSender/releases
+
+<a name="ref3">[3]</a> http://emscripten.org
+
+<a name="ref4">[4]</a> http://faust.grame.fr/
+
+<a name="ref5">[5]</a> https://enzienaudio.com
+
+<a name="ref6">[6]</a> http://sourceforge.net/projects/mingw/

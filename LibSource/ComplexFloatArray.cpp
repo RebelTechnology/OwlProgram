@@ -38,6 +38,7 @@ float ComplexFloatArray::mag2(const int i){
 }
 
 void ComplexFloatArray::getMagnitudeSquaredValues(FloatArray destination){
+  ASSERT(destination.getSize()>=size, "Wrong array size");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_cmplx_mag_squared_f32((float*)data, (float*)destination, size);
@@ -46,6 +47,21 @@ void ComplexFloatArray::getMagnitudeSquaredValues(FloatArray destination){
     destination[i]=mag2(i);
   }
 #endif  
+}
+
+void ComplexFloatArray::getPolar(FloatArray magnitude, FloatArray phase){
+  ASSERT(magnitude.getSize()>=size, "Wrong array size");
+  ASSERT(phase.getSize()>=size, "Wrong array size");
+  for(int i=0; i<size; i++){
+    magnitude[i] = data[i].getMagnitude();
+    phase[i] = data[i].getPhase();
+  }
+}
+
+void ComplexFloatArray::getPhaseValues(FloatArray destination){
+  ASSERT(destination.getSize()>=size, "Wrong array size");
+  for(int i=0; i<size; i++)
+    destination[i] = data[i].getPhase();
 }
 
 void ComplexFloatArray::complexDotProduct(ComplexFloatArray operand2, ComplexFloat& result){
@@ -293,6 +309,7 @@ void ComplexFloatArray::setPolar(FloatArray magnitude, FloatArray phase, int off
     data[n].setPolar(magnitude[n], phase[n]);
   }
 }
+
 void ComplexFloatArray::setPhase(FloatArray phase){
   setPhase(phase, 0, size);
 }

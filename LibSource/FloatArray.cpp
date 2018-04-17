@@ -477,6 +477,18 @@ void FloatArray::correlateInitialized(FloatArray operand2, FloatArray destinatio
 #endif /* ARM_CORTEX */  
 }
 
+void FloatArray::gainToDecibel(FloatArray destination){
+  ASSERT(destination.getSize()>=size, "Wrong array size");
+  for(int i=0; i<size; i++)
+    destination[i] = log10f(data[i])*20.0;
+}
+
+void FloatArray::decibelToGain(FloatArray destination){
+  ASSERT(destination.getSize()>=size, "Wrong array size");
+  for(int i=0; i<size; i++)
+    destination[i] = exp10f(data[i]*0.05);
+}
+
 FloatArray FloatArray::create(int size){
   FloatArray fa(new float[size], size);
   fa.clear();

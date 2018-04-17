@@ -183,11 +183,13 @@ class OwlUI : public UI
 
     virtual void addHorizontalBargraph(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT lo, FAUSTFLOAT hi) 									{ skip(); }
     virtual void addVerticalBargraph  (const char* label, FAUSTFLOAT* zone, FAUSTFLOAT lo, FAUSTFLOAT hi) 									{ skip(); }
+    // -- soundfiles
+    virtual void addSoundfile(const char* label, const char* filename, Soundfile** sf_zone) { skip(); }
 
 	// -- metadata declarations
 
     virtual void declare(FAUSTFLOAT* z, const char* k, const char* id) {
-    	if (strcasecmp(k,"OWL") == 0) {
+    	if(strcasecmp(k,"OWL") == 0){
 	  if(strncasecmp(id, "PARAMETER_", 10) == 0)
 	    id += 10;
 	  if (strcasecmp(id,"A") == 0)  fParameter = PARAMETER_A;
@@ -200,7 +202,14 @@ class OwlUI : public UI
 	  else if (strcasecmp(id,"H") == 0)  fParameter = PARAMETER_H;
 	  else if (strcasecmp(id,"PUSH") == 0)  fButton = PUSHBUTTON;
 	  else if (strcasecmp(id,"BYPASS") == 0)  fButton = BYPASS_BUTTON;
-    	}
+    	}else if(strcasecmp(k,"freq") == 0){
+	  fParameter = PARAMETER_FREQ;	  
+    	}else if(strcasecmp(k,"gain") == 0){
+	  fParameter = PARAMETER_GAIN;
+    	}else if(strcasecmp(k,"gate") == 0){
+	  fButton = GATE_BUTTON;
+	}
+
     }
 };
 
@@ -248,7 +257,17 @@ class FaustPatch : public Patch
 public:
 
     FaustPatch() : fUI(this)
-    {      
+    {
+      // // Allocate memory for dsp object first to ensure high priority memory is used
+      // void* allocated = mem.allocate(sizeof(mydsp));
+      // // DSP static data is initialised using classInit.
+      // mydsp::classInit(int(getSampleRate()), &mem);
+      // // call mydsp constructor
+      // fDSP = new (allocated) mydsp();
+      // fDSP->instanceInit(int(getSampleRate()));
+      // // Map OWL parameters and faust widgets 
+      // fDSP->buildUserInterface(&fUI);
+
       fDSP = new mydsp();
       mydsp::fManager = &mem; // set custom memory manager
       mydsp::classInit(int(getSampleRate())); // initialise static tables
@@ -257,8 +276,9 @@ public:
     }
 
     ~FaustPatch(){
-      delete fDSP;
-      mydsp::classDestroy(); // destroy static tables
+      mem.destroy(fDSP);
+      // DSP static data is destroyed using classDestroy.
+      mydsp::classDestroy();
     }
     
     void processAudio(AudioBuffer &buffer)
