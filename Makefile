@@ -54,7 +54,7 @@ endif
 PATCHIN     ?= 2
 PATCHOUT    ?= 2
 SLOT        ?= 0
-OWLDEVICE   ?= OWL-MIDI
+OWLDEVICE   ?= OWL-MIDI*
 BUILD       ?= $(BUILDROOT)/Build
 LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
 # LDSCRIPT    ?= $(BUILDROOT)/Source/STM32F746ZGTx_FLASH.ld
