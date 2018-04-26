@@ -69,7 +69,7 @@ int main(void){
     return -1;
   }
 
-  if(pv->audio_blocksize <= 0 || pv->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){     
+  if(pv->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){     
     error(CONFIGURATION_ERROR_STATUS, "Invalid blocksize");
     return -1;
   }
