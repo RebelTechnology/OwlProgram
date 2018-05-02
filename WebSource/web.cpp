@@ -74,6 +74,36 @@ int WEB_getButtons(){
   return buttons;
 }
 
+int WEB_processMidi(int port, int status, int d1, int d2){
+  switch(status & 0xf0){
+  case 0x80: // NOTE_OFF
+    getInitialisingPatchProcessor()->patch->buttonChanged(MIDI_NOTE_BUTTON+d1, 0);
+    break;
+  case 0x90: // NOTE_ON
+    getInitialisingPatchProcessor()->patch->buttonChanged(MIDI_NOTE_BUTTON+d1, d2);
+    break;
+  case 0xE0: // PITCH_BEND_CHANGE
+    // set PARAMETER_G
+    if(PARAMETER_G < NOF_PARAMETERS)
+      parameters[PARAMETER_G] = (d1 | (d2<<7)) - 8192;
+    break;
+  case 0xB0: // CONTROL_CHANGE
+    // todo: PARAMETER_F for CC 1
+    if(d1 == 0x01 && PARAMETER_F < NOF_PARAMETERS)
+      parameters[PARAMETER_F] = d2<<5;
+    break;
+  }    
+ // todo: set PARAMETER_FREQ, PARAMETER_GAIN
+#ifdef USE_MIDI_CALLBACK
+  static MidiMessage msg;
+  msg.data[0] = port;
+  msg.data[1] = status;
+  msg.data[2] = d1;
+  msg.data[3] = d2;
+  getInitialisingPatchProcessor()->patch->processMidi(msg);
+#endif
+}
+
 int WEB_setup(long fs, int bs){
   for(int i=0; i<NOF_PARAMETERS; ++i){
     parameters[i] = 0;
@@ -109,7 +139,7 @@ int WEB_setup(long fs, int bs){
 
   return 0;
 }
-
+	       
 class MemBuffer : public AudioBuffer {
 protected:
   float** buffer;
