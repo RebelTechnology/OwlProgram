@@ -1,12 +1,23 @@
-#include <string.h>
-#include <inttypes.h>
 #include "ProgramVector.h"
 #include "Patch.h"
 #include "device.h"
 #include "main.h"
 #include "message.h"
 #include "PatchProcessor.h"
-#include "malloc.h"
+
+#ifdef malloc
+#undef malloc
+#endif
+#ifdef calloc
+#undef calloc
+#endif
+#ifdef free
+#undef free
+#endif
+
+#include <string.h>
+#include <inttypes.h>
+#include <malloc.h>
 #include <math.h>
 #include <time.h>
 
@@ -28,6 +39,7 @@ extern "C"{
   void WEB_setParameter(int pid, float value);
   void WEB_setButtons(int values);
   int WEB_getButtons();
+  int WEB_processMidi(int port, int status, int d1, int d2);
   char* WEB_getMessage();
   char* WEB_getStatus();
   char* WEB_getPatchName();
@@ -77,10 +89,10 @@ int WEB_getButtons(){
 int WEB_processMidi(int port, int status, int d1, int d2){
   switch(status & 0xf0){
   case 0x80: // NOTE_OFF
-    getInitialisingPatchProcessor()->patch->buttonChanged(MIDI_NOTE_BUTTON+d1, 0);
+    getInitialisingPatchProcessor()->patch->buttonChanged((PatchButtonId)(MIDI_NOTE_BUTTON+d1), 0, 0);
     break;
   case 0x90: // NOTE_ON
-    getInitialisingPatchProcessor()->patch->buttonChanged(MIDI_NOTE_BUTTON+d1, d2);
+    getInitialisingPatchProcessor()->patch->buttonChanged((PatchButtonId)(MIDI_NOTE_BUTTON+d1), d2, 0);
     break;
   case 0xE0: // PITCH_BEND_CHANGE
     // set PARAMETER_G
@@ -102,6 +114,7 @@ int WEB_processMidi(int port, int status, int d1, int d2){
   msg.data[3] = d2;
   getInitialisingPatchProcessor()->patch->processMidi(msg);
 #endif
+  return 0;
 }
 
 int WEB_setup(long fs, int bs){
@@ -261,15 +274,9 @@ int serviceCall(int service, void** params, int len){
 }
 
 void *pvPortMalloc( size_t xWantedSize ){
-#ifdef malloc
-#undef malloc
-#endif
   return malloc(xWantedSize);
 }
 void vPortFree( void *pv ){
-#ifdef free
-#undef free
-#endif
   free(pv);
 }
 
