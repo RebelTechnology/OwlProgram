@@ -11,11 +11,11 @@ public:
   virtual float getNextSample(float fm){ return 0.0f; }
   /* Fills @param output with samples */
   virtual void getSamples(FloatArray output){
-    for(int i=0; i<output.getSize(); ++i)
+    for(size_t i=0; i<output.getSize(); ++i)
       output[i] = getNextSample();
   }
   virtual void getSamples(FloatArray output, FloatArray fm){
-    for(int i=0; i<output.getSize(); ++i)
+    for(size_t i=0; i<output.getSize(); ++i)
       output[i] = getNextSample(fm[i]);
   }
   virtual void setSampleRate(float value){}

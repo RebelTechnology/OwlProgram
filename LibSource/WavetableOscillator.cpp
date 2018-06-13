@@ -2,9 +2,9 @@
 #include "basicmaths.h"
 #include <stdint.h>
 
-WavetableOscillator* WavetableOscillator::create(float sr, int size) {
+WavetableOscillator* WavetableOscillator::create(float sr, size_t size) {
   FloatArray wave = FloatArray::create(size);
-  for(int i=0; i<size; ++i)
+  for(size_t i=0; i<size; ++i)
     wave[i] = sin(2*M_PI*i/(size-1));    
   return new WavetableOscillator(sr, wave);
 }
@@ -45,6 +45,6 @@ float WavetableOscillator::getNextSample(){
 }
 
 void WavetableOscillator::getSamples(FloatArray samples){
-  for(int i=0; i<samples.getSize();++i)
+  for(size_t i=0; i<samples.getSize();++i)
     samples[i] = getNextSample();
 }

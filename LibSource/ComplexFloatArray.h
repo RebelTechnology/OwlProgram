@@ -73,15 +73,13 @@ private:
   int size;
 public:
   /**Constructor
-
     Initializes size to 0.
   */
   ComplexFloatArray() :
     data(NULL), size(0) {}
   
   /**
-    Constructor.
-      
+    Constructor.      
     @param array A pointer to an array of ComplexFloat
     @param size The length of the rray
   */
@@ -89,8 +87,7 @@ public:
     data(array), size(size) {}
       
   /** 
-    The real part of an element of the array.
-      
+    The real part of an element of the array.      
     @param i The index of the element
     @return The real part of the element
   */
