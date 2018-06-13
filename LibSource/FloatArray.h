@@ -152,6 +152,12 @@ public:
   float getMean();
   
   /**
+   * Sum of the array.
+   * Gets the sum of the values in the array.
+  */
+  float getSum();
+  
+  /**
    * Power of the array.
    * Gets the power of the values in the array.
   */

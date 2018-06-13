@@ -141,6 +141,13 @@ float FloatArray::getRms(){
   return result;
 }
 
+float FloatArray::getSum(){
+  float result = 0;
+  for(int n=0; n<size; n++)
+    result += data[n];
+  return result;
+} 
+
 float FloatArray::getMean(){
   float result;
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
