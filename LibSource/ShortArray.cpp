@@ -96,7 +96,7 @@ void ShortArray::rectify(ShortArray& destination){ //this is actually "copy data
 #ifdef ARM_CORTEX   
   arm_abs_q15(data, destination.getData(), size);
 #else
-  int minSize= min(size,destination.getSize()); //TODO: shall we take this out and allow it to segfault?
+  size_t minSize= min(size,destination.getSize()); //TODO: shall we take this out and allow it to segfault?
   for(size_t n=0; n<minSize; n++){
     destination[n] = fabs(data[n]);
   }
@@ -524,7 +524,7 @@ void ShortArray::convolve(ShortArray operand2, ShortArray destination){
 #else
   size_t size2=operand2.getSize();
   for (size_t n=0; n<size+size2-1; n++){
-    int n1=n;
+    size_t n1=n;
     destination[n] =0;
     for(size_t k=0; k<size2; k++){
       if(n1>=0 && n1<size)

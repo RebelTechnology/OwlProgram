@@ -18,10 +18,9 @@ public:
   SmoothValue();
   SmoothValue(T lambda);
   SmoothValue(T lambda, T initialValue);
-  SmoothValue(const SmoothValue<T>& other){
+  SmoothValue(const SmoothValue<T>& other)
+    : value(other.value), lambda(other.lambda){
     // copy constructor: not needed?
-    value = other.value;
-    lambda = other.lambda;
   }
   void update(T newValue);
   T getValue(){

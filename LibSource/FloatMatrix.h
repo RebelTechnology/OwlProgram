@@ -13,19 +13,19 @@ private:
   arm_matrix_instance_f32 instance;
 #else
   float* data;
-  int rows;
-  int columns;
+  size_t rows;
+  size_t columns;
 #endif
 public:
   FloatMatrix();
-  FloatMatrix(float* data, int rows, int columns);
+  FloatMatrix(float* data, size_t rows, size_t columns);
 
   /** Get the number of elements in this matrix */
   int getSize() const{
     return getRows()*getColumns();
   }
 
-  int getRows() const{
+  size_t getRows() const{
 #ifdef ARM_CORTEX
     return instance.numRows;
 #else
@@ -33,7 +33,7 @@ public:
 #endif
   }
 
-  int getColumns() const{
+  size_t getColumns() const{
 #ifdef ARM_CORTEX
     return instance.numCols;
 #else
@@ -143,7 +143,7 @@ public:
    * @return a FloatMatrix which **data** point to the newly allocated memory and **rows** and **columns** initialized to the proper values.
    * @remarks a FloatMatrix created with this method should be destroyed invoking the FloatMatrix::destroy() method.
   */
-  static FloatMatrix create(int rows, int columns);
+  static FloatMatrix create(size_t rows, size_t columns);
   
   /**
    * Destroys a FloatMatrix created with the create() method.
