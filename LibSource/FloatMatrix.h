@@ -125,7 +125,7 @@ public:
   }
 
   float* operator [](const int index){
-    return &data[index*getColumns()];
+    return &getData()[index*getColumns()];
   }
 
   /**
@@ -145,22 +145,14 @@ public:
    * @return the float stored at index @param index
   */
   float getElement(int row, int col){
-#ifdef ARM_CORTEX
-    return instance.pData[row*getColumns()+col];
-#else
-    return data[row*getColumns()+col];
-#endif
+    return getData()[row*getColumns()+col];
   }
 
   /**
    * Set a single float in the FloatMatrix.
   */
   void setElement(int row, int col, float value){
-#ifdef ARM_CORTEX
-    instance.pDdata[row*getColumns()+col] = value;
-#else
-    data[row*getColumns()+col] = value;
-#endif
+    getData()[row*getColumns()+col] = value;
   }
 
   void softmax(FloatMatrix destination);
