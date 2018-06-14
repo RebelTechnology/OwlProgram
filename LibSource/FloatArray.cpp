@@ -217,6 +217,7 @@ void FloatArray::clip(float max){
       data[n]=-max;
   }
 }
+
 void FloatArray::clip(float min, float max){
   for(size_t n=0; n<size; n++){
     if(data[n]>max)
@@ -225,6 +226,7 @@ void FloatArray::clip(float min, float max){
       data[n]=min;
   }
 }
+
 FloatArray FloatArray::subArray(int offset, size_t length){
   ASSERT(size >= offset+length, "Array too small");
   return FloatArray(data+offset, length);

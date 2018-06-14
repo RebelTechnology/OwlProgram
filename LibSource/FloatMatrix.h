@@ -19,9 +19,10 @@ private:
 public:
   FloatMatrix();
   FloatMatrix(float* data, size_t rows, size_t columns);
+  FloatMatrix(const float* data, size_t rows, size_t columns);
 
   /** Get the number of elements in this matrix */
-  int getSize() const{
+  size_t getSize() const{
     return getRows()*getColumns();
   }
 
@@ -122,7 +123,11 @@ public:
   operator float*(){
     return getData();
   }
-  
+
+  float* operator [](const int index){
+    return &data[index*getColumns()];
+  }
+
   /**
    * Get the data stored in the FloatMatrix.
    * @return a float* pointer to the data stored in the FloatMatrix
@@ -134,7 +139,42 @@ public:
     return data;
 #endif
   }
-  
+
+    /**
+   * Get a single float stored in the FloatMatrix.
+   * @return the float stored at index @param index
+  */
+  float getElement(int row, int col){
+#ifdef ARM_CORTEX
+    return instance.pData[row*getColumns()+col];
+#else
+    return data[row*getColumns()+col];
+#endif
+  }
+
+  /**
+   * Set a single float in the FloatMatrix.
+  */
+  void setElement(int row, int col, float value){
+#ifdef ARM_CORTEX
+    instance.pDdata[row*getColumns()+col] = value;
+#else
+    data[row*getColumns()+col] = value;
+#endif
+  }
+
+  void softmax(FloatMatrix destination);
+
+  void softmax(){
+    softmax(*this);
+  }
+
+  void sigmoid(FloatMatrix destination);
+
+  void sigmoid(){
+    sigmoid(*this);
+  }
+
   /**
    * Creates a new FloatMatrix.
    * Allocates rows*columns*sizeof(float) bytes of memory and returns a FloatMatrix that points to it.

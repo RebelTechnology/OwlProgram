@@ -453,6 +453,21 @@ public:
   float* getData(){
     return data;
   }
+
+  /**
+   * Get a single float stored in the FloatArray.
+   * @return the float stored at index @param index
+  */
+  float getElement(int index){
+    return data[index];
+  }
+
+  /**
+   * Set a single float in the FloatArray.
+  */
+  void setElement(int index, float value){
+    data[index] = value;
+  }
   
   /**
    * Creates a new FloatArray.
