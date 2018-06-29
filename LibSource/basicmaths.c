@@ -3,6 +3,18 @@
 #include "fastpow.h"
 #include "fastlog.h"
 
+void *pvPortRealloc(void *pv, size_t xWantedSize ){
+  vPortFree(pv);
+  return pvPortMalloc(xWantedSize);
+}
+
+void *pvPortCalloc(size_t nmemb, size_t size){
+  size_t xWantedSize = nmemb*size;
+  void* ptr = pvPortMalloc(xWantedSize);
+  memset(ptr, 0, xWantedSize);
+  return ptr;
+}
+
 // todo: see
 // http://www.hxa.name/articles/content/fast-pow-adjustable_hxa7241_2007.html
 // http://www.finesse.demon.co.uk/steven/sqrt.html

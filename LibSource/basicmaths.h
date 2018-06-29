@@ -84,8 +84,11 @@
 
 
 #define malloc(x) pvPortMalloc(x)
-#define calloc(x, y) pvPortMalloc(x*y)
+#define calloc(x, y) pvPortCalloc(x, y)
 #define free(x) vPortFree(x)
+#define realloc(x, y) pvPortRealloc(x, y);
+void *pvPortCalloc(size_t nmemb, size_t size);
+void *pvPortRealloc(void *pv, size_t xWantedSize );
 
 #ifdef ARM_CORTEX
 #define sin(x) arm_sin_f32(x)
@@ -99,6 +102,8 @@
 #define sinh(x) sinhf(x)
 #define cosh(x) coshf(x)
 
+#undef __FAST_MATH__
+#define exp10f(x) fast_exp10f(x)
 #ifdef __FAST_MATH__ /* set by gcc option -ffast-math */
 
 // fast lookup-based exponentials
