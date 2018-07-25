@@ -426,7 +426,7 @@ void FloatArray::convolve(FloatArray operand2, FloatArray destination){
 #else
   size_t size2=operand2.getSize();
   for (size_t n=0; n<size+size2-1; n++){
-    size_t n1=n;
+    int n1=n;
     destination[n] =0;
     for(size_t k=0; k<size2; k++){
       if(n1>=0 && n1<size)
@@ -454,7 +454,7 @@ void FloatArray::convolve(FloatArray operand2, FloatArray destination, int offse
   */
   size_t size2=operand2.getSize();
   for (size_t n=offset; n<offset+samples; n++){
-    size_t n1=n;
+    int n1=n;
     destination[n] =0; //this should be [n-offset]
     for(size_t k=0; k<size2; k++){
       if(n1>=0 && n1<size)
