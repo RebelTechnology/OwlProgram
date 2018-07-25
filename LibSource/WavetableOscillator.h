@@ -17,7 +17,7 @@ public:
   float getSample(float phase);
   float getNextSample();
   void getSamples(FloatArray samples);
-  static WavetableOscillator* create(float sr, int size);
+  static WavetableOscillator* create(float sr, size_t size);
   static void destroy(WavetableOscillator* osc);
 };
 
