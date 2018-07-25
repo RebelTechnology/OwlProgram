@@ -1,5 +1,6 @@
 #include "basicmaths.h"
 #include <stdint.h>
+#include <string.h>
 #include "fastpow.h"
 #include "fastlog.h"
 
