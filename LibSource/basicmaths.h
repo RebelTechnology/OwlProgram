@@ -68,6 +68,8 @@
    float fast_log10f(float x);
    void fast_log_set_table(const float* table, int size);
 
+   uint32_t fast_log2i(uint32_t x);
+
    // fast approximations
    float fast_atan2f(float a, float b);
 
