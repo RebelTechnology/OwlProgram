@@ -35,8 +35,8 @@ CFLAGS = $(EMCCFLAGS)
 CXXFLAGS = $(EMCCFLAGS) -std=gnu++11
 LDFLAGS = $(EMCCFLAGS)
 
-EMCC_OBJS = $(addprefix $(BUILD)/, $(notdir $(CPP_SRC:.cpp=.o)))
-EMCC_OBJS += $(addprefix $(BUILD)/, $(notdir $(C_SRC:.c=.o)))
+EMCC_OBJS = $(addprefix $(WEBDIR)/, $(notdir $(CPP_SRC:.cpp=.o)))
+EMCC_OBJS += $(addprefix $(WEBDIR)/, $(notdir $(C_SRC:.c=.o)))
 
 # Set up search path
 vpath %.cpp $(SOURCE)
@@ -63,23 +63,22 @@ endif
 UGLIFYJS = Tools/node_modules/uglifyjs/bin/uglifyjs
 
 $(WEBDIR)/$(TARGET).js: $(EMCC_OBJS)
-	@mkdir -p $(WEBDIR)
-	$(EMCC) $(LDFLAGS) $(EMCC_OBJS) -o $(WEBDIR)/$(TARGET).js
+	@$(EMCC) $(LDFLAGS) $(EMCC_OBJS) -o $(WEBDIR)/$(TARGET).js
 	@cp WebSource/*.js WebSource/*.html $(WEBDIR)
 
 $(WEBDIR)/%.min.js: $(WEBDIR)/%.js
 	@$(UGLIFYJS) -o $@ $<
-#	$(CLOSURE) --js_output_file=$@ $<
+#	@$(CLOSURE) --js_output_file=$@ $<
 
 
 # compile and generate dependency info
-$(BUILD)/%.o: %.c
-	$(EMCC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
-	$(EMCC) -MM -MT"$@" $(CPPFLAGS) $(CFLAGS) $< > $(@:.o=.d)
+$(WEBDIR)/%.o: %.c
+	@$(EMCC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+	@$(EMCC) -MM -MT"$@" $(CPPFLAGS) $(CFLAGS) $< > $(@:.o=.d)
 
-$(BUILD)/%.o: %.cpp
-	$(EMCC) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
-	$(EMCC) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) $< > $(@:.o=.d)
+$(WEBDIR)/%.o: %.cpp
+	@$(EMCC) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+	@$(EMCC) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) $< > $(@:.o=.d)
 
 web: $(WEBDIR)/$(TARGET).js ;
 

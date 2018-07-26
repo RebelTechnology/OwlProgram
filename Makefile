@@ -77,6 +77,7 @@ all: patch
 .FORCE:
 	@echo Building patch $(PATCHNAME)
 	@mkdir -p $(BUILD)/Source
+	@mkdir -p $(BUILD)/web
 
 $(BUILD)/registerpatch.cpp: .FORCE
 	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $@
@@ -95,7 +96,7 @@ patch: $(DEPS) ## build patch binary
 
 web: $(DEPS) ## build Javascript patch
 	@$(MAKE) -s -f web.mk web
-	@echo Built Web Audio $(PATCHNAME) in $(BUILD)/web/$(TARGET).js
+	@echo Built javascript $(PATCHNAME) in $(BUILD)/web/$(TARGET).js
 
 minify: $(DEPS)
 	@$(MAKE) -s -f web.mk minify
