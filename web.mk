@@ -28,12 +28,12 @@ C_SRC   += $(wildcard $(PATCHSOURCE)/*.c)
 CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
 WEBDIR   = $(BUILD)/web
 
-EMCCFLAGS += -s WASM=0
+EMCCFLAGS += -s WASM=0 # disables wasm output
 
 CPPFLAGS =
-CFLAGS = $(EMCCFLAGS)
+CFLAGS   = $(EMCCFLAGS) -std=gnu99
 CXXFLAGS = $(EMCCFLAGS) -std=gnu++11
-LDFLAGS = $(EMCCFLAGS)
+LDFLAGS  = $(EMCCFLAGS)
 
 EMCC_OBJS = $(addprefix $(WEBDIR)/, $(notdir $(CPP_SRC:.cpp=.o)))
 EMCC_OBJS += $(addprefix $(WEBDIR)/, $(notdir $(C_SRC:.c=.o)))
