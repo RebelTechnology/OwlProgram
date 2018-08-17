@@ -31,7 +31,7 @@ WEBDIR   = $(BUILD)/web
 EMCCFLAGS += -s WASM=0 # disables wasm output
 
 CPPFLAGS =
-CFLAGS   = $(EMCCFLAGS) -std=gnu99
+CFLAGS   = $(EMCCFLAGS) -std=gnu11
 CXXFLAGS = $(EMCCFLAGS) -std=gnu++11
 LDFLAGS  = $(EMCCFLAGS)
 
