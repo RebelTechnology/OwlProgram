@@ -181,10 +181,7 @@
   #define hv_alloca(_n)  alloca(_n)
   #define hv_malloc(_n) pvPortMalloc(_n)
   #define hv_free(_n) vPortFree(_n)
-inline void* hv_realloc(void *ptr, size_t size){
-  hv_free(ptr);
-  return hv_malloc(size);
-}
+  #define hv_realloc(a, b) pvPortRealloc(a, b)
 #else
   #include <alloca.h>
   #define hv_alloca(_n)  alloca(_n)

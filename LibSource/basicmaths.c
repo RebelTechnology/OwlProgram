@@ -4,15 +4,19 @@
 #include "fastpow.h"
 #include "fastlog.h"
 
-void *pvPortRealloc(void *pv, size_t xWantedSize ){
-  vPortFree(pv);
-  return pvPortMalloc(xWantedSize);
+void* pvPortRealloc(void *ptr, size_t size ){  
+  vPortFree(ptr);
+  ptr = pvPortMalloc(size);
+  if(ptr != NULL)
+    memset(ptr, 0, size);
+  return ptr;
 }
 
 void *pvPortCalloc(size_t nmemb, size_t size){
   size_t xWantedSize = nmemb*size;
   void* ptr = pvPortMalloc(xWantedSize);
-  memset(ptr, 0, xWantedSize);
+  if(ptr != NULL)
+    memset(ptr, 0, xWantedSize);
   return ptr;
 }
 
