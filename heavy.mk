@@ -4,8 +4,8 @@ HEAVYFILE    ?= $(HEAVY).pd
 HEAVYNAME    ?= owl
 HEAVYSRC     ?= $(BUILDROOT)/HeavySource
 HEAVYDIR     ?= $(BUILD)/Heavy
-HEAVYARGS    ?= -g c -n $(HEAVYNAME) -o $(BUILD)
-HVCC         ?= ~/devel/hvcc_gpl_staging/hvcc.py
+HEAVYARGS    ?= -g c -n $(HEAVYNAME) -p $(HEAVYDIR) -o $(BUILD)
+HVCC         ?= Tools/hvcc/hvcc.py
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@mkdir -p $(HEAVYDIR)
@@ -13,6 +13,7 @@ $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@cp -f $< $@
 
 $(BUILD)/Source/Heavy_owl.h: $(HEAVYDIR)/_main.pd
+	@echo python2.7 $(HVCC) $(HEAVYDIR)/_main.pd  $(HEAVYARGS)
 	@python2.7 $(HVCC) $(HEAVYDIR)/_main.pd  $(HEAVYARGS)
 	@mv -f $(BUILD)/c/* $(BUILD)/Source
 	@cp -f $(HEAVYSRC)/HvUtils.h $(HEAVYSRC)/HvMessage.c $(BUILD)/Source
