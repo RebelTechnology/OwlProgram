@@ -85,8 +85,8 @@
 #define calloc(x, y) pvPortCalloc(x, y)
 #define free(x) vPortFree(x)
 #define realloc(x, y) pvPortRealloc(x, y);
-void *pvPortCalloc(size_t nmemb, size_t size);
-void *pvPortRealloc(void *pv, size_t xWantedSize );
+void* pvPortCalloc(size_t nmemb, size_t size);
+void* pvPortRealloc(void *pv, size_t xWantedSize);
 
 #ifdef __cplusplus
 }
