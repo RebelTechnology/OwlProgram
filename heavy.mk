@@ -13,7 +13,6 @@ $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@cp -f $< $@
 
 $(BUILD)/Source/Heavy_owl.h: $(HEAVYDIR)/_main.pd
-	@echo python2.7 $(HVCC) $(HEAVYDIR)/_main.pd  $(HEAVYARGS)
 	@python2.7 $(HVCC) $(HEAVYDIR)/_main.pd  $(HEAVYARGS)
 	@mv -f $(BUILD)/c/* $(BUILD)/Source
 	@cp -f $(HEAVYSRC)/HvUtils.h $(HEAVYSRC)/HvMessage.c $(BUILD)/Source
