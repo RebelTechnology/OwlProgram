@@ -247,10 +247,16 @@ static inline hv_int32_t __hv_utils_min_i(hv_int32_t x, hv_int32_t y) { return (
 #define hv_sin_f(a) arm_sin_f32(a)
 #define hv_cos_f(a) arm_cos_f32(a)
 #define hv_sqrt_f(a) arm_sqrtf(a)
+#define hv_pow_f(a, b) fast_powf(a, b)
+#define hv_exp_f(a) fast_expf(a)
+#define hv_log_f(a) fast_logf(a)
 #else
 #define hv_sin_f(a) sinf(a)
 #define hv_cos_f(a) cosf(a)
 #define hv_sqrt_f(a) sqrtf(a)
+#define hv_pow_f(a, b) powf(a, b)
+#define hv_exp_f(a) expf(a)
+#define hv_log_f(a) logf(a)
 #endif
 #define hv_sinh_f(a) sinhf(a)
 #define hv_cosh_f(a) coshf(a)
@@ -263,9 +269,7 @@ static inline hv_int32_t __hv_utils_min_i(hv_int32_t x, hv_int32_t y) { return (
 #define hv_atan_f(a) atanf(a)
 #define hv_atanh_f(a) atanhf(a)
 #define hv_atan2_f(a, b) atan2f(a, b)
-#define hv_exp_f(a) expf(a)
 #define hv_abs_f(a) fabsf(a)
-#define hv_log_f(a) logf(a)
 #if HV_ANDROID
   // NOTE(mhroth): for whatever silly reason, log2f is not defined!
   #define hv_log2_f(a) (1.44269504088896f*logf(a))
@@ -276,7 +280,6 @@ static inline hv_int32_t __hv_utils_min_i(hv_int32_t x, hv_int32_t y) { return (
 #define hv_ceil_f(a) ceilf(a)
 #define hv_floor_f(a) floorf(a)
 #define hv_round_f(a) roundf(a)
-#define hv_pow_f(a, b) powf(a, b)
 #if HV_EMSCRIPTEN || defined ARM_CORTEX
 #define hv_fma_f(a, b, c) ((a*b)+c) // emscripten does not support fmaf (yet?). Inefficient on ARM Cortex M
 #else
