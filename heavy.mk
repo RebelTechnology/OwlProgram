@@ -5,7 +5,7 @@ HEAVYNAME    ?= owl
 HEAVYSRC     ?= $(BUILDROOT)/HeavySource
 HEAVYDIR     ?= $(BUILD)/Heavy
 HEAVYARGS    ?= -g c -n $(HEAVYNAME) -p $(HEAVYDIR) -o $(BUILD)
-HVCC         ?= Tools/hvcc/hvcc.py
+HVCC         ?= $(BUILDROOT)/Tools/hvcc/hvcc.py
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@mkdir -p $(HEAVYDIR)
