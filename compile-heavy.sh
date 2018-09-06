@@ -1,6 +1,7 @@
 #!/bin/bash
 
-HVCC=Tools/hvcc/hvcc.py
+DIR=`dirname "$0"`
+HVCC=$DIR/Tools/hvcc/hvcc.py
 FILENAME=`basename $MAIN_FILENAME`
 
 mkdir -p $BUILD_DIR
