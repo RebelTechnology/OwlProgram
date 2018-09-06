@@ -18,4 +18,5 @@ else
     exit 1
 fi
 
-cd $BUILD_DIR && zip -q $TARGET_DIR/patch.zip */*
+cd $BUILD_DIR && zip -q patch.zip */*
+cp $BUILD_DIR/patch.zip $TARGET_DIR/
