@@ -142,8 +142,33 @@ owl.initPatchAudio = function () {
 	return WEB_getPatchName();
     }
 
-    that.update = function (key, val) {
-	WEB_setParameter(key, val);
+    that.setButton = function(key, value) {
+	// key should be 0 for BUTTON_A, 1 for BUTTON_B et c
+	console.log("set button "+key+" : "+value);
+	if(key == 0){
+	    if(value)
+		that.setPushButtonDown();
+	    else
+		that.setPushButtonUp();
+	}else{
+	    if(WEB_setButtons){
+		var buttonState = WEB_getButtons();
+		var mask = 1<<(key+3);
+		if(value)
+		    buttonState |= mask
+		else
+		    buttonState &= ~mask;
+		WEB_setButtons(buttonState);
+	    }
+        }
+        return that;
+    };
+
+    that.update = function (key, value) {
+	if(key < 80)
+  	    WEB_setParameter(key, value);
+	else
+	    that.setButton(key-80, value);
 	return that;
     };
 
