@@ -50,8 +50,10 @@ owl.initPatchAudio = function () {
     that.vectorsize = 2048;      
     console.log("audio[fs "+owl.audioContext.sampleRate+"][bs "+that.vectorsize+"]");
     WEB_setup(owl.audioContext.sampleRate, that.vectorsize);
-    for(var i = 0; i < 5; i++)
+    
+    for(var i = 0; i < 5; i++){
 	console.log("parameter "+i+": "+WEB_getParameterName(i));
+    }
 
     // Bind to C++ Member Functions
     that.getNumInputs = function () {
@@ -144,7 +146,6 @@ owl.initPatchAudio = function () {
 
     that.setButton = function(key, value) {
 	// key should be 0 for BUTTON_A, 1 for BUTTON_B et c
-	console.log("set button "+key+" : "+value);
 	if(key == 0){
 	    if(value)
 		that.setPushButtonDown();
@@ -252,7 +253,7 @@ owl.initPatchAudio = function () {
 	var port = 0;
 	if(WEB_processMidi){
     	    return WEB_processMidi(port, status, d1, d2);
-	}else{
+	} else {
 	    return 0;
 	}
     }
@@ -291,4 +292,4 @@ owl.initPatchAudio = function () {
     return that;
 };
 
-export default owl;
+// export default owl;
