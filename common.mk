@@ -66,7 +66,7 @@ $(BUILD)/%.map: $(BUILD)/%.elf
 	@$(OBJDUMP) -S $< > $@
 
 size:
-	$(NM) --print-size --size-sort $(BUILD)/$(TARGET).elf | tail -n 10
+	$(NM) --print-size --size-sort $(BUILD)/$(TARGET).elf | tail -n 20
 	$(SIZE) $(BUILD)/$(TARGET).elf
 	ls -s $(BUILD)/$(TARGET).bin
 
