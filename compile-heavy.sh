@@ -19,5 +19,5 @@ else
     exit 1
 fi
 
-cd $BUILD_DIR && zip -q patch.zip */*
+cd $BUILD_DIR && zip -q -r patch.zip */*
 cp $BUILD_DIR/patch.zip $TARGET_DIR/$PATCH_SEO_NAME.zip
