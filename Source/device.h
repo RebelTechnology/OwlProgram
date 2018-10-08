@@ -36,13 +36,7 @@
 #endif
 
 #define MAX_BUFFERS_PER_PATCH        8
-#define MAX_NUMBER_OF_PATCHES        32
 #define MAX_NUMBER_OF_PARAMETERS     42
-
-#define LED_PORT                     GPIOE
-#define LED_GREEN                    GPIO_Pin_5
-#define LED_RED                      GPIO_Pin_3
-#define LED_CLOCK                    RCC_AHB1Periph_GPIOE
 
 #ifdef  USE_FULL_ASSERT
 #ifdef __cplusplus
