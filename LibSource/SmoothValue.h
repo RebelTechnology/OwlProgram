@@ -23,6 +23,9 @@ public:
     // copy constructor: not needed?
   }
   void update(T newValue);
+  void reset(T newValue){
+    value = newValue;
+  }
   T getValue(){
     return value;
   }
@@ -75,6 +78,9 @@ public:
     if(abs(value-newValue) > delta)
       value = newValue;
   }
+  void reset(T newValue){
+    value = newValue;
+  }
   T getValue(){
     return value;
   }
@@ -124,6 +130,9 @@ public:
   SmoothStiffValue(T l, T d, T initialValue)
     : lambda(d), delta(d), value(initialValue) {}
   void update(T newValue);
+  void reset(T newValue){
+    value = newValue;
+  }
   T getValue(){
     return value;
   }
