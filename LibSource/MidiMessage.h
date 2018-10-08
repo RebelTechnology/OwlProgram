@@ -34,6 +34,9 @@ class MidiMessage {
   uint8_t getControllerValue(){
     return data[3];
   }
+  uint8_t getChannelPressure(){
+    return data[2];
+  }
   int16_t getPitchBend(){
     int16_t pb = (data[2] | (data[3]<<7)) - 8192;
     return pb;
@@ -49,6 +52,9 @@ class MidiMessage {
   }
   bool isProgramChange(){
     return (data[1] & MIDI_STATUS_MASK) == PROGRAM_CHANGE;
+  }
+  bool isChannelPressure(){
+    return (data[1] & MIDI_STATUS_MASK) == CHANNEL_PRESSURE;
   }
   bool isPitchBend(){
     return (data[1] & MIDI_STATUS_MASK) == PITCH_BEND_CHANGE;
