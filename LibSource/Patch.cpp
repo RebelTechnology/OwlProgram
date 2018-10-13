@@ -101,9 +101,9 @@ void Patch::processScreen(ScreenBuffer& screen){
 #endif /* USE_SCREEN */
 
 #ifdef USE_MIDI_CALLBACK
-void Patch::processMidi(MidiMessage& msg){}
+void Patch::processMidi(MidiMessage msg){}
 
-void Patch::sendMidi(MidiMessage& msg){
+void Patch::sendMidi(MidiMessage msg){
   doMidiSend(msg.data[0], msg.data[1], msg.data[2], msg.data[3]);
 }
 

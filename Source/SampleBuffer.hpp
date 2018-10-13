@@ -9,10 +9,11 @@
 #include "device.h"
 #ifdef ARM_CORTEX
 #include "arm_math.h"
+#define AUDIO_SATURATE_SAMPLES
+#else
+#undef AUDIO_SATURATE_SAMPLES
 #endif //ARM_CORTEX
 
-#undef AUDIO_SATURATE_SAMPLES
-// #define AUDIO_SATURATE_SAMPLES
 
 class SampleBuffer : public AudioBuffer {
 protected:

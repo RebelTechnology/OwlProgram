@@ -71,8 +71,8 @@ public:
   virtual void processScreen(ScreenBuffer& screen);
 #endif /* USE_SCREEN */
 #ifdef USE_MIDI_CALLBACK
-  virtual void processMidi(MidiMessage& msg);
-  virtual void sendMidi(MidiMessage& msg);
+  virtual void processMidi(MidiMessage msg);
+  virtual void sendMidi(MidiMessage msg);
 #endif /* USE_MIDI_CALLBACK */
 };
 

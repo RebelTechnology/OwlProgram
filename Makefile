@@ -18,7 +18,7 @@ ASFLAGS      = -g
 endif
 
 ifeq ($(CONFIG),Release)
-CPPFLAGS    ?= -O2 -specs=nano.specs -ffast-math
+CPPFLAGS    ?= -Os -specs=nano.specs -ffast-math
 EMCCFLAGS   ?= -Oz # optimise for size
 endif
 

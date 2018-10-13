@@ -5,8 +5,12 @@
 
 class MidiMessage {
  public:
-  uint8_t data[4];
+  union {
+    uint32_t packed;
+    uint8_t data[4];
+  };
   MidiMessage(){}
+  MidiMessage(uint32_t msg): packed(msg){}
   MidiMessage(uint8_t port, uint8_t d0, uint8_t d1, uint8_t d2){
     data[0] = port;
     data[1] = d0;
@@ -37,6 +41,9 @@ class MidiMessage {
   uint8_t getChannelPressure(){
     return data[2];
   }
+  uint8_t getProgramChange(){
+    return data[1];
+  }
   int16_t getPitchBend(){
     int16_t pb = (data[2] | (data[3]<<7)) - 8192;
     return pb;
@@ -64,6 +71,13 @@ class MidiMessage {
   }
   static MidiMessage pc(uint8_t ch, uint8_t pc){
     return MidiMessage(USB_COMMAND_PROGRAM_CHANGE, PROGRAM_CHANGE|ch, pc, 0);
+  }
+  static MidiMessage pb(uint8_t ch, uint16_t bend){
+    bend += 8192;
+    return MidiMessage(USB_COMMAND_PITCH_BEND_CHANGE, PITCH_BEND_CHANGE|ch, bend&0x7f, (bend>>7)&0x7f);
+  }
+  static MidiMessage note(uint8_t ch, uint8_t note, uint8_t velocity){
+    return MidiMessage(USB_COMMAND_PROGRAM_CHANGE, velocity == 0 ? NOTE_OFF|ch : NOTE_ON|ch, note, velocity);
   }
 };
 

@@ -15,6 +15,8 @@
 #define HV_OWL_PARAM_H "Channel-H"
 #define HV_OWL_PARAM_PUSH "Channel-Push"
 #define HV_OWL_PARAM_NOTEOUT "__hv_noteout"
+#define HV_OWL_PARAM_CTLOUT "__hv_ctlout"
+#define HV_OWL_PARAM_BENDOUT "__hv_bendout"
 #define HEAVY_MESSAGE_POOL_SIZE  4 // in kB (default 10kB)
 #define HEAVY_MESSAGE_IN_QUEUE_SIZE 1 // in kB (default 2kB)
 #define HEAVY_MESSAGE_OUT_QUEUE_SIZE 0 // in kB (default 0kB)
@@ -46,6 +48,8 @@ extern "C" {
 		       const char *receiverName,
 		       uint32_t sendHash,
 		       const HvMessage *m){
+    // todo: check if sendHash is same as receiverHash and use that instead of strcmp
+    Patch* patch = (Patch*)ctxt->getUserData();
     if(strcmp(receiverName, HV_OWL_PARAM_PUSH) == 0){
       bool pressed;
       if(hv_msg_getNumElements(m) > 0 && hv_msg_isFloat(m, 0))
@@ -53,10 +57,20 @@ extern "C" {
       else
 	pressed = !isButtonPressed(PUSHBUTTON);
       setButton(PUSHBUTTON, pressed);
-    }else if(strcmp(receiverName, HV_OWL_PARAM_NOTEOUT) == 0){
-      uint8_t note = hv_msg_getFloat(m, 0)*128;
-      uint16_t velocity = hv_msg_getFloat(m, 1)*4096;
-      setButton((PatchButtonId)(MIDI_NOTE_BUTTON+note), velocity);
+    }else if(strcmp(receiverName, HV_OWL_PARAM_NOTEOUT) == 0){      
+      uint8_t note = hv_msg_getFloat(m, 0);
+      uint8_t velocity = hv_msg_getFloat(m, 1);
+      uint8_t ch = hv_msg_getFloat(m, 2);
+      patch->sendMidi(MidiMessage::note(ch, note, velocity));
+    }else if(strcmp(receiverName, HV_OWL_PARAM_CTLOUT) == 0){
+      uint8_t value = hv_msg_getFloat(m, 0);
+      uint8_t cc = hv_msg_getFloat(m, 1);
+      uint8_t ch = hv_msg_getFloat(m, 2);
+      patch->sendMidi(MidiMessage::cc(ch, cc, value));
+    }else if(strcmp(receiverName, HV_OWL_PARAM_BENDOUT) == 0){
+      uint16_t value = hv_msg_getFloat(m, 0);
+      uint8_t ch = hv_msg_getFloat(m, 1);
+      patch->sendMidi(MidiMessage::pb(ch, value));
     }
   }
 }
@@ -65,7 +79,6 @@ class HeavyPatch : public Patch {
 private:
 
   unsigned int receiverHash[9];
-  HvMessage* notein;
 public:
   HeavyPatch() {
     registerParameter(PARAMETER_A, HV_OWL_PARAM_A);
@@ -86,42 +99,71 @@ public:
 			    HEAVY_MESSAGE_POOL_SIZE, 
 			    HEAVY_MESSAGE_IN_QUEUE_SIZE, 
 			    HEAVY_MESSAGE_OUT_QUEUE_SIZE);
-    context->setPrintHook(&printHook);
+    context->setUserData(this);
+    context->setPrintHook(printHook);
     context->setSendHook(sendHook);
-
-    // create note in message
-    notein = (HvMessage*)malloc(hv_msg_getByteSize(5));
-    hv_msg_init(notein, 5, 0.0);
-    hv_msg_setFloat(notein, 0, 60.0); // note
-    hv_msg_setFloat(notein, 1, 80.0); // velocity
-    hv_msg_setFloat(notein, 2, 1.0f); // channel
-    hv_msg_setFloat(notein, 3, 0x90); // command
-    hv_msg_setFloat(notein, 4, 0.0f); // port
   }
   
   ~HeavyPatch() {
     delete context;
-    free(notein);
   }
-  
+
+  void processMidi(MidiMessage msg){
+    // sendMessageToReceiverV parses format and loops over args, see HeavyContext.cpp
+    switch(msg.getStatus()){
+    case CONTROL_CHANGE:
+      context->sendMessageToReceiverV
+	(0x41BE0F9C, // __hv_ctlin
+	 0, "fff",
+	 (float)msg.getControllerValue(), // value
+	 (float)msg.getControllerNumber(), // controller number
+	 (float)msg.getChannel());
+      break;
+    case NOTE_ON:
+      context->sendMessageToReceiverV
+	(0x67E37CA3, // __hv_notein
+	 0, "fff",
+	 (float)msg.getNote(), // pitch
+	 (float)msg.getVelocity(), // velocity
+	 (float)msg.getChannel());
+      break;
+    case NOTE_OFF:
+      context->sendMessageToReceiverV
+	(0x67E37CA3, // __hv_notein
+	 0, "fff",
+	 (float)msg.getNote(), // pitch
+	 0.0f, // velocity
+	 (float)msg.getChannel());
+      break;
+    case CHANNEL_PRESSURE:
+      context->sendMessageToReceiverV
+	(0x553925BD, // __hv_touchin
+	 0, "ff",
+	 (float)msg.getChannelPressure(),
+	 (float)msg.getChannel());
+      break;
+    case PITCH_BEND_CHANGE:
+      context->sendMessageToReceiverV
+	(0x3083F0F7, // __hv_bendin
+	 0, "ff",
+	 (float)msg.getPitchBend(),
+	 (float)msg.getChannel());
+      break;
+    case PROGRAM_CHANGE:
+      context->sendMessageToReceiverV
+	(0x2E1EA03D, // __hv_pgmin,
+	 0, "ff",
+	 (float)msg.getProgramChange(),
+	 (float)msg.getChannel());
+      break;
+    }
+  }
+
   void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){
     if(_msgLock)
       return;
     if(bid == PUSHBUTTON){
       context->sendFloatToReceiver(receiverHash[8], value ? 1.0 : 0.0);
-    }else if(bid >= MIDI_NOTE_BUTTON){
-      // send message to notein object
-      unsigned int hash = 0x67E37CA3; // __hv_notein
-      float note = (float)(bid - MIDI_NOTE_BUTTON);
-      float velocity = (float)(value>>5);
-      // unsigned int hash = 0x41BE0F9C; // __hv_ctlin
-      float ms = 1000.0f*(samples+getBlockSize())/getSampleRate(); // delay in milliseconds
-      // float cmd = value ? 0x90 : 0x80;
-      hv_msg_setFloat(notein, 0, note);
-      hv_msg_setFloat(notein, 1, velocity);
-      // notein expects: note, velocity, channel, command, port
-      // not thread safe
-      context->sendMessageToReceiver(hash, ms, notein);
     }
   }
 

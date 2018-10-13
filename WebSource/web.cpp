@@ -4,6 +4,9 @@
 #include "main.h"
 #include "message.h"
 #include "PatchProcessor.h"
+#ifdef USE_MIDI_CALLBACK
+#include "MidiMessage.h"
+#endif
 
 #ifdef malloc
 #undef malloc
