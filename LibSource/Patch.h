@@ -50,6 +50,9 @@ public:
   FloatParameter getFloatParameter(const char* name, float min, float max, float defaultValue=0.0f, float lambda=0.0f, float delta=0.0, float skew=LIN);
   IntParameter getIntParameter(const char* name, int min, int max, int defaultValue=0, float lambda=0.0f, float delta=0.0, float skew=LIN);
   void registerParameter(PatchParameterId pid, const char* name);
+  void registerParameter(PatchParameterId pid, const char* name, const char* desc){
+    registerParameter(pid, name);
+  }    
   float getParameterValue(PatchParameterId pid);
   void setParameterValue(PatchParameterId pid, float value);
   bool isButtonPressed(PatchButtonId bid);
