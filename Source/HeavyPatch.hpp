@@ -3,6 +3,7 @@
 
 #include "Patch.h"
 #include "basicmaths.h"
+#include "HvHeavy.h"
 #include "Heavy_owl.hpp"
 
 #define HV_OWL_PARAM_A "Channel-A"
@@ -47,39 +48,12 @@ extern "C" {
   static void sendHook(HeavyContextInterface* ctxt,
 		       const char *receiverName,
 		       uint32_t sendHash,
-		       const HvMessage *m){
-    // todo: check if sendHash is same as receiverHash and use that instead of strcmp
-    Patch* patch = (Patch*)ctxt->getUserData();
-    if(strcmp(receiverName, HV_OWL_PARAM_PUSH) == 0){
-      bool pressed;
-      if(hv_msg_getNumElements(m) > 0 && hv_msg_isFloat(m, 0))
-	pressed = hv_msg_getFloat(m, 0) > 0.5;
-      else
-	pressed = !isButtonPressed(PUSHBUTTON);
-      setButton(PUSHBUTTON, pressed);
-    }else if(strcmp(receiverName, HV_OWL_PARAM_NOTEOUT) == 0){      
-      uint8_t note = hv_msg_getFloat(m, 0);
-      uint8_t velocity = hv_msg_getFloat(m, 1);
-      uint8_t ch = hv_msg_getFloat(m, 2);
-      patch->sendMidi(MidiMessage::note(ch, note, velocity));
-    }else if(strcmp(receiverName, HV_OWL_PARAM_CTLOUT) == 0){
-      uint8_t value = hv_msg_getFloat(m, 0);
-      uint8_t cc = hv_msg_getFloat(m, 1);
-      uint8_t ch = hv_msg_getFloat(m, 2);
-      patch->sendMidi(MidiMessage::cc(ch, cc, value));
-    }else if(strcmp(receiverName, HV_OWL_PARAM_BENDOUT) == 0){
-      uint16_t value = hv_msg_getFloat(m, 0);
-      uint8_t ch = hv_msg_getFloat(m, 1);
-      patch->sendMidi(MidiMessage::pb(ch, value));
-    }
-  }
+		       const HvMessage *m);
 }
 
 class HeavyPatch : public Patch {
-private:
-
-  unsigned int receiverHash[9];
 public:
+  unsigned int receiverHash[12];
   HeavyPatch() {
     registerParameter(PARAMETER_A, HV_OWL_PARAM_A);
     registerParameter(PARAMETER_B, HV_OWL_PARAM_B);
@@ -95,17 +69,45 @@ public:
     receiverHash[6] = hv_stringToHash(HV_OWL_PARAM_G);
     receiverHash[7] = hv_stringToHash(HV_OWL_PARAM_H);
     receiverHash[8] = hv_stringToHash(HV_OWL_PARAM_PUSH);
+    receiverHash[9] = hv_stringToHash(HV_OWL_PARAM_NOTEOUT);
+    receiverHash[10] = hv_stringToHash(HV_OWL_PARAM_CTLOUT);
+    receiverHash[11] = hv_stringToHash(HV_OWL_PARAM_BENDOUT);
     context = new Heavy_owl(getSampleRate(), 
 			    HEAVY_MESSAGE_POOL_SIZE, 
 			    HEAVY_MESSAGE_IN_QUEUE_SIZE, 
 			    HEAVY_MESSAGE_OUT_QUEUE_SIZE);
     context->setUserData(this);
-    context->setPrintHook(printHook);
-    context->setSendHook(sendHook);
+    context->setPrintHook(&printHook);
+    context->setSendHook(&sendHook);
   }
   
   ~HeavyPatch() {
     delete context;
+  }
+
+  void send(uint32_t sendHash, const HvMessage *m){
+    if(sendHash == receiverHash[8]){
+      bool pressed;
+      if(hv_msg_getNumElements(m) > 0 && hv_msg_isFloat(m, 0))
+	pressed = hv_msg_getFloat(m, 0) > 0.5;
+      else
+	pressed = !isButtonPressed(PUSHBUTTON);
+      setButton(PUSHBUTTON, pressed);
+    }else if(sendHash == receiverHash[9]){
+      uint8_t note = hv_msg_getFloat(m, 0);
+      uint8_t velocity = hv_msg_getFloat(m, 1);
+      uint8_t ch = hv_msg_getFloat(m, 2);
+      sendMidi(MidiMessage::note(ch, note, velocity));
+    }else if(sendHash == receiverHash[10]){
+      uint8_t value = hv_msg_getFloat(m, 0);
+      uint8_t cc = hv_msg_getFloat(m, 1);
+      uint8_t ch = hv_msg_getFloat(m, 2);
+      sendMidi(MidiMessage::cc(ch, cc, value));
+    }else if(sendHash == receiverHash[11]){
+      uint16_t value = hv_msg_getFloat(m, 0);
+      uint8_t ch = hv_msg_getFloat(m, 1);
+      sendMidi(MidiMessage::pb(ch, value));
+    }
   }
 
   void processMidi(MidiMessage msg){
@@ -194,4 +196,17 @@ private:
   HeavyContext* context;
 };
 
+// extern "C" {
+    static void sendHook(HeavyContextInterface* ctxt,
+		       const char *receiverName,
+		       uint32_t sendHash,
+		       const HvMessage *m){
+      HeavyPatch* patch = (HeavyPatch*)ctxt->getUserData();
+    // debugMessage(receiverName, (float)sendHash, hv_msg_getFloat(m, 0));
+    // debugMessage(receiverName, (float)sendHash, (float)(uint32_t)patch);
+
+      debugMessage("receiverName");
+      patch->send(sendHash, m);
+    }
+// }
 #endif // __HeavyPatch_hpp__
