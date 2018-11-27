@@ -67,17 +67,20 @@ class MidiMessage {
     return (data[1] & MIDI_STATUS_MASK) == PITCH_BEND_CHANGE;
   }
   static MidiMessage cc(uint8_t ch, uint8_t cc, uint8_t value){
-    return MidiMessage(USB_COMMAND_CONTROL_CHANGE, CONTROL_CHANGE|ch, cc, value);
+    return MidiMessage(USB_COMMAND_CONTROL_CHANGE, CONTROL_CHANGE|(ch&0xf), cc&0x7f, value&0x7f);
   }
   static MidiMessage pc(uint8_t ch, uint8_t pc){
-    return MidiMessage(USB_COMMAND_PROGRAM_CHANGE, PROGRAM_CHANGE|ch, pc, 0);
+    return MidiMessage(USB_COMMAND_PROGRAM_CHANGE, PROGRAM_CHANGE|(ch&0xf), pc&0x7f, 0);
   }
   static MidiMessage pb(uint8_t ch, uint16_t bend){
     bend += 8192;
-    return MidiMessage(USB_COMMAND_PITCH_BEND_CHANGE, PITCH_BEND_CHANGE|ch, bend&0x7f, (bend>>7)&0x7f);
+    return MidiMessage(USB_COMMAND_PITCH_BEND_CHANGE, PITCH_BEND_CHANGE|(ch&0xf), bend&0x7f, (bend>>7)&0x7f);
   }
   static MidiMessage note(uint8_t ch, uint8_t note, uint8_t velocity){
-    return MidiMessage(USB_COMMAND_PROGRAM_CHANGE, velocity == 0 ? NOTE_OFF|ch : NOTE_ON|ch, note, velocity);
+    return MidiMessage(USB_COMMAND_PROGRAM_CHANGE, velocity == 0 ? NOTE_OFF|(ch&0xf) : NOTE_ON|(ch&0xf), note&0x7f, velocity&0x7f);
+  }
+  static MidiMessage cp(uint8_t ch, uint8_t value){
+    return MidiMessage(USB_COMMAND_CHANNEL_PRESSURE, CHANNEL_PRESSURE|(ch&0xf), value&0x7f, 0);
   }
 };
 
