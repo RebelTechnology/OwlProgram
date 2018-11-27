@@ -11,9 +11,9 @@
 #define HV_HASH_CHANNEL_B 0xb762bb42
 #define HV_HASH_CHANNEL_C 0x27d89cd5
 #define HV_HASH_CHANNEL_D 0x217d22f5
-#define HV_HASH_CHANNEL_E 0xd3c05ccb
-#define HV_HASH_CHANNEL_F 0xba16b531
-#define HV_HASH_CHANNEL_G 0x217d22f5
+#define HV_HASH_CHANNEL_E 0x7746db0a
+#define HV_HASH_CHANNEL_F 0xd3c05ccb
+#define HV_HASH_CHANNEL_G 0xba16b531
 #define HV_HASH_CHANNEL_H 0xfbc0c5a
 
 #define HV_HASH_BUTTON_A 0xfbc73385
@@ -22,6 +22,10 @@
 #define HV_HASH_BUTTON_D 0x55d2d3a6
 #define HV_HASH_BUTTON_E 0x1444edb
 #define HV_HASH_BUTTON_F 0xe8f2587f
+
+#define HV_HASH_TR_F 0xc3bc4805
+#define HV_HASH_CV_F 0xf8424b3c
+#define HV_HASH_CV_G 0xf1c46a96
 
 #define HV_HASH_NOTEIN 0x67e37ca3
 #define HV_HASH_CTLIN 0x41be0f9c
@@ -114,7 +118,7 @@ public:
       return isButtonPressed(bid) ? 0 : 4095; // toggle
   }
 
-  void send(uint32_t sendHash, const HvMessage *m){
+  void sendCallback(uint32_t sendHash, const HvMessage *m){
     switch(sendHash){
     case HV_HASH_BUTTON_A:
     case HV_HASH_CHANNEL_PUSH:
@@ -129,13 +133,16 @@ public:
     // case HV_HASH_BUTTON_D:
     //   setButton(BUTTON_D, getButtonValue(BUTTON_D, m));
     //   break;
-    case HV_HASH_BUTTON_F: // Wizard trigger F out
+    // case HV_HASH_BUTTON_F:
+    case HV_HASH_TR_F:  // Wizard trigger F out
       setButton(BUTTON_F, getButtonValue(BUTTON_F, m));
       break;
-    case HV_HASH_CHANNEL_F: // Wizard CV F out
+    // case HV_HASH_CHANNEL_F:
+    case HV_HASH_CV_F: // Wizard CV F out
       setParameterValue(PARAMETER_F, hv_msg_getFloat(m, 0));
       break;
-    case HV_HASH_CHANNEL_G: // Wizard CV G out
+    // case HV_HASH_CHANNEL_G:
+    case HV_HASH_CV_G: // Wizard CV G out
       setParameterValue(PARAMETER_G, hv_msg_getFloat(m, 0));
       break;
     case HV_HASH_NOTEOUT:
@@ -143,6 +150,7 @@ public:
       uint8_t note = hv_msg_getFloat(m, 0);
       uint8_t velocity = hv_msg_getFloat(m, 1);
       uint8_t ch = hv_msg_getFloat(m, 2);
+      // debugMessage("noteout", note, velocity, ch);
       sendMidi(MidiMessage::note(ch, note, velocity));
       }
       break;
@@ -151,6 +159,7 @@ public:
 	uint8_t value = hv_msg_getFloat(m, 0);
 	uint8_t cc = hv_msg_getFloat(m, 1);
 	uint8_t ch = hv_msg_getFloat(m, 2);
+	// debugMessage("ctlout", value, cc, ch);
 	sendMidi(MidiMessage::cc(ch, cc, value));
       }
       break;
@@ -158,6 +167,7 @@ public:
       {
 	uint16_t value = hv_msg_getFloat(m, 0);
 	uint8_t ch = hv_msg_getFloat(m, 1);
+      // debugMessage("bendout", value, ch);
 	sendMidi(MidiMessage::pb(ch, value));
       }
       break;
@@ -259,16 +269,12 @@ private:
 };
 
 // extern "C" {
-    static void sendHook(HeavyContextInterface* ctxt,
-		       const char *receiverName,
-		       uint32_t sendHash,
-		       const HvMessage *m){
-      HeavyPatch* patch = (HeavyPatch*)ctxt->getUserData();
-    // debugMessage(receiverName, (float)sendHash, hv_msg_getFloat(m, 0));
-    // debugMessage(receiverName, (float)sendHash, (float)(uint32_t)patch);
-
-      debugMessage("receiverName");
-      patch->send(sendHash, m);
-    }
+static void sendHook(HeavyContextInterface* ctxt,
+		     const char *receiverName,
+		     uint32_t sendHash,
+		     const HvMessage *m){
+  HeavyPatch* patch = (HeavyPatch*)ctxt->getUserData();
+  patch->sendCallback(sendHash, m);
+}
 // }
 #endif // __HeavyPatch_hpp__
