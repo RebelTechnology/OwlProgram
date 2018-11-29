@@ -46,20 +46,78 @@
 
 #include "faust/dsp/dsp.h"
 #include "faust/gui/UI.h"
+static float fFreq, fGain, fGate;
 
-
-inline static float CPS2midi(float freqHz, double tune = 440.)
-{
-  if (freqHz > 0.f)
-    return 12.f * log2f(freqHz/tune)+57.f;
-  else
-    return 0.;
-}
-  
-inline static float midi2CPS(float pitch, float tune = 440.f)
-{
-  return tune * exp2f((pitch - 69.f) / 12.f);
-}
+class MonoVoiceAllocator {
+  float& freq;
+  float& gain;
+  float& gate;
+  uint8_t notes[16];
+  uint8_t lastNote = 0;
+  float pb;
+public:
+  MonoVoiceAllocator(float& fq, float& gn, float& gt): freq(fq), gain(gn), gate(gt) {}
+  float getFreq(){
+    return freq;
+  }
+  float getGain(){
+    return gain;
+  }
+  float getGate(){
+    return gate;
+  }
+  void processMidi(MidiMessage msg){
+    uint16_t samples = 0;
+    if(msg.isNoteOn()){
+      noteOn(msg.getNote(), (uint16_t)msg.getVelocity()<<5, samples);
+    }else if(msg.isNoteOff()){
+      noteOff(msg.getNote(), (uint16_t)msg.getVelocity()<<5, samples);      
+    }else if(msg.isPitchBend()){
+      setPitchBend(msg.getPitchBend());
+    }else if(msg.isControlChange()){
+      if(msg.getControllerNumber() == MIDI_ALL_NOTES_OFF)
+	allNotesOff();
+    }
+  }
+  void setPitchBend(int16_t bend){
+    // pb = bend/8192.0f;
+    pb = bend/1024.0f; // 2 octave range?
+    if(lastNote > 0)
+      freq = noteToHz(notes[lastNote-1]);
+  }
+  void setPitchBend(float bend){
+    pb = bend*2;
+  }
+  float noteToHz(uint8_t note){
+    return 440.0f*exp2f((note-69 + pb)/12.0);
+  }
+  float velocityToGain(uint16_t velocity){
+    return exp2f(velocity/4095.0f) -1;
+    // return powf((1.0-depth) + (velocity/127.0*depth), 2.0);
+  }
+  void noteOn(uint8_t note, uint16_t velocity, uint16_t delay){
+    if(lastNote < 16)
+      notes[lastNote++] = note;
+    freq = noteToHz(note);
+    gain = velocityToGain(velocity);
+    gate = 1;
+  }
+  void noteOff(uint8_t note, uint16_t velocity, uint16_t delay){
+    for(int i=0; i<lastNote; ++i){
+      if(notes[i] == note){
+	while(i<lastNote)
+	  notes[i] = notes[++i];
+      }
+    }
+    --lastNote;
+    if(lastNote == 0)
+      gate = 0;
+  }
+  void allNotesOff(){
+    lastNote = 0;
+    pb = 0;
+  }
+};
 
 struct Meta
 {
@@ -159,7 +217,7 @@ public:
 #define NO_PARAMETER     ((PatchParameterId)-1)
 #define NO_BUTTON        ((PatchButtonId)-1)
 
-static float fFreq, fGain, fGate;
+MonoVoiceAllocator allocator(fFreq, fGain, fGate);
 
 class OwlUI : public UI
 {
@@ -242,7 +300,7 @@ public:
   virtual void addHorizontalBargraph(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT lo, FAUSTFLOAT hi) 									{ skip(); }
   virtual void addVerticalBargraph  (const char* label, FAUSTFLOAT* zone, FAUSTFLOAT lo, FAUSTFLOAT hi) 									{ skip(); }
   // -- soundfiles
-  virtual void addSoundfile(const char* label, Soundfile** sf_zone) { skip(); }
+  virtual void addSoundfile(const char* label, const char* filename, Soundfile** sf_zone) { skip(); }
 
   // -- metadata declarations
 
@@ -334,14 +392,7 @@ public:
   }
 
   void processMidi(MidiMessage msg){
-    if(msg.isNoteOn()){
-      fFreq = midi2CPS(msg.getNote());
-      fGain = msg.getNote()/127.0f;
-      fGate = 1.0f;
-    }else if(msg.isNoteOff()){
-      fGain = msg.getNote()/127.0f;
-      fGate = 0.0f;
-    }
+    allocator.processMidi(msg);
   }
 
   void processAudio(AudioBuffer &buffer)
