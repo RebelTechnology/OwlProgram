@@ -59,42 +59,53 @@ struct Meta
 	
 ***************************************************************************************/
 
-class OwlParameter
+class OwlParameterBase
 {
 protected:
-  Patch* 	fPatch;		// needed to register and read owl parameters
+  Patch* fPatch;      // needed to register and read owl parameters
+  FAUSTFLOAT* fZone;  // Faust widget zone
+  const char* fLabel; // Faust widget label
+public:
+  OwlParameterBase() :
+    fPatch(NULL), fZone(0), fLabel("") {}
+  OwlParameterBase(const OwlParameterBase& w) :
+    fPatch(w.fPatch), fZone(w.fZone), fLabel(w.fLabel) {}
+  OwlParameterBase(Patch* pp, FAUSTFLOAT* z, const char* l) :
+    fPatch(pp), fZone(z), fLabel(l) {}
+  virtual void bind() 	{}
+  virtual void update()	{}
+};
+
+class OwlParameter : public OwlParameterBase
+{
+protected:
   PatchParameterId	fParameter;		// OWL parameter code : PARAMETER_A,...
-  FAUSTFLOAT* 		fZone;			// Faust widget zone
-  const char*			fLabel;			// Faust widget label 
   float				fMin;			// Faust widget minimal value
   float				fSpan;			// Faust widget value span (max-min)
 	
 public:
   OwlParameter() :
-    fPatch(0), fParameter(PARAMETER_A), fZone(0), fLabel(""), fMin(0), fSpan(1) {}
+    fParameter(PARAMETER_A), fMin(0), fSpan(1) {}
   OwlParameter(const OwlParameter& w) :
-    fPatch(w.fPatch), fParameter(w.fParameter), fZone(w.fZone), fLabel(w.fLabel), fMin(w.fMin), fSpan(w.fSpan) {}
+    OwlParameterBase(w), fParameter(w.fParameter), fMin(w.fMin), fSpan(w.fSpan) {}
   OwlParameter(Patch* pp, PatchParameterId param, FAUSTFLOAT* z, const char* l, float lo, float hi) :
-    fPatch(pp), fParameter(param), fZone(z), fLabel(l), fMin(lo), fSpan(hi-lo) {}
+    OwlParameterBase(pp, z, l), fParameter(param), fMin(lo), fSpan(hi-lo) {}
   void bind() 	{ fPatch->registerParameter(fParameter, fLabel); }
   void update()	{ *fZone = fMin + fSpan*fPatch->getParameterValue(fParameter); }
 	
 };
 
-class OwlButton
+class OwlButton : public OwlParameterBase
 {
 protected:
-  Patch* 	fPatch;		// needed to register and read owl parameters
   PatchButtonId	fButton;		// OWL button id : PUSHBUTTON, ...
-  FAUSTFLOAT* 		fZone;			// Faust widget zone
-  const char*			fLabel;			// Faust widget label 
 public:
   OwlButton() :
-    fPatch(0), fButton(PUSHBUTTON), fZone(0), fLabel("") {}
+    fButton(PUSHBUTTON) {}
   OwlButton(const OwlButton& w) :
-    fPatch(w.fPatch), fButton(w.fButton), fZone(w.fZone), fLabel(w.fLabel) {}
+    OwlParameterBase(w), fButton(w.fButton) {}
   OwlButton(Patch* pp, PatchButtonId button, FAUSTFLOAT* z, const char* l) :
-    fPatch(pp), fButton(button), fZone(z), fLabel(l) {}
+    OwlParameterBase(pp, z, l), fButton(button) {}
   void bind() 	{  }
   void update()	{ *fZone = fPatch->isButtonPressed(fButton); }
 };
@@ -111,7 +122,7 @@ public:
 ***************************************************************************************/
 
 // The maximun number of mappings between owl parameters and faust widgets 
-#define MAXOWLPARAMETERS 40
+#define MAXOWLPARAMETERS 20
 #define MAXOWLBUTTONS    2
 #define NO_PARAMETER     ((PatchParameterId)-1)
 #define NO_BUTTON        ((PatchButtonId)-1)
@@ -121,24 +132,23 @@ class OwlUI : public UI
   Patch* 	fPatch;
   PatchParameterId	fParameter;					// current parameter ID, value NO_PARAMETER means not set
   int					fParameterIndex;						// number of OwlParameters collected so far
-  OwlParameter			fParameterTable[MAXOWLPARAMETERS];		// kind of static list of OwlParameters
+  OwlParameterBase* fParameterTable[MAXOWLPARAMETERS];
   PatchButtonId fButton;
-  int fButtonIndex;
-  OwlButton fButtonTable[MAXOWLBUTTONS];
   // check if the widget is an Owl parameter and, if so, add the corresponding OwlParameter
   void addOwlParameter(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT lo, FAUSTFLOAT hi) {
     if ((fParameter >= PARAMETER_A) && (fParameterIndex < MAXOWLPARAMETERS)) {
-      fParameterTable[fParameterIndex] = OwlParameter(fPatch, fParameter, zone, label, lo, hi);
-      fParameterTable[fParameterIndex].bind();
+      fParameterTable[fParameterIndex] = new OwlParameter(fPatch, fParameter, zone, label, lo, hi);
+      fParameterTable[fParameterIndex]->bind();
       fParameterIndex++;
     }
     fParameter = NO_PARAMETER; 		// clear current parameter ID
   }
+
   void addOwlButton(const char* label, FAUSTFLOAT* zone) {
-    if ((fButton >= PUSHBUTTON) && (fButtonIndex < MAXOWLBUTTONS)) {
-      fButtonTable[fButtonIndex] = OwlButton(fPatch, fButton, zone, label);
-      fButtonTable[fButtonIndex].bind();
-      fButtonIndex++;
+    if ((fButton >= PUSHBUTTON) && (fParameterIndex < MAXOWLPARAMETERS)){
+      fParameterTable[fParameterIndex] = new OwlButton(fPatch, fButton, zone, label);
+      fParameterTable[fParameterIndex]->bind();
+      fParameterIndex++;
     }
     fButton = NO_BUTTON; 		// clear current button ID
   }
@@ -151,14 +161,14 @@ class OwlUI : public UI
 
 public:
 
-  OwlUI(Patch* pp) : fPatch(pp), fParameter(NO_PARAMETER), fParameterIndex(0), fButton(NO_BUTTON), fButtonIndex(0) {}
+  OwlUI(Patch* pp) : fPatch(pp), fParameter(NO_PARAMETER), fParameterIndex(0), fButton(NO_BUTTON) {}
 	
   virtual ~OwlUI() {}
 	
   // should be called before compute() to update widget's zones registered as Owl parameters
   void update() {
-    for (int i=0; i<fParameterIndex; i++)  fParameterTable[i].update();
-    for (int i=0; i<fButtonIndex; i++)  fButtonTable[i].update();
+    for (int i=0; i<fParameterIndex; i++)
+      fParameterTable[i]->update();
   }
 
   //---------------------- virtual methods called by buildUserInterface ----------------
@@ -279,7 +289,13 @@ public:
     // DSP static data is destroyed using classDestroy.
     mydsp::classDestroy();
   }
-    
+
+  void processMidi(MidiMessage& msg){
+    if(msg.isNoteOn()){
+    }else if(msg.isNoteOff()){
+    }
+  }
+
   void processAudio(AudioBuffer &buffer)
   {
     // Reasonably assume we will not have more than 32 channels
@@ -306,7 +322,6 @@ public:
       fDSP->compute(buffer.getSize(), ins, outs);
     }
   }
-
 };
 
 extern "C" {
