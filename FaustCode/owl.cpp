@@ -87,6 +87,8 @@ public:
   }
   void setPitchBend(float bend){
     pb = bend*2;
+    // y = 1 + 0.0002289126*x + 1.676756e-8*x^2; // y=0.25 to 4
+    // y = 1 + 0.00009156205*x + 3.726427e-9*x^2; // y=0.5 to 2
   }
   float noteToHz(uint8_t note){
     return 440.0f*exp2f((note-69 + pb)/12.0);
@@ -136,14 +138,13 @@ class OwlParameterBase
 protected:
   Patch* fPatch;      // needed to register and read owl parameters
   FAUSTFLOAT* fZone;  // Faust widget zone
-  const char* fLabel; // Faust widget label
 public:
   OwlParameterBase() :
-    fPatch(NULL), fZone(0), fLabel("") {}
+    fPatch(NULL), fZone(0) {}
   OwlParameterBase(const OwlParameterBase& w) :
-    fPatch(w.fPatch), fZone(w.fZone), fLabel(w.fLabel) {}
-  OwlParameterBase(Patch* pp, FAUSTFLOAT* z, const char* l) :
-    fPatch(pp), fZone(z), fLabel(l) {}
+    fPatch(w.fPatch), fZone(w.fZone) {}
+  OwlParameterBase(Patch* pp, FAUSTFLOAT* z) :
+    fPatch(pp), fZone(z) {}
   virtual void update()	{}
 };
 
@@ -160,8 +161,8 @@ public:
   OwlParameter(const OwlParameter& w) :
     OwlParameterBase(w), fParameter(w.fParameter), fMin(w.fMin), fSpan(w.fSpan) {}
   OwlParameter(Patch* pp, PatchParameterId param, FAUSTFLOAT* z, const char* l, float lo, float hi) :
-    OwlParameterBase(pp, z, l), fParameter(param), fMin(lo), fSpan(hi-lo) {
-    fPatch->registerParameter(fParameter, fLabel);
+    OwlParameterBase(pp, z), fParameter(param), fMin(lo), fSpan(hi-lo) {
+    fPatch->registerParameter(param, l);
   }
   void update()	{ *fZone = fMin + fSpan*fPatch->getParameterValue(fParameter); }
 	
@@ -175,12 +176,12 @@ protected:
   float	fSpan;			// Faust widget value span (max-min)
 	
 public:
-  // OwlVariable() :
-  //   fParameter(NULL), fMin(0), fSpan(1) {}
-  // OwlVariable(const OwlVariable& w) :
-  //   OwlParameterBase(w), fParameter(w.fParameter), fMin(w.fMin), fSpan(w.fSpan) {}
+  OwlVariable() :
+    fMin(0), fSpan(1) {}
+  OwlVariable(const OwlVariable& w) :
+    OwlParameterBase(w), fMin(w.fMin), fSpan(w.fSpan) {}
   OwlVariable(Patch* pp, float* t, FAUSTFLOAT* z, const char* l, float lo, float hi) :
-    OwlParameterBase(pp, z, l), fValue(t), fMin(lo), fSpan(hi-lo) {
+    OwlParameterBase(pp, z), fValue(t), fMin(lo), fSpan(hi-lo) {
   }
   void update()	{ *fZone = *fValue; }
 	
@@ -196,7 +197,7 @@ public:
   OwlButton(const OwlButton& w) :
     OwlParameterBase(w), fButton(w.fButton) {}
   OwlButton(Patch* pp, PatchButtonId button, FAUSTFLOAT* z, const char* l) :
-    OwlParameterBase(pp, z, l), fButton(button) {}
+    OwlParameterBase(pp, z), fButton(button) {}
   void update()	{ *fZone = fPatch->isButtonPressed(fButton); }
 };
 
@@ -213,7 +214,6 @@ public:
 
 // The maximun number of mappings between owl parameters and faust widgets 
 #define MAXOWLPARAMETERS 20
-#define MAXOWLBUTTONS    2
 #define NO_PARAMETER     ((PatchParameterId)-1)
 #define NO_BUTTON        ((PatchButtonId)-1)
 
@@ -221,9 +221,9 @@ MonoVoiceAllocator allocator(fFreq, fGain, fGate);
 
 class OwlUI : public UI
 {
-  Patch* 	fPatch;
-  PatchParameterId	fParameter;					// current parameter ID, value NO_PARAMETER means not set
-  int					fParameterIndex;						// number of OwlParameters collected so far
+  Patch* fPatch;
+  PatchParameterId fParameter;					// current parameter ID, value NO_PARAMETER means not set
+  int fParameterIndex = 0;						// number of OwlParameters collected so far
   OwlParameterBase* fParameterTable[MAXOWLPARAMETERS];
   PatchButtonId fButton;
   // check if the widget is an Owl parameter and, if so, add the corresponding OwlParameter
@@ -238,7 +238,7 @@ class OwlUI : public UI
 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fFreq, zone, label, lo, hi);
       }else if(strcasecmp(label,"gain") == 0){
 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fGain, zone, label, lo, hi);
-      }else if(fParameter >= PARAMETER_A){
+      }else if(fParameter != NO_PARAMETER){
 	fParameterTable[fParameterIndex++] = new OwlParameter(fPatch, fParameter, zone, label, lo, hi);
       }
     }
@@ -252,11 +252,10 @@ class OwlUI : public UI
       // }else 
       if(strcasecmp(label,"gate") == 0){
 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fGate, zone, label, 0.0f, 1.0f);
-      }else if(fButton >= PUSHBUTTON){
+      }else if(fButton != NO_BUTTON){
 	fParameterTable[fParameterIndex++] = new OwlButton(fPatch, fButton, zone, label);
       }
     }
-
     fButton = NO_BUTTON; 		// clear current button ID
   }
 
@@ -270,7 +269,10 @@ public:
 
   OwlUI(Patch* pp) : fPatch(pp), fParameter(NO_PARAMETER), fParameterIndex(0), fButton(NO_BUTTON) {}
 	
-  virtual ~OwlUI() {}
+  virtual ~OwlUI() {
+    for (int i=0; i<fParameterIndex; i++)
+      delete fParameterTable[i];
+}
 	
   // should be called before compute() to update widget's zones registered as Owl parameters
   void update() {
@@ -317,6 +319,11 @@ public:
       else if (strcasecmp(id,"G") == 0)  fParameter = PARAMETER_G;
       else if (strcasecmp(id,"H") == 0)  fParameter = PARAMETER_H;
       else if (strcasecmp(id,"PUSH") == 0)  fButton = PUSHBUTTON;
+    }else if(strcasecmp(k,"midi") == 0){
+      // todo!
+      // if (strcasecmp(id,"pitchwheel") == 0)  fParameter = PARAMETER_G; // mapped to pitch wheel
+      // declare(&fHslider1, "midi", "pitchwheel");
+      // declare(&fButton1, "midi", "ctrl 64");
     }
 
   }
