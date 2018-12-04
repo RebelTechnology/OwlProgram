@@ -171,6 +171,12 @@ public:
 	params[param_count++] = new GenButton(this, context, name, PUSHBUTTON, i);	
       }else if(strcasecmp(GEN_OWL_PARAM_BUTTON_A, name) == 0){
 	params[param_count++] = new GenButton(this, context, name, BUTTON_A, i);
+      }else if(strcasecmp(GEN_OWL_PARAM_BUTTON_B, name) == 0){
+	params[param_count++] = new GenButton(this, context, name, BUTTON_B, i);
+      }else if(strcasecmp(GEN_OWL_PARAM_BUTTON_C, name) == 0){
+	params[param_count++] = new GenButton(this, context, name, BUTTON_C, i);
+      }else if(strcasecmp(GEN_OWL_PARAM_BUTTON_D, name) == 0){
+	params[param_count++] = new GenButton(this, context, name, BUTTON_D, i);
       }else if(strlen(name) == 1 && name[0] >= 'A' && name[0] <= 'H'){
 	uint8_t index = name[0]-'A';
 	params[param_count++] = new GenParameter(this, context, name, (PatchParameterId)index, i);
