@@ -46,17 +46,20 @@
 
 #include "faust/dsp/dsp.h"
 #include "faust/gui/UI.h"
+
 static float fFreq, fGain, fGate;
+static float fBend = 1.0f;
 
 class MonoVoiceAllocator {
   float& freq;
   float& gain;
   float& gate;
+  float& bend;
   uint8_t notes[16];
   uint8_t lastNote = 0;
-  float pb;
 public:
-  MonoVoiceAllocator(float& fq, float& gn, float& gt): freq(fq), gain(gn), gate(gt) {}
+  MonoVoiceAllocator(float& fq, float& gn, float& gt, float& bd): freq(fq), gain(gn), gate(gt), bend(bd) {
+  }
   float getFreq(){
     return freq;
   }
@@ -65,6 +68,9 @@ public:
   }
   float getGate(){
     return gate;
+  }
+  float getBend(){
+    return bend;
   }
   void processMidi(MidiMessage msg){
     uint16_t samples = 0;
@@ -79,19 +85,12 @@ public:
 	allNotesOff();
     }
   }
-  void setPitchBend(int16_t bend){
-    // pb = bend/8192.0f;
-    pb = bend/1024.0f; // 2 octave range?
-    if(lastNote > 0)
-      freq = noteToHz(notes[lastNote-1]);
-  }
-  void setPitchBend(float bend){
-    pb = bend*2;
-    // y = 1 + 0.0002289126*x + 1.676756e-8*x^2; // y=0.25 to 4
-    // y = 1 + 0.00009156205*x + 3.726427e-9*x^2; // y=0.5 to 2
+  void setPitchBend(int16_t pb){
+    float fb = pb*(2.0f/8192.0f);
+    bend = exp2f(fb);
   }
   float noteToHz(uint8_t note){
-    return 440.0f*exp2f((note-69 + pb)/12.0);
+    return 440.0f*exp2f((note-69)/12.0);
   }
   float velocityToGain(uint16_t velocity){
     return exp2f(velocity/4095.0f) -1;
@@ -105,19 +104,26 @@ public:
     gate = 1;
   }
   void noteOff(uint8_t note, uint16_t velocity, uint16_t delay){
-    for(int i=0; i<lastNote; ++i){
-      if(notes[i] == note){
-	while(i<lastNote)
-	  notes[i] = notes[++i];
-      }
+    int i;
+    for(i=0; i<lastNote; ++i){
+      if(notes[i] == note)
+    	break;
     }
-    --lastNote;
-    if(lastNote == 0)
+    if(lastNote > 1){
+      lastNote--;
+      while(i<lastNote){
+	notes[i] = notes[i+1];
+	i++;
+      }
+      freq = noteToHz(notes[lastNote-1]);
+    }else{
       gate = 0;
+      lastNote = 0;
+    }
   }
   void allNotesOff(){
     lastNote = 0;
-    pb = 0;
+    bend = 0;
   }
 };
 
@@ -217,7 +223,7 @@ public:
 #define NO_PARAMETER     ((PatchParameterId)-1)
 #define NO_BUTTON        ((PatchButtonId)-1)
 
-MonoVoiceAllocator allocator(fFreq, fGain, fGate);
+MonoVoiceAllocator allocator(fFreq, fGain, fGate, fBend);
 
 class OwlUI : public UI
 {
@@ -229,15 +235,12 @@ class OwlUI : public UI
   // check if the widget is an Owl parameter and, if so, add the corresponding OwlParameter
   void addOwlParameter(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT lo, FAUSTFLOAT hi) {
     if(fParameterIndex < MAXOWLPARAMETERS){
-      // if(fParameter == PARAMETER_FREQ){
-      // 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fFreq, zone, label, lo, hi);
-      // }else if(fParameter == PARAMETER_GAIN){
-      // 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fGain, zone, label, lo, hi);
-      // }else 
       if(strcasecmp(label,"freq") == 0){
 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fFreq, zone, label, lo, hi);
       }else if(strcasecmp(label,"gain") == 0){
 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fGain, zone, label, lo, hi);
+      }else if(strcasecmp(label,"bend") == 0){
+	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fBend, zone, label, lo, hi);
       }else if(fParameter != NO_PARAMETER){
 	fParameterTable[fParameterIndex++] = new OwlParameter(fPatch, fParameter, zone, label, lo, hi);
       }
@@ -247,9 +250,6 @@ class OwlUI : public UI
 
   void addOwlButton(const char* label, FAUSTFLOAT* zone) {
     if(fParameterIndex < MAXOWLPARAMETERS){
-      // if(fButton == GATE_BUTTON){
-      // 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fGate, zone, label, 0.0f, 1.0f);
-      // }else 
       if(strcasecmp(label,"gate") == 0){
 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fGate, zone, label, 0.0f, 1.0f);
       }else if(fButton != NO_BUTTON){
@@ -384,6 +384,7 @@ public:
     // // Map OWL parameters and faust widgets 
     // fDSP->buildUserInterface(&fUI);
 
+    fBend = 1.0f;
     fDSP = new mydsp();
     mydsp::fManager = &mem; // set custom memory manager
     mydsp::classInit(int(getSampleRate())); // initialise static tables

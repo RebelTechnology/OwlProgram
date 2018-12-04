@@ -69,15 +69,22 @@ public:
     gate = 1;
   }
   void noteOff(uint8_t note, uint16_t velocity, uint16_t delay){
-    for(int i=0; i<lastNote; ++i){
-      if(notes[i] == note){
-	while(i<lastNote)
-	  notes[i] = notes[++i];
-      }
+    int i;
+    for(i=0; i<lastNote; ++i){
+      if(notes[i] == note)
+    	break;
     }
-    --lastNote;
-    if(lastNote == 0)
+    if(lastNote > 1){
+      lastNote--;
+      while(i<lastNote){
+	notes[i] = notes[i+1];
+	i++;
+      }
+      freq = noteToHz(notes[lastNote-1]);
+    }else{
       gate = 0;
+      lastNote = 0;
+    }
   }
   void allNotesOff(){
     lastNote = 0;
