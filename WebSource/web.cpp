@@ -81,6 +81,12 @@ void WEB_setButtons(int values){
   if(values != buttons){
     if((buttons&(1<<PUSHBUTTON)) != (values&(1<<PUSHBUTTON)))
       getInitialisingPatchProcessor()->patch->buttonChanged(PUSHBUTTON, values&(1<<PUSHBUTTON)?4095:0, 0);
+    else if((buttons&(1<<BUTTON_B)) != (values&(1<<BUTTON_B)))
+      getInitialisingPatchProcessor()->patch->buttonChanged(PUSHBUTTON, values&(1<<BUTTON_B)?4095:0, 0);
+    else if((buttons&(1<<BUTTON_C)) != (values&(1<<BUTTON_C)))
+      getInitialisingPatchProcessor()->patch->buttonChanged(PUSHBUTTON, values&(1<<BUTTON_B)?4095:0, 0);
+    else if((buttons&(1<<BUTTON_D)) != (values&(1<<BUTTON_D)))
+      getInitialisingPatchProcessor()->patch->buttonChanged(PUSHBUTTON, values&(1<<BUTTON_B)?4095:0, 0);
     buttons = values;
   }
 }
