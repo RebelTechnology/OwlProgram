@@ -140,10 +140,12 @@ class GenVariableParameter : public GenParameterBase  {
 public:
   float* fp;
   int8_t index;
-  GenVariableParameter(Patch* patch, CommonState *context, const char* name, float* f, int8_t idx) : fp(f), index(idx) {
-  }
+  GenVariableParameter(Patch* patch, CommonState *context, const char* name, float* f, int8_t idx)
+    : fp(f), index(idx) {}
   void update(Patch* patch, CommonState *context){
     float value = *fp;
+    // clip value to min/max (not needed, done inside gen~ code)
+    // value = value > min ? (value < max ? value : max) : min;
     gen::setparameter(context, index, value, NULL);
   }
 };
