@@ -145,10 +145,6 @@ protected:
   Patch* fPatch;      // needed to register and read owl parameters
   FAUSTFLOAT* fZone;  // Faust widget zone
 public:
-  OwlParameterBase() :
-    fPatch(NULL), fZone(0) {}
-  OwlParameterBase(const OwlParameterBase& w) :
-    fPatch(w.fPatch), fZone(w.fZone) {}
   OwlParameterBase(Patch* pp, FAUSTFLOAT* z) :
     fPatch(pp), fZone(z) {}
   virtual void update()	{}
@@ -157,15 +153,11 @@ public:
 class OwlParameter : public OwlParameterBase
 {
 protected:
-  PatchParameterId	fParameter;		// OWL parameter code : PARAMETER_A,...
-  float				fMin;			// Faust widget minimal value
-  float				fSpan;			// Faust widget value span (max-min)
+  PatchParameterId fParameter;	// OWL parameter code : PARAMETER_A,...
+  float	fMin;			// Faust widget minimal value
+  float	fSpan;			// Faust widget value span (max-min)
 	
 public:
-  OwlParameter() :
-    fParameter(PARAMETER_A), fMin(0), fSpan(1) {}
-  OwlParameter(const OwlParameter& w) :
-    OwlParameterBase(w), fParameter(w.fParameter), fMin(w.fMin), fSpan(w.fSpan) {}
   OwlParameter(Patch* pp, PatchParameterId param, FAUSTFLOAT* z, const char* l, float lo, float hi) :
     OwlParameterBase(pp, z), fParameter(param), fMin(lo), fSpan(hi-lo) {
     fPatch->registerParameter(param, l);
@@ -178,19 +170,19 @@ class OwlVariable : public OwlParameterBase
 {
 protected:
   float* fValue;
-  float	fMin;			// Faust widget minimal value
-  float	fSpan;			// Faust widget value span (max-min)
+  float	fLo;			// Faust widget minimal value
+  float	fHi;			// Faust widget value span (max-min)
 	
 public:
-  OwlVariable() :
-    fMin(0), fSpan(1) {}
-  OwlVariable(const OwlVariable& w) :
-    OwlParameterBase(w), fMin(w.fMin), fSpan(w.fSpan) {}
   OwlVariable(Patch* pp, float* t, FAUSTFLOAT* z, const char* l, float lo, float hi) :
-    OwlParameterBase(pp, z), fValue(t), fMin(lo), fSpan(hi-lo) {
+    OwlParameterBase(pp, z), fValue(t), fLo(lo), fHi(hi) {
   }
-  void update()	{ *fZone = *fValue; }
-	
+  void update()	{
+    float value = *fValue;
+    // clip value to min/max
+    value = value > fLo ? (value < fHi ? value : fHi) : fLo;
+    *fZone = value;
+  }  	
 };
 
 class OwlButton : public OwlParameterBase
@@ -198,10 +190,6 @@ class OwlButton : public OwlParameterBase
 protected:
   PatchButtonId	fButton;		// OWL button id : PUSHBUTTON, ...
 public:
-  OwlButton() :
-    fButton(PUSHBUTTON) {}
-  OwlButton(const OwlButton& w) :
-    OwlParameterBase(w), fButton(w.fButton) {}
   OwlButton(Patch* pp, PatchButtonId button, FAUSTFLOAT* z, const char* l) :
     OwlParameterBase(pp, z), fButton(button) {}
   void update()	{ *fZone = fPatch->isButtonPressed(fButton); }
@@ -319,6 +307,10 @@ public:
       else if (strcasecmp(id,"G") == 0)  fParameter = PARAMETER_G;
       else if (strcasecmp(id,"H") == 0)  fParameter = PARAMETER_H;
       else if (strcasecmp(id,"PUSH") == 0)  fButton = PUSHBUTTON;
+      else if (strcasecmp(id,"ButtonA") == 0)  fButton = BUTTON_A;
+      else if (strcasecmp(id,"ButtonB") == 0)  fButton = BUTTON_B;
+      else if (strcasecmp(id,"ButtonC") == 0)  fButton = BUTTON_C;
+      else if (strcasecmp(id,"ButtonD") == 0)  fButton = BUTTON_D;
     }else if(strcasecmp(k,"midi") == 0){
       // todo!
       // if (strcasecmp(id,"pitchwheel") == 0)  fParameter = PARAMETER_G; // mapped to pitch wheel
