@@ -20,4 +20,8 @@ else
 fi
 
 cd $BUILD_DIR && zip -q -r patch.zip */*
-cp $BUILD_DIR/patch.zip $TARGET_DIR/$PATCH_SEO_NAME.zip
+
+if [ -d "$TARGET_DIR" ]
+then
+  cp $BUILD_DIR/patch.zip $TARGET_DIR/patch.zip
+fi
