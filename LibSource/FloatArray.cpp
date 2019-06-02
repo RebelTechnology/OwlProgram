@@ -87,7 +87,7 @@ void FloatArray::rectify(FloatArray& destination){ //this is actually "copy data
 #else
   size_t minSize= min(size,destination.getSize()); //TODO: shall we take this out and allow it to segfault?
   for(size_t n=0; n<minSize; n++){
-    destination[n] = fabs(data[n]);
+    destination[n] = fabsf(data[n]);
   }
 #endif  
 }
@@ -408,7 +408,7 @@ void FloatArray::noise(){
 }
 
 void FloatArray::noise(float min, float max){
-  float amplitude = fabs(max-min);
+  float amplitude = fabsf(max-min);
   float offset = min;
   ASSERT(getSize()>10, "10<getSize");
   ASSERT(size==getSize(), "getSize");
