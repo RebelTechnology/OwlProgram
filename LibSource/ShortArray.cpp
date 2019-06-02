@@ -177,7 +177,8 @@ int64_t ShortArray::getPower(){
   result=0;
   int16_t *pSrc = data;
   for(size_t n=0; n < size; n++){
-    result += (int32_t)pSrc[n]*pSrc[n];
+    int32_t value = (int32_t)pSrc[n]*pSrc[n];
+    result += saturateTo16(value >> 15);
   }
 #endif
   return result;
