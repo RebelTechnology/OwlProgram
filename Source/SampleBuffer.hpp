@@ -9,18 +9,21 @@
 #include "device.h"
 #ifdef ARM_CORTEX
 #include "arm_math.h"
-#define AUDIO_SATURATE_SAMPLES
+// #define AUDIO_SATURATE_SAMPLES
 #else
 #undef AUDIO_SATURATE_SAMPLES
 #endif //ARM_CORTEX
 
+#define MULTIPLIER 2147483648
+// #define MULTIPLIER 8388608
+// #define MULTIPLIER 1073741824
 
 class SampleBuffer : public AudioBuffer {
 protected:
   FloatArray left;
   FloatArray right;
   uint16_t size;
-  const float mul = 1/2147483648.0f;
+  const float mul = 1.0f/MULTIPLIER;
 public:
   SampleBuffer(int blocksize){
     left = FloatArray::create(blocksize);
@@ -29,8 +32,10 @@ public:
   void split32(int32_t* input, uint16_t blocksize){
     size = blocksize;
     for(int i=0; i<size; ++i){
-      left[i] = (int32_t)((*input++)<<8) * mul;
-      right[i] = (int32_t)((*input++)<<8) * mul;
+      // left[i] = (int32_t)((*input++)<<8) * mul;
+      // right[i] = (int32_t)((*input++)<<8) * mul;
+      left[i] = (int32_t)((*input++)) * mul;
+      right[i] = (int32_t)((*input++)) * mul;
     }
   }
   void comb32(int32_t* output){
@@ -38,20 +43,17 @@ public:
     for(int i=0; i<size; ++i){
 #ifdef AUDIO_SATURATE_SAMPLES
       // Saturate to 24 bits to avoid nasty clipping on cs4271
-      *dest++ = __SSAT((q31_t)(left[i] * 8388608.0f), 24);
-      *dest++ = __SSAT((q31_t)(right[i] * 8388608.0f), 24);
+      *dest++ = __SSAT((q31_t)(left[i] * MULTIPLIER), 24);
+      *dest++ = __SSAT((q31_t)(right[i] * MULTIPLIER), 24);
 #else
-      *dest++ = ((int32_t)(left[i] * 8388608.0f));
-      *dest++ = ((int32_t)(right[i] * 8388608.0f));
+      *dest++ = ((int32_t)(left[i] * MULTIPLIER));
+      *dest++ = ((int32_t)(right[i] * MULTIPLIER));
 #endif
     }
   }
 
-// #define MULTIPLIER 2147483648
-#define MULTIPLIER 8388608
-// #define MULTIPLIER 1073741824
   
-#if 0
+#if 1
   void split24(int32_t* data, uint16_t blocksize){
     size = blocksize;
     uint8_t* input = (uint8_t*)data;
