@@ -5,9 +5,12 @@
 #include "basicmaths.h"
 #include "HvHeavy.h"
 #include "Heavy_owl.hpp"
+#include "Heavy_owl_constants.h"
 
 #define HV_HASH_CHANNEL_PUSH 0x3cf4c9df
-#define HV_HASH_CHANNEL_A 0xc440c54f
+/*
+#define HV_HASH_CHANNEL_A 0xc440c54f //Channel-A
+//#define HV_HASH_CHANNEL_A 0x7bcbaf78 //ChannelA
 #define HV_HASH_CHANNEL_B 0xb762bb42
 #define HV_HASH_CHANNEL_C 0x27d89cd5
 #define HV_HASH_CHANNEL_D 0x217d22f5
@@ -15,7 +18,7 @@
 #define HV_HASH_CHANNEL_F 0xd3c05ccb
 #define HV_HASH_CHANNEL_G 0xba16b531
 #define HV_HASH_CHANNEL_H 0xfbc0c5a
-
+*/
 #define HV_HASH_BUTTON_A 0xfbc73385
 #define HV_HASH_BUTTON_B 0x8c39a047
 #define HV_HASH_BUTTON_C 0x69b62624
@@ -103,8 +106,84 @@ public:
     context->setPrintHook(&printHook);
     context->setSendHook(&sendHook);
 
-    // HvParameterInfo pinfo;
-    // int pcount = hv_getParameterInfo(context, 0, &pinfo);
+#ifdef HV_NAME_CHANNEL_A
+    registerParameter(PARAMETER_A, HV_NAME_CHANNEL_A);
+#endif
+#ifdef HV_NAME_CHANNEL_B
+    registerParameter(PARAMETER_B, HV_NAME_CHANNEL_B);
+#endif
+#ifdef HV_NAME_CHANNEL_C
+    registerParameter(PARAMETER_C, HV_NAME_CHANNEL_C);
+#endif
+#ifdef HV_NAME_CHANNEL_D
+    registerParameter(PARAMETER_D, HV_NAME_CHANNEL_D);
+#endif
+#ifdef HV_NAME_CHANNEL_E
+    registerParameter(PARAMETER_E, HV_NAME_CHANNEL_E);
+#endif
+#ifdef HV_NAME_CHANNEL_F
+    registerParameter(PARAMETER_F, HV_NAME_CHANNEL_F);
+#endif
+#ifdef HV_NAME_CHANNEL_G
+    registerParameter(PARAMETER_G, HV_NAME_CHANNEL_G);
+#endif
+#ifdef HV_NAME_CHANNEL_H
+    registerParameter(PARAMETER_H, HV_NAME_CHANNEL_H);
+#endif
+#ifdef HV_NAME_CHANNEL_AA
+    registerParameter(PARAMETER_AA, HV_NAME_CHANNEL_AA);
+#endif
+#ifdef HV_NAME_CHANNEL_AB
+    registerParameter(PARAMETER_AB, HV_NAME_CHANNEL_AB);
+#endif
+#ifdef HV_NAME_CHANNEL_AC
+    registerParameter(PARAMETER_AC, HV_NAME_CHANNEL_AC);
+#endif
+#ifdef HV_NAME_CHANNEL_AD
+    registerParameter(PARAMETER_AD, HV_NAME_CHANNEL_AD);
+#endif
+#ifdef HV_NAME_CHANNEL_AE
+    registerParameter(PARAMETER_AE, HV_NAME_CHANNEL_AE);
+#endif
+#ifdef HV_NAME_CHANNEL_AF
+    registerParameter(PARAMETER_AF, HV_NAME_CHANNEL_AF);
+#endif
+#ifdef HV_NAME_CHANNEL_AG
+    registerParameter(PARAMETER_AG, HV_NAME_CHANNEL_AG);
+#endif
+#ifdef HV_NAME_CHANNEL_AH
+    registerParameter(PARAMETER_AH, HV_NAME_CHANNEL_AH);
+#endif
+#ifdef HV_NAME_CHANNEL_BA
+    registerParameter(PARAMETER_BA, HV_NAME_CHANNEL_BA);
+#endif
+#ifdef HV_NAME_CHANNEL_BB
+    registerParameter(PARAMETER_BB, HV_NAME_CHANNEL_BB);
+#endif
+#ifdef HV_NAME_CHANNEL_BC
+    registerParameter(PARAMETER_BC, HV_NAME_CHANNEL_BC);
+#endif
+#ifdef HV_NAME_CHANNEL_BD
+    registerParameter(PARAMETER_BD, HV_NAME_CHANNEL_BD);
+#endif
+
+    /*
+    HvParameterInfo pinfo;
+    int pcount = hv_getParameterInfo(context, 0, &pinfo);
+    if (pcount > 0) {
+      for (int i=0;;) {
+
+        if (i==0) {
+          registerParameter(PARAMETER_A, *pinfo->name);
+        } else if (i==1){
+          registerParameter(PARAMETER_B, *pinfo->name);
+        }
+        i++;
+        if (i > pcount) break;
+        hv_getParameterInfo(context, i, &pinfo);
+      } 
+    }
+    */
   }
   
   ~HeavyPatch() {
@@ -177,6 +256,106 @@ public:
     case HV_HASH_PGMOUT:
       sendMidi(MidiMessage::pc((uint8_t)hv_msg_getFloat(m, 1), (uint8_t)hv_msg_getFloat(m, 0)));
       break;
+#ifdef HV_HASH_SEND_CHANNEL_A
+    case HV_HASH_SEND_CHANNEL_A:
+      setParameterValue(PARAMETER_A, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_B
+    case HV_HASH_SEND_CHANNEL_B:
+      setParameterValue(PARAMETER_B, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_C
+    case HV_HASH_SEND_CHANNEL_C:
+      setParameterValue(PARAMETER_C, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_D
+    case HV_HASH_SEND_CHANNEL_D:
+      setParameterValue(PARAMETER_D, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_E
+    case HV_HASH_SEND_CHANNEL_E:
+      setParameterValue(PARAMETER_E, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_F
+    case HV_HASH_SEND_CHANNEL_F:
+      setParameterValue(PARAMETER_F, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_G
+    case HV_HASH_SEND_CHANNEL_G:
+      setParameterValue(PARAMETER_G, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_H
+    case HV_HASH_SEND_CHANNEL_H:
+      setParameterValue(PARAMETER_H, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_AA
+    case HV_HASH_SEND_CHANNEL_AA:
+      setParameterValue(PARAMETER_AA, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_AB
+    case HV_HASH_SEND_CHANNEL_AB:
+      setParameterValue(PARAMETER_AB, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_AC
+    case HV_HASH_SEND_CHANNEL_AC:
+      setParameterValue(PARAMETER_AC, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_AD
+    case HV_HASH_SEND_CHANNEL_AD:
+      setParameterValue(PARAMETER_AD, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_AE
+    case HV_HASH_SEND_CHANNEL_AE:
+      setParameterValue(PARAMETER_AE, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_AF
+    case HV_HASH_SEND_CHANNEL_AF:
+      setParameterValue(PARAMETER_AF, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_AG
+    case HV_HASH_SEND_CHANNEL_AG:
+      setParameterValue(PARAMETER_AG, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_AH
+    case HV_HASH_SEND_CHANNEL_AH:
+      setParameterValue(PARAMETER_AH, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_BA
+    case HV_HASH_SEND_CHANNEL_BA:
+      setParameterValue(PARAMETER_BA, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_BB
+    case HV_HASH_SEND_CHANNEL_BB:
+      setParameterValue(PARAMETER_BB, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_BC
+    case HV_HASH_SEND_CHANNEL_BC:
+      setParameterValue(PARAMETER_BC, hv_msg_getFloat(m, 0));
+      break;
+#endif
+#ifdef HV_HASH_SEND_CHANNEL_BD
+    case HV_HASH_SEND_CHANNEL_BD:
+      setParameterValue(PARAMETER_BD, hv_msg_getFloat(m, 0));
+      break;
+#endif
     default:
       break;
     }
@@ -251,16 +430,68 @@ public:
 
   void processAudio(AudioBuffer &buffer) {
     _msgLock = true;
-    context->sendFloatToReceiver(HV_HASH_CHANNEL_A, getParameterValue(PARAMETER_A));
-    context->sendFloatToReceiver(HV_HASH_CHANNEL_B, getParameterValue(PARAMETER_B));
-    context->sendFloatToReceiver(HV_HASH_CHANNEL_C, getParameterValue(PARAMETER_C));
-    context->sendFloatToReceiver(HV_HASH_CHANNEL_D, getParameterValue(PARAMETER_D));
-    context->sendFloatToReceiver(HV_HASH_CHANNEL_E, getParameterValue(PARAMETER_E));
-#ifdef HV_EXTENDED_PARAMETERS
-    context->sendFloatToReceiver(HV_HASH_CHANNEL_F, getParameterValue(PARAMETER_F));
-    context->sendFloatToReceiver(HV_HASH_CHANNEL_G, getParameterValue(PARAMETER_G));
-    context->sendFloatToReceiver(HV_HASH_CHANNEL_H, getParameterValue(PARAMETER_H));
+#ifdef HV_HASH_RECV_CHANNEL_A
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_A, getParameterValue(PARAMETER_A));
 #endif
+#ifdef HV_HASH_RECV_CHANNEL_B
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_B, getParameterValue(PARAMETER_B));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_C
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_C, getParameterValue(PARAMETER_C));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_D
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_D, getParameterValue(PARAMETER_D));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_E
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_E, getParameterValue(PARAMETER_E));
+#endif
+#ifdef HV_EXTENDED_PARAMETERS
+#ifdef HV_HASH_RECV_CHANNEL_F
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_F, getParameterValue(PARAMETER_F));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_G
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_G, getParameterValue(PARAMETER_G));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_H
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_H, getParameterValue(PARAMETER_H));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_AA
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_AA, getParameterValue(PARAMETER_AA));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_AB
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_AB, getParameterValue(PARAMETER_AB));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_AC
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_AC, getParameterValue(PARAMETER_AC));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_AD
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_AD, getParameterValue(PARAMETER_AD));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_AE
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_AE, getParameterValue(PARAMETER_AE));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_AF
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_AF, getParameterValue(PARAMETER_AF));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_AG
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_AG, getParameterValue(PARAMETER_AG));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_AH
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_AH, getParameterValue(PARAMETER_AH));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_BA
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_BA, getParameterValue(PARAMETER_BA));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_BB
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_BB, getParameterValue(PARAMETER_BB));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_BC
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_BC, getParameterValue(PARAMETER_BC));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_BD
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_BD, getParameterValue(PARAMETER_BD));
+#endif
+#endif //EXTENDED PARAMETERS
     _msgLock = false;
     float* outputs[] = {buffer.getSamples(LEFT_CHANNEL), buffer.getSamples(RIGHT_CHANNEL)};
     context->process(outputs, outputs, getBlockSize());
