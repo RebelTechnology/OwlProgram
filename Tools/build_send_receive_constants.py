@@ -67,7 +67,8 @@ def main():
 
 
     #
-    # TODO, aggiungere controllo perchè non ci sia un canale sia input che output
+    # TODO, check that there is not channel defined both as input and output
+
 
     with open(args.outfilename, mode="w") as f:
         for chan in channels:
