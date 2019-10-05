@@ -35,7 +35,7 @@ void arm_srand32(uint32_t s){
 }
 
 /**
- * generate an unsigned 32bit pseudo-random number using xorshifter algorithm.
+ * Generate an unsigned 32bit pseudo-random number using xorshifter algorithm. Aka xorshifter32.
  * "Anyone who considers arithmetical methods of producing random digits is, of course, in a state of sin." 
  * -- John von Neumann.
 */
