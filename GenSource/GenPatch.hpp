@@ -195,6 +195,9 @@ public:
 	params[param_count++] = new GenParameter(this, context, name, (PatchParameterId)index, i);
       }
     }
+    // ins = num_inputs();
+    // outs = num_outputs();
+    // todo: assign unused outputs to output parameters, starting from the last registered input parametere
   }
 
   ~GenPatch() {
