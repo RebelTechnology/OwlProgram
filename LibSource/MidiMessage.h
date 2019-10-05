@@ -72,7 +72,7 @@ class MidiMessage {
   static MidiMessage pc(uint8_t ch, uint8_t pc){
     return MidiMessage(USB_COMMAND_PROGRAM_CHANGE, PROGRAM_CHANGE|(ch&0xf), pc&0x7f, 0);
   }
-  static MidiMessage pb(uint8_t ch, uint16_t bend){
+  static MidiMessage pb(uint8_t ch, int16_t bend){
     bend += 8192;
     return MidiMessage(USB_COMMAND_PITCH_BEND_CHANGE, PITCH_BEND_CHANGE|(ch&0xf), bend&0x7f, (bend>>7)&0x7f);
   }
