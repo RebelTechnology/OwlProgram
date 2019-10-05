@@ -14,28 +14,33 @@
 #undef AUDIO_SATURATE_SAMPLES
 #endif //ARM_CORTEX
 
-#define MULTIPLIER 2147483648
-// #define MULTIPLIER 8388608
-// #define MULTIPLIER 1073741824
+#define MULTIPLIER_31B 2147483648
+#define MULTIPLIER_30B 1073741824
+#define MULTIPLIER_23B 8388608
 
 class SampleBuffer : public AudioBuffer {
 protected:
-  FloatArray left;
-  FloatArray right;
+  FloatArray* buffers;
   uint16_t size;
-  const float mul = 1.0f/MULTIPLIER;
+  size_t channels;
 public:
-  SampleBuffer(int blocksize){
-    left = FloatArray::create(blocksize);
-    right = FloatArray::create(blocksize);
+  SampleBuffer(size_t channels, size_t blocksize)
+    :channels(channels), size(blocksize) {
+    buffers = new FloatArray[channels];
+    for(size_t i=0; i<channels; ++i)
+      buffers[i] = FloatArray::create(blocksize);
+  }
+  ~SampleBuffer(){
+    for(size_t i=0; i<channels; ++i)
+      FloatArray::destroy(buffers[i]);
+    delete[] buffers;
   }
   void split32(int32_t* input, uint16_t blocksize){
+    const float mul = 1.0f/MULTIPLIER_31B;
     size = blocksize;
     for(int i=0; i<size; ++i){
-      // left[i] = (int32_t)((*input++)<<8) * mul;
-      // right[i] = (int32_t)((*input++)<<8) * mul;
-      left[i] = (int32_t)((*input++)) * mul;
-      right[i] = (int32_t)((*input++)) * mul;
+      buffers[0][i] = (int32_t)((*input++)<<8) * mul;
+      buffers[1][i] = (int32_t)((*input++)<<8) * mul;
     }
   }
   void comb32(int32_t* output){
@@ -43,18 +48,43 @@ public:
     for(int i=0; i<size; ++i){
 #ifdef AUDIO_SATURATE_SAMPLES
       // Saturate to 24 bits to avoid nasty clipping on cs4271
-      *dest++ = __SSAT((q31_t)(left[i] * MULTIPLIER), 24);
-      *dest++ = __SSAT((q31_t)(right[i] * MULTIPLIER), 24);
+      *dest++ = __SSAT((q31_t)(buffers[0][i] * MULTIPLIER_23B), 24);
+      *dest++ = __SSAT((q31_t)(buffers[1][i] * MULTIPLIER_23B), 24);
 #else
-      *dest++ = ((int32_t)(left[i] * MULTIPLIER));
-      *dest++ = ((int32_t)(right[i] * MULTIPLIER));
+      *dest++ = ((int32_t)(buffers[0][i] * MULTIPLIER_23B));
+      *dest++ = ((int32_t)(buffers[1][i] * MULTIPLIER_23B));
 #endif
     }
   }
-
+  void split32x4(int32_t* input, uint16_t blocksize){
+    const float mul = 1.0f/MULTIPLIER_31B;
+    size = blocksize;
+    for(int i=0; i<size; ++i){
+      buffers[0][i] = (int32_t)((*input++)) * mul;
+      buffers[1][i] = (int32_t)((*input++)) * mul;
+      buffers[2][i] = (int32_t)((*input++)) * mul;
+      buffers[3][i] = (int32_t)((*input++)) * mul;
+    }
+  }
+  void comb32x4(int32_t* output){
+    int32_t* dest = output;
+    for(int i=0; i<size; ++i){
+#ifdef AUDIO_SATURATE_SAMPLES
+      *dest++ = __SSAT((q31_t)(buffers[0][i] * MULTIPLIER_31B), 24);
+      *dest++ = __SSAT((q31_t)(buffers[1][i] * MULTIPLIER_31B), 24);
+      *dest++ = __SSAT((q31_t)(buffers[2][i] * MULTIPLIER_31B), 24);
+      *dest++ = __SSAT((q31_t)(buffers[3][i] * MULTIPLIER_31B), 24);
+#else
+      *dest++ = ((int32_t)(buffers[0][i] * MULTIPLIER_31B));
+      *dest++ = ((int32_t)(buffers[1][i] * MULTIPLIER_31B));
+      *dest++ = ((int32_t)(buffers[2][i] * MULTIPLIER_31B));
+      *dest++ = ((int32_t)(buffers[3][i] * MULTIPLIER_31B));
+#endif
+    }
+  }
   
-#if 1
   void split24(int32_t* data, uint16_t blocksize){
+    const float mul = 1.0f/MULTIPLIER_31B;
     size = blocksize;
     uint8_t* input = (uint8_t*)data;
     int32_t qint;
@@ -63,12 +93,12 @@ public:
       qint |= (*input++)<<24;
       qint |= (*input++);
       qint |= (*input++)<<8;
-      left[i] = qint * mul;
+      buffers[0][i] = qint * mul;
       qint =( *input++)<<16;
       qint |= (*input++)<<24;
       qint |= (*input++);
       qint |= (*input++)<<8;
-      right[i] = qint * mul;
+      buffers[1][i] = qint * mul;
     }
   }
 
@@ -77,18 +107,18 @@ public:
     int32_t qint;
     for(int i=0; i<size; ++i){
 #ifdef AUDIO_SATURATE_SAMPLES
-      qint = __SSAT((q31_t)(left[i] * MULTIPLIER), 24);
+      qint = __SSAT((q31_t)(buffers[0][i] * MULTIPLIER_23B), 24);
 #else
-      qint = left[i] * MULTIPLIER;
+      qint = buffers[0][i] * MULTIPLIER_23B;
 #endif
       *dest++ = qint >> 24;
       *dest++ = qint >> 16;
       *dest++ = qint >> 8;
       *dest++ = qint;
 #ifdef AUDIO_SATURATE_SAMPLES
-      qint = __SSAT((q31_t)(right[i] * MULTIPLIER), 24);
+      qint = __SSAT((q31_t)(buffers[1][i] * MULTIPLIER_23B), 24);
 #else
-      qint = right[i] * MULTIPLIER;
+      qint = buffers[1][i] * MULTIPLIER_23B;
 #endif
       *dest++ = qint >> 24;
       *dest++ = qint >> 16;
@@ -96,32 +126,32 @@ public:
       *dest++ = qint;
     }
   }
-#endif
 
   void split16(int32_t* data, uint16_t blocksize){
+    const float mul = 1.0f/MULTIPLIER_31B;
     uint16_t* input = (uint16_t*)data;
     size = blocksize;
     int32_t qint;
     for(int i=0; i<size; ++i){
       qint = (*input++)<<16;
       qint |= *input++;
-      left[i] = qint * mul;
+      buffers[0][i] = qint * mul;
       qint = (*input++)<<16;
       qint |= *input++;
-      right[i] = qint * mul;
+      buffers[1][i] = qint * mul;
     }
   }
   void comb16(int32_t* output){
-    float* l = (float*)left;
-    float* r = (float*)right;
+    float* l = (float*)buffers[0];
+    float* r = (float*)buffers[1];
     uint32_t blkCnt = size;
     uint16_t* dst = (uint16_t*)output;
     int32_t qint;
     while(blkCnt > 0u){
-      qint = *l++ * 2147483648.0f;
+      qint = *l++ * MULTIPLIER_31B;
       *dst++ = qint >> 16;
       *dst++ = qint & 0xffff;
-      qint = *r++ * 2147483648.0f;
+      qint = *r++ * MULTIPLIER_31B;
       *dst++ = qint >> 16;
       *dst++ = qint & 0xffff;
       blkCnt--;
@@ -129,15 +159,16 @@ public:
   }
 
   void clear(){
-    left.clear();
-    right.clear();
+    for(size_t i=0; i<channels; ++i)
+      buffers[i].clear();
   }
   inline FloatArray getSamples(int channel){
-    return channel == LEFT_CHANNEL ? left : right;
-    // return channel == 0 ? FloatArray(left, size) : FloatArray(right, size);
+    if(channel < channels)
+      return buffers[channel];
+    return FloatArray();
   }
   inline int getChannels(){
-    return 2;
+    return channels;
   }
   inline int getSize(){
     return size;

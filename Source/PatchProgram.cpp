@@ -101,37 +101,31 @@ void setup(ProgramVector* pv){
   getProgramVector()->serviceCall(OWL_SERVICE_REQUEST_CALLBACK, midiTxArgs, 2);
 
 #endif /* USE_MIDI_CALLBACK */
-  samples = new SampleBuffer(pv->audio_blocksize);
+  switch(pv->audio_format){
+  case AUDIO_FORMAT_24B16_2X:
+  case AUDIO_FORMAT_24B24_2X:
+  case AUDIO_FORMAT_24B32_2X:
+    samples = new SampleBuffer(2, pv->audio_blocksize);
+    break;
+  case AUDIO_FORMAT_24B32_4X:
+    samples = new SampleBuffer(4, pv->audio_blocksize);
+    break;
+  default:
+    error(CONFIGURATION_ERROR_STATUS, "Unsupported audio format");
+    break;
+  }
 #include "registerpatch.cpp"
 }
 
 void run(ProgramVector* pv){
-  pv->audio_format = AUDIO_FORMAT_24B32;
-#if 0
-  for(;;){
-    pv->programReady();
-    memcpy(pv->audio_output, pv->audio_input, pv->audio_blocksize*2*sizeof(int32_t));
-  }
-#else
-  if(pv->audio_format == AUDIO_FORMAT_24B32){
+  switch(pv->audio_format){
+  case 0:
     for(;;){
       pv->programReady();
-      samples->split32(pv->audio_input, pv->audio_blocksize);
-      processor.setParameterValues(pv->parameters);
-      processor.patch->processAudio(*samples);
-      samples->comb32(pv->audio_output);
+      memcpy(pv->audio_output, pv->audio_input, pv->audio_blocksize*2*sizeof(int32_t));
     }
-#if 0
-  }else if(pv->audio_format == AUDIO_FORMAT_24B24){
-    for(;;){
-      pv->programReady();
-      samples->split24(pv->audio_input, pv->audio_blocksize);
-      processor.setParameterValues(pv->parameters);
-      processor.patch->processAudio(*samples);
-      samples->comb24(pv->audio_output);
-    }
-#endif
-  }else{
+    break;
+  case AUDIO_FORMAT_24B16_2X:
     for(;;){
       pv->programReady();
       samples->split16(pv->audio_input, pv->audio_blocksize);
@@ -139,8 +133,37 @@ void run(ProgramVector* pv){
       processor.patch->processAudio(*samples);
       samples->comb16(pv->audio_output);
     }
+    break;
+  case AUDIO_FORMAT_24B24_2X:
+    for(;;){   
+      pv->programReady();
+      samples->split24(pv->audio_input, pv->audio_blocksize);
+      processor.setParameterValues(pv->parameters);
+      processor.patch->processAudio(*samples);
+      samples->comb24(pv->audio_output);
+    }
+    break;
+  case AUDIO_FORMAT_24B32_2X:
+    for(;;){
+      pv->programReady();
+      samples->split32(pv->audio_input, pv->audio_blocksize);
+      processor.setParameterValues(pv->parameters);
+      processor.patch->processAudio(*samples);
+      samples->comb32(pv->audio_output);
+    }
+    break;
+  case AUDIO_FORMAT_24B32_4X:
+    for(;;){
+      pv->programReady();
+      samples->split32x4(pv->audio_input, pv->audio_blocksize);
+      processor.setParameterValues(pv->parameters);
+      processor.patch->processAudio(*samples);
+      samples->comb32x4(pv->audio_output);
+    }
+    break;
+  default:
+    break;
   }
-#endif
 }
 
 #if 0
