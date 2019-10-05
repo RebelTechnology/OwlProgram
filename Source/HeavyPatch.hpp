@@ -356,6 +356,8 @@ public:
       setParameterValue(PARAMETER_BD, hv_msg_getFloat(m, 0));
       break;
 #endif
+    default:
+      break;
     }
   }
 
