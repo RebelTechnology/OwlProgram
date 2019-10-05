@@ -177,6 +177,8 @@ public:
     case HV_HASH_PGMOUT:
       sendMidi(MidiMessage::pc((uint8_t)hv_msg_getFloat(m, 1), (uint8_t)hv_msg_getFloat(m, 0)));
       break;
+    default:
+      break;
     }
   }
 
