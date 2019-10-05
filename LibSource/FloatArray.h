@@ -312,7 +312,7 @@ public:
   void gainToDecibel(FloatArray destination);
 
   /**
-   * Convert decibel to gains values: gain = (dB/20)^10
+   * Convert decibel to gains values: gain = 10^(dB/20)
    * -6dB = 0.5, 0dB = 1.0, +6dB = 2.0
    */  
   void decibelToGain(FloatArray destination);
