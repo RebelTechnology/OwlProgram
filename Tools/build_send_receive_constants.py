@@ -115,7 +115,7 @@ def main():
             f.write("#define HV_HASH_%s_%s 0x%x\n" % (typ, const, namehash))
             f.write('#define HV_MIN_%s %s\n' % (const, minvalue))
             f.write('#define HV_MAX_%s %s\n' % (const, maxvalue))
-            f.write('#define HV_DEFAULT_%s %s\n' % (const, defvalue))
+            f.write('#define HV_DEFAULT_%s %s\n' % (const, (defvalue-minvalue)/(maxvalue-minvalue)))
 
 if __name__ == '__main__':
     main()
