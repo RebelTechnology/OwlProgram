@@ -8,17 +8,6 @@
 #include "Heavy_owl_constants.h"
 
 #define HV_HASH_CHANNEL_PUSH 0x3cf4c9df
-/*
-#define HV_HASH_CHANNEL_A 0xc440c54f //Channel-A
-//#define HV_HASH_CHANNEL_A 0x7bcbaf78 //ChannelA
-#define HV_HASH_CHANNEL_B 0xb762bb42
-#define HV_HASH_CHANNEL_C 0x27d89cd5
-#define HV_HASH_CHANNEL_D 0x217d22f5
-#define HV_HASH_CHANNEL_E 0x7746db0a
-#define HV_HASH_CHANNEL_F 0xd3c05ccb
-#define HV_HASH_CHANNEL_G 0xba16b531
-#define HV_HASH_CHANNEL_H 0xfbc0c5a
-*/
 #define HV_HASH_BUTTON_A 0xfbc73385
 #define HV_HASH_BUTTON_B 0x8c39a047
 #define HV_HASH_BUTTON_C 0x69b62624
@@ -43,14 +32,6 @@
 #define HV_HASH_PGMOUT 0x8753e39e
 
 #define HV_EXTENDED_PARAMETERS
-#define HV_OWL_PARAM_A "Channel-A"
-#define HV_OWL_PARAM_B "Channel-B"
-#define HV_OWL_PARAM_C "Channel-C"
-#define HV_OWL_PARAM_D "Channel-D"
-#define HV_OWL_PARAM_E "Channel-E"
-#define HV_OWL_PARAM_F "Channel-F"
-#define HV_OWL_PARAM_G "Channel-G"
-#define HV_OWL_PARAM_H "Channel-H"
 
 #define HEAVY_MESSAGE_POOL_SIZE  4 // in kB (default 10kB)
 #define HEAVY_MESSAGE_IN_QUEUE_SIZE 1 // in kB (default 2kB)
@@ -88,16 +69,6 @@ extern "C" {
 class HeavyPatch : public Patch {
 public:
   HeavyPatch() {
-//     registerParameter(PARAMETER_A, HV_OWL_PARAM_A);
-//     registerParameter(PARAMETER_B, HV_OWL_PARAM_B);
-//     registerParameter(PARAMETER_C, HV_OWL_PARAM_C);
-//     registerParameter(PARAMETER_D, HV_OWL_PARAM_D);
-//     registerParameter(PARAMETER_E, HV_OWL_PARAM_E);
-// #ifdef HV_EXTENDED_PARAMETERS
-//     registerParameter(PARAMETER_F, HV_OWL_PARAM_F);
-//     registerParameter(PARAMETER_G, HV_OWL_PARAM_G);
-//     registerParameter(PARAMETER_H, HV_OWL_PARAM_H);
-// #endif
     context = new Heavy_owl(getSampleRate(), 
 			    HEAVY_MESSAGE_POOL_SIZE, 
 			    HEAVY_MESSAGE_IN_QUEUE_SIZE, 
@@ -108,6 +79,7 @@ public:
 
 #ifdef HV_NAME_CHANNEL_A
     registerParameter(PARAMETER_A, HV_NAME_CHANNEL_A);
+    setParameterValue(PARAMETER_A, HV_DEFAULT_CHANNEL_A);
 #endif
 #ifdef HV_NAME_CHANNEL_B
     registerParameter(PARAMETER_B, HV_NAME_CHANNEL_B);
@@ -166,24 +138,18 @@ public:
 #ifdef HV_NAME_CHANNEL_BD
     registerParameter(PARAMETER_BD, HV_NAME_CHANNEL_BD);
 #endif
-
-    /*
-    HvParameterInfo pinfo;
-    int pcount = hv_getParameterInfo(context, 0, &pinfo);
-    if (pcount > 0) {
-      for (int i=0;;) {
-
-        if (i==0) {
-          registerParameter(PARAMETER_A, *pinfo->name);
-        } else if (i==1){
-          registerParameter(PARAMETER_B, *pinfo->name);
-        }
-        i++;
-        if (i > pcount) break;
-        hv_getParameterInfo(context, i, &pinfo);
-      } 
-    }
-    */
+#ifdef HV_NAME_CHANNEL_BE
+    registerParameter(PARAMETER_BE, HV_NAME_CHANNEL_BE);
+#endif
+#ifdef HV_NAME_CHANNEL_BF
+    registerParameter(PARAMETER_BF, HV_NAME_CHANNEL_BF);
+#endif
+#ifdef HV_NAME_CHANNEL_BG
+    registerParameter(PARAMETER_BG, HV_NAME_CHANNEL_BG);
+#endif
+#ifdef HV_NAME_CHANNEL_BH
+    registerParameter(PARAMETER_BH, HV_NAME_CHANNEL_BH);
+#endif
   }
   
   ~HeavyPatch() {
@@ -431,7 +397,8 @@ public:
   void processAudio(AudioBuffer &buffer) {
     _msgLock = true;
 #ifdef HV_HASH_RECV_CHANNEL_A
-    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_A, getParameterValue(PARAMETER_A));
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_A, getParameterValue(PARAMETER_A)*
+				 (HV_MAX_CHANNEL_A-HV_MIN_CHANNEL_A)+HV_MIN_CHANNEL_A);
 #endif
 #ifdef HV_HASH_RECV_CHANNEL_B
     context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_B, getParameterValue(PARAMETER_B));
@@ -490,6 +457,18 @@ public:
 #endif
 #ifdef HV_HASH_RECV_CHANNEL_BD
     context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_BD, getParameterValue(PARAMETER_BD));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_BE
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_BE, getParameterValue(PARAMETER_BE));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_BF
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_BF, getParameterValue(PARAMETER_BF));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_BG
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_BG, getParameterValue(PARAMETER_BG));
+#endif
+#ifdef HV_HASH_RECV_CHANNEL_BH
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_BH, getParameterValue(PARAMETER_BH));
 #endif
 #endif //EXTENDED PARAMETERS
     _msgLock = false;
