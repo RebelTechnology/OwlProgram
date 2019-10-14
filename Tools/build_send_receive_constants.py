@@ -36,10 +36,14 @@ def main():
                 'Channel-AA', 'Channel-AB', 'Channel-AC', 'Channel-AD',
                 'Channel-AE', 'Channel-AF', 'Channel-AG', 'Channel-AH',
                 'Channel-BA', 'Channel-BB', 'Channel-BC', 'Channel-BD',
+                'Channel-BE', 'Channel-BF', 'Channel-BG', 'Channel-BH',
                 ]
 
     recvs = odict()
     sends = odict()
+    mins = odict()
+    maxs = odict()
+    defs = odict()
     #from pprint import pprint as pp
 
     with open(args.infilename, mode="r") as f:
@@ -53,15 +57,26 @@ def main():
                 continue
 
             # If a name has been specified
-            if 'owl_channel' in v['attributes'] and v['attributes']['owl_channel'] is not None:
-                recvs[v['attributes']['owl_channel']] = k
+            if 'owl_param' in v['attributes'] and v['attributes']['owl_param'] is not None:
+                key = 'Channel-'+v['attributes']['owl_param']
+                recvs[key] = k
+                mins[key] = v['attributes']['owl_min']
+                maxs[key] = v['attributes']['owl_max']
+                defs[key] = v['attributes']['owl_default']
             else:
                 recvs[k] = k
+                mins[k] = 0
+                maxs[k] = 1
+                defs[k] = 0.5
 
         for k, v in ir['objects'].iteritems():
             try:
                 if v['type'] == '__send':
-                    sends[v['args']['attributes']['owl_channel']] = v['args']['name']
+                    key = 'Channel-'+v['args']['attributes']['owl_param']
+                    sends[key] = v['args']['name']
+                    mins[key] = v['args']['attributes']['owl_min']
+                    maxs[key] = v['args']['attributes']['owl_max']
+                    defs[key] = v['args']['attributes']['owl_default']
             except:
                 pass
 
@@ -77,6 +92,9 @@ def main():
                 name = recvs[chan]
                 typ = 'RECV'
                 namehash = heavy_hash(name)
+                minvalue = mins[chan]
+                maxvalue = maxs[chan]
+                defvalue = defs[chan]
 
             elif chan in sends:
                 # first we compute the hash, then append the '>' for the label
@@ -84,6 +102,9 @@ def main():
                 namehash = heavy_hash(name)
                 name += '>'
                 typ = 'SEND'
+                minvalue = mins[chan]
+                maxvalue = maxs[chan]
+                defvalue = defs[chan]
             else:
                 continue
 
@@ -92,9 +113,9 @@ def main():
 
             f.write('#define HV_NAME_%s "%s"\n' % (const, name))
             f.write("#define HV_HASH_%s_%s 0x%x\n" % (typ, const, namehash))
-
-
-    recvs
+            f.write('#define HV_MIN_%s %s\n' % (const, minvalue))
+            f.write('#define HV_MAX_%s %s\n' % (const, maxvalue))
+            f.write('#define HV_DEFAULT_%s %s\n' % (const, defvalue))
 
 if __name__ == '__main__':
     main()
