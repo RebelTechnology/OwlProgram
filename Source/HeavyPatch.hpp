@@ -224,7 +224,8 @@ public:
       break;
 #ifdef HV_HASH_SEND_CHANNEL_A
     case HV_HASH_SEND_CHANNEL_A:
-      setParameterValue(PARAMETER_A, hv_msg_getFloat(m, 0));
+      setParameterValue(PARAMETER_A, (hv_msg_getFloat(m, 0)-HV_MIN_CHANNEL_A)/
+			(HV_MAX_CHANNEL_A-HV_MIN_CHANNEL_A));
       break;
 #endif
 #ifdef HV_HASH_SEND_CHANNEL_B
