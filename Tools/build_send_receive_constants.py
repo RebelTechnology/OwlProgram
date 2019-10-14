@@ -72,11 +72,18 @@ def main():
         for k, v in ir['objects'].iteritems():
             try:
                 if v['type'] == '__send':
-                    key = 'Channel-'+v['args']['attributes']['owl_param']
-                    sends[key] = v['args']['name']
-                    mins[key] = v['args']['attributes']['owl_min']
-                    maxs[key] = v['args']['attributes']['owl_max']
-                    defs[key] = v['args']['attributes']['owl_default']
+                    if 'owl_param' in v['args']['attributes'] and v['args']['attributes']['owl_param'] is not None:
+                        key = 'Channel-'+v['args']['attributes']['owl_param']
+                        sends[key] = v['args']['name']
+                        mins[key] = v['args']['attributes']['owl_min']
+                        maxs[key] = v['args']['attributes']['owl_max']
+                        defs[key] = v['args']['attributes']['owl_default']
+                    else:
+                        key = v['args']['name']
+                        sends[key] = key
+                        mins[key] = 0
+                        maxs[key] = 1
+                        defs[key] = 0.5
             except:
                 pass
 
