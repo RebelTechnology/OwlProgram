@@ -31,8 +31,6 @@
 #define HV_HASH_TOUCHOUT 0x476d4387
 #define HV_HASH_PGMOUT 0x8753e39e
 
-#define HV_EXTENDED_PARAMETERS
-
 #define HEAVY_MESSAGE_POOL_SIZE  4 // in kB (default 10kB)
 #define HEAVY_MESSAGE_IN_QUEUE_SIZE 1 // in kB (default 2kB)
 #define HEAVY_MESSAGE_OUT_QUEUE_SIZE 0 // in kB (default 0kB)
@@ -48,22 +46,22 @@ extern "C" {
     else
       getProgramVector()->buttons &= ~(1<<bid);
   }
-  static void printHook(HeavyContextInterface* ctxt, 
-			const char *printLabel, 
-			const char *msgString, 
-			const HvMessage *m) {
+  static void owlPrintHook(HeavyContextInterface* ctxt, 
+			   const char *printLabel, 
+			   const char *msgString, 
+			   const HvMessage *m) {
     char buf[64];
     char* dst = buf;
     int len = strnlen(printLabel, 48);
-    dst = stpncpy(dst, printLabel, 63);
+    dst = stpncpy(dst, printLabel, len);
     dst = stpcpy(dst, " ");
     dst = stpncpy(dst, msgString, 63-len);
     debugMessage(buf);
   }
-  static void sendHook(HeavyContextInterface* ctxt,
-		       const char *receiverName,
-		       uint32_t sendHash,
-		       const HvMessage *m);
+  static void owlSendHook(HeavyContextInterface* ctxt,
+			  const char *receiverName,
+			  uint32_t sendHash,
+			  const HvMessage *m);
 }
 
 class HeavyPatch : public Patch {
@@ -74,8 +72,8 @@ public:
 			    HEAVY_MESSAGE_IN_QUEUE_SIZE, 
 			    HEAVY_MESSAGE_OUT_QUEUE_SIZE);
     context->setUserData(this);
-    context->setPrintHook(&printHook);
-    context->setSendHook(&sendHook);
+    context->setPrintHook(&owlPrintHook);
+    context->setSendHook(&owlSendHook);
 
 #ifdef HV_NAME_CHANNEL_A
     registerParameter(PARAMETER_A, HV_NAME_CHANNEL_A);
@@ -83,24 +81,31 @@ public:
 #endif
 #ifdef HV_NAME_CHANNEL_B
     registerParameter(PARAMETER_B, HV_NAME_CHANNEL_B);
+    setParameterValue(PARAMETER_A, HV_DEFAULT_CHANNEL_B);
 #endif
 #ifdef HV_NAME_CHANNEL_C
     registerParameter(PARAMETER_C, HV_NAME_CHANNEL_C);
+    setParameterValue(PARAMETER_A, HV_DEFAULT_CHANNEL_C);
 #endif
 #ifdef HV_NAME_CHANNEL_D
     registerParameter(PARAMETER_D, HV_NAME_CHANNEL_D);
+    setParameterValue(PARAMETER_A, HV_DEFAULT_CHANNEL_D);
 #endif
 #ifdef HV_NAME_CHANNEL_E
     registerParameter(PARAMETER_E, HV_NAME_CHANNEL_E);
+    setParameterValue(PARAMETER_A, HV_DEFAULT_CHANNEL_E);
 #endif
 #ifdef HV_NAME_CHANNEL_F
     registerParameter(PARAMETER_F, HV_NAME_CHANNEL_F);
+    setParameterValue(PARAMETER_A, HV_DEFAULT_CHANNEL_F);
 #endif
 #ifdef HV_NAME_CHANNEL_G
     registerParameter(PARAMETER_G, HV_NAME_CHANNEL_G);
+    setParameterValue(PARAMETER_A, HV_DEFAULT_CHANNEL_G);
 #endif
 #ifdef HV_NAME_CHANNEL_H
     registerParameter(PARAMETER_H, HV_NAME_CHANNEL_H);
+    setParameterValue(PARAMETER_A, HV_DEFAULT_CHANNEL_H);
 #endif
 #ifdef HV_NAME_CHANNEL_AA
     registerParameter(PARAMETER_AA, HV_NAME_CHANNEL_AA);
@@ -245,22 +250,26 @@ public:
 #endif
 #ifdef HV_HASH_SEND_CHANNEL_E
     case HV_HASH_SEND_CHANNEL_E:
-      setParameterValue(PARAMETER_E, hv_msg_getFloat(m, 0));
+      setParameterValue(PARAMETER_E, (hv_msg_getFloat(m, 0)-HV_MIN_CHANNEL_E)/
+			(HV_MAX_CHANNEL_E-HV_MIN_CHANNEL_E));
       break;
 #endif
 #ifdef HV_HASH_SEND_CHANNEL_F
     case HV_HASH_SEND_CHANNEL_F:
-      setParameterValue(PARAMETER_F, hv_msg_getFloat(m, 0));
+      setParameterValue(PARAMETER_F, (hv_msg_getFloat(m, 0)-HV_MIN_CHANNEL_F)/
+			(HV_MAX_CHANNEL_F-HV_MIN_CHANNEL_F));
       break;
 #endif
 #ifdef HV_HASH_SEND_CHANNEL_G
     case HV_HASH_SEND_CHANNEL_G:
-      setParameterValue(PARAMETER_G, hv_msg_getFloat(m, 0));
+      setParameterValue(PARAMETER_G, (hv_msg_getFloat(m, 0)-HV_MIN_CHANNEL_G)/
+			(HV_MAX_CHANNEL_G-HV_MIN_CHANNEL_G));
       break;
 #endif
 #ifdef HV_HASH_SEND_CHANNEL_H
     case HV_HASH_SEND_CHANNEL_H:
-      setParameterValue(PARAMETER_H, hv_msg_getFloat(m, 0));
+      setParameterValue(PARAMETER_H, (hv_msg_getFloat(m, 0)-HV_MIN_CHANNEL_H)/
+			(HV_MAX_CHANNEL_H-HV_MIN_CHANNEL_H));
       break;
 #endif
 #ifdef HV_HASH_SEND_CHANNEL_AA
@@ -402,26 +411,32 @@ public:
 				 (HV_MAX_CHANNEL_A-HV_MIN_CHANNEL_A)+HV_MIN_CHANNEL_A);
 #endif
 #ifdef HV_HASH_RECV_CHANNEL_B
-    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_B, getParameterValue(PARAMETER_B));
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_B, getParameterValue(PARAMETER_B)*
+				 (HV_MAX_CHANNEL_B-HV_MIN_CHANNEL_B)+HV_MIN_CHANNEL_B);
 #endif
 #ifdef HV_HASH_RECV_CHANNEL_C
-    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_C, getParameterValue(PARAMETER_C));
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_C, getParameterValue(PARAMETER_C)*
+				 (HV_MAX_CHANNEL_C-HV_MIN_CHANNEL_C)+HV_MIN_CHANNEL_C);
 #endif
 #ifdef HV_HASH_RECV_CHANNEL_D
-    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_D, getParameterValue(PARAMETER_D));
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_D, getParameterValue(PARAMETER_D)*
+				 (HV_MAX_CHANNEL_D-HV_MIN_CHANNEL_D)+HV_MIN_CHANNEL_D);
 #endif
 #ifdef HV_HASH_RECV_CHANNEL_E
-    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_E, getParameterValue(PARAMETER_E));
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_E, getParameterValue(PARAMETER_E)*
+				 (HV_MAX_CHANNEL_E-HV_MIN_CHANNEL_E)+HV_MIN_CHANNEL_E);
 #endif
-#ifdef HV_EXTENDED_PARAMETERS
 #ifdef HV_HASH_RECV_CHANNEL_F
-    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_F, getParameterValue(PARAMETER_F));
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_F, getParameterValue(PARAMETER_F)*
+				 (HV_MAX_CHANNEL_F-HV_MIN_CHANNEL_F)+HV_MIN_CHANNEL_F);
 #endif
 #ifdef HV_HASH_RECV_CHANNEL_G
-    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_G, getParameterValue(PARAMETER_G));
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_G, getParameterValue(PARAMETER_G)*
+				 (HV_MAX_CHANNEL_G-HV_MIN_CHANNEL_G)+HV_MIN_CHANNEL_G);
 #endif
 #ifdef HV_HASH_RECV_CHANNEL_H
-    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_H, getParameterValue(PARAMETER_H));
+    context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_H, getParameterValue(PARAMETER_H)*
+				 (HV_MAX_CHANNEL_H-HV_MIN_CHANNEL_H)+HV_MIN_CHANNEL_H);
 #endif
 #ifdef HV_HASH_RECV_CHANNEL_AA
     context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_AA, getParameterValue(PARAMETER_AA));
@@ -471,7 +486,6 @@ public:
 #ifdef HV_HASH_RECV_CHANNEL_BH
     context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_BH, getParameterValue(PARAMETER_BH));
 #endif
-#endif //EXTENDED PARAMETERS
     _msgLock = false;
     float* outputs[] = {buffer.getSamples(LEFT_CHANNEL), buffer.getSamples(RIGHT_CHANNEL)};
     context->process(outputs, outputs, getBlockSize());
@@ -481,13 +495,12 @@ private:
   HeavyContext* context;
 };
 
-// extern "C" {
-static void sendHook(HeavyContextInterface* ctxt,
-		     const char *receiverName,
-		     uint32_t sendHash,
-		     const HvMessage *m){
+static void owlSendHook(HeavyContextInterface* ctxt,
+			const char *receiverName,
+			uint32_t sendHash,
+			const HvMessage *m){
   HeavyPatch* patch = (HeavyPatch*)ctxt->getUserData();
   patch->sendCallback(sendHash, m);
 }
-// }
+
 #endif // __HeavyPatch_hpp__
