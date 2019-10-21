@@ -54,9 +54,9 @@ CXXFLAGS = -fno-rtti -fno-exceptions
 ifdef HEAVY
 CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
 else ifeq ($(PLATFORM),Alchemist)
-CPPFLAGS    += -DOWL_MICROLAB
+CPPFLAGS    += -DOWL_ALCHEMIST
 else ifeq ($(PLATFORM),Wizard)
-CPPFLAGS    += -DOWL_MINILAB
+CPPFLAGS    += -DOWL_WIZARD
 else ifeq ($(PLATFORM),Prism)
 CPPFLAGS    += -DOWL_PRISM
 CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
