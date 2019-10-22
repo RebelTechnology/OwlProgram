@@ -12,9 +12,9 @@
 #define USE_SCREEN
 #define SSD1309
 #define AUDIO_MAX_BLOCK_SIZE         512
-#elif defined OWL_MINILAB
+#elif defined OWL_ALCHEMIST
 #define AUDIO_MAX_BLOCK_SIZE         512
-#elif defined OWL_MICROLAB
+#elif defined OWL_WIZARD
 #define AUDIO_MAX_BLOCK_SIZE         512
 #endif
 
