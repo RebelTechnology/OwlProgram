@@ -57,12 +57,12 @@ def main():
                 continue
 
             # If a name has been specified
-            if 'owl_param' in v['attributes'] and v['attributes']['owl_param'] is not None:
-                key = 'Channel-'+v['attributes']['owl_param']
+            if '@owl' in v['attributes'] and v['attributes']['@owl'] is not None:
+                key = 'Channel-'+v['attributes']['@owl']
                 recvs[key] = k
-                mins[key] = v['attributes']['owl_min']
-                maxs[key] = v['attributes']['owl_max']
-                defs[key] = v['attributes']['owl_default']
+                mins[key] = v['attributes']['@owl_min']
+                maxs[key] = v['attributes']['@owl_max']
+                defs[key] = v['attributes']['@owl_default']
             else:
                 recvs[k] = k
                 mins[k] = 0
@@ -72,12 +72,12 @@ def main():
         for k, v in ir['objects'].iteritems():
             try:
                 if v['type'] == '__send':
-                    if 'owl_param' in v['args']['attributes'] and v['args']['attributes']['owl_param'] is not None:
-                        key = 'Channel-'+v['args']['attributes']['owl_param']
+                    if '@owl' in v['args']['attributes'] and v['args']['attributes']['@owl'] is not None:
+                        key = 'Channel-'+v['args']['attributes']['@owl']
                         sends[key] = v['args']['name']
-                        mins[key] = v['args']['attributes']['owl_min']
-                        maxs[key] = v['args']['attributes']['owl_max']
-                        defs[key] = v['args']['attributes']['owl_default']
+                        mins[key] = v['args']['attributes']['@owl_min']
+                        maxs[key] = v['args']['attributes']['@owl_max']
+                        defs[key] = v['args']['attributes']['@owl_default']
                     else:
                         key = v['args']['name']
                         sends[key] = key
