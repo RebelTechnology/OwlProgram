@@ -14,6 +14,14 @@ import core.hv2ir.HeavyLangObject as HeavyLangObject
 
 heavy_hash = HeavyLangObject.HeavyLangObject.get_hash
 
+import jinja2
+
+def get_template(path):
+    templateLoader = jinja2.FileSystemLoader(searchpath=dir_path)
+    templateEnv = jinja2.Environment(loader=templateLoader)
+    template = templateEnv.get_template(path)
+    return template
+
 def main():
     parser = argparse.ArgumentParser(
         description="Generates the constants file for send_receive puredata objects.")
@@ -31,12 +39,9 @@ def main():
 
     args = parser.parse_args()
 
-    channels = ['Channel-A', 'Channel-B', 'Channel-C', 'Channel-D',
-                'Channel-E', 'Channel-F', 'Channel-G', 'Channel-H',
-                'Channel-AA', 'Channel-AB', 'Channel-AC', 'Channel-AD',
-                'Channel-AE', 'Channel-AF', 'Channel-AG', 'Channel-AH',
-                'Channel-BA', 'Channel-BB', 'Channel-BC', 'Channel-BD',
-                'Channel-BE', 'Channel-BF', 'Channel-BG', 'Channel-BH',
+    channels = ['A', 'B', 'C', 'D','E', 'F', 'G', 'H',
+                'AA', 'AB', 'AC', 'AD','AE', 'AF', 'AG', 'AH',
+                'BA', 'BB', 'BC', 'BD','BE', 'BF', 'BG', 'BH',
                 ]
 
     recvs = odict()
@@ -46,10 +51,9 @@ def main():
     defs = odict()
     #from pprint import pprint as pp
 
+    # Read receive and send object data
     with open(args.infilename, mode="r") as f:
         ir = json.load(f)
-        #pp(ir)
-        #ir
 
         for k, v in ir['control']['receivers'].iteritems():
             # skip __hv_init and similar
@@ -58,7 +62,7 @@ def main():
 
             # If a name has been specified
             if '@owl' in v['attributes'] and v['attributes']['@owl'] is not None:
-                key = 'Channel-'+v['attributes']['@owl']
+                key = v['attributes']['@owl']
                 recvs[key] = k
                 mins[key] = v['attributes']['@owl_min']
                 maxs[key] = v['attributes']['@owl_max']
@@ -73,7 +77,7 @@ def main():
             try:
                 if v['type'] == '__send':
                     if '@owl' in v['args']['attributes'] and v['args']['attributes']['@owl'] is not None:
-                        key = 'Channel-'+v['args']['attributes']['@owl']
+                        key = v['args']['attributes']['@owl']
                         sends[key] = v['args']['name']
                         mins[key] = v['args']['attributes']['@owl_min']
                         maxs[key] = v['args']['attributes']['@owl_max']
@@ -87,11 +91,10 @@ def main():
             except:
                 pass
 
-
-    #
     # TODO, check that there is not channel defined both as input and output
 
-
+    # Prepare data for output reordering by channel order
+    jdata = list()
     with open(args.outfilename, mode="w") as f:
         for chan in channels:
 
@@ -115,14 +118,19 @@ def main():
             else:
                 continue
 
-            const = chan.replace('-', '_')
-            const = const.upper()
+            jdata.append((chan, name, typ, "0x%x" % namehash, minvalue, maxvalue, defvalue))
 
-            f.write('#define HV_NAME_%s "%s"\n' % (const, name))
-            f.write("#define HV_HASH_%s_%s 0x%x\n" % (typ, const, namehash))
-            f.write('#define HV_MIN_%s %s\n' % (const, minvalue))
-            f.write('#define HV_MAX_%s %s\n' % (const, maxvalue))
-            f.write('#define HV_DEFAULT_%s %s\n' % (const, (defvalue-minvalue)/(maxvalue-minvalue)))
+    # Write to files
+    with open(args.outfilename, mode="w") as f:
+        template = get_template("Heavy_owl_constants.tpl.h")
+        outputText = template.render(jdata=jdata)  # this is where to put args to the template renderer
+        f.write(outputText)
+
+    HeavyPatchpath = "/".join(args.outfilename.split("/")[:-1]) + '/HeavyPatch.hpp'
+    with open(HeavyPatchpath, mode="w") as f:
+        template = get_template("HeavyPatch.tpl.hpp")
+        outputText = template.render(jdata=jdata)  # this is where to put args to the template renderer
+        f.write(outputText)
 
 if __name__ == '__main__':
     main()
