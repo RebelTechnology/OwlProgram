@@ -38,6 +38,11 @@
 
 #include "Patch.h"
 
+// We have to undefine min/max from Owl's basicmaths.h, otherwise they cause errors
+// when Faust calls functions with the same names in std:: namespace
+#undef min
+#undef max
+
 #include <string.h>
 #include <strings.h>
 
