@@ -163,9 +163,10 @@ protected:
   float	fSpan;			// Faust widget value span (max-min)
 	
 public:
-  OwlParameter(Patch* pp, PatchParameterId param, FAUSTFLOAT* z, const char* l, float lo, float hi) :
+  OwlParameter(Patch* pp, PatchParameterId param, FAUSTFLOAT* z, const char* l, float init, float lo, float hi) :
     OwlParameterBase(pp, z), fParameter(param), fMin(lo), fSpan(hi-lo) {
     fPatch->registerParameter(param, l);
+    fPatch->setParameterValue(fParameter, (init - lo) / fSpan);
   }
   void update()	{ *fZone = fMin + fSpan*fPatch->getParameterValue(fParameter); }
 	
@@ -179,8 +180,9 @@ protected:
   float	fHi;			// Faust widget value span (max-min)
 	
 public:
-  OwlVariable(Patch* pp, float* t, FAUSTFLOAT* z, const char* l, float lo, float hi) :
+  OwlVariable(Patch* pp, float* t, FAUSTFLOAT* z, const char* l, float init, float lo, float hi) :
     OwlParameterBase(pp, z), fValue(t), fLo(lo), fHi(hi) {
+    *fZone = init;
   }
   void update()	{
     float value = *fValue;
@@ -226,16 +228,16 @@ class OwlUI : public UI
   OwlParameterBase* fParameterTable[MAXOWLPARAMETERS];
   PatchButtonId fButton;
   // check if the widget is an Owl parameter and, if so, add the corresponding OwlParameter
-  void addOwlParameter(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT lo, FAUSTFLOAT hi) {
+  void addOwlParameter(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT lo, FAUSTFLOAT hi) {
     if(fParameterIndex < MAXOWLPARAMETERS){
       if(strcasecmp(label,"freq") == 0){
-	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fFreq, zone, label, lo, hi);
+	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fFreq, zone, label, init, lo, hi);
       }else if(strcasecmp(label,"gain") == 0){
-	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fGain, zone, label, lo, hi);
+	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fGain, zone, label, init, lo, hi);
       }else if(strcasecmp(label,"bend") == 0){
-	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fBend, zone, label, lo, hi);
+	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fBend, zone, label, init, lo, hi);
       }else if(fParameter != NO_PARAMETER){
-	fParameterTable[fParameterIndex++] = new OwlParameter(fPatch, fParameter, zone, label, lo, hi);
+	fParameterTable[fParameterIndex++] = new OwlParameter(fPatch, fParameter, zone, label, init, lo, hi);
       }
     }
     fParameter = NO_PARAMETER; 		// clear current parameter ID
@@ -244,7 +246,7 @@ class OwlUI : public UI
   void addOwlButton(const char* label, FAUSTFLOAT* zone) {
     if(fParameterIndex < MAXOWLPARAMETERS){
       if(strcasecmp(label,"gate") == 0){
-	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fGate, zone, label, 0.0f, 1.0f);
+	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fGate, zone, label, 0.0f, 0.0f, 1.0f);
       }else if(fButton != NO_BUTTON){
 	fParameterTable[fParameterIndex++] = new OwlButton(fPatch, fButton, zone, label);
       }
@@ -286,9 +288,9 @@ public:
 
   virtual void addButton(const char* label, FAUSTFLOAT* zone) 																			{ addOwlButton(label, zone); }
   virtual void addCheckButton(const char* label, FAUSTFLOAT* zone) 																		{ addOwlButton(label, zone); }
-  virtual void addVerticalSlider(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT lo, FAUSTFLOAT hi, FAUSTFLOAT step) 	{ addOwlParameter(label, zone, lo, hi); }
-  virtual void addHorizontalSlider(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT lo, FAUSTFLOAT hi, FAUSTFLOAT step) 	{ addOwlParameter(label, zone, lo, hi); }
-  virtual void addNumEntry(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT lo, FAUSTFLOAT hi, FAUSTFLOAT step) 			{ addOwlParameter(label, zone, lo, hi); }
+  virtual void addVerticalSlider(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT lo, FAUSTFLOAT hi, FAUSTFLOAT step) 	{ addOwlParameter(label, zone, init, lo, hi); }
+  virtual void addHorizontalSlider(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT lo, FAUSTFLOAT hi, FAUSTFLOAT step) 	{ addOwlParameter(label, zone, init, lo, hi); }
+  virtual void addNumEntry(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT lo, FAUSTFLOAT hi, FAUSTFLOAT step) 			{ addOwlParameter(label, zone, init, lo, hi); }
 
   // -- passive widgets
 
