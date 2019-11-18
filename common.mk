@@ -2,9 +2,7 @@
 DSPLIB=Libraries/CMSIS/DSP_Lib/Source
 
 # Tool path
-# TOOLROOT ?= Tools/gcc-arm-none-eabi-5_4-2016q3/bin/
-# TOOLROOT ?= Tools/gcc-arm-none-eabi-5_2-2015q4/bin/
-TOOLROOT ?= ~/bin/gcc-arm-none-eabi-7-2017-q4-major/bin/
+TOOLROOT ?= Tools/gcc-arm-none-eabi-7-2018-q2-update/bin/
 
 CMSIS ?= Libraries/CMSIS/Include/
 
@@ -34,7 +32,7 @@ INC_FLAGS += -I$(DEVICE)/Include -I$(CMSIS)
 INC_FLAGS += -I$(USB_DEVICE_FILE)/Core/inc -I$(USB_DEVICE_FILE)/Class/cdc/inc
 INC_FLAGS += -I$(USB_OTG_FILE)/inc
 CPPFLAGS += $(ARCH_FLAGS) $(INC_FLAGS) $(DEF_FLAGS)
-CFLAGS += -fno-builtin -std=gnu99 -DARM_CORTEX
+CFLAGS += -std=gnu11
 CXXFLAGS += -std=gnu++11
 LDFLAGS += -T$(LDSCRIPT) $(ARCH_FLAGS)
 
@@ -66,7 +64,7 @@ $(BUILD)/%.map: $(BUILD)/%.elf
 	@$(OBJDUMP) -S $< > $@
 
 size:
-	$(NM) --print-size --size-sort $(BUILD)/$(TARGET).elf | tail -n 10
+	$(NM) --print-size --size-sort $(BUILD)/$(TARGET).elf | tail -n 20
 	$(SIZE) $(BUILD)/$(TARGET).elf
 	ls -s $(BUILD)/$(TARGET).bin
 

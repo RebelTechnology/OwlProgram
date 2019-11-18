@@ -70,27 +70,24 @@ struct ComplexFloat {
 class ComplexFloatArray {
 private:
   ComplexFloat* data;
-  int size;
+  size_t size;
 public:
   /**Constructor
-
     Initializes size to 0.
   */
   ComplexFloatArray() :
     data(NULL), size(0) {}
   
   /**
-    Constructor.
-      
+    Constructor.      
     @param array A pointer to an array of ComplexFloat
     @param size The length of the rray
   */
-  ComplexFloatArray(ComplexFloat* array, int size) :
+  ComplexFloatArray(ComplexFloat* array, size_t size) :
     data(array), size(size) {}
       
   /** 
-    The real part of an element of the array.
-      
+    The real part of an element of the array.      
     @param i The index of the element
     @return The real part of the element
   */
@@ -194,7 +191,7 @@ public:
   */
   void subtract(ComplexFloatArray operand2);
 
-  int getSize() const{
+  size_t getSize() const{
     return size;
   }
   
@@ -221,7 +218,7 @@ public:
    * as long as the ComplexFloatArray returned by this method is still in use.
    * @remarks Calling ComplexFloatArray::destroy() on a ComplexFloatArray instance created with this method might cause an exception.
   */
-  ComplexFloatArray subArray(int offset, int length);
+  ComplexFloatArray subArray(int offset, size_t length);
   
   /** Get the real part of the elements of the array.
    * @param[out] buf The array where the real part will be stored.
@@ -247,7 +244,7 @@ public:
    * int size=1000;
    * float content[size]; 
    * ComplexFloatArray complexFloatArray(content, size);
-   * for(int n=0; n<size; n+=2){//now the ComplexFloatArray can be indexed as if it was an array
+   * for(size_t n=0; n<size; n+=2){//now the ComplexFloatArray can be indexed as if it was an array
    *   content[n]==complexFloatArray[n/2].re; 
    *   content[n+1]==complexFloatArray[n/2].im;
    * }
@@ -301,7 +298,7 @@ public:
     if(size!=other.getSize()){
       return false;
     }
-    for(int n=0; n<size; n++){
+    for(size_t n=0; n<size; n++){
       if(data[n].re!=other[n].re || data[n].im!=other[n].im){
         return false;
       }
@@ -316,7 +313,7 @@ public:
    * @return A ComplexFloatArray which **data** point to the newly allocated memory and <code>size</code> is initialized to the proper value.
    * @remarks A ComplexFloatArray created with this method has to be destroyed invoking the ComplexFloatArray::destroy() method.
   */
-  static ComplexFloatArray create(int size);
+  static ComplexFloatArray create(size_t size);
 
   /**
    * Destroys a ComplexFloatArray created with the create() method.
@@ -344,7 +341,7 @@ public:
    * @param[in] source A pointer to the beginning of the portion of memory to read from.
    * @param[in] length Number of samples to copy.
   */
-  void copyFrom(ComplexFloat* source, int length);
+  void copyFrom(ComplexFloat* source, size_t length);
   
   /**
    * Copies the content of the ComplexFloatArray into a FloatArray.
@@ -364,7 +361,7 @@ public:
    * @param[in] destination A pointer to the beginning of the portion of memory to write to.
    * @param[in] length Number of samples to copy.
   */
-  void copyTo(ComplexFloat* destination, int length);
+  void copyTo(ComplexFloat* destination, size_t length);
 
 
   /**
@@ -407,7 +404,7 @@ public:
    * @param[in] offset First element to set
    * @param[in] count Number of elements to set
   */  
-  void setPolar(FloatArray magnitude, FloatArray phase, int offset, int count);
+  void setPolar(FloatArray magnitude, FloatArray phase, int offset, size_t count);
     
   /**
    * The phases of the elements of the array.
@@ -427,7 +424,7 @@ public:
    * @param[in] offset First element to set
    * @param[in] count Number of elements to set
   */
-  void setPhase(FloatArray phase, int offset, int count);
+  void setPhase(FloatArray phase, int offset, size_t count);
   
   /**
    * Set the phase of the elements of an array, using the magnitude from the current array.
@@ -446,7 +443,7 @@ public:
    * @param[in] count Number of elements to set
    * @param[out] destination The destination array.
   */
-  void setPhase(FloatArray phase, int offset, int count, ComplexFloatArray destination);
+  void setPhase(FloatArray phase, int offset, size_t count, ComplexFloatArray destination);
 
 
   /**
@@ -461,7 +458,7 @@ public:
    * @param[in] offset First element to set
    * @param[in] count Number of elements to set
   */
-  void setMagnitude(FloatArray magnitude, int offset, int count);
+  void setMagnitude(FloatArray magnitude, int offset, size_t count);
   
   /**
    * Set the magnitude of the elements of an array, using the phase from the current array.
@@ -480,7 +477,7 @@ public:
    * @param[in] count Number of elements to set
    * @param[out] destination The destination array.
   */
-  void setMagnitude(FloatArray magnitude, int offset, int count, ComplexFloatArray destination);
+  void setMagnitude(FloatArray magnitude, int offset, size_t count, ComplexFloatArray destination);
 };
 
 #endif // __ComplexFloatArray_h__

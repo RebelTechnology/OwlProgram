@@ -11,16 +11,16 @@
 class FloatArray {
 private:
   float* data;
-  int size;
+  size_t size;
 public:
   FloatArray();
-  FloatArray(float* data, int size);
+  FloatArray(float* data, size_t size);
 
-  int getSize() const{
+  size_t getSize() const{
     return size;
   }
 
-  int getSize(){
+  size_t getSize(){
     return size;
   }
 
@@ -152,6 +152,12 @@ public:
   float getMean();
   
   /**
+   * Sum of the array.
+   * Gets the sum of the values in the array.
+  */
+  float getSum();
+  
+  /**
    * Power of the array.
    * Gets the power of the values in the array.
   */
@@ -280,7 +286,7 @@ public:
    * @remarks **destination[n]** is left unchanged for n<offset and the result is stored from destination[offset] onwards
    * that is, in the same position where they would be if a full convolution was performed.
   */
-  void convolve(FloatArray operand2, FloatArray destination, int offset, int samples);
+  void convolve(FloatArray operand2, FloatArray destination, int offset, size_t samples);
   
   /** 
    * Correlation between arrays.
@@ -306,7 +312,7 @@ public:
   void gainToDecibel(FloatArray destination);
 
   /**
-   * Convert decibel to gains values: gain = (dB/20)^10
+   * Convert decibel to gains values: gain = 10^(dB/20)
    * -6dB = 0.5, 0dB = 1.0, +6dB = 2.0
    */  
   void decibelToGain(FloatArray destination);
@@ -329,7 +335,7 @@ public:
    * as long as the FloatArray returned by this method is still in use.
    * @remarks Calling FloatArray::destroy() on a FloatArray instance created with this method might cause an exception.
   */
-  FloatArray subArray(int offset, int length);
+  FloatArray subArray(int offset, size_t length);
   
   /**
    * Copies the content of the array to another array.
@@ -343,7 +349,7 @@ public:
    * The **length***sizeof(float) bytes of memory starting at this location must have been allocated before calling this method.
    * @param[in] length number of samples to copy
   */
-  void copyTo(float* destination, int length);
+  void copyTo(float* destination, size_t length);
 
   /**
    * Copies the content of an array into another array.
@@ -356,7 +362,7 @@ public:
    * @param[in] source a pointer to the beginning of the portion of memory to read from.
    * @param[in] length number of samples to copy.
   */
-  void copyFrom(float* source, int length);
+  void copyFrom(float* source, size_t length);
   
   /**
    * Copies the content of an array into a subset of the array.
@@ -366,7 +372,7 @@ public:
    * @param[in] samples the number of samples to copy
    *
   */
-  void insert(FloatArray source, int destinationOffset, int samples);
+  void insert(FloatArray source, int destinationOffset, size_t samples);
 
   /**
    * Copies the content of an array into a subset of the array.
@@ -376,7 +382,7 @@ public:
    * @param[in] destinationOffset the offset into the destination array
    * @param[in] samples the number of samples to copy
   */
-  void insert(FloatArray source, int sourceOffset, int destinationOffset, int samples);
+  void insert(FloatArray source, int sourceOffset, int destinationOffset, size_t samples);
   
   /**
    * Copies values within an array.
@@ -386,7 +392,7 @@ public:
    * @param[in] length the number of elements to copy
    * @remarks this method uses *memmove()* so that the source memory and the destination memory can overlap. As a consequence it might have slow performances.
   */
-  void move(int fromIndex, int toIndex, int length);
+  void move(int fromIndex, int toIndex, size_t length);
   
   /**
    * Allows to index the array using array-style brackets.
@@ -424,7 +430,7 @@ public:
     if(size!=other.getSize()){
       return false;
     }
-    for(int n=0; n<size; n++){
+    for(size_t n=0; n<size; n++){
       if(data[n]!=other[n]){
         return false;
       }
@@ -446,6 +452,21 @@ public:
   */
   float* getData(){
     return data;
+  }
+
+  /**
+   * Get a single float stored in the FloatArray.
+   * @return the float stored at index @param index
+  */
+  float getElement(int index){
+    return data[index];
+  }
+
+  /**
+   * Set a single float in the FloatArray.
+  */
+  void setElement(int index, float value){
+    data[index] = value;
   }
   
   /**

@@ -1,12 +1,26 @@
-#include <string.h>
-#include <inttypes.h>
 #include "ProgramVector.h"
 #include "Patch.h"
 #include "device.h"
 #include "main.h"
 #include "message.h"
 #include "PatchProcessor.h"
-#include "malloc.h"
+#ifdef USE_MIDI_CALLBACK
+#include "MidiMessage.h"
+#endif
+
+#ifdef malloc
+#undef malloc
+#endif
+#ifdef calloc
+#undef calloc
+#endif
+#ifdef free
+#undef free
+#endif
+
+#include <string.h>
+#include <inttypes.h>
+#include <malloc.h>
 #include <math.h>
 #include <time.h>
 
@@ -28,6 +42,7 @@ extern "C"{
   void WEB_setParameter(int pid, float value);
   void WEB_setButtons(int values);
   int WEB_getButtons();
+  int WEB_processMidi(int port, int status, int d1, int d2);
   char* WEB_getMessage();
   char* WEB_getStatus();
   char* WEB_getPatchName();
@@ -66,12 +81,49 @@ void WEB_setButtons(int values){
   if(values != buttons){
     if((buttons&(1<<PUSHBUTTON)) != (values&(1<<PUSHBUTTON)))
       getInitialisingPatchProcessor()->patch->buttonChanged(PUSHBUTTON, values&(1<<PUSHBUTTON)?4095:0, 0);
+    else if((buttons&(1<<BUTTON_B)) != (values&(1<<BUTTON_B)))
+      getInitialisingPatchProcessor()->patch->buttonChanged(PUSHBUTTON, values&(1<<BUTTON_B)?4095:0, 0);
+    else if((buttons&(1<<BUTTON_C)) != (values&(1<<BUTTON_C)))
+      getInitialisingPatchProcessor()->patch->buttonChanged(PUSHBUTTON, values&(1<<BUTTON_B)?4095:0, 0);
+    else if((buttons&(1<<BUTTON_D)) != (values&(1<<BUTTON_D)))
+      getInitialisingPatchProcessor()->patch->buttonChanged(PUSHBUTTON, values&(1<<BUTTON_B)?4095:0, 0);
     buttons = values;
   }
 }
 
 int WEB_getButtons(){
   return buttons;
+}
+
+int WEB_processMidi(int port, int status, int d1, int d2){
+  switch(status & 0xf0){
+  case 0x80: // NOTE_OFF
+    getInitialisingPatchProcessor()->patch->buttonChanged((PatchButtonId)(MIDI_NOTE_BUTTON+d1), 0, 0);
+    break;
+  case 0x90: // NOTE_ON
+    getInitialisingPatchProcessor()->patch->buttonChanged((PatchButtonId)(MIDI_NOTE_BUTTON+d1), d2, 0);
+    break;
+  case 0xE0: // PITCH_BEND_CHANGE
+    // set PARAMETER_G
+    if(PARAMETER_G < NOF_PARAMETERS)
+      parameters[PARAMETER_G] = (d1 | (d2<<7)) - 8192;
+    break;
+  case 0xB0: // CONTROL_CHANGE
+    // todo: PARAMETER_F for CC 1
+    if(d1 == 0x01 && PARAMETER_F < NOF_PARAMETERS)
+      parameters[PARAMETER_F] = d2<<5;
+    break;
+  }    
+ // todo: set PARAMETER_FREQ, PARAMETER_GAIN
+#ifdef USE_MIDI_CALLBACK
+  static MidiMessage msg;
+  msg.data[0] = port;
+  msg.data[1] = status;
+  msg.data[2] = d1;
+  msg.data[3] = d2;
+  getInitialisingPatchProcessor()->patch->processMidi(msg);
+#endif
+  return 0;
 }
 
 int WEB_setup(long fs, int bs){
@@ -109,7 +161,7 @@ int WEB_setup(long fs, int bs){
 
   return 0;
 }
-
+	       
 class MemBuffer : public AudioBuffer {
 protected:
   float** buffer;
@@ -231,15 +283,9 @@ int serviceCall(int service, void** params, int len){
 }
 
 void *pvPortMalloc( size_t xWantedSize ){
-#ifdef malloc
-#undef malloc
-#endif
   return malloc(xWantedSize);
 }
 void vPortFree( void *pv ){
-#ifdef free
-#undef free
-#endif
   free(pv);
 }
 

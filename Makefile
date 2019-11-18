@@ -18,7 +18,7 @@ ASFLAGS      = -g
 endif
 
 ifeq ($(CONFIG),Release)
-CPPFLAGS    ?= -O2 -specs=nano.specs -ffast-math
+CPPFLAGS    ?= -Os -specs=nano.specs -ffast-math
 EMCCFLAGS   ?= -Oz # optimise for size
 endif
 
@@ -66,7 +66,7 @@ export PATCHNAME PATCHCLASS PATCHSOURCE
 export PATCHFILE PATCHIN PATCHOUT
 export HEAVYTOKEN HEAVYSERVICETOKEN  HEAVY
 export LDSCRIPT CPPFLAGS EMCCFLAGS ASFLAGS
-export PLATFORM
+export CONFIG PLATFORM
 
 DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
 
@@ -77,6 +77,7 @@ all: patch
 .FORCE:
 	@echo Building patch $(PATCHNAME)
 	@mkdir -p $(BUILD)/Source
+	@mkdir -p $(BUILD)/web
 
 $(BUILD)/registerpatch.cpp: .FORCE
 	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $@
@@ -95,7 +96,7 @@ patch: $(DEPS) ## build patch binary
 
 web: $(DEPS) ## build Javascript patch
 	@$(MAKE) -s -f web.mk web
-	@echo Built Web Audio $(PATCHNAME) in $(BUILD)/web/$(TARGET).js
+	@echo Built javascript $(PATCHNAME) in $(BUILD)/web/$(TARGET).js
 
 minify: $(DEPS)
 	@$(MAKE) -s -f web.mk minify

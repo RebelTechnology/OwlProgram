@@ -3,25 +3,22 @@
 #if defined OWL_MAGUS
 #define USE_SCREEN
 #define SSD1309
-#define USE_MIDI_CALLBACK
 #define AUDIO_MAX_BLOCK_SIZE         512
 #elif defined OWL_PRISM
 #define USE_SCREEN
 #define SEPS114A
-#define USE_MIDI_CALLBACK
 #define AUDIO_MAX_BLOCK_SIZE         256
 #elif defined OWL_PLAYER
 #define USE_SCREEN
 #define SSD1309
-/* #define USE_MIDI_CALLBACK */
 #define AUDIO_MAX_BLOCK_SIZE         512
-#elif defined OWL_MINILAB
-#define USE_MIDI_CALLBACK
+#elif defined OWL_ALCHEMIST
 #define AUDIO_MAX_BLOCK_SIZE         512
-#elif defined OWL_MICROLAB
-#define USE_MIDI_CALLBACK
+#elif defined OWL_WIZARD
 #define AUDIO_MAX_BLOCK_SIZE         512
 #endif
+
+#define USE_MIDI_CALLBACK
 
 #if !defined OWL_CLASSIC
 #define AUDIO_SATURATE_SAMPLES
@@ -39,13 +36,7 @@
 #endif
 
 #define MAX_BUFFERS_PER_PATCH        8
-#define MAX_NUMBER_OF_PATCHES        32
 #define MAX_NUMBER_OF_PARAMETERS     42
-
-#define LED_PORT                     GPIOE
-#define LED_GREEN                    GPIO_Pin_5
-#define LED_RED                      GPIO_Pin_3
-#define LED_CLOCK                    RCC_AHB1Periph_GPIOE
 
 #ifdef  USE_FULL_ASSERT
 #ifdef __cplusplus

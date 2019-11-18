@@ -5,8 +5,12 @@
 
 class MidiMessage {
  public:
-  uint8_t data[4];
+  union {
+    uint32_t packed;
+    uint8_t data[4];
+  };
   MidiMessage(){}
+  MidiMessage(uint32_t msg): packed(msg){}
   MidiMessage(uint8_t port, uint8_t d0, uint8_t d1, uint8_t d2){
     data[0] = port;
     data[1] = d0;
@@ -34,6 +38,12 @@ class MidiMessage {
   uint8_t getControllerValue(){
     return data[3];
   }
+  uint8_t getChannelPressure(){
+    return data[2];
+  }
+  uint8_t getProgramChange(){
+    return data[1];
+  }
   int16_t getPitchBend(){
     int16_t pb = (data[2] | (data[3]<<7)) - 8192;
     return pb;
@@ -50,14 +60,27 @@ class MidiMessage {
   bool isProgramChange(){
     return (data[1] & MIDI_STATUS_MASK) == PROGRAM_CHANGE;
   }
+  bool isChannelPressure(){
+    return (data[1] & MIDI_STATUS_MASK) == CHANNEL_PRESSURE;
+  }
   bool isPitchBend(){
     return (data[1] & MIDI_STATUS_MASK) == PITCH_BEND_CHANGE;
   }
   static MidiMessage cc(uint8_t ch, uint8_t cc, uint8_t value){
-    return MidiMessage(USB_COMMAND_CONTROL_CHANGE, CONTROL_CHANGE|ch, cc, value);
+    return MidiMessage(USB_COMMAND_CONTROL_CHANGE, CONTROL_CHANGE|(ch&0xf), cc&0x7f, value&0x7f);
   }
   static MidiMessage pc(uint8_t ch, uint8_t pc){
-    return MidiMessage(USB_COMMAND_PROGRAM_CHANGE, PROGRAM_CHANGE|ch, pc, 0);
+    return MidiMessage(USB_COMMAND_PROGRAM_CHANGE, PROGRAM_CHANGE|(ch&0xf), pc&0x7f, 0);
+  }
+  static MidiMessage pb(uint8_t ch, int16_t bend){
+    bend += 8192;
+    return MidiMessage(USB_COMMAND_PITCH_BEND_CHANGE, PITCH_BEND_CHANGE|(ch&0xf), bend&0x7f, (bend>>7)&0x7f);
+  }
+  static MidiMessage note(uint8_t ch, uint8_t note, uint8_t velocity){
+    return MidiMessage(USB_COMMAND_PROGRAM_CHANGE, velocity == 0 ? NOTE_OFF|(ch&0xf) : NOTE_ON|(ch&0xf), note&0x7f, velocity&0x7f);
+  }
+  static MidiMessage cp(uint8_t ch, uint8_t value){
+    return MidiMessage(USB_COMMAND_CHANNEL_PRESSURE, CHANNEL_PRESSURE|(ch&0xf), value&0x7f, 0);
   }
 };
 

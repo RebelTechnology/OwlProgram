@@ -18,12 +18,14 @@ public:
   SmoothValue();
   SmoothValue(T lambda);
   SmoothValue(T lambda, T initialValue);
-  SmoothValue(const SmoothValue<T>& other){
+  SmoothValue(const SmoothValue<T>& other)
+    : value(other.value), lambda(other.lambda){
     // copy constructor: not needed?
-    value = other.value;
-    lambda = other.lambda;
   }
   void update(T newValue);
+  void reset(T newValue){
+    value = newValue;
+  }
   T getValue(){
     return value;
   }
@@ -76,6 +78,9 @@ public:
     if(abs(value-newValue) > delta)
       value = newValue;
   }
+  void reset(T newValue){
+    value = newValue;
+  }
   T getValue(){
     return value;
   }
@@ -125,6 +130,9 @@ public:
   SmoothStiffValue(T l, T d, T initialValue)
     : lambda(d), delta(d), value(initialValue) {}
   void update(T newValue);
+  void reset(T newValue){
+    value = newValue;
+  }
   T getValue(){
     return value;
   }

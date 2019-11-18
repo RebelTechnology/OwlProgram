@@ -25,7 +25,7 @@ public:
   /**
    * Default constructor.
    * Does **not** initialize the instance.
-   * @remarks You need to call init(int size) before calling any other method
+   * @remarks You need to call init(size_t size) before calling any other method
   */
   FastFourierTransform();
 
@@ -35,7 +35,7 @@ public:
    * @remarks Only sizes of 32, 64, 128, 256, 512, 1024, 2048, 4096 are supported, due to limitations of the CMSIS library.
    * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   */
-  FastFourierTransform(int aSize);
+  FastFourierTransform(size_t aSize);
 
   ~FastFourierTransform();
 
@@ -44,7 +44,7 @@ public:
    * @param aSize The size of the FFT
    * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   */
-  void init(int aSize);
+  void init(size_t aSize);
 
   /**
    * Perform the direct FFT.
@@ -70,7 +70,7 @@ public:
    * Get the size of the FFT
    * @return The size of the FFT
   */
-  int getSize();
+  size_t getSize();
 };
 
 #endif // __FastFourierTransform_h__

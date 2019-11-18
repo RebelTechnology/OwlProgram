@@ -4,6 +4,10 @@
 #include "ServiceCall.h"
 #include <stdint.h>
 
+VoltsPerOctave::VoltsPerOctave(float o, float m)
+  : tune(0.0), offset(o), multiplier(m) {
+}
+
 VoltsPerOctave::VoltsPerOctave(bool input) : tune(0.0) {
   int32_t volts_offset = 0, volts_scalar = 0;
   void* args[] = {
@@ -30,10 +34,6 @@ VoltsPerOctave::VoltsPerOctave(bool input) : tune(0.0) {
   }
 }
 
-VoltsPerOctave::VoltsPerOctave(float o, float m)
-  : offset(o), multiplier(m), tune(0.0) {
-}
-
 void VoltsPerOctave::getFrequency(FloatArray samples, FloatArray output){
   ASSERT(output.getSize() >= samples.getSize(), "Output buffer too short");
   // todo: block based implementation
@@ -41,7 +41,7 @@ void VoltsPerOctave::getFrequency(FloatArray samples, FloatArray output){
   // samples.multiply(multiplier, output);
   // for(int i=0; i<samples.getSize(); ++i)
   //   output[i] = voltsToHertz(output[i]);
-  for(int i=0; i<samples.getSize(); ++i)
+  for(size_t i=0; i<samples.getSize(); ++i)
     output[i] = getFrequency(samples[i]);
 }
 

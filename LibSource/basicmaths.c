@@ -1,7 +1,24 @@
 #include "basicmaths.h"
 #include <stdint.h>
+#include <string.h>
 #include "fastpow.h"
 #include "fastlog.h"
+
+void* pvPortRealloc(void *ptr, size_t size ){  
+  vPortFree(ptr);
+  ptr = pvPortMalloc(size);
+  if(ptr != NULL)
+    memset(ptr, 0, size);
+  return ptr;
+}
+
+void *pvPortCalloc(size_t nmemb, size_t size){
+  size_t xWantedSize = nmemb*size;
+  void* ptr = pvPortMalloc(xWantedSize);
+  if(ptr != NULL)
+    memset(ptr, 0, xWantedSize);
+  return ptr;
+}
 
 // todo: see
 // http://www.hxa.name/articles/content/fast-pow-adjustable_hxa7241_2007.html
@@ -18,7 +35,7 @@ void arm_srand32(uint32_t s){
 }
 
 /**
- * generate an unsigned 32bit pseudo-random number using xorshifter algorithm.
+ * Generate an unsigned 32bit pseudo-random number using xorshifter algorithm. Aka xorshifter32.
  * "Anyone who considers arithmetical methods of producing random digits is, of course, in a state of sin." 
  * -- John von Neumann.
 */

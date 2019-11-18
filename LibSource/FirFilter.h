@@ -7,11 +7,11 @@ class FirFilter {
 private:
   FloatArray coefficients;
   FloatArray states;
-  int blockSize;
+  size_t blockSize;
 #ifdef ARM_CORTEX
   arm_fir_instance_f32 instance;
 #else
-  int pointer;
+  size_t pointer = 0;
 #endif /* ARM_CORTEX */
 
   void processBlock(float* source, float* destination, int size){
@@ -34,26 +34,18 @@ private:
   }
   
 public:
-  FirFilter(){};
+  FirFilter() {}
   
-  FirFilter(int numTaps, int aBlockSize){
-    init(numTaps,aBlockSize);
-  };
-  
-  ~FirFilter(){
-    FloatArray::destroy(coefficients);
-  }
-
-  void init(int numTaps, int aBlockSize){
-    coefficients=FloatArray::create(numTaps);
-    blockSize=aBlockSize;
-    states=FloatArray::create(numTaps + blockSize - 1);
-    states.clear();
+  FirFilter(FloatArray cfs, FloatArray ste, size_t bsize)
+    : coefficients(cfs), states(ste), blockSize(bsize) {
 #ifdef ARM_CORTEX
     arm_fir_init_f32(&instance, coefficients.getSize(), coefficients.getData(), states.getData(), blockSize);
 #else
     pointer = 0;
 #endif /* ARM_CORTEX */
+  }
+  
+  ~FirFilter(){
   }
   
   void processBlock(FloatArray buffer){
@@ -79,13 +71,16 @@ public:
     coefficients.copyFrom(newCoefficients);
   }
   
-  static FirFilter* create(int aNumTaps, int aMaxBlockSize){
-    return new FirFilter(aNumTaps, aMaxBlockSize);
+  static FirFilter* create(size_t taps, size_t blocksize){
+    FloatArray coefficients = FloatArray::create(taps);
+    FloatArray states = FloatArray::create(taps + blocksize - 1);
+    states.clear();
+    return new FirFilter(coefficients, states, blocksize);
   }
 
   static void destroy(FirFilter* filter){
-    delete filter->coefficients;
-    delete filter->states;
+    FloatArray::destroy(filter->coefficients);
+    FloatArray::destroy(filter->states);
     delete filter;
   }
 };

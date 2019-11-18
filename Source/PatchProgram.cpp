@@ -5,10 +5,13 @@
 #include "PatchProcessor.h"
 #include "message.h"
 #include "Patch.h"
-#include "registerpatch.h"
 #include "main.h"
 #include "heap.h"
 #include "system_tables.h"
+#ifdef USE_MIDI_CALLBACK
+#include "MidiMessage.h"
+#endif
+#include "registerpatch.h"
 
 static PatchProcessor processor;
 PatchProcessor* getInitialisingPatchProcessor(){
@@ -25,15 +28,16 @@ void doSetPatchParameter(uint8_t id, int16_t value){
 void doSetButton(uint8_t id, uint16_t value, uint16_t samples){
   ProgramVector* vec = getProgramVector();
   if(vec->checksum >= PROGRAM_VECTOR_CHECKSUM_V12 &&
-     vec->setButton != NULL &&
-     // if it is not a MIDI note, check that value has changed
-     (id > 31 || (bool)(vec->buttons&(1<<id)) != (bool)value))
+     // // if it is not a MIDI note, check that value has changed
+     // (id > 15 || (bool)(vec->buttons&(1<<id)) != (bool)value) &&
+     vec->setButton != NULL){
     vec->setButton((PatchButtonId)id, value, samples);
-  if(id < 32){
-    if(value)
-      vec->buttons |= (1<<id);
-    else
-      vec->buttons &= ~(1<<id);
+    if(id < 16){
+      if(value)
+	vec->buttons |= (1<<id);
+      else
+	vec->buttons &= ~(1<<id);
+    }
   }
 }
 

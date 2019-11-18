@@ -80,14 +80,17 @@
      return (31 - __builtin_clz (x));
    }
 
+
+#define malloc(x) pvPortMalloc(x)
+#define calloc(x, y) pvPortCalloc(x, y)
+#define free(x) vPortFree(x)
+#define realloc(x, y) pvPortRealloc(x, y);
+void* pvPortCalloc(size_t nmemb, size_t size);
+void* pvPortRealloc(void *pv, size_t xWantedSize);
+
 #ifdef __cplusplus
 }
 #endif
-
-
-#define malloc(x) pvPortMalloc(x)
-#define calloc(x, y) pvPortMalloc(x*y)
-#define free(x) vPortFree(x)
 
 #ifdef ARM_CORTEX
 #define sin(x) arm_sin_f32(x)

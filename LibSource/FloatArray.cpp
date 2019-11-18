@@ -6,7 +6,7 @@
  FloatArray::FloatArray() :
    data(NULL), size(0) {}
 
- FloatArray::FloatArray(float* d, int s) :
+ FloatArray::FloatArray(float* d, size_t s) :
    data(d), size(s) {}
 
 void FloatArray::getMin(float* value, int* index){
@@ -18,7 +18,7 @@ void FloatArray::getMin(float* value, int* index){
 #else
   *value=data[0];
   *index=0;
-  for(int n=1; n<size; n++){
+  for(size_t n=1; n<size; n++){
     float currentValue=data[n];
     if(currentValue<*value){
       *value=currentValue;
@@ -54,7 +54,7 @@ void FloatArray::getMax(float* value, int* index){
 #else
   *value=data[0];
   *index=0;
-  for(int n=1; n<size; n++){
+  for(size_t n=1; n<size; n++){
     float currentValue=data[n];
     if(currentValue>*value){
       *value=currentValue;
@@ -85,9 +85,9 @@ void FloatArray::rectify(FloatArray& destination){ //this is actually "copy data
 #ifdef ARM_CORTEX   
   arm_abs_f32(data, destination.getData(), size);
 #else
-  int minSize= min(size,destination.getSize()); //TODO: shall we take this out and allow it to segfault?
-  for(int n=0; n<minSize; n++){
-    destination[n] = fabs(data[n]);
+  size_t minSize= min(size,destination.getSize()); //TODO: shall we take this out and allow it to segfault?
+  for(size_t n=0; n<minSize; n++){
+    destination[n] = fabsf(data[n]);
   }
 #endif  
 }
@@ -102,13 +102,13 @@ void FloatArray::reverse(FloatArray& destination){ //this is actually "copy data
     reverse();
     return;
   }
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     destination[n]=data[size-n-1];
   }
 }
 
 void FloatArray::reverse(){//in place
-  for(int n=0; n<size/2; n++){
+  for(size_t n=0; n<size/2; n++){
     float temp=data[n];
     data[n]=data[size-n-1];
     data[size-n-1]=temp;
@@ -117,7 +117,7 @@ void FloatArray::reverse(){//in place
 
 void FloatArray::reciprocal(FloatArray& destination){
   float* data = getData();
-  for(int n=0; n<getSize(); n++)
+  for(size_t n=0; n<getSize(); n++)
     destination[n] = 1.0f/data[n];
 }
 
@@ -133,13 +133,20 @@ float FloatArray::getRms(){
 #else
   result=0;
   float *pSrc= data;
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     result += pSrc[n]*pSrc[n];
   }
   result=sqrtf(result/size);
 #endif
   return result;
 }
+
+float FloatArray::getSum(){
+  float result = 0;
+  for(size_t n=0; n<size; n++)
+    result += data[n];
+  return result;
+} 
 
 float FloatArray::getMean(){
   float result;
@@ -148,7 +155,7 @@ float FloatArray::getMean(){
   arm_mean_f32 (data, size, &result);
 #else
   result=0;
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     result+=data[n];
   }
   result=result/size;
@@ -164,7 +171,7 @@ float FloatArray::getPower(){
 #else
   result=0;
   float *pSrc = data;
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     result += pSrc[n]*pSrc[n];
   }
 #endif
@@ -190,7 +197,7 @@ float FloatArray::getVariance(){
 #else
   float sumOfSquares=getPower();
   float sum=0;
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     sum+=data[n];
   }
   result=(sumOfSquares - sum*sum/size) / (size - 1);
@@ -203,22 +210,24 @@ void FloatArray::clip(){
 }
 
 void FloatArray::clip(float max){
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     if(data[n]>max)
       data[n]=max;
     else if(data[n]<-max)
       data[n]=-max;
   }
 }
+
 void FloatArray::clip(float min, float max){
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     if(data[n]>max)
       data[n]=max;
     else if(data[n]<min)
       data[n]=min;
   }
 }
-FloatArray FloatArray::subArray(int offset, int length){
+
+FloatArray FloatArray::subArray(int offset, size_t length){
   ASSERT(size >= offset+length, "Array too small");
   return FloatArray(data+offset, length);
 }
@@ -233,7 +242,7 @@ void FloatArray::copyFrom(FloatArray source){
   copyFrom(source, min(size, source.getSize()));
 }
 
-void FloatArray::copyTo(float* other, int length){
+void FloatArray::copyTo(float* other, size_t length){
   ASSERT(size >= length, "Array too small");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -243,7 +252,7 @@ void FloatArray::copyTo(float* other, int length){
 #endif /* ARM_CORTEX */
 }
 
-void FloatArray::copyFrom(float* other, int length){
+void FloatArray::copyFrom(float* other, size_t length){
   ASSERT(size >= length, "Array too small");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -253,7 +262,7 @@ void FloatArray::copyFrom(float* other, int length){
 #endif /* ARM_CORTEX */
 }
 
-void FloatArray::insert(FloatArray source, int sourceOffset, int destinationOffset, int samples){
+void FloatArray::insert(FloatArray source, int sourceOffset, int destinationOffset, size_t samples){
   ASSERT(size >= destinationOffset+samples, "Array too small");
   ASSERT(source.size >= sourceOffset+samples, "Array too small");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
@@ -264,12 +273,12 @@ void FloatArray::insert(FloatArray source, int sourceOffset, int destinationOffs
 #endif /* ARM_CORTEX */
 }
 
-void FloatArray::insert(FloatArray source, int destinationOffset, int samples){
+void FloatArray::insert(FloatArray source, int destinationOffset, size_t samples){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   insert(source, 0, destinationOffset, samples);
 }
 
-void FloatArray::move(int fromIndex, int toIndex, int samples){
+void FloatArray::move(int fromIndex, int toIndex, size_t samples){
   ASSERT(size >= toIndex+samples, "Array too small");
   memmove(data+toIndex, data+fromIndex, samples*sizeof(float)); //TODO: evaluate if it is appropriate to use arm_copy_f32 for this method
 }
@@ -279,7 +288,7 @@ void FloatArray::setAll(float value){
 #ifdef ARM_CORTEX
   arm_fill_f32(value, data, size);
 #else
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     data[n]=value;
   }
 #endif /* ARM_CORTEX */
@@ -295,7 +304,7 @@ void FloatArray::add(FloatArray operand2, FloatArray destination){ //allows in-p
   */
   arm_add_f32(data, operand2.data, destination.data, size);
 #else
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     destination[n]=data[n]+operand2[n];
   }
 #endif /* ARM_CORTEX */
@@ -307,7 +316,7 @@ void FloatArray::add(FloatArray operand2){ //in-place
 }
 
 void FloatArray::add(float scalar){
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     data[n]+=scalar;
   } 
 }
@@ -322,7 +331,7 @@ void FloatArray::subtract(FloatArray operand2, FloatArray destination){ //allows
   */
   arm_sub_f32(data, operand2.data, destination.data, size);
   #else
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     destination[n]=data[n]-operand2[n];
   }
   #endif /* ARM_CORTEX */
@@ -334,7 +343,7 @@ void FloatArray::subtract(FloatArray operand2){ //in-place
 }
 
 void FloatArray::subtract(float scalar){
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     data[n]-=scalar;
   } 
 }
@@ -349,7 +358,7 @@ void FloatArray::multiply(FloatArray operand2, FloatArray destination){ //allows
   */
     arm_mult_f32(data, operand2.data, destination, size);
   #else
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     destination[n]=data[n]*operand2[n];
   }
 
@@ -365,7 +374,7 @@ void FloatArray::multiply(float scalar){
 #ifdef ARM_CORTEX
   arm_scale_f32(data, scalar, data, size);
 #else
-  for(int n=0; n<size; n++)
+  for(size_t n=0; n<size; n++)
     data[n]*=scalar;
 #endif
 }
@@ -374,7 +383,7 @@ void FloatArray::multiply(float scalar, FloatArray destination){
 #ifdef ARM_CORTEX
   arm_scale_f32(data, scalar, destination, size);
 #else
-  for(int n=0; n<size; n++)
+  for(size_t n=0; n<size; n++)
     destination[n] = data[n] * scalar;
 #endif
 }
@@ -384,7 +393,7 @@ void FloatArray::negate(FloatArray& destination){//allows in-place
 #ifdef ARM_CORTEX
   arm_negate_f32(data, destination.getData(), size); 
   #else
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     destination[n]=-data[n];
   }
   #endif /* ARM_CORTEX */
@@ -399,11 +408,11 @@ void FloatArray::noise(){
 }
 
 void FloatArray::noise(float min, float max){
-  float amplitude = fabs(max-min);
+  float amplitude = fabsf(max-min);
   float offset = min;
   ASSERT(getSize()>10, "10<getSize");
   ASSERT(size==getSize(), "getSize");
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     data[n]=(rand()/(RAND_MAX+1.0f)) * amplitude + offset;
   }
 }
@@ -415,11 +424,11 @@ void FloatArray::convolve(FloatArray operand2, FloatArray destination){
 #ifdef ARM_CORTEX
   arm_conv_f32(data, size, operand2.data, operand2.size, destination);
 #else
-  int size2=operand2.getSize();
-  for (int n=0; n<size+size2-1; n++){
+  size_t size2=operand2.getSize();
+  for (size_t n=0; n<size+size2-1; n++){
     int n1=n;
     destination[n] =0;
-    for(int k=0; k<size2; k++){
+    for(size_t k=0; k<size2; k++){
       if(n1>=0 && n1<size)
         destination[n]+=data[n1]*operand2[k];
       n1--;
@@ -428,7 +437,7 @@ void FloatArray::convolve(FloatArray operand2, FloatArray destination){
 #endif /* ARM_CORTEX */
 }
 
-void FloatArray::convolve(FloatArray operand2, FloatArray destination, int offset, int samples){
+void FloatArray::convolve(FloatArray operand2, FloatArray destination, int offset, size_t samples){
   ASSERT(destination.size >= size + operand2.size -1, "Destination array too small"); //TODO: change this condition to the actual size being written(will be samples+ tail)
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -443,11 +452,11 @@ void FloatArray::convolve(FloatArray operand2, FloatArray destination, int offse
   /*
   This implementation is just a copy/paste/edit from the overloaded method
   */
-  int size2=operand2.getSize();
-  for (int n=offset; n<offset+samples; n++){
+  size_t size2=operand2.getSize();
+  for (size_t n=offset; n<offset+samples; n++){
     int n1=n;
     destination[n] =0; //this should be [n-offset]
-    for(int k=0; k<size2; k++){
+    for(size_t k=0; k<size2; k++){
       if(n1>=0 && n1<size)
         destination[n]+=data[n1]*operand2[k];//this should be destination[n-offset]
       n1--;
@@ -479,13 +488,13 @@ void FloatArray::correlateInitialized(FloatArray operand2, FloatArray destinatio
 
 void FloatArray::gainToDecibel(FloatArray destination){
   ASSERT(destination.getSize()>=size, "Wrong array size");
-  for(int i=0; i<size; i++)
+  for(size_t i=0; i<size; i++)
     destination[i] = log10f(data[i])*20.0;
 }
 
 void FloatArray::decibelToGain(FloatArray destination){
   ASSERT(destination.getSize()>=size, "Wrong array size");
-  for(int i=0; i<size; i++)
+  for(size_t i=0; i<size; i++)
     destination[i] = exp10f(data[i]*0.05);
 }
 

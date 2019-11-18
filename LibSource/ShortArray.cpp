@@ -17,7 +17,7 @@ static int16_t saturateTo16(int64_t value){
 ShortArray::ShortArray() :
  data(NULL), size(0) {}
 
-ShortArray::ShortArray(int16_t* d, int s) :
+ShortArray::ShortArray(int16_t* d, size_t s) :
  data(d), size(s) {}
 
 void ShortArray::getMin(int16_t* value, int* index){
@@ -29,7 +29,7 @@ void ShortArray::getMin(int16_t* value, int* index){
 #else
   *value=data[0];
   *index=0;
-  for(int n=1; n<size; n++){
+  for(size_t n=1; n<size; n++){
     int16_t currentValue=data[n];
     if(currentValue<*value){
       *value=currentValue;
@@ -65,7 +65,7 @@ void ShortArray::getMax(int16_t* value, int* index){
 #else
   *value=data[0];
   *index=0;
-  for(int n=1; n<size; n++){
+  for(size_t n=1; n<size; n++){
     int16_t currentValue=data[n];
     if(currentValue>*value){
       *value=currentValue;
@@ -96,8 +96,8 @@ void ShortArray::rectify(ShortArray& destination){ //this is actually "copy data
 #ifdef ARM_CORTEX   
   arm_abs_q15(data, destination.getData(), size);
 #else
-  int minSize= min(size,destination.getSize()); //TODO: shall we take this out and allow it to segfault?
-  for(int n=0; n<minSize; n++){
+  size_t minSize= min(size,destination.getSize()); //TODO: shall we take this out and allow it to segfault?
+  for(size_t n=0; n<minSize; n++){
     destination[n] = fabs(data[n]);
   }
 #endif  
@@ -113,13 +113,13 @@ void ShortArray::reverse(ShortArray& destination){ //this is actually "copy data
     reverse();
     return;
   }
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     destination[n]=data[size-n-1];
   }
 }
 
 void ShortArray::reverse(){//in place
-  for(int n=0; n<size/2; n++){
+  for(size_t n=0; n<size/2; n++){
     int16_t temp=data[n];
     data[n]=data[size-n-1];
     data[size-n-1]=temp;
@@ -128,7 +128,7 @@ void ShortArray::reverse(){//in place
 
 void ShortArray::reciprocal(ShortArray& destination){
   int16_t* data = getData();
-  for(int n=0; n<getSize(); n++)
+  for(size_t n=0; n<getSize(); n++)
     destination[n] = (int16_t)(0.5 + 1.0f/data[n]);
 }
 
@@ -143,7 +143,7 @@ int16_t ShortArray::getRms(){
   arm_rms_q15 (data, size, &result);
 #else
   int64_t value = 0;
-  for(int n=0; n < size; ++n){
+  for(size_t n=0; n < size; ++n){
     value += data[n] * data[n];
   }
   value = sqrtf(value / size);
@@ -159,7 +159,7 @@ int16_t ShortArray::getMean(){
   arm_mean_q15 (data, size, &result);
 #else
   int32_t value = 0;
-  for(int n=0; n < size; n++){
+  for(size_t n=0; n < size; n++){
     value += data[n];
   }
   value = value / size;
@@ -176,8 +176,9 @@ int64_t ShortArray::getPower(){
 #else
   result=0;
   int16_t *pSrc = data;
-  for(int n=0; n < size; n++){
-    result += (int32_t)pSrc[n]*pSrc[n];
+  for(size_t n=0; n < size; n++){
+    int32_t value = (int32_t)pSrc[n]*pSrc[n];
+    result += saturateTo16(value >> 15);
   }
 #endif
   return result;
@@ -202,7 +203,7 @@ int16_t ShortArray::getVariance(){
 #else
   int16_t sumOfSquares=getPower();
   int16_t sum=0;
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     sum+=data[n];
   }
   result=(sumOfSquares - sum*sum/size) / (size - 1);
@@ -211,7 +212,7 @@ int16_t ShortArray::getVariance(){
 }
 
 void ShortArray::clip(int16_t max){
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     if(data[n]>max)
       data[n]=max;
     else if(data[n]<-max)
@@ -219,14 +220,14 @@ void ShortArray::clip(int16_t max){
   }
 }
 void ShortArray::clip(int16_t min, int16_t max){
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     if(data[n]>max)
       data[n]=max;
     else if(data[n]<min)
       data[n]=min;
   }
 }
-ShortArray ShortArray::subArray(int offset, int length){
+ShortArray ShortArray::subArray(int offset, size_t length){
   ASSERT(size >= offset+length, "Array too small");
   return ShortArray(data+offset, length);
 }
@@ -241,7 +242,7 @@ void ShortArray::copyFrom(ShortArray source){
   copyFrom(source, min(size, source.getSize()));
 }
 
-void ShortArray::copyTo(int16_t* other, int length){
+void ShortArray::copyTo(int16_t* other, size_t length){
   ASSERT(size >= length, "Array too small");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -251,7 +252,7 @@ void ShortArray::copyTo(int16_t* other, int length){
 #endif /* ARM_CORTEX */
 }
 
-void ShortArray::copyFrom(int16_t* other, int length){
+void ShortArray::copyFrom(int16_t* other, size_t length){
   ASSERT(size >= length, "Array too small");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -261,7 +262,7 @@ void ShortArray::copyFrom(int16_t* other, int length){
 #endif /* ARM_CORTEX */
 }
 
-void ShortArray::insert(ShortArray source, int sourceOffset, int destinationOffset, int samples){
+void ShortArray::insert(ShortArray source, int sourceOffset, int destinationOffset, size_t samples){
   ASSERT(size >= destinationOffset+samples, "Array too small");
   ASSERT(source.size >= sourceOffset+samples, "Array too small");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
@@ -272,12 +273,12 @@ void ShortArray::insert(ShortArray source, int sourceOffset, int destinationOffs
 #endif /* ARM_CORTEX */
 }
 
-void ShortArray::insert(ShortArray source, int destinationOffset, int samples){
+void ShortArray::insert(ShortArray source, int destinationOffset, size_t samples){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   insert(source, 0, destinationOffset, samples);
 }
 
-void ShortArray::move(int fromIndex, int toIndex, int samples){
+void ShortArray::move(int fromIndex, int toIndex, size_t samples){
   ASSERT(size >= toIndex+samples, "Array too small");
   memmove(data+toIndex, data+fromIndex, samples*sizeof(int16_t)); //TODO: evaluate if it is appropriate to use arm_copy_q15 for this method
 }
@@ -287,7 +288,7 @@ void ShortArray::setAll(int16_t value){
 #ifdef ARM_CORTEX
   arm_fill_q15(value, data, size);
 #else
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     data[n]=value;
   }
 #endif /* ARM_CORTEX */
@@ -303,7 +304,7 @@ void ShortArray::add(ShortArray operand2, ShortArray destination){ //allows in-p
   */
   arm_add_q15(data, operand2.data, destination.data, size);
 #else
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     int32_t value = data[n] + operand2[n];
     destination[n] = saturateTo16(value);
   }
@@ -362,7 +363,7 @@ void ShortArray::add(int16_t scalar){
     blkCnt--;
   }
 #else
-  for(int n=0; n < size; ++n){
+  for(size_t n=0; n < size; ++n){
     int32_t value = data[n] + scalar;
     data[n] = saturateTo16(value);
   } 
@@ -379,7 +380,7 @@ void ShortArray::subtract(ShortArray operand2, ShortArray destination){ //allows
   */
   arm_sub_q15(data, operand2.data, destination.data, size);
 #else
-  for(int n=0; n < size; ++n){
+  for(size_t n=0; n < size; ++n){
     int32_t value = data[n] - operand2[n];
     destination[n] = saturateTo16(value);
   }
@@ -443,7 +444,7 @@ void ShortArray::subtract(int16_t scalar)
     blkCnt--;
   }
 #else
-  for(int n = 0; n < size; ++n){
+  for(size_t n = 0; n < size; ++n){
     int32_t value = data[n] - scalar;
     data[n] = saturateTo16(value);
   } 
@@ -460,7 +461,7 @@ void ShortArray::multiply(ShortArray operand2, ShortArray destination){ //allows
   */
     arm_mult_q15(data, operand2.data, destination, size);
 #else
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     int32_t value = data[n] * operand2[n];
     destination[n] = saturateTo16(value >> 15);
   }
@@ -480,7 +481,7 @@ void ShortArray::multiply(int16_t scalar){
 #ifdef ARM_CORTEX
   arm_scale_q15(data, scalar, 0, data, size);
 #else 
-  for(int n = 0; n < size; ++n){
+  for(size_t n = 0; n < size; ++n){
     int32_t value = data[n] * scalar;
     data[n] = saturateTo16(value >> 15);
   }
@@ -492,7 +493,7 @@ void ShortArray::negate(ShortArray& destination){//allows in-place
 #ifdef ARM_CORTEX
   arm_negate_q15(data, destination.getData(), size); 
 #else
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     destination[n]=-data[n];
   }
 #endif /* ARM_CORTEX */
@@ -510,7 +511,7 @@ void ShortArray::noise(int16_t min, int16_t max){
   uint16_t amplitude = abs((int32_t)max-(int32_t)min);
   int16_t offset = min;
   //debugMessage("amp off", amplitude,offset);
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     data[n]=(rand()/((float)RAND_MAX)) * amplitude + offset;
   }
 }
@@ -522,11 +523,11 @@ void ShortArray::convolve(ShortArray operand2, ShortArray destination){
 #ifdef ARM_CORTEX
   arm_conv_q15(data, size, operand2.data, operand2.size, destination);
 #else
-  int size2=operand2.getSize();
-  for (int n=0; n<size+size2-1; n++){
-    int n1=n;
+  size_t size2=operand2.getSize();
+  for (size_t n=0; n<size+size2-1; n++){
+    size_t n1=n;
     destination[n] =0;
-    for(int k=0; k<size2; k++){
+    for(size_t k=0; k<size2; k++){
       if(n1>=0 && n1<size)
         destination[n]+=data[n1]*operand2[k];
       n1--;
@@ -535,7 +536,7 @@ void ShortArray::convolve(ShortArray operand2, ShortArray destination){
 #endif /* ARM_CORTEX */
 }
 
-void ShortArray::convolve(ShortArray operand2, ShortArray destination, int offset, int samples){
+void ShortArray::convolve(ShortArray operand2, ShortArray destination, int offset, size_t samples){
   ASSERT(destination.size >= size + operand2.size -1, "Destination array too small"); //TODO: change this condition to the actual size being written(will be samples+ tail)
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -550,11 +551,11 @@ void ShortArray::convolve(ShortArray operand2, ShortArray destination, int offse
   /*
   This implementation is just a copy/paste/edit from the overloaded method
   */
-  int size2=operand2.getSize();
-  for (int n=offset; n<offset+samples; n++){
-    int n1=n;
+  size_t size2=operand2.getSize();
+  for (size_t n=offset; n<offset+samples; n++){
+    size_t n1=n;
     destination[n] =0; //this should be [n-offset]
-    for(int k=0; k<size2; k++){
+    for(size_t k=0; k<size2; k++){
       if(n1>=0 && n1<size)
         destination[n]+=data[n1]*operand2[k];//this should be destination[n-offset]
       n1--;
@@ -588,7 +589,7 @@ void ShortArray::shift(int shiftValue){
 #ifdef ARM_CORTEX
     arm_shift_q15(data, shiftValue, data, size);
 #else
-    for(int n = 0; n < getSize(); ++n){
+    for(size_t n = 0; n < getSize(); ++n){
       int16_t value = data[n];
       if(shiftValue > 0){
         int32_t v = (int32_t)value << shiftValue;
@@ -629,7 +630,7 @@ void ShortArray::copyFrom(FloatArray source){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   arm_float_to_q15((float*)source, data, size);
 #else
-  for(int n = 0; n < size; ++n){
+  for(size_t n = 0; n < size; ++n){
     setFloatValue(n, source[n]);
   }
 #endif
@@ -641,7 +642,7 @@ void ShortArray::copyTo(FloatArray destination){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   arm_q15_to_float(data, (float*)destination, size);
 #else
-  for(int n = 0; n < size; ++n){
+  for(size_t n = 0; n < size; ++n){
     destination[n] = getFloatValue(n);
   }
 #endif

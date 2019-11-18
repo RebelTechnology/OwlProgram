@@ -9,27 +9,27 @@ public:
     {
       TEST("Default ctor");
       ShortArray empty;
-      CHECK_EQUAL(empty.getSize(), 0);
+      CHECK_EQUAL((int)empty.getSize(), 0);
       CHECK(empty.getData() == NULL);
     }
     {
       TEST("create");
       ShortArray array = ShortArray::create(512);
-      CHECK_EQUAL(array.getSize(), 512);
+      CHECK_EQUAL((int)array.getSize(), 512);
       REQUIRE(array.getData() != NULL);
-      for(int i=0; i<512; ++i){
+      for(size_t i=0; i<512; ++i){
 	CHECK_CLOSE(array[i], 0.0, DEFAULT_TOLERANCE);
       }
       ShortArray::destroy(array);
     }
     {
       TEST("getSize, getData");
-      const int size = 123;
+      const size_t size = 123;
       ShortArray ar = ShortArray::create(size);
-      CHECK_EQUAL(size, ar.getSize());
+      CHECK_EQUAL((int)size, (int)ar.getSize());
       int16_t data[size];
       ShortArray ar2 = ShortArray(data, size);
-      CHECK_EQUAL(size, ar2.getSize());
+      CHECK_EQUAL((int)size, (int)ar2.getSize());
       CHECK(data == ar2.getData());
       ShortArray::destroy(ar);
     }
@@ -65,19 +65,19 @@ public:
       TEST("clear,noise");
       ShortArray ar = ShortArray::create(1000);
       int32_t acc = 0;
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         acc += abs(ar[n]);
       }
       // A newly created arra should be init'd to 0
       CHECK(acc==0);
       acc = 0;
       ar.noise();
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         acc += abs(ar[n]);
       }
       CHECK(acc > 0);
       ar.clear();
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK(ar[n] == 0);
       }
       ar.noise();
@@ -106,12 +106,12 @@ public:
       ar.noise();
       ar2.copyFrom(ar);
       ar2.rectify();
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK(abs(ar[n]) == ar2[n]); 
       }
       ar2.clear();
       ar.rectify(ar2);
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK(abs(ar[n]) == ar2[n]); 
       }
       ShortArray::destroy(ar);
@@ -124,11 +124,11 @@ public:
       ar.noise();
       ar.copyTo(ar2);
       ar2.reverse();
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK(ar[n] == ar2[ar2.getSize() - n - 1]); 
       }
       ar.reverse(ar2);
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK(ar[n] == ar2[ar2.getSize() - n - 1]); 
       }
       ShortArray::destroy(ar);
@@ -141,11 +141,11 @@ public:
       ar.noise();
       ar.copyTo(ar2);
       ar2.reciprocal();
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK_CLOSE(ar2[n], (0.5 + 1.f/ar[n]), 2);
       }
       ar.reciprocal(ar2);
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK_CLOSE(ar2[n], (0.5 + 1.f/ar[n]), 2);
       }
       ShortArray::destroy(ar);
@@ -158,11 +158,11 @@ public:
       ar.noise();
       ar2.copyFrom(ar);
       ar2.negate();
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK(ar2[n] == -ar[n]);
       }
       ar.negate(ar2);
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK(ar2[n] == -ar[n]);
       }
       ShortArray::destroy(ar);
@@ -175,7 +175,7 @@ public:
       ar.noise();
       ar.reciprocal(ar2);
       float acc = 0;
-      for(int n=0; n<ar.getSize(); ++n){
+      for(size_t n=0; n<ar.getSize(); ++n){
         acc += ar[n] * ar[n] / (float)ar.getSize(); 
       } 
       int rms=(sqrtf(acc + 0.5));
@@ -188,7 +188,7 @@ public:
       ShortArray ar = ShortArray::create(1000);
       ar.noise();
       int32_t sum = 0;
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         sum += ar[n];
       }
       int32_t mean = sum / ar.getSize();
@@ -203,7 +203,7 @@ public:
       ShortArray ar = ShortArray::create(1000);
       ar.noise();
       int64_t power = 0;
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         power += ar[n] * ar[n];
       }
       CHECK_CLOSE(power, ar.getPower(), 30);
@@ -228,7 +228,7 @@ public:
       M = range;
       ar2.copyFrom(ar);
       ar2.clip(range); 
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         int16_t value = ar[n];
         value = value > M ? M : value;
         value = value < m ? m : value;
@@ -239,7 +239,7 @@ public:
       M = 4214; 
       ar2.copyFrom(ar);
       ar2.clip(m, M); 
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         int16_t value = ar[n];
         value = value > M ? M : value;
         value = value < m ? m : value;
@@ -258,7 +258,7 @@ public:
       ShortArray ar4 = ShortArray::create(1000);
       ar.noise();
       ar2.noise();
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         int32_t value = ar[n] + ar2[n];
         value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
         ar3[n] = (int16_t)value;
@@ -273,7 +273,7 @@ public:
       int32_t addValue = 124;
       ar4.copyFrom(ar);
       ar4.add(addValue);
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         int32_t value = ar[n] + addValue;
         value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
         ar3[n] = (int16_t)value;
@@ -292,7 +292,7 @@ public:
       ShortArray ar4 = ShortArray::create(1023);
       ar.noise();
       ar2.noise();
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         int32_t value = ar[n] - ar2[n];
         value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
         ar3[n] = (int16_t)value;
@@ -307,7 +307,7 @@ public:
       int32_t subValue = 1000;
       ar4.copyFrom(ar);
       ar4.subtract(subValue);
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         int32_t value = ar[n] - subValue;
         value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
         ar3[n] = (int16_t)value;
@@ -326,7 +326,7 @@ public:
       ShortArray ar4 = ShortArray::create(1023);
       ar.noise();
       ar2.noise();
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         int32_t value = ar[n] * ar2[n];
         value = value >> 15;
         value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
@@ -342,7 +342,7 @@ public:
       int32_t mulValue = 1000;
       ar4.copyFrom(ar);
       ar4.multiply(mulValue);
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         int32_t value = ar[n] * mulValue;
         value = value >> 15;
         value = value > SHRT_MAX ? SHRT_MAX : value < SHRT_MIN ? SHRT_MIN : value;
@@ -360,7 +360,7 @@ public:
       ar.noise();
       int16_t value = -1255;
       ar.setAll(value);
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK(ar[n] == value);
       }
       ShortArray::destroy(ar);
@@ -370,11 +370,11 @@ public:
       ShortArray ar = ShortArray::create(1023);
       ShortArray ar2 = ShortArray::create(1023);
       int32_t offset = 249;
-      int32_t length = 167;
+      size_t length = 167;
       ShortArray sub = ar.subArray(offset, length);
       CHECK(sub.getSize() == length);
       CHECK(sub.getData() == ar.getData() + offset);
-      for(int n = 0; n < sub.getSize(); ++n){
+      for(size_t n = 0; n < sub.getSize(); ++n){
         CHECK(sub[n] == ar2[n + offset]);
       }
       ShortArray::destroy(ar);
@@ -394,11 +394,11 @@ public:
       ShortArray ar2 = ShortArray::create(1023);
       ShortArray ar3 = ShortArray::create(1023);
       int shiftValue = 1;
-      for(int k = 0; k < 2; ++k){
+      for(size_t k = 0; k < 2; ++k){
         ar.noise();
         ar2.copyFrom(ar);
         ar2.shift(shiftValue);
-        for(int n = 0; n < ar.getSize(); ++n){
+        for(size_t n = 0; n < ar.getSize(); ++n){
           int16_t value = ar[n];
           if(shiftValue > 0){
             int32_t v = (int32_t)value << shiftValue;
@@ -423,7 +423,7 @@ public:
       TEST("float");
       ShortArray ar = ShortArray::create(1023);
       FloatArray fa = FloatArray::create(1023);
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         float value = rand() / (float)RAND_MAX * 2 - 1;
         ar.setFloatValue(n, value);
         CHECK_CLOSE(ar[n], value * (float)-SHRT_MIN, 2);
@@ -432,12 +432,12 @@ public:
       }
       fa.noise();
       ar.copyFrom(fa);
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK_CLOSE(ar.getFloatValue(n), fa[n], 0.0004f);
       }
       fa.clear();
       ar.copyTo(fa);
-      for(int n = 0; n < ar.getSize(); ++n){
+      for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK_CLOSE(ar.getFloatValue(n), fa[n], 0.0004f);
       }
       ShortArray::destroy(ar);
