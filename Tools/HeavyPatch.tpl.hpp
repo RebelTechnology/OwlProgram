@@ -151,7 +151,7 @@ public:
     case HV_HASH_PGMOUT:
       sendMidi(MidiMessage::pc((uint8_t)hv_msg_getFloat(m, 1), (uint8_t)hv_msg_getFloat(m, 0)));
       break;
-    {% for param, name, typ, namehash, minvalue, maxvalue, defvalue in jdata %}
+    {% for param, name, typ, namehash, minvalue, maxvalue, defvalue in jdata if typ == 'SEND'%}
     // {{name}}
     case HV_HASH_{{typ}}_CHANNEL_{{param}}:
       setParameterValue(PARAMETER_{{param}}, (hv_msg_getFloat(m, 0)-HV_MIN_CHANNEL_{{param}})/
@@ -232,9 +232,9 @@ public:
 
   void processAudio(AudioBuffer &buffer) {
     _msgLock = true;
-    {% for param, name, typ, namehash, minvalue, maxvalue, defvalue in jdata %}
+    {% for param, name, typ, namehash, minvalue, maxvalue, defvalue in jdata if typ == 'RECV' %}
     // {{name}}
-      context->sendFloatToReceiver(HV_HASH_RECV_CHANNEL_{{param}}, getParameterValue(PARAMETER_{{param}})*
+      context->sendFloatToReceiver(HV_HASH_{{typ}}_CHANNEL_{{param}}, getParameterValue(PARAMETER_{{param}})*
 				 (HV_MAX_CHANNEL_{{param}}-HV_MIN_CHANNEL_{{param}})+HV_MIN_CHANNEL_{{param}});
     {% endfor %}
 
