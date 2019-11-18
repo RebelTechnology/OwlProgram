@@ -61,27 +61,28 @@ def main():
                 continue
 
             # If a name has been specified
-            if '@owl' in v['attributes'] and v['attributes']['@owl'] is not None:
-                key = v['attributes']['@owl']
+            if 'owl' in v['attributes'] and v['attributes']['owl'] is not None:
+                key = v['attributes']['owl']
                 recvs[key] = k
-                mins[key] = v['attributes']['@owl_min']
-                maxs[key] = v['attributes']['@owl_max']
-                defs[key] = v['attributes']['@owl_default']
-            else:
-                recvs[k] = k
-                mins[k] = 0
-                maxs[k] = 1
-                defs[k] = 0.5
+                mins[key] = v['attributes']['min']
+                maxs[key] = v['attributes']['max']
+                defs[key] = v['attributes']['default']
+            elif k.startswith('Channel-'):
+                key = k.split('Channel-', 1)[1]
+                recvs[key] = k
+                mins[key] = 0
+                maxs[key] = 1
+                defs[key] = 0.5
 
         for k, v in ir['objects'].iteritems():
             try:
                 if v['type'] == '__send':
-                    if '@owl' in v['args']['attributes'] and v['args']['attributes']['@owl'] is not None:
-                        key = v['args']['attributes']['@owl']
+                    if 'owl' in v['args']['attributes'] and v['args']['attributes']['owl'] is not None:
+                        key = v['args']['attributes']['owl']
                         sends[key] = v['args']['name']
-                        mins[key] = v['args']['attributes']['@owl_min']
-                        maxs[key] = v['args']['attributes']['@owl_max']
-                        defs[key] = v['args']['attributes']['@owl_default']
+                        mins[key] = v['args']['attributes']['min']
+                        maxs[key] = v['args']['attributes']['max']
+                        defs[key] = v['args']['attributes']['default']
                     else:
                         key = v['args']['name']
                         sends[key] = key
