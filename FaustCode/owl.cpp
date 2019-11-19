@@ -51,6 +51,7 @@
 
 #include "faust/dsp/dsp.h"
 #include "faust/gui/UI.h"
+#include "faust/gui/meta.h"
 
 static float fFreq, fGain, fGate;
 static float fBend = 1.0f;
@@ -132,9 +133,84 @@ public:
   }
 };
 
-struct Meta
-{
-    virtual void declare(const char* key, const char* value) = 0;
+
+enum ParserState {
+   ST_NONE,
+   ST_KEY,
+   ST_VALUE
+};
+
+
+// This is a parser for Faust metadata. Currently it only reacts on midi declaration, but
+// this can be extended in processItem class.
+// To enable MIDI in current patch, add this to source Faust file:
+// declare options "[midi:on]";
+
+class MetaData : public Meta {
+public:
+  bool midiOn = false;
+
+  void declare (const char* key, const char* value) {
+    if (key == "options") {
+      // Parse options.
+      // Faust provides a metadata parser, but they use stdlib stuff that won't work on OWL
+      parseOptions(value);
+
+    }
+  }
+
+private:
+  void processItem(const char* item_key, const char* item_value) {
+    if (strcasecmp(item_key, "midi") == 0 && strcasecmp(item_value, "on") == 0) {
+      midiOn = true;
+      //debugMessage("MIDI ON");
+    }
+  }
+
+  void parseOptions(const char* value) {
+    const char* c = value;
+    const uint8_t max_len = 32;
+    // We don't need to read long item values, so set a limit that would be used for truncating them.
+    char item_key[max_len] = "";
+    char item_value[max_len] = "";
+    uint8_t key_pos;
+    uint8_t value_pos;
+    ParserState state = ST_NONE;
+    while (*c) {
+      if (state == ST_NONE) {
+	if (*c == '[') {
+	  // Start reading key
+	  state = ST_KEY;
+	  key_pos = 0;
+	  value_pos = 0;
+	}
+      }
+      else if (state == ST_KEY) {
+	if (*c == ':') {
+	  // Found end of key
+	  item_key[key_pos + 1] = '\n';
+	  // Start reading value
+	  state = ST_VALUE;
+	}
+	else if (key_pos < max_len - 1)
+	  // Add next character to key
+	    item_key[key_pos++] = *c;
+      }
+      else if (state == ST_VALUE) {
+	if  (*c == ']') {
+	  // Found end of value
+	  item_value[value_pos + 1] = '\n';
+	  processItem(item_key, item_value);
+	  // Reset state
+	  state = ST_NONE;
+	}
+	else if (value_pos < max_len -  1)
+	  // Add next character to value
+	  item_value[value_pos++] = *c;
+      };
+      *c++;
+    }
+  }
 };
 
 /**************************************************************************************
@@ -230,11 +306,11 @@ class OwlUI : public UI
   // check if the widget is an Owl parameter and, if so, add the corresponding OwlParameter
   void addOwlParameter(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT lo, FAUSTFLOAT hi) {
     if(fParameterIndex < MAXOWLPARAMETERS){
-      if(strcasecmp(label,"freq") == 0){
+      if(meta.midiOn && strcasecmp(label,"freq") == 0){
 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fFreq, zone, label, init, lo, hi);
-      }else if(strcasecmp(label,"gain") == 0){
+      }else if(meta.midiOn && strcasecmp(label,"gain") == 0){
 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fGain, zone, label, init, lo, hi);
-      }else if(strcasecmp(label,"bend") == 0){
+      }else if(meta.midiOn && strcasecmp(label,"bend") == 0){
 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fBend, zone, label, init, lo, hi);
       }else if(fParameter != NO_PARAMETER){
 	fParameterTable[fParameterIndex++] = new OwlParameter(fPatch, fParameter, zone, label, init, lo, hi);
@@ -245,7 +321,7 @@ class OwlUI : public UI
 
   void addOwlButton(const char* label, FAUSTFLOAT* zone) {
     if(fParameterIndex < MAXOWLPARAMETERS){
-      if(strcasecmp(label,"gate") == 0){
+      if(meta.midiOn && strcasecmp(label,"gate") == 0){
 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fGate, zone, label, 0.0f, 0.0f, 1.0f);
       }else if(fButton != NO_BUTTON){
 	fParameterTable[fParameterIndex++] = new OwlButton(fPatch, fButton, zone, label);
@@ -261,7 +337,7 @@ class OwlUI : public UI
   }
 
 public:
-
+  MetaData meta;
   OwlUI(Patch* pp) : fPatch(pp), fParameter(NO_PARAMETER), fParameterIndex(0), fButton(NO_BUTTON) {}
 	
   virtual ~OwlUI() {
@@ -385,6 +461,7 @@ public:
 
     fBend = 1.0f;
     fDSP = new mydsp();
+    fDSP->metadata(&fUI.meta);
     mydsp::fManager = &mem; // set custom memory manager
     mydsp::classInit(int(getSampleRate())); // initialise static tables
     fDSP->instanceInit(int(getSampleRate())); // initialise DSP instance
@@ -399,7 +476,8 @@ public:
   }
 
   void processMidi(MidiMessage msg){
-    allocator.processMidi(msg);
+    if (fUI.meta.midiOn)
+      allocator.processMidi(msg);
   }
 
   void processAudio(AudioBuffer &buffer)
