@@ -144,18 +144,23 @@ enum ParserState {
 // This is a parser for Faust metadata. Currently it only reacts on midi declaration, but
 // this can be extended in processItem class.
 // To enable MIDI in current patch, add this to source Faust file:
-// declare options "[midi:on]";
+//     declare options "[midi:on]";
+// You can also add descrpiption to be displayed with debugMessage function like this:
+//     declare message "Hello World";
 
 class MetaData : public Meta {
 public:
   bool midiOn = false;
+  const char* message = NULL;
 
   void declare (const char* key, const char* value) {
     if (strcasecmp(key, "options") == 0) {
       // Parse options.
       // Faust provides a metadata parser, but they use stdlib stuff that won't work on OWL
       parseOptions(value);
-
+    }
+    else if (strcasecmp(key, "message") == 0) {
+      message = value;
     }
   }
 
@@ -490,6 +495,8 @@ public:
     fBend = 1.0f;
     fDSP = new mydsp();
     fDSP->metadata(&fUI.meta);
+    if (fUI.meta.message != NULL)
+      debugMessage(fUI.meta.message);
     mydsp::fManager = &mem; // set custom memory manager
     mydsp::classInit(int(getSampleRate())); // initialise static tables
     fDSP->instanceInit(int(getSampleRate())); // initialise DSP instance
