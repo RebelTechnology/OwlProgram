@@ -147,25 +147,16 @@ void run(ProgramVector* pv){
       samples->comb24(pv->audio_output);
     }
     break;
-  // case AUDIO_FORMAT_24B32_2X:
-  //   for(;;){
-  //     pv->programReady();
-  //     samples->split32(pv->audio_input, pv->audio_blocksize);
-  //     processor.setParameterValues(pv->parameters);
-  //     processor.patch->processAudio(*samples);
-  //     samples->comb32(pv->audio_output);
-  //   }
-  //   break;
   case AUDIO_FORMAT_24B32_2X:
   case AUDIO_FORMAT_24B32_4X:
   case AUDIO_FORMAT_24B32_7X:
   case AUDIO_FORMAT_24B32_8X:
     for(;;){
       pv->programReady();
-      samples->split32xN(pv->audio_input, pv->audio_blocksize);
+      samples->split32(pv->audio_input, pv->audio_blocksize);
       processor.setParameterValues(pv->parameters);
       processor.patch->processAudio(*samples);
-      samples->comb32xN(pv->audio_output);
+      samples->comb32(pv->audio_output);
     }
     break;
   default:
