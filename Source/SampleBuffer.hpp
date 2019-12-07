@@ -35,29 +35,8 @@ public:
       FloatArray::destroy(buffers[i]);
     delete[] buffers;
   }
-  void split32(int32_t* input, uint16_t blocksize){
-    const float mul = 1.0f/MULTIPLIER_31B;
-    size = blocksize;
-    for(size_t i=0; i<size; ++i){
-      buffers[0][i] = (int32_t)((*input++)<<8) * mul;
-      buffers[1][i] = (int32_t)((*input++)<<8) * mul;
-    }
-  }
-  void comb32(int32_t* output){
-    int32_t* dest = output;
-    for(size_t i=0; i<size; ++i){
-#ifdef AUDIO_SATURATE_SAMPLES
-      // Saturate to 24 bits to avoid nasty clipping on cs4271
-      *dest++ = __SSAT((q31_t)(buffers[0][i] * MULTIPLIER_23B), 24);
-      *dest++ = __SSAT((q31_t)(buffers[1][i] * MULTIPLIER_23B), 24);
-#else
-      *dest++ = ((int32_t)(buffers[0][i] * MULTIPLIER_23B));
-      *dest++ = ((int32_t)(buffers[1][i] * MULTIPLIER_23B));
-#endif
-    }
-  }
 
-  void split32xN(int32_t* input, uint16_t blocksize){
+  void split32(int32_t* input, uint16_t blocksize){
     const float mul = 1.0f/MULTIPLIER_31B;
     size = blocksize;
     for(size_t i=0; i<size; ++i){
@@ -65,7 +44,7 @@ public:
 	buffers[j][i] = (int32_t)((*input++)) * mul;
     }
   }
-  void comb32xN(int32_t* output){
+  void comb32(int32_t* output){
     int32_t* dest = output;
     for(size_t i=0; i<size; ++i){
       for(size_t j=0; j<channels; ++j){
@@ -75,33 +54,6 @@ public:
 	*dest++ = ((int32_t)(buffers[j][i] * MULTIPLIER_31B));
 #endif
       }
-    }
-  }
-
-  void split32x4(int32_t* input, uint16_t blocksize){
-    const float mul = 1.0f/MULTIPLIER_31B;
-    size = blocksize;
-    for(size_t i=0; i<size; ++i){
-      buffers[0][i] = (int32_t)((*input++)) * mul;
-      buffers[1][i] = (int32_t)((*input++)) * mul;
-      buffers[2][i] = (int32_t)((*input++)) * mul;
-      buffers[3][i] = (int32_t)((*input++)) * mul;
-    }
-  }
-  void comb32x4(int32_t* output){
-    int32_t* dest = output;
-    for(size_t i=0; i<size; ++i){
-#ifdef AUDIO_SATURATE_SAMPLES
-      *dest++ = __SSAT((q31_t)(buffers[0][i] * MULTIPLIER_31B), 24);
-      *dest++ = __SSAT((q31_t)(buffers[1][i] * MULTIPLIER_31B), 24);
-      *dest++ = __SSAT((q31_t)(buffers[2][i] * MULTIPLIER_31B), 24);
-      *dest++ = __SSAT((q31_t)(buffers[3][i] * MULTIPLIER_31B), 24);
-#else
-      *dest++ = ((int32_t)(buffers[0][i] * MULTIPLIER_31B));
-      *dest++ = ((int32_t)(buffers[1][i] * MULTIPLIER_31B));
-      *dest++ = ((int32_t)(buffers[2][i] * MULTIPLIER_31B));
-      *dest++ = ((int32_t)(buffers[3][i] * MULTIPLIER_31B));
-#endif
     }
   }
   
