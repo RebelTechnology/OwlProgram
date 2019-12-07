@@ -89,12 +89,16 @@ void setup(ProgramVector* pv){
 #endif /* USE_MIDI_CALLBACK */
   switch(pv->audio_format){
   case AUDIO_FORMAT_24B16_2X:
-  case AUDIO_FORMAT_24B24_2X:
-  case AUDIO_FORMAT_24B32_2X:
     samples = new SampleBuffer(2, pv->audio_blocksize);
     break;
   case AUDIO_FORMAT_24B32_4X:
     samples = new SampleBuffer(4, pv->audio_blocksize);
+    break;
+  case AUDIO_FORMAT_24B32_7X:
+    samples = new SampleBuffer(7, pv->audio_blocksize);
+    break;
+  case AUDIO_FORMAT_24B32_8X:
+    samples = new SampleBuffer(8, pv->audio_blocksize);
     break;
   default:
     error(CONFIGURATION_ERROR_STATUS, "Unsupported audio format");
@@ -129,22 +133,25 @@ void run(ProgramVector* pv){
       samples->comb24(pv->audio_output);
     }
     break;
+  // case AUDIO_FORMAT_24B32_2X:
+  //   for(;;){
+  //     pv->programReady();
+  //     samples->split32(pv->audio_input, pv->audio_blocksize);
+  //     processor.setParameterValues(pv->parameters);
+  //     processor.patch->processAudio(*samples);
+  //     samples->comb32(pv->audio_output);
+  //   }
+  //   break;
   case AUDIO_FORMAT_24B32_2X:
-    for(;;){
-      pv->programReady();
-      samples->split32(pv->audio_input, pv->audio_blocksize);
-      processor.setParameterValues(pv->parameters);
-      processor.patch->processAudio(*samples);
-      samples->comb32(pv->audio_output);
-    }
-    break;
   case AUDIO_FORMAT_24B32_4X:
+  case AUDIO_FORMAT_24B32_7X:
+  case AUDIO_FORMAT_24B32_8X:
     for(;;){
       pv->programReady();
-      samples->split32x4(pv->audio_input, pv->audio_blocksize);
+      samples->split32xN(pv->audio_input, pv->audio_blocksize);
       processor.setParameterValues(pv->parameters);
       processor.patch->processAudio(*samples);
-      samples->comb32x4(pv->audio_output);
+      samples->comb32xN(pv->audio_output);
     }
     break;
   default:
