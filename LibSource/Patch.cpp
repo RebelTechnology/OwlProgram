@@ -29,8 +29,9 @@ int Patch::getBlockSize(){
 }
 
 int Patch::getNumberOfChannels(){
-  if(getProgramVector()->audio_format == AUDIO_FORMAT_24B32_4X)
-    return 4;
+  uint8_t format = getProgramVector()->audio_format;
+  if((format & 0xf0) == AUDIO_FORMAT_24B32)
+    return format & 0x0f;
   return 2;
 }
 

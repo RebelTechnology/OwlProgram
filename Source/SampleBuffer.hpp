@@ -21,7 +21,7 @@
 class SampleBuffer : public AudioBuffer {
 protected:
   FloatArray* buffers;
-  uint16_t size;
+  size_t size;
   size_t channels;
 public:
   SampleBuffer(size_t channels, size_t blocksize)
@@ -38,14 +38,14 @@ public:
   void split32(int32_t* input, uint16_t blocksize){
     const float mul = 1.0f/MULTIPLIER_31B;
     size = blocksize;
-    for(int i=0; i<size; ++i){
+    for(size_t i=0; i<size; ++i){
       buffers[0][i] = (int32_t)((*input++)<<8) * mul;
       buffers[1][i] = (int32_t)((*input++)<<8) * mul;
     }
   }
   void comb32(int32_t* output){
     int32_t* dest = output;
-    for(int i=0; i<size; ++i){
+    for(size_t i=0; i<size; ++i){
 #ifdef AUDIO_SATURATE_SAMPLES
       // Saturate to 24 bits to avoid nasty clipping on cs4271
       *dest++ = __SSAT((q31_t)(buffers[0][i] * MULTIPLIER_23B), 24);
@@ -56,10 +56,32 @@ public:
 #endif
     }
   }
+
+  void split32xN(int32_t* input, uint16_t blocksize){
+    const float mul = 1.0f/MULTIPLIER_31B;
+    size = blocksize;
+    for(size_t i=0; i<size; ++i){
+      for(size_t j=0; j<channels; ++j)
+	buffers[j][i] = (int32_t)((*input++)) * mul;
+    }
+  }
+  void comb32xN(int32_t* output){
+    int32_t* dest = output;
+    for(size_t i=0; i<size; ++i){
+      for(size_t j=0; j<channels; ++j){
+#ifdef AUDIO_SATURATE_SAMPLES
+	*dest++ = __SSAT((q31_t)(buffers[j][i] * MULTIPLIER_31B), 24);
+#else
+	*dest++ = ((int32_t)(buffers[j][i] * MULTIPLIER_31B));
+#endif
+      }
+    }
+  }
+
   void split32x4(int32_t* input, uint16_t blocksize){
     const float mul = 1.0f/MULTIPLIER_31B;
     size = blocksize;
-    for(int i=0; i<size; ++i){
+    for(size_t i=0; i<size; ++i){
       buffers[0][i] = (int32_t)((*input++)) * mul;
       buffers[1][i] = (int32_t)((*input++)) * mul;
       buffers[2][i] = (int32_t)((*input++)) * mul;
@@ -68,7 +90,7 @@ public:
   }
   void comb32x4(int32_t* output){
     int32_t* dest = output;
-    for(int i=0; i<size; ++i){
+    for(size_t i=0; i<size; ++i){
 #ifdef AUDIO_SATURATE_SAMPLES
       *dest++ = __SSAT((q31_t)(buffers[0][i] * MULTIPLIER_31B), 24);
       *dest++ = __SSAT((q31_t)(buffers[1][i] * MULTIPLIER_31B), 24);
@@ -88,7 +110,7 @@ public:
     size = blocksize;
     uint8_t* input = (uint8_t*)data;
     int32_t qint;
-    for(int i=0; i<size; ++i){
+    for(size_t i=0; i<size; ++i){
       qint =( *input++)<<16;
       qint |= (*input++)<<24;
       qint |= (*input++);
@@ -105,7 +127,7 @@ public:
   void comb24(int32_t* output){
     uint8_t* dest = (uint8_t*)output;
     int32_t qint;
-    for(int i=0; i<size; ++i){
+    for(size_t i=0; i<size; ++i){
 #ifdef AUDIO_SATURATE_SAMPLES
       qint = __SSAT((q31_t)(buffers[0][i] * MULTIPLIER_23B), 24);
 #else
@@ -132,7 +154,7 @@ public:
     uint16_t* input = (uint16_t*)data;
     size = blocksize;
     int32_t qint;
-    for(int i=0; i<size; ++i){
+    for(size_t i=0; i<size; ++i){
       qint = (*input++)<<16;
       qint |= *input++;
       buffers[0][i] = qint * mul;
