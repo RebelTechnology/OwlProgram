@@ -104,8 +104,6 @@ void* pvPortRealloc(void *pv, size_t xWantedSize);
 #define sinh(x) sinhf(x)
 #define cosh(x) coshf(x)
 
-#undef __FAST_MATH__
-#define exp10f(x) fast_exp10f(x)
 #ifdef __FAST_MATH__ /* set by gcc option -ffast-math */
 
 // fast lookup-based exponentials
