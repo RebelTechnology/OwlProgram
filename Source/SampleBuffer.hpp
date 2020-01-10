@@ -9,7 +9,7 @@
 #include "device.h"
 #ifdef ARM_CORTEX
 #include "arm_math.h"
-// #define AUDIO_SATURATE_SAMPLES
+#define AUDIO_SATURATE_SAMPLES
 #else
 #undef AUDIO_SATURATE_SAMPLES
 #endif //ARM_CORTEX
@@ -37,7 +37,7 @@ public:
   }
 
   void split32(int32_t* input, uint16_t blocksize){
-    const float mul = 1.0f/MULTIPLIER_31B;
+    const float mul = 1.0f/MULTIPLIER_23B;
     size = blocksize;
     for(size_t i=0; i<size; ++i){
       for(size_t j=0; j<channels; ++j)
@@ -49,9 +49,9 @@ public:
     for(size_t i=0; i<size; ++i){
       for(size_t j=0; j<channels; ++j){
 #ifdef AUDIO_SATURATE_SAMPLES
-	*dest++ = __SSAT((q31_t)(buffers[j][i] * MULTIPLIER_31B), 24);
+	*dest++ = __SSAT((q31_t)(buffers[j][i] * MULTIPLIER_23B), 24);
 #else
-	*dest++ = ((int32_t)(buffers[j][i] * MULTIPLIER_31B));
+	*dest++ = ((int32_t)(buffers[j][i] * MULTIPLIER_23B));
 #endif
       }
     }
