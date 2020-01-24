@@ -14,9 +14,9 @@
 #undef AUDIO_SATURATE_SAMPLES
 #endif //ARM_CORTEX
 
-#define MULTIPLIER_31B 2147483648
-#define MULTIPLIER_30B 1073741824
-#define MULTIPLIER_23B 8388608
+#define MULTIPLIER_31B 0x80000000
+#define MULTIPLIER_30B 0x40000000
+#define MULTIPLIER_23B 0x00800000
 
 class SampleBuffer : public AudioBuffer {
 protected:
@@ -41,7 +41,7 @@ public:
     size = blocksize;
     for(size_t i=0; i<size; ++i){
       for(size_t j=0; j<channels; ++j)
-	buffers[j][i] = (int32_t)((*input++)) * mul;
+	buffers[j][i] = *input++ * mul;
     }
   }
   void comb32(int32_t* output){
