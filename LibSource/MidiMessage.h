@@ -77,7 +77,10 @@ class MidiMessage {
     return MidiMessage(USB_COMMAND_PITCH_BEND_CHANGE, PITCH_BEND_CHANGE|(ch&0xf), bend&0x7f, (bend>>7)&0x7f);
   }
   static MidiMessage note(uint8_t ch, uint8_t note, uint8_t velocity){
-    return MidiMessage(USB_COMMAND_PROGRAM_CHANGE, velocity == 0 ? NOTE_OFF|(ch&0xf) : NOTE_ON|(ch&0xf), note&0x7f, velocity&0x7f);
+    if(velocity == 0)
+      return MidiMessage(USB_COMMAND_NOTE_OFF, NOTE_OFF|(ch&0xf), note&0x7f, velocity&0x7f);
+    else
+      return MidiMessage(USB_COMMAND_NOTE_ON, NOTE_ON|(ch&0xf), note&0x7f, velocity&0x7f);
   }
   static MidiMessage cp(uint8_t ch, uint8_t value){
     return MidiMessage(USB_COMMAND_CHANNEL_PRESSURE, CHANNEL_PRESSURE|(ch&0xf), value&0x7f, 0);
