@@ -9,7 +9,7 @@ class MidiMessage {
     uint32_t packed;
     uint8_t data[4];
   };
-  MidiMessage(){}
+  MidiMessage():packed(0){}
   MidiMessage(uint32_t msg): packed(msg){}
   MidiMessage(uint8_t port, uint8_t d0, uint8_t d1, uint8_t d2){
     data[0] = port;
