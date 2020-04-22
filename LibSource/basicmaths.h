@@ -127,10 +127,6 @@ void* pvPortRealloc(void *pv, size_t xWantedSize);
 #define log10(x) fast_log10f(x)
 #define log10f(x) fast_log10f(x)
 
-// fast approximate math functions
-#define atan2(x, y) fast_atan2f(x, y)
-#define atan2f(x, y) fast_atan2f(x, y)
-
 #endif
 
 #undef RAND_MAX
