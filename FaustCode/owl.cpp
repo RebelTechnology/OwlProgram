@@ -213,7 +213,7 @@ private:
 	  // Add next character to value
 	  item_value[value_pos++] = *c;
       };
-      *c++;
+      c++;
     }
   }
 };
