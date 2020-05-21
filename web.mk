@@ -15,12 +15,12 @@ EMCCFLAGS += -Wno-unknown-warning-option
 EMCCFLAGS += -Wno-c++11-extensions
 EMCCFLAGS += --memory-init-file 0 # don't create separate memory init file .mem
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus','_WEB_getButtons','_WEB_setButtons', '_WEB_processMidi']"
-EMCCFLAGS += -s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']"
+# EMCCFLAGS += -s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']"
 CPP_SRC  = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/message.cpp
 CPP_SRC += WebSource/web.cpp
 C_SRC   += $(LIBSOURCE)/basicmaths.c
 CPP_SRC += $(LIBSOURCE)/Patch.cpp $(LIBSOURCE)/FloatArray.cpp $(LIBSOURCE)/ComplexFloatArray.cpp $(LIBSOURCE)/FastFourierTransform.cpp $(LIBSOURCE)/Envelope.cpp $(LIBSOURCE)/VoltsPerOctave.cpp $(LIBSOURCE)/Window.cpp $(LIBSOURCE)/WavetableOscillator.cpp $(LIBSOURCE)/PolyBlepOscillator.cpp $(LIBSOURCE)/SmoothValue.cpp
-# C_SRC  += $(LIBSOURCE)/fastpow.c $(LIBSOURCE)/fastlog.c $(LIBSOURCE)/system_tables.cpp
+C_SRC   += $(LIBSOURCE)/fastpow.c $(LIBSOURCE)/fastlog.c
 C_SRC   += Libraries/KissFFT/kiss_fft.c
 C_SRC   += $(wildcard $(GENSOURCE)/*.c)
 CPP_SRC += $(wildcard $(GENSOURCE)/*.cpp)
@@ -28,7 +28,7 @@ C_SRC   += $(wildcard $(PATCHSOURCE)/*.c)
 CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
 WEBDIR   = $(BUILD)/web
 
-EMCCFLAGS += -s WASM=0 # disables wasm output
+# EMCCFLAGS += -s WASM=0 # disables wasm output
 
 CPPFLAGS =
 CFLAGS   = $(EMCCFLAGS) -std=gnu11

@@ -91,20 +91,22 @@ static uint32_t log_precision;
 static const uint32_t* pow_table;
 static uint32_t pow_precision;
 
+#define M_LOG210 3.32192809488736
+
 float fast_powf(float x, float y){
-  return powFastLookup(y, logf(x)*1.44269504088896f, pow_table, pow_precision);
+  return powFastLookup(y, logf(x)*M_LOG2E, pow_table, pow_precision);
 }
     
 float fast_expf(float x){
-  return powFastLookup(x, 1.44269504088896f, pow_table, pow_precision);
+  return powFastLookup(x, M_LOG2E, pow_table, pow_precision);
 }
 
 float fast_exp2f(float x){
-  return powFastLookup(x, 1.0f, pow_table, pow_precision);
+  return powFastLookup(x, 1, pow_table, pow_precision);
 }
 
 float fast_exp10f(float x){
-  return powFastLookup(x, 3.32192809488736f, pow_table, pow_precision);
+  return powFastLookup(x, M_LOG210, pow_table, pow_precision);
 }
 
 float fast_logf(float x){
@@ -113,12 +115,12 @@ float fast_logf(float x){
 
 float fast_log10f(float x){
   /* log10 (x) equals log (x) / log (10). */
-  return icsi_log(x, log_table, log_precision) / M_LOG10E;
+  return icsi_log(x, log_table, log_precision) / M_LN10;
 }
 
 float fast_log2f(float x){
   /* log2 (x) equals log (x) / log (2). */
-  return icsi_log(x, log_table, log_precision) / M_LOG2E;
+  return icsi_log(x, log_table, log_precision) / M_LN2;
 }
 
 void fast_pow_set_table(const uint32_t* table, int size){
