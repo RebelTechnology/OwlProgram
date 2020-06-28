@@ -48,15 +48,17 @@ AudioBuffer* PatchProcessor::createMemoryBuffer(int channels, int size){
 }
 
 void PatchProcessor::setParameterValues(int16_t *params){
+#ifdef USE_LEGACY_FIRMWARE
   if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE){
     for(int i=0; i<4 && i<parameterCount; ++i)
       parameters[i]->update(4095 - params[i]);
     for(int i=4; i<parameterCount; ++i)
       parameters[i]->update(params[i]);
-  }else{
+  }
+  else
+#endif
     for(int i=0; i<parameterCount; ++i)
       parameters[i]->update(params[i]);
-  }
 }
 
 template<typename T, typename V>

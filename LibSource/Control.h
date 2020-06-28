@@ -13,17 +13,20 @@ public:
     set(value);
   }
   void set(const float value){
+#ifdef USE_LEGACY_FIRMWARE
     if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && PID < 4)
       doSetPatchParameter(PID, 4095 - (int16_t)(value*4096.0f));
     else
+#endif
       doSetPatchParameter(PID, (int16_t)(value*4096));
   }
   float get(){
-    if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && PID < 4){
+#ifdef USE_LEGACY_FIRMWARE
+    if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && PID < 4)
       return (4095 - getProgramVector()->parameters[PID])/4096.0f;
-    }else{
+    else
+#endif
       return getProgramVector()->parameters[PID]/4096.0f;
-    }
   }
   Control<PID>& operator=(const float value){
     set(value);
