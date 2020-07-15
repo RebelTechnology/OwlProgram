@@ -73,7 +73,7 @@ Make sure to do a `make clean` before compiling a new patch, or add `clean` to y
 * PATCHOUT: number of output channels, default 2
 * SLOT: user program slot to store patch in, default 0
 * TARGET: changes the output prefix, default 'patch'
-* PLATFORM: Alchemist, Wizard, Prism, Magus, Player, default 'OWL'
+* PLATFORM: Alchemist, Wizard, Prism, Magus, Player, OWL, default 'OwlLegacy'
 
 If you follow the convention of SimpleDelay then you don't have to specify `PATCHCLASS` and `PATCHFILE`, they will be deduced from `PATCHNAME`.
 t
