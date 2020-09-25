@@ -1,4 +1,4 @@
-{% for param, name, typ, namehash, minvalue, maxvalue, defvalue in jdata %}
+{% for param, name, typ, namehash, minvalue, maxvalue, defvalue, button in jdata %}
 // {{param}} {{name}} {{typ}} {{namehash}} {{minvalue}} {{maxvalue}} {{defvalue}} {{(defvalue-minvalue)/(maxvalue-minvalue)}}
 #define HV_NAME_CHANNEL_{{param}} "{{name}}"
 #define HV_HASH_{{typ}}_CHANNEL_{{param}} {{namehash}}

@@ -7,17 +7,15 @@
 #include "Heavy_owl.hpp"
 #include "Heavy_owl_constants.h"
 
-#define HV_HASH_CHANNEL_PUSH 0x3cf4c9df
-#define HV_HASH_BUTTON_A 0xfbc73385
-#define HV_HASH_BUTTON_B 0x8c39a047
-#define HV_HASH_BUTTON_C 0x69b62624
-#define HV_HASH_BUTTON_D 0x55d2d3a6
-#define HV_HASH_BUTTON_E 0x1444edb
-#define HV_HASH_BUTTON_F 0xe8f2587f
-
-#define HV_HASH_TR_F 0xc3bc4805
-#define HV_HASH_CV_F 0xf8424b3c
-#define HV_HASH_CV_G 0xf1c46a96
+#define BUTTON_PUSH PUSHBUTTON
+#define BUTTON_B1 BUTTON_A
+#define BUTTON_B2 BUTTON_B
+#define BUTTON_B3 BUTTON_C
+#define BUTTON_B4 BUTTON_D
+#define BUTTON_B5 BUTTON_E
+#define BUTTON_B6 BUTTON_F
+#define BUTTON_B7 BUTTON_G
+#define BUTTON_B8 BUTTON_H
 
 #define HV_HASH_NOTEIN 0x67e37ca3
 #define HV_HASH_CTLIN 0x41be0f9c
@@ -74,7 +72,7 @@ public:
     context->setUserData(this);
     context->setPrintHook(&owlPrintHook);
     context->setSendHook(&owlSendHook);
-    {% for param, name, typ, namehash, minvalue, maxvalue, defvalue in jdata %}
+    {% for param, name, typ, namehash, minvalue, maxvalue, defvalue, button in jdata if button == False %}
     // {{name}}
     registerParameter(PARAMETER_{{param}}, HV_NAME_CHANNEL_{{param}});
     setParameterValue(PARAMETER_{{param}}, HV_DEFAULT_CHANNEL_{{param}});
@@ -94,31 +92,6 @@ public:
 
   void sendCallback(uint32_t sendHash, const HvMessage *m){
     switch(sendHash){
-    case HV_HASH_BUTTON_A:
-    case HV_HASH_CHANNEL_PUSH:
-      setButton(PUSHBUTTON, getButtonValue(PUSHBUTTON, m));
-      break;
-    // case HV_HASH_BUTTON_B:
-    //   setButton(BUTTON_B, getButtonValue(BUTTON_B, m));
-    //   break;
-    // case HV_HASH_BUTTON_C:
-    //   setButton(BUTTON_C, getButtonValue(BUTTON_C, m));
-    //   break;
-    // case HV_HASH_BUTTON_D:
-    //   setButton(BUTTON_D, getButtonValue(BUTTON_D, m));
-    //   break;
-    // case HV_HASH_BUTTON_F:
-    case HV_HASH_TR_F:  // Wizard trigger F out
-      setButton(BUTTON_F, getButtonValue(BUTTON_F, m));
-      break;
-    // case HV_HASH_CHANNEL_F:
-    case HV_HASH_CV_F: // Wizard CV F out
-      setParameterValue(PARAMETER_F, hv_msg_getFloat(m, 0));
-      break;
-    // case HV_HASH_CHANNEL_G:
-    case HV_HASH_CV_G: // Wizard CV G out
-      setParameterValue(PARAMETER_G, hv_msg_getFloat(m, 0));
-      break;
     case HV_HASH_NOTEOUT:
       {
       uint8_t note = hv_msg_getFloat(m, 0);
@@ -151,13 +124,20 @@ public:
     case HV_HASH_PGMOUT:
       sendMidi(MidiMessage::pc((uint8_t)hv_msg_getFloat(m, 1), (uint8_t)hv_msg_getFloat(m, 0)));
       break;
-    {% for param, name, typ, namehash, minvalue, maxvalue, defvalue in jdata if typ == 'SEND'%}
-    // {{name}}
+      {% for param, name, typ, namehash, minvalue, maxvalue, defvalue, button in jdata if typ == 'SEND'%}
+      {% if button == True %}
+    // Button {{name}}
+    case HV_HASH_{{typ}}_CHANNEL_{{param}}:
+      setButton(BUTTON_{{param}}, (hv_msg_getFloat(m, 0)-HV_MIN_CHANNEL_{{param}})/
+		(HV_MAX_CHANNEL_{{param}}-HV_MIN_CHANNEL_{{param}}) > 0.5);
+      {% else %}
+    // Parameter {{name}}
     case HV_HASH_{{typ}}_CHANNEL_{{param}}:
       setParameterValue(PARAMETER_{{param}}, (hv_msg_getFloat(m, 0)-HV_MIN_CHANNEL_{{param}})/
 			(HV_MAX_CHANNEL_{{param}}-HV_MIN_CHANNEL_{{param}}));
+      {% endif %}
       break;
-    {% endfor %}
+      {% endfor %}
     default:
       break;
     }
@@ -212,27 +192,19 @@ public:
     if(_msgLock)
       return;
     switch(bid){
-    case PUSHBUTTON:
-      context->sendFloatToReceiver(HV_HASH_CHANNEL_PUSH, value ? 1.0 : 0.0);
+    {% for param, name, typ, namehash, minvalue, maxvalue, defvalue, button in jdata if typ == 'RECV' and button == True %}
+    // {{name}}
+    case BUTTON_{{param}}:
+      context->sendFloatToReceiver(HV_HASH_{{typ}}_CHANNEL_{{param}}, isButtonPressed(BUTTON_{{param}})*
+				 (HV_MAX_CHANNEL_{{param}}-HV_MIN_CHANNEL_{{param}})+HV_MIN_CHANNEL_{{param}});
       break;
-    case BUTTON_A:
-      context->sendFloatToReceiver(HV_HASH_BUTTON_A, value ? 1.0 : 0.0);
-      break;
-    case BUTTON_B:
-      context->sendFloatToReceiver(HV_HASH_BUTTON_B, value ? 1.0 : 0.0);
-      break;
-    case BUTTON_C:
-      context->sendFloatToReceiver(HV_HASH_BUTTON_C, value ? 1.0 : 0.0);
-      break;
-    case BUTTON_D:
-      context->sendFloatToReceiver(HV_HASH_BUTTON_D, value ? 1.0 : 0.0);
-      break;
+    {% endfor %}
     }
   }
 
   void processAudio(AudioBuffer &buffer) {
     _msgLock = true;
-    {% for param, name, typ, namehash, minvalue, maxvalue, defvalue in jdata if typ == 'RECV' %}
+    {% for param, name, typ, namehash, minvalue, maxvalue, defvalue, button in jdata if typ == 'RECV' and button == False %}
     // {{name}}
       context->sendFloatToReceiver(HV_HASH_{{typ}}_CHANNEL_{{param}}, getParameterValue(PARAMETER_{{param}})*
 				 (HV_MAX_CHANNEL_{{param}}-HV_MIN_CHANNEL_{{param}})+HV_MIN_CHANNEL_{{param}});
