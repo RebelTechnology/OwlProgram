@@ -16,7 +16,7 @@ heavy_hash = HeavyLangObject.HeavyLangObject.get_hash
 
 import jinja2
 
-OWL_BUTTONS = ['PUSH', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']
+OWL_BUTTONS = ['Push', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']
                
 def get_template(path):
     templateLoader = jinja2.FileSystemLoader(searchpath=dir_path)
@@ -84,10 +84,6 @@ def main():
                 pass
 
     # TODO, check that there is not channel defined both as input and output
-    print "list "+str(len(jdata[0]))
-    print "set "+str(len(set(jdata[0])))
-    for v in jdata:
-        print "item "+v[0]+" : "+v[1]+" : "+str(v[7])
                                                               
     # Write to files
     with open(args.outfilename, mode="w") as f:

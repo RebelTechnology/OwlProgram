@@ -7,7 +7,7 @@
 #include "Heavy_owl.hpp"
 #include "Heavy_owl_constants.h"
 
-#define BUTTON_PUSH PUSHBUTTON
+#define BUTTON_Push PUSHBUTTON
 #define BUTTON_B1 BUTTON_A
 #define BUTTON_B2 BUTTON_B
 #define BUTTON_B3 BUTTON_C
@@ -134,7 +134,7 @@ public:
     // Parameter {{name}}
     case HV_HASH_{{typ}}_CHANNEL_{{param}}:
       setParameterValue(PARAMETER_{{param}}, (hv_msg_getFloat(m, 0)-HV_MIN_CHANNEL_{{param}})/
-			(HV_MAX_CHANNEL_{{param}}-HV_MIN_CHANNEL_{{param}}));
+  		        (HV_MAX_CHANNEL_{{param}}-HV_MIN_CHANNEL_{{param}}));
       {% endif %}
       break;
       {% endfor %}
