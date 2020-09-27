@@ -185,6 +185,8 @@ public:
 	 (float)msg.getProgramChange(),
 	 (float)msg.getChannel());
       break;
+    default:
+      break;
     }
   }
 
@@ -199,6 +201,8 @@ public:
 				 (HV_MAX_CHANNEL_{{param}}-HV_MIN_CHANNEL_{{param}})+HV_MIN_CHANNEL_{{param}});
       break;
     {% endfor %}
+    default:
+      break;
     }
   }
 
