@@ -32,3 +32,6 @@
 *.app
 
 Source/progname.s
+
+#Unignore this - because .lib extension is ignored for libraries
+!FaustCode/owl.lib

@@ -1,0 +1,57 @@
+//------------------------ pushbutton ----------------
+// Send a gate signal to push button
+//
+// ### Usage:
+//    `_:pushbutton`
+//
+pushbutton = ffunction(int owl_pushbutton(int), <owl.h>, "");
+
+//------------------------ Voltage convertion ----------------
+
+//------------------------ sample2hertz ----------------------
+// Convert input sample to frequency in Hertz
+//
+// ### Usage:
+//    `_:sample2hertz(tune):_`
+//
+sample2hertz = ffunction(float sample2hertz(float, float), <owl.h>, "");
+
+//------------------------ hertz2sample ----------------------
+// Convert frequency in Hertz to output sample
+//
+// ### Usage:
+//    `_:hertz2sample(tune):_`
+//
+hertz2sample = ffunction(float hertz2sample(float, float), <owl.h>, "");
+
+//------------------------ sample2volts ----------------------
+// Convert input sample to Volts
+//
+// ### Usage:
+//    `_:sample2volts:_`
+//
+sample2volts = ffunction(float sample2volts(float), <owl.h>, "");
+
+//------------------------ volts2hertz -----------------------
+// Convert Volts into Hertz
+//
+// ### Usage:
+//    `_:volts2hertz:_`
+//
+volts2hertz = ffunction(float volts2hertz(float), <owl.h>, "");
+
+//------------------------ volts2sample ----------------------
+// Convert Volts into output sample
+//
+// ### Usage:
+//    `_:volts2sample:_`
+//
+volts2sample = ffunction(float volts2sample(float), <owl.h>, "");
+
+//------------------------ hertz2volts ----------------------
+// Convert Hertz into Volts
+//
+// ### Usage:
+//    `_:hertz2volts:_`
+//
+hertz2volts = ffunction(float hertz2volts(float), <owl.h>, "");

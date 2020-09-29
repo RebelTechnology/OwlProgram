@@ -22,22 +22,27 @@ public:
     tune = octaves;
   }
   float getFrequency(float sample){
-    return voltsToHertz(sampleToVolts(sample)+tune);
+    return voltsToHertz(sampleToVolts(sample) + tune);
+  }
+  float getSample(float frequency){
+    return voltsToSample(hertzToVolts(frequency) + tune);
   }
   float sampleToVolts(float sample){
     return (sample-offset) * multiplier;
   }
-  float voltsToHertz(float volts){
+  static float voltsToHertz(float volts){
     return 440.f * exp2f(volts);
   }
   float voltsToSample(float volts){
     return volts / multiplier + offset;
   }
-  float hertzToVolts(float hertz){
+  static float hertzToVolts(float hertz){
     return log2f(hertz/440.0f);
   }
   void getFrequency(FloatArray samples, FloatArray output);
   void getFrequency(FloatArray samples);
+  void getSample(FloatArray frequencies, FloatArray output);
+  void getSample(FloatArray frequencies);
 };
 
 #endif /* __VoltsPerOctave_hpp__ */

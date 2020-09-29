@@ -1,0 +1,33 @@
+﻿---
+BasedOnStyle: WebKit
+BreakBeforeBinaryOperators: None
+ColumnLimit: '80'
+CompactNamespaces: 'false'
+SpaceBeforeParens: Never
+SpaceInEmptyParentheses: 'false'
+Standard: Cpp11
+TabWidth: '4'
+UseTab: Never
+AlwaysBreakTemplateDeclarations: 'Yes'
+IndentWidth: '4'
+ContinuationIndentWidth: '4'
+AllowShortFunctionsOnASingleLine: None
+PenaltyExcessCharacter: '2'
+PointerAlignment: 'Left'
+SortIncludes: 'false'
+SpaceBeforeParens: ControlStatements
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass:      false
+  AfterControlStatement: false
+  AfterEnum:       false
+  AfterFunction:   false
+  AfterNamespace:  false
+  AfterObjCDeclaration: false
+  AfterStruct:     false
+  AfterUnion:      false
+  BeforeCatch:     false
+  BeforeElse:      true
+  IndentBraces:    false
+
+...
