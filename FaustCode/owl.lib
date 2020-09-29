@@ -1,0 +1,20 @@
+owl_push = ffunction(int owl_pushbutton(int), <owl.h>,"");
+owl_button = ffunction(int owl_button(int, int), <owl.h>,"");
+owl_parameter = ffunction(int owl_parameter(int, float), <owl.h>,"");
+
+OWL_B1 = fconstant(int BUTTON_A, <owl.h>);
+OWL_B2 = fconstant(int BUTTON_B, <owl.h>);
+OWL_B3 = fconstant(int BUTTON_C, <owl.h>);
+OWL_B4 = fconstant(int BUTTON_D, <owl.h>);
+OWL_B5 = fconstant(int BUTTON_E, <owl.h>);
+OWL_B6 = fconstant(int BUTTON_F, <owl.h>);
+OWL_B7 = fconstant(int BUTTON_G, <owl.h>);
+OWL_B8 = fconstant(int BUTTON_H, <owl.h>);
+OWL_A = fconstant(int PARAMETER_A, <owl.h>);
+OWL_B = fconstant(int PARAMETER_B, <owl.h>);
+OWL_C = fconstant(int PARAMETER_C, <owl.h>);
+OWL_D = fconstant(int PARAMETER_D, <owl.h>);
+OWL_E = fconstant(int PARAMETER_E, <owl.h>);
+OWL_F = fconstant(int PARAMETER_F, <owl.h>);
+OWL_G = fconstant(int PARAMETER_G, <owl.h>);
+OWL_H = fconstant(int PARAMETER_H, <owl.h>);

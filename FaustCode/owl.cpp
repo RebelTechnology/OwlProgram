@@ -42,6 +42,7 @@
 // when Faust calls functions with the same names in std:: namespace
 #undef min
 #undef max
+#define fast_fabsf(x) fabsf(x)
 
 #include <string.h>
 #include <strings.h>
@@ -291,9 +292,15 @@ class OwlButton : public OwlParameterBase
 protected:
   PatchButtonId	fButton;		// OWL button id : PUSHBUTTON, ...
 public:
-  OwlButton(Patch* pp, PatchButtonId button, FAUSTFLOAT* z, const char* l) :
-    OwlParameterBase(pp, z, true), fButton(button) {}
-  void update()	{ *fZone = fPatch->isButtonPressed(fButton); }
+  OwlButton(Patch* pp, PatchButtonId button, FAUSTFLOAT* z, const char* l, bool output=false) :
+    OwlParameterBase(pp, z, output), fButton(button) {}
+  void update()	{
+    if(isOutput){
+      fPatch->setButton(fButton, *fZone,  0);
+    }else{
+      *fZone = fPatch->isButtonPressed(fButton);
+    }
+  }
 };
 
 
@@ -347,9 +354,12 @@ class OwlUI : public UI
 	fParameterTable[fParameterIndex++] = new OwlVariable(fPatch, &fBend, zone, label, lo, lo, hi, true);
       }else if(fParameter != NO_PARAMETER){
 	fParameterTable[fParameterIndex++] = new OwlParameter(fPatch, fParameter, zone, label, lo, lo, hi, true);
+      }else if(fButton != NO_BUTTON){
+	fParameterTable[fParameterIndex++] = new OwlButton(fPatch, fButton, zone, label, true);
       }
     }
     fParameter = NO_PARAMETER; 		// clear current parameter ID
+    fButton = NO_BUTTON;
   }
 
   void addOwlButton(const char* label, FAUSTFLOAT* zone) {
@@ -423,10 +433,14 @@ public:
       else if (strcasecmp(id,"G") == 0)  fParameter = PARAMETER_G;
       else if (strcasecmp(id,"H") == 0)  fParameter = PARAMETER_H;
       else if (strcasecmp(id,"PUSH") == 0)  fButton = PUSHBUTTON;
-      else if (strcasecmp(id,"ButtonA") == 0)  fButton = BUTTON_A;
-      else if (strcasecmp(id,"ButtonB") == 0)  fButton = BUTTON_B;
-      else if (strcasecmp(id,"ButtonC") == 0)  fButton = BUTTON_C;
-      else if (strcasecmp(id,"ButtonD") == 0)  fButton = BUTTON_D;
+      else if (strcasecmp(id,"B1") == 0)  fButton = BUTTON_A;
+      else if (strcasecmp(id,"B2") == 0)  fButton = BUTTON_B;
+      else if (strcasecmp(id,"B3") == 0)  fButton = BUTTON_C;
+      else if (strcasecmp(id,"B4") == 0)  fButton = BUTTON_D;
+      else if (strcasecmp(id,"B5") == 0)  fButton = BUTTON_E;
+      else if (strcasecmp(id,"B6") == 0)  fButton = BUTTON_F;
+      else if (strcasecmp(id,"B7") == 0)  fButton = BUTTON_G;
+      else if (strcasecmp(id,"B8") == 0)  fButton = BUTTON_H;
     }else if(strcasecmp(k,"midi") == 0){
       // todo!
       // if (strcasecmp(id,"pitchwheel") == 0)  fParameter = PARAMETER_G; // mapped to pitch wheel
@@ -545,6 +559,7 @@ public:
 
 extern "C" {
   void doSetButton(uint8_t id, uint16_t state, uint16_t samples);
+  void doSetPatchParameter(uint8_t id, int16_t value);
   int owl_pushbutton(int value){
     static bool state = 0;
     static uint16_t counter = 0;
@@ -555,6 +570,14 @@ extern "C" {
     }
     if(++counter > getProgramVector()->audio_blocksize)
       counter = 0;
+    return value;
+  }
+  int owl_button(int bid, int value){
+    doSetButton(bid, value, 0);
+    return value;
+  }
+  float owl_parameter(int pid, float value){
+    doSetPatchParameter(pid, (int16_t)(value*4096));
     return value;
   }
 }
