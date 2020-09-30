@@ -18,7 +18,7 @@ ASFLAGS      = -g
 endif
 
 ifeq ($(CONFIG),Release)
-CPPFLAGS    ?= -Os -specs=nano.specs -ffast-math
+CPPFLAGS    ?= -O3 -specs=nano.specs -ffast-math
 EMCCFLAGS   ?= -Oz # optimise for size
 endif
 
@@ -59,7 +59,7 @@ BUILD       ?= $(BUILDROOT)/Build
 LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
 # LDSCRIPT    ?= $(BUILDROOT)/Source/STM32F746ZGTx_FLASH.ld
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
-FIRMWARESENDER ?= Tools/FirmwareSender
+FIRMWARESENDER ?= ~/Documents/FirmwareSender/Builds/Linux/build/FirmwareSender
 
 export BUILD BUILDROOT TARGET
 export PATCHNAME PATCHCLASS PATCHSOURCE 

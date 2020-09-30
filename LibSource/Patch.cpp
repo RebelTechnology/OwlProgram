@@ -68,7 +68,7 @@ AudioBuffer* Patch::createMemoryBuffer(int channels, int samples){
 #define DWT_CYCCNT ((volatile unsigned int *)0xE0001004)
 
 float Patch::getElapsedBlockTime(){
-  return (*DWT_CYCCNT)/getBlockSize()/3500.0;
+  return (*DWT_CYCCNT)/getBlockSize()/(float)5000;
 }
 
 int Patch::getElapsedCycles(){
