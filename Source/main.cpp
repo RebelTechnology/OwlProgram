@@ -79,4 +79,5 @@ int main(void){
   pv->heap_bytes_used = before - xPortGetFreeHeapSize();
 
   run(pv); // never returns
+  return 0;
 }

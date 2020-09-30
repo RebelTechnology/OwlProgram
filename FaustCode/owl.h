@@ -3,6 +3,10 @@
 
 /* In this file we declare all OWL foreign functions.
  * They can be used in a FAUST patch like this:
+ *
+ * owl_button = ffunction(int owl_button(int, int), <owl.h>,"");
+ *
+ * owl_parameter = ffunction(int owl_parameter(int, float), <owl.h>,"");
  * 
  * pushbutton = ffunction(int owl_pushbutton(int), <owl.h>,"");
  * 
@@ -27,6 +31,8 @@
 #endif
 
    int owl_pushbutton(int value);
+   int owl_button(int bid, int value);
+   float owl_parameter(int pid, float value);
    float sample2hertz(float tune, float sample);
    float hertz2sample(float tune, float hertz);
    float sample2volts(float sample);

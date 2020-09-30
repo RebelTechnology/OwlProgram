@@ -333,14 +333,15 @@ class OwlButton : public OwlParameterBase {
 protected:
     PatchButtonId fButton; // OWL button id : PUSHBUTTON, ...
 public:
-    OwlButton(Patch* pp, PatchButtonId button, FAUSTFLOAT* z, const char* l)
-        : OwlParameterBase(pp, z, true)
-        , fButton(button) {
+  OwlButton(Patch* pp, PatchButtonId button, FAUSTFLOAT* z, const char* l, bool output=false) :
+    OwlParameterBase(pp, z, output), fButton(button) {}
+  void update()	{
+    if(isOutput){
+      fPatch->setButton(fButton, *fZone,  0);
+    }else{
+      *fZone = fPatch->isButtonPressed(fButton);
     }
-    void update() {
-        *fZone = fPatch->isButtonPressed(fButton);
-    }
-    ~OwlButton() {};
+  }
 };
 
 /**************************************************************************************
@@ -390,12 +391,13 @@ class OwlUI : public UI {
             }
         }
         fParameter = NO_PARAMETER; // clear current parameter ID
+	fButton = NO_BUTTON;
     }
 
     void addOutputOwlParameter(
         const char* label, FAUSTFLOAT* zone, FAUSTFLOAT lo, FAUSTFLOAT hi) {
-        ASSERT(label[strlen(label) - 1] == '>',
-            "You must add '>' character for output parameters");
+        if(label[strlen(label) - 1] == '>')
+  	    debugMessage("Add '>' character for output parameters");
         if (fParameterIndex < MAXOWLPARAMETERS) {
             if (meta.midiOn && strcasecmp(label, "freq") == 0) {
                 fParameterTable[fParameterIndex++] =
@@ -412,9 +414,14 @@ class OwlUI : public UI {
             else if (fParameter != NO_PARAMETER) {
                 fParameterTable[fParameterIndex++] = new OwlParameter(
                     fPatch, fParameter, zone, label, lo, lo, hi, true);
-            }
-        }
-        fParameter = NO_PARAMETER; // clear current parameter ID
+	    }
+	    else if(fButton != NO_BUTTON){
+	        fParameterTable[fParameterIndex++] = new OwlButton(
+		    fPatch, fButton, zone, label, true);
+	    }
+	}
+	fParameter = NO_PARAMETER;
+	fButton = NO_BUTTON;
     }
 
     void addOwlButton(const char* label, FAUSTFLOAT* zone) {
@@ -428,6 +435,7 @@ class OwlUI : public UI {
                     new OwlButton(fPatch, fButton, zone, label);
             }
         }
+	fParameter = NO_PARAMETER;
         fButton = NO_BUTTON; // clear current button ID
     }
 
@@ -562,7 +570,10 @@ public:
                                 std::min(int(PARAMETER_DH), param_tmp + *id - '0'));
                         }
                     }
-                    else {
+                    else if (param_tmp == PARAMETER_B && *id >= '0' && *id <= '9') {
+                        fButton = PatchButtonId(BUTTON_A + *id - '1');
+		    }
+		    else {
                         // Inc to skip 1-character params
                         param_tmp++;
                         // This is first character for groups of 8 params
@@ -581,14 +592,6 @@ public:
             }
             else if (strcasecmp(id, "PUSH") == 0)
                 fButton = PUSHBUTTON;
-            else if (strcasecmp(id, "ButtonA") == 0)
-                fButton = BUTTON_A;
-            else if (strcasecmp(id, "ButtonB") == 0)
-                fButton = BUTTON_B;
-            else if (strcasecmp(id, "ButtonC") == 0)
-                fButton = BUTTON_C;
-            else if (strcasecmp(id, "ButtonD") == 0)
-                fButton = BUTTON_D;
         }
         else if (strcasecmp(k, "midi") == 0) {
             // todo!
@@ -709,47 +712,56 @@ public:
 };
 
 extern "C" {
-void doSetButton(uint8_t id, uint16_t state, uint16_t samples);
+  void doSetButton(uint8_t id, uint16_t state, uint16_t samples);
+  void doSetPatchParameter(uint8_t id, int16_t value);
 
-int owl_pushbutton(int value) {
+  int owl_pushbutton(int value) {
     static bool state = 0;
     static uint16_t counter = 0;
     value = (bool)value;
     if (state != value) {
-        state = value;
-        doSetButton(PUSHBUTTON, state, counter);
+      state = value;
+      doSetButton(PUSHBUTTON, state, counter);
     }
     if (++counter > getProgramVector()->audio_blocksize)
-        counter = 0;
+      counter = 0;
     return value;
-}
+  }
+  int owl_button(int bid, int value){
+    doSetButton(bid, value, 0);
+    return value;
+  }
+  float owl_parameter(int pid, float value){
+    doSetPatchParameter(pid, (int16_t)(value*4096));
+    return value;
+  }
 
-// Uses input scaler and tuning
-float sample2hertz(float tune, float sample) {
+  // Uses input scaler and tuning
+  float sample2hertz(float tune, float sample) {
     fVOctInput->setTune(tune);
     return fVOctInput->getFrequency(sample);
-}
-// Uses output scaler and tuning
-float hertz2sample(float tune, float hertz) {
+  }
+  // Uses output scaler and tuning
+  float hertz2sample(float tune, float hertz) {
     fVOctOutput->setTune(tune);
     return fVOctOutput->getSample(hertz);
-}
-// Uses input scaler
-float sample2volts(float sample) {
+  }
+  // Uses input scaler
+  float sample2volts(float sample) {
     return fVOctInput->sampleToVolts(sample);
-}
-// No scaler required
-float volts2hertz(float volts) {
+  }
+  // No scaler required
+  float volts2hertz(float volts) {
     return VoltsPerOctave::voltsToHertz(volts);
-}
-// Uses output scaler
-float volts2sample(float volts) {
+  }
+  // Uses output scaler
+  float volts2sample(float volts) {
     return fVOctOutput->voltsToSample(volts);
-}
-// No scaler required
-float hertz2volts(float hertz) {
+  }
+  // No scaler required
+  float hertz2volts(float hertz) {
     return VoltsPerOctave::hertzToVolts(hertz);
-}
+  }
 }
 
 #endif // __FaustPatch_h__
