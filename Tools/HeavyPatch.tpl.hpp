@@ -17,12 +17,14 @@
 #define BUTTON_B7 BUTTON_G
 #define BUTTON_B8 BUTTON_H
 
+#define HV_HASH_MIDIIN 0x149631be
 #define HV_HASH_NOTEIN 0x67e37ca3
 #define HV_HASH_CTLIN 0x41be0f9c
 #define HV_HASH_BENDIN 0x3083f0f7
 #define HV_HASH_TOUCHIN 0x553925bd
 #define HV_HASH_PGMIN 0x2e1ea03d
 
+#define HV_HASH_MIDIOUT 0x6511de55
 #define HV_HASH_NOTEOUT 0xd1d4ac2
 #define HV_HASH_CTLOUT 0xe5e2a040
 #define HV_HASH_BENDOUT 0xe8458013
@@ -91,39 +93,67 @@ public:
   }
 
   void sendCallback(uint32_t sendHash, const HvMessage *m){
+    {% if '__hv_midiout' in midiout|map(attribute=0) %}
+    if(sendHash == HV_HASH_MIDIOUT){
+      if(!hv_msg_hasFormat(m, "ff"))
+	return;
+      static MidiMessage _midi_out_msg;
+      static uint8_t _midi_out_pos = 1;
+      _midi_out_msg.data[_midi_out_pos++] = hv_msg_getFloat(m, 0);
+      if(_midi_out_pos >= 4){
+	uint8_t port = min(15, (int)hv_msg_getFloat(m, 1));
+	_midi_out_msg.data[0] = (port << 4) | (_midi_out_msg.getStatus() >> 4);
+	sendMidi(_midi_out_msg);
+	debugMessage("midiout", _midi_out_msg.data[1], _midi_out_msg.data[2], _midi_out_msg.data[3]);
+	_midi_out_pos = 1;
+      }
+    }
+    {% endif %}
     switch(sendHash){
+      {% for name, namehash in midiout %}
+      // {{ name }} {{ namehash }}
+      {% if name == '__hv_noteout' %}
     case HV_HASH_NOTEOUT:
       {
-      uint8_t note = hv_msg_getFloat(m, 0);
-      uint8_t velocity = hv_msg_getFloat(m, 1);
-      uint8_t ch = hv_msg_getFloat(m, 2);
-      // debugMessage("noteout", note, velocity, ch);
-      sendMidi(MidiMessage::note(ch, note, velocity));
+	if(!hv_msg_hasFormat(m, "fff"))
+	  return;
+	uint8_t note = min(127, hv_msg_getFloat(m, 0));
+	uint8_t velocity = min(127, hv_msg_getFloat(m, 1));
+	uint8_t ch = min(15, hv_msg_getFloat(m, 2));
+	debugMessage("noteout", note, velocity, ch);
+	sendMidi(MidiMessage::note(ch, note, velocity));
       }
       break;
+      {% elif name == '__hv_ctlout' %}
     case HV_HASH_CTLOUT:
       {
-	uint8_t value = hv_msg_getFloat(m, 0);
-	uint8_t cc = hv_msg_getFloat(m, 1);
-	uint8_t ch = hv_msg_getFloat(m, 2);
+	uint8_t value = min(127, hv_msg_getFloat(m, 0));
+	uint8_t cc = min(127, hv_msg_getFloat(m, 1));
+	uint8_t ch = min(15, hv_msg_getFloat(m, 1));
 	// debugMessage("ctlout", value, cc, ch);
 	sendMidi(MidiMessage::cc(ch, cc, value));
       }
       break;
+      {% elif name == '__hv_bendout' %}
     case HV_HASH_BENDOUT:
+      // [bendout] takes values from -8192 to 8191 - this won't change.
       {
-	uint16_t value = hv_msg_getFloat(m, 0);
-	uint8_t ch = hv_msg_getFloat(m, 1);
+	int16_t value = max(-8192, min(8191, hv_msg_getFloat(m, 0)));
+	uint8_t ch = min(15, hv_msg_getFloat(m, 1));
       // debugMessage("bendout", value, ch);
 	sendMidi(MidiMessage::pb(ch, value));
       }
       break;
+      {% elif name == '__hv_touchout' %}
     case HV_HASH_TOUCHOUT:
       sendMidi(MidiMessage::cp((uint8_t)hv_msg_getFloat(m, 1), (uint8_t)hv_msg_getFloat(m, 0)));
       break;
+      {% elif name == '__hv_pgmout' %}
     case HV_HASH_PGMOUT:
       sendMidi(MidiMessage::pc((uint8_t)hv_msg_getFloat(m, 1), (uint8_t)hv_msg_getFloat(m, 0)));
       break;
+      {% endif %}
+      {% endfor %}      
       {% for param, name, typ, namehash, minvalue, maxvalue, defvalue, button in jdata if typ == 'SEND'%}
       {% if button == True %}
     // Button {{name}}
@@ -145,14 +175,21 @@ public:
 
   void processMidi(MidiMessage msg){
     // sendMessageToReceiverV parses format and loops over args, see HeavyContext.cpp
-    switch(msg.getStatus()){
-    case CONTROL_CHANGE:
+    {% if '__hv_midiin' in midiin|map(attribute=0) %}
+      // __hv_midiin 0x149631be
+    for(int i=1; i<4; ++i)
       context->sendMessageToReceiverV
-	(HV_HASH_CTLIN, 0, "fff",
-	 (float)msg.getControllerValue(), // value
-	 (float)msg.getControllerNumber(), // controller number
-	 (float)msg.getChannel());
-      break;
+	(HV_HASH_MIDIIN, i, "ff",
+	 (float)msg.data[i],
+	 (float)msg.getPort());
+      {% endif %}
+    switch(msg.getStatus()){
+      {% for name, namehash in midiin %}
+      // {{ name }} {{ namehash }}
+      {% if name == '__hv_notein' %}
+    case NOTE_OFF:
+      msg.data[3] = 0; // ensure velocity is zero for note off
+      // deliberate fall-through
     case NOTE_ON:
       context->sendMessageToReceiverV
 	(HV_HASH_NOTEIN, 0, "fff",
@@ -160,31 +197,37 @@ public:
 	 (float)msg.getVelocity(), // velocity
 	 (float)msg.getChannel());
       break;
-    case NOTE_OFF:
+      {% elif name == '__hv_ctlin' %}
+    case CONTROL_CHANGE:
       context->sendMessageToReceiverV
-	(HV_HASH_NOTEIN, 0, "fff",
-	 (float)msg.getNote(), // pitch
-	 0.0f, // velocity
+	(HV_HASH_CTLIN, 0, "fff",
+         (float)msg.getControllerValue(), // value
+	 (float)msg.getControllerNumber(), // controller number
 	 (float)msg.getChannel());
-      break;
+      break;    
+      {% elif name == '__hv_touchin' %}
     case CHANNEL_PRESSURE:
       context->sendMessageToReceiverV
-	(HV_HASH_TOUCHIN, 0, "ff",
+	( {{ namehash }}, 0, "ff",
 	 (float)msg.getChannelPressure(),
 	 (float)msg.getChannel());
-      break;
+      break;      
+      {% elif name == '__hv_bendin' %}
     case PITCH_BEND_CHANGE:
       context->sendMessageToReceiverV
 	(HV_HASH_BENDIN, 0, "ff",
-	 (float)msg.getPitchBend(),
+	 (float)msg.getPitchBend() + 8192,
 	 (float)msg.getChannel());
       break;
+      {% elif name == '__hv_pgm' %}
     case PROGRAM_CHANGE:
       context->sendMessageToReceiverV
 	(HV_HASH_PGMIN, 0, "ff",
 	 (float)msg.getProgramChange(),
 	 (float)msg.getChannel());
       break;
+      {% endif %}
+      {% endfor %}      
     default:
       break;
     }

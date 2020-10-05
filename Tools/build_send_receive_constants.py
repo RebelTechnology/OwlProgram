@@ -17,6 +17,16 @@ heavy_hash = HeavyLangObject.HeavyLangObject.get_hash
 import jinja2
 
 OWL_BUTTONS = ['Push', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']
+MIDI_RECEIVERS = ['__hv_midiin',
+                  '__hv_notein',
+                  '__hv_bendin',
+                  '__hv_ctlin',
+                  '__hv_pgmout']
+MIDI_SENDERS = ['__hv_midiout',
+                '__hv_noteout',
+                '__hv_bendout',
+                '__hv_ctlout',
+                '__hv_pgmout']
                
 def get_template(path):
     templateLoader = jinja2.FileSystemLoader(searchpath=dir_path)
@@ -41,25 +51,29 @@ def main():
 
     args = parser.parse_args()
     jdata = list()
+    midiin = list()
+    midiout = list()
 
     # Read receive and send object data
     with open(args.infilename, mode="r") as f:
         ir = json.load(f)
 
         for name, v in ir['control']['receivers'].iteritems():
-            # skip __hv_init and similar
-            if name.startswith("__"):
-                continue
+            # # skip __hv_init and similar
+            # if name.startswith("__"):
+            #     continue
 
             # If a name has been specified
-            if 'owl' in v['attributes'] and v['attributes']['owl'] is not None:
+            if name in MIDI_RECEIVERS:
+                midiin.append((name, "0x%x" % heavy_hash(name)))
+                print "MIDI in "+name
+            elif 'owl' in v['attributes'] and v['attributes']['owl'] is not None:
                 key = v['attributes']['owl']
                 jdata.append((key, name, 'RECV', "0x%x" % heavy_hash(name),
                               v['attributes']['min'],
                               v['attributes']['max'],
                               v['attributes']['default'],
                               key in OWL_BUTTONS))
-
             elif name.startswith('Channel-'):
                 key = name.split('Channel-', 1)[1]
                 jdata.append((key, name, 'RECV', "0x%x" % heavy_hash(name),
@@ -69,7 +83,10 @@ def main():
             try:
                 if v['type'] == '__send':
                     name = v['args']['name']
-                    if 'owl' in v['args']['attributes'] and v['args']['attributes']['owl'] is not None:
+                    if name in MIDI_SENDERS:
+                        midiout.append((name, "0x%x" % heavy_hash(name)))
+                        print "MIDI out "+name
+                    elif 'owl' in v['args']['attributes'] and v['args']['attributes']['owl'] is not None:
                         key = v['args']['attributes']['owl']
                         jdata.append((key, name+'>', 'SEND', "0x%x" % heavy_hash(name),
                                       v['args']['attributes']['min'],
@@ -94,7 +111,7 @@ def main():
     HeavyPatchpath = "/".join(args.outfilename.split("/")[:-1]) + '/HeavyPatch.hpp'
     with open(HeavyPatchpath, mode="w") as f:
         template = get_template("HeavyPatch.tpl.hpp")
-        outputText = template.render(jdata=jdata)  # this is where to put args to the template renderer
+        outputText = template.render(jdata=jdata, midiin=midiin, midiout=midiout)  # this is where to put args to the template renderer
         f.write(outputText)
 
 if __name__ == '__main__':
