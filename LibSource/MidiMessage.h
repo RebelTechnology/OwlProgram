@@ -66,6 +66,44 @@ class MidiMessage {
   bool isPitchBend(){
     return (data[1] & MIDI_STATUS_MASK) == PITCH_BEND_CHANGE;
   }
+  /**
+   * Get length of this MIDI message in bytes, not including USB command,
+   * based on the contents of the status byte.
+   * @return 3, 2, or 1; 0 for unknown/incomplete (e.g. SysEx)
+   */
+  size_t getLength(){
+    return getLength(data[1]);
+  }
+  static size_t getLength(uint8_t status){
+    switch(status & MIDI_STATUS_MASK){
+    case NOTE_OFF:
+    case NOTE_ON:
+    case POLY_KEY_PRESSURE:
+    case CONTROL_CHANGE:
+    case PITCH_BEND_CHANGE:
+      return 3;
+    case PROGRAM_CHANGE:
+    case CHANNEL_PRESSURE:
+      return 2;
+    case SYSTEM_COMMON:
+      switch(status){
+      case TUNE_REQUEST:
+      case TIMING_CLOCK:
+      case START:
+      case CONTINUE:
+      case STOP:
+      case ACTIVE_SENSING:
+      case SYSTEM_RESET:
+	return 1;
+      case TIME_CODE_QUARTER_FRAME:
+      case SONG_SELECT:
+	return 2;
+      case SONG_POSITION_PTR:
+	return 3;
+      }
+    }
+    return 0;
+  }
   static MidiMessage cc(uint8_t ch, uint8_t cc, uint8_t value){
     return MidiMessage(USB_COMMAND_CONTROL_CHANGE, CONTROL_CHANGE|(ch&0xf), cc&0x7f, value&0x7f);
   }
