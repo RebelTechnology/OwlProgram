@@ -97,15 +97,14 @@ public:
     if(sendHash == HV_HASH_MIDIOUT){
       if(!hv_msg_hasFormat(m, "ff"))
 	return;
-      static MidiMessage _midi_out_msg;
-      static uint8_t _midi_out_pos = 1;
-      _midi_out_msg.data[_midi_out_pos++] = hv_msg_getFloat(m, 0);
-      if(_midi_out_pos >= 4){
+      static MidiMessage msg;
+      static uint8_t pos = 1;
+      msg.data[pos++] = hv_msg_getFloat(m, 0);
+      if(pos > msg.getLength()){
 	uint8_t port = min(15, (int)hv_msg_getFloat(m, 1));
-	_midi_out_msg.data[0] = (port << 4) | (_midi_out_msg.getStatus() >> 4);
-	sendMidi(_midi_out_msg);
-	debugMessage("midiout", _midi_out_msg.data[1], _midi_out_msg.data[2], _midi_out_msg.data[3]);
-	_midi_out_pos = 1;
+	msg.data[0] = (port << 4) | (msg.getStatus() >> 4);
+	sendMidi(msg);
+	pos = 1;
       }
     }
     {% endif %}
