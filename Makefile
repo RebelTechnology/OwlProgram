@@ -56,7 +56,11 @@ PATCHOUT    ?= 2
 SLOT        ?= 0
 OWLDEVICE   ?= OWL-*
 BUILD       ?= $(BUILDROOT)/Build
+ifeq ($(PLATFORM), Daisy)
+LDSCRIPT    ?= $(BUILDROOT)/Source/flash_daisy.ld
+else
 LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
+endif
 # LDSCRIPT    ?= $(BUILDROOT)/Source/STM32F746ZGTx_FLASH.ld
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
 FIRMWARESENDER ?= Tools/FirmwareSender
@@ -68,7 +72,9 @@ export HEAVYTOKEN HEAVYSERVICETOKEN  HEAVY
 export LDSCRIPT CPPFLAGS EMCCFLAGS ASFLAGS
 export CONFIG PLATFORM
 
-DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
+STARTUP = $(BUILD)/Source/startup.s
+
+DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(STARTUP)
 
 all: patch
 
@@ -85,7 +91,7 @@ $(BUILD)/registerpatch.cpp: .FORCE
 $(BUILD)/registerpatch.h: .FORCE
 	@echo "#include \"$(PATCHFILE)\"" > $@
 
-$(BUILD)/Source/startup.s: .FORCE
+$(STARTUP): .FORCE
 	@echo '.string "'$(PATCHNAME)'"' > $(BUILD)/Source/progname.s
 
 $(BUILD)/%.syx: $(BUILD)/%.bin

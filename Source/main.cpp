@@ -43,6 +43,7 @@ int main(void){
     }
     regions[cnt] = {NULL, 0}; // terminate the array
   }else{
+#ifndef OWL_DAISY
     /* Defined by the linker */
     extern char _fastheap, _fasteheap; // internal RAM dedicated to heap
     extern char _eprogram, _eram; // remaining program space
@@ -52,6 +53,7 @@ int main(void){
     regions[cnt++] = { (uint8_t*)&_eprogram, (size_t)(&_eram - &_eprogram) };
     regions[cnt++] = { (uint8_t*)&_heap, (size_t)(&_eheap - &_heap) };
     regions[cnt] = {NULL, 0}; // terminate the array
+#endif
   }
   vPortDefineHeapRegions(regions); // call before static initialisers to allow heap use
 

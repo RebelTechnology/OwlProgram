@@ -11,7 +11,6 @@
 
 #define AUDIO_BIGEND
 /* #define AUDIO_SATURATE_SAMPLES // SATURATE adds almost 500 cycles to 24-bit mode */
-#define AUDIO_CHANNELS               2
 #define AUDIO_BITDEPTH               24    /* bits per sample */
 #ifndef AUDIO_MAX_BLOCK_SIZE
 #define AUDIO_MAX_BLOCK_SIZE         1024

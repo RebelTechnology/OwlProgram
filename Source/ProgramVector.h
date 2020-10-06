@@ -12,6 +12,7 @@
 #define OWL_RACK_HARDWARE     0x13
 #define PRISM_HARDWARE        0x14
 #define PLAYER_HARDWARE       0x15
+#define DAISY_PATCH_HARDWARE  0x21
 
 #define PROGRAM_VECTOR_CHECKSUM_V11 0x40
 #define PROGRAM_VECTOR_CHECKSUM_V12 0x50
@@ -28,6 +29,15 @@
 #define AUDIO_FORMAT_24B32_4X       0x24
 #define AUDIO_FORMAT_24B32_7X       0x27
 #define AUDIO_FORMAT_24B32_8X       0x28
+
+/*
+ * This would work correctly only with 24B32* formats!
+ * Others have inconsistent channels mask.
+ */
+#define AUDIO_CHANNELS_MASK         0x0F
+#define AUDIO_FORMAT_MASK           0x30
+#define AUDIO_FORMAT(FORMAT)        (FORMAT & AUDIO_FORMAT_MASK)
+#define AUDIO_FORMAT_CHANNELS(FORMAT) (FORMAT & AUDIO_CHANNELS_MASK)
 
   typedef enum { 
     AUDIO_IDLE_STATUS = 0, 

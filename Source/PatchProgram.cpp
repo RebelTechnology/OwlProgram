@@ -76,6 +76,7 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
 }
 
 static SampleBuffer* samples;
+
 void setup(ProgramVector* pv){
   setSystemTables(pv);
 #ifdef USE_MIDI_CALLBACK
@@ -155,10 +156,10 @@ void run(ProgramVector* pv){
       static int32_t step = 32;
       ProgramVector* pv = getProgramVector();
       for(int i=0; i < pv->audio_blocksize; ++i){
-	pv->audio_output[i*2] = value;
-	pv->audio_output[i*2+1] = value; // swap(value);
-	value += step;
-	if(value >= INT32_MAX)
-	  value = INT32_MIN;
+        pv->audio_output[i*2] = value;
+        pv->audio_output[i*2+1] = value; // swap(value);
+        value += step;
+        if(value >= INT32_MAX)
+          value = INT32_MIN;
       }
 #endif
