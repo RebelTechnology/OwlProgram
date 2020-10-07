@@ -470,6 +470,11 @@ public:
   }
   
   /**
+   * Create a linear ramp from one value to another across all values in the Float
+   */
+  void ramp(float from, float to);
+
+  /**
    * Creates a new FloatArray.
    * Allocates size*sizeof(float) bytes of memory and returns a FloatArray that points to it.
    * @param size the size of the new FloatArray.
