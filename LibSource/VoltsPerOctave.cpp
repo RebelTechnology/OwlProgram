@@ -36,15 +36,43 @@ VoltsPerOctave::VoltsPerOctave(bool input) : tune(0.0) {
 
 void VoltsPerOctave::getFrequency(FloatArray samples, FloatArray output){
   ASSERT(output.getSize() >= samples.getSize(), "Output buffer too short");
-  // todo: block based implementation
-  // samples.subtract(offset, output);
-  // samples.multiply(multiplier, output);
-  // for(int i=0; i<samples.getSize(); ++i)
-  //   output[i] = voltsToHertz(output[i]);
+  // Block based implementation - this is giving ~1% higher CPU usage, tested on Magus
+  /*
+  output.copyFrom(samples);
+  output.subtract(offset);
+  output.multiply(multiplier);
+  output.add(tune);
+  for(size_t i = 0; i < samples.getSize(); ++i)
+    output[i] = exp2f(output[i]);
+  output.multiply(440.f);
+  */
+
+  // Sample by sample processing
   for(size_t i=0; i<samples.getSize(); ++i)
-    output[i] = getFrequency(samples[i]);
+     output[i] = getFrequency(samples[i]);
 }
 
 void VoltsPerOctave::getFrequency(FloatArray samples){
   getFrequency(samples, samples);
+}
+
+void VoltsPerOctave::getSample(FloatArray frequencies, FloatArray output){
+  ASSERT(output.getSize() >= frequencies.getSize(), "Output buffer too short");
+  // Block based implementation - this gives the same CPU load as sample
+  // by sample processing, so probably no reason to use it
+  /*
+  for (size_t i = 0; i < output.getSize(); i++)
+    //output[i] = tune - hertzToVolts(output[i]);
+    output[i] = log2f(output[i]);
+  output.add(tune - log2f(440.0f));
+  output.multiply(1.0f / multiplier);
+  output.add(offset);
+  */
+  
+  // Sample by sample processing
+  for(size_t i=0; i < frequencies.getSize(); ++i)
+    output[i] = getSample(frequencies[i]);
+}
+void VoltsPerOctave::getSample(FloatArray frequencies){
+  getSample(frequencies, frequencies);
 }

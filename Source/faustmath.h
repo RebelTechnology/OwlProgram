@@ -11,6 +11,7 @@
 
 // Float versions
 
+#define fast_fabsf(x) abs(x) 
 #define fast_acosf(x) acosf(x)
 #define fast_asinf(x) asinf(x)
 #define fast_atanf(x) atanf(x)
@@ -27,6 +28,7 @@
 // fast_log10f is defined in basicmath.h
 // fast_powf is defined in basicmath.h
 #define fast_remainderf(x, y) remainderf(x, y)
+#define fast_rintf(x) rintf(x)
 #define fast_roundf(x) roundf(x)
 #define fast_sinf(x) sinf(x) // Optimized for ARM
 #define fast_sqrtf(x) sqrtf(x) // Optimized for ARM
@@ -35,6 +37,7 @@
 // Double versions
 
 // Actually, we'll end up calling float versions and casting them to doubles.
+#define fast_fabs(x) abs(x)
 #define fast_acos(x) fast_acosf(x)
 #define fast_asin(x) fast_asinf(x)
 #define fast_atan(x) fast_atanf(x)
@@ -51,6 +54,7 @@
 #define fast_log10(x) fast_log10f(x)
 #define fast_pow(x, y) fast_powf(x, y)
 #define fast_remainder(x, y) fast_remainderf(x, y)
+#define fast_rint(x) fast_rintf(x)
 #define fast_round(x) fast_roundf(x)
 #define fast_sin(x) fast_sinf(x)
 #define fast_sqrt(x) fast_sqrtf(x)

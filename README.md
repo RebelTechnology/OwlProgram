@@ -32,7 +32,7 @@ edit OwlProgram/common.mk and point TOOLROOT to where arm-none-eabi binaries are
 to compile puredata patches you need hvcc
 
     $ sudo apt install python python-enum34 python-jinja2 python-nose2
-    $ git clone https://github.com/enzienaudio/hvcc OwlProgram/Tools/hvcc
+    $ git clone https://github.com/pingdynasty/hvcc.git
     
 compile FirmwareSender 
 

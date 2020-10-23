@@ -498,6 +498,15 @@ void FloatArray::decibelToGain(FloatArray destination){
     destination[i] = exp10f(data[i]*0.05);
 }
 
+void FloatArray::ramp(float from, float to){
+  float step = (to-from)/size;
+  float value = from;
+  for(size_t i=0; i<size; i++){
+    data[i] = from;
+    from += step;
+  }
+}
+
 FloatArray FloatArray::create(int size){
   FloatArray fa(new float[size], size);
   fa.clear();

@@ -16,6 +16,8 @@ heavy_hash = HeavyLangObject.HeavyLangObject.get_hash
 
 import jinja2
 
+OWL_BUTTONS = ['Push', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']
+               
 def get_template(path):
     templateLoader = jinja2.FileSystemLoader(searchpath=dir_path)
     templateEnv = jinja2.Environment(loader=templateLoader)
@@ -38,89 +40,51 @@ def main():
     )
 
     args = parser.parse_args()
-
-    channels = ['A', 'B', 'C', 'D','E', 'F', 'G', 'H',
-                'AA', 'AB', 'AC', 'AD','AE', 'AF', 'AG', 'AH',
-                'BA', 'BB', 'BC', 'BD','BE', 'BF', 'BG', 'BH',
-                ]
-
-    recvs = odict()
-    sends = odict()
-    mins = odict()
-    maxs = odict()
-    defs = odict()
-    #from pprint import pprint as pp
+    jdata = list()
 
     # Read receive and send object data
     with open(args.infilename, mode="r") as f:
         ir = json.load(f)
 
-        for k, v in ir['control']['receivers'].iteritems():
+        for name, v in ir['control']['receivers'].iteritems():
             # skip __hv_init and similar
-            if k.startswith("__"):
+            if name.startswith("__"):
                 continue
 
             # If a name has been specified
             if 'owl' in v['attributes'] and v['attributes']['owl'] is not None:
                 key = v['attributes']['owl']
-                recvs[key] = k
-                mins[key] = v['attributes']['min']
-                maxs[key] = v['attributes']['max']
-                defs[key] = v['attributes']['default']
-            elif k.startswith('Channel-'):
-                key = k.split('Channel-', 1)[1]
-                recvs[key] = k
-                mins[key] = 0
-                maxs[key] = 1
-                defs[key] = 0.5
+                jdata.append((key, name, 'RECV', "0x%x" % heavy_hash(name),
+                              v['attributes']['min'],
+                              v['attributes']['max'],
+                              v['attributes']['default'],
+                              key in OWL_BUTTONS))
+
+            elif name.startswith('Channel-'):
+                key = name.split('Channel-', 1)[1]
+                jdata.append((key, name, 'RECV', "0x%x" % heavy_hash(name),
+                              0, 1, 0.5, key in OWL_BUTTONS))
 
         for k, v in ir['objects'].iteritems():
             try:
                 if v['type'] == '__send':
+                    name = v['args']['name']
                     if 'owl' in v['args']['attributes'] and v['args']['attributes']['owl'] is not None:
                         key = v['args']['attributes']['owl']
-                        sends[key] = v['args']['name']
-                        mins[key] = v['args']['attributes']['min']
-                        maxs[key] = v['args']['attributes']['max']
-                        defs[key] = v['args']['attributes']['default']
-                    else:
-                        key = v['args']['name']
-                        sends[key] = key
-                        mins[key] = 0
-                        maxs[key] = 1
-                        defs[key] = 0.5
+                        jdata.append((key, name+'>', 'SEND', "0x%x" % heavy_hash(name),
+                                      v['args']['attributes']['min'],
+                                      v['args']['attributes']['max'],
+                                      v['args']['attributes']['default'],
+                                      key in OWL_BUTTONS))
+                    elif name.startswith('Channel-'):
+                        key = name.split('Channel-', 1)[1]
+                        jdata.append((key, name+'>', 'SEND', "0x%x" % heavy_hash(name),
+                                      0, 1, 0.5, key in OWL_BUTTONS))
             except:
                 pass
 
     # TODO, check that there is not channel defined both as input and output
-
-    # Prepare data for output reordering by channel order
-    jdata = list()
-    with open(args.outfilename, mode="w") as f:
-        for chan in channels:
-
-            if chan in recvs:
-                name = recvs[chan]
-                typ = 'RECV'
-                namehash = heavy_hash(name)
-                minvalue = mins[chan]
-                maxvalue = maxs[chan]
-                defvalue = defs[chan]
-
-            elif chan in sends:
-                # first we compute the hash, then append the '>' for the label
-                name = sends[chan]
-                namehash = heavy_hash(name)
-                name += '>'
-                typ = 'SEND'
-                minvalue = mins[chan]
-                maxvalue = maxs[chan]
-                defvalue = defs[chan]
-            else:
-                continue
-
-            jdata.append((chan, name, typ, "0x%x" % namehash, minvalue, maxvalue, defvalue))
-
+                                                              
     # Write to files
     with open(args.outfilename, mode="w") as f:
         template = get_template("Heavy_owl_constants.tpl.h")
