@@ -30,8 +30,8 @@ int Patch::getBlockSize(){
 
 int Patch::getNumberOfChannels(){
   uint8_t format = getProgramVector()->audio_format;
-  if((format & 0xf0) == AUDIO_FORMAT_24B32 && (format & 0x0f) > 0)
-    return format & 0x0f;
+  if (AUDIO_FORMAT(format) == AUDIO_FORMAT_24B32)
+    return AUDIO_FORMAT_CHANNELS(format);
   return 2;
 }
 
