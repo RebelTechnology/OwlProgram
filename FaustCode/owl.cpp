@@ -414,14 +414,14 @@ class OwlUI : public UI {
             else if (fParameter != NO_PARAMETER) {
                 fParameterTable[fParameterIndex++] = new OwlParameter(
                     fPatch, fParameter, zone, label, lo, lo, hi, true);
-	    }
-	    else if(fButton != NO_BUTTON){
-	        fParameterTable[fParameterIndex++] = new OwlButton(
-		    fPatch, fButton, zone, label, true);
-	    }
-	}
-	fParameter = NO_PARAMETER;
-	fButton = NO_BUTTON;
+            }
+            else if(fButton != NO_BUTTON){
+                fParameterTable[fParameterIndex++] = new OwlButton(
+                fPatch, fButton, zone, label, true);
+            }
+        }
+        fParameter = NO_PARAMETER;
+        fButton = NO_BUTTON;
     }
 
     void addOwlButton(const char* label, FAUSTFLOAT* zone) {
@@ -435,7 +435,7 @@ class OwlUI : public UI {
                     new OwlButton(fPatch, fButton, zone, label);
             }
         }
-	fParameter = NO_PARAMETER;
+        fParameter = NO_PARAMETER;
         fButton = NO_BUTTON; // clear current button ID
     }
 
@@ -572,8 +572,8 @@ public:
                     }
                     else if (param_tmp == PARAMETER_B && *id >= '0' && *id <= '9') {
                         fButton = PatchButtonId(BUTTON_A + *id - '1');
-		    }
-		    else {
+                    }
+                    else {
                         // Inc to skip 1-character params
                         param_tmp++;
                         // This is first character for groups of 8 params
