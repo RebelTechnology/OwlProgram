@@ -396,8 +396,8 @@ class OwlUI : public UI {
 
     void addOutputOwlParameter(
         const char* label, FAUSTFLOAT* zone, FAUSTFLOAT lo, FAUSTFLOAT hi) {
-        if(label[strlen(label) - 1] == '>')
-  	    debugMessage("Add '>' character for output parameters");
+        if(label[strlen(label) - 1] != '>')
+            debugMessage("Add '>' character for output parameters");
         if (fParameterIndex < MAXOWLPARAMETERS) {
             if (meta.midiOn && strcasecmp(label, "freq") == 0) {
                 fParameterTable[fParameterIndex++] =
