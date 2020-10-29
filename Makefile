@@ -121,6 +121,10 @@ store: patch ## upload and save patch to attached OWL
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to store in slot $(SLOT)
 	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out "$(OWLDEVICE)" -store $(SLOT)
 
+resource: $(RESOURCE) ## upload and save resource to attached OWL
+	@echo Sending resource $(RESOURCE) to $(OWLDEVICE) to store in slot $(SLOT)
+	@$(FIRMWARESENDER) -q -in $(RESOURCE) -out "$(OWLDEVICE)" -store $(SLOT)
+
 docs: ## generate HTML documentation
 	@doxygen Doxyfile
 
