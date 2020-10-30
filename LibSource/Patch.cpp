@@ -32,19 +32,22 @@ float Patch::getParameterValue(PatchParameterId pid){
   //  return getInitialisingPatchProcessor()->getParameterValue(pid);
   // if(pid < getProgramVector()->parameters_size)
   if(pid < getProgramVector()->parameters_size){
-    if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4){
+#ifdef USE_LEGACY_FIRMWARE
+    if(getProgramVector()->isLegacyFirmware() && pid < 4)
       return (4095 - getProgramVector()->parameters[pid])/4096.0f;
-    }else{
+    else
+#endif
       return getProgramVector()->parameters[pid]/4096.0f;
-    }
   }
   return 0.0f;
 }
 
 void Patch::setParameterValue(PatchParameterId pid, float value){
-  if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE && pid < 4)
+#ifdef USE_LEGACY_FIRMWARE
+  if(getProgramVector()->isLegacyFirmware() && pid < 4)
     doSetPatchParameter(pid, 4095 - (int16_t)(value*4096.0f));
   else
+#endif
     doSetPatchParameter(pid, (int16_t)(value*4096));
 }
 
@@ -82,7 +85,7 @@ int Patch::getElapsedCycles(){
       screen.setTextSize(1);
       screen.setTextWrap(true);
       screen.print(0, 26, pv->message);
-    }    
+    }
   }
   void drawTitle(const char* title, ScreenBuffer& screen){
     // draw title

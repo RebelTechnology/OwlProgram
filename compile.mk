@@ -66,6 +66,8 @@ CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
 else ifeq ($(PLATFORM),Player)
 CPPFLAGS    += -DOWL_PLAYER
 CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
+else ifeq ($(PLATFORM),OwlLegacy)
+CPPFLAGS    += -DOWL_CLASSIC -DUSE_LEGACY_FIRMWARE
 else
 CPPFLAGS    += -DOWL_CLASSIC
 endif
