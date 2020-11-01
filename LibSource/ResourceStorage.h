@@ -1,0 +1,127 @@
+#ifndef __RESOURCE_STORAGE_H__
+#define __RESOURCE_STORAGE_H__
+
+#include <stdint.h>
+#include <cstring>
+#include "OpenWareMidiControl.h"
+#include "ServiceCall.h"
+#include "ProgramVector.h"
+
+
+/*
+ * This class is sort of abstract, but doesn't contain virtual functions. It should never
+ * be instantiated directly, but it can be returned by untyped getResource() calls to storage.
+  */
+class Resource {
+protected:
+    uint32_t magic;
+    Resource() = default; // This is required by child objects, but we don't want to insantiate this class manually
+public:
+    uint32_t size;
+    char name[24];
+    Resource& operator=(const Resource&) = delete;
+    Resource(const Resource&) = delete;
+    uint8_t* getData() const{
+        return (uint8_t*)this + sizeof(Resource);
+    }
+    void setName(const char* new_name) {        
+        strncpy(name, new_name, 24);
+    }
+};
+
+/*
+ * StorageResource is template for accessing payload of specific type. It's OK to instantiate it
+ * multiple types in one patch if necessary. It should be considered read-only, because
+ * its data comes from flash.
+ */
+template<typename Payload>
+class StorageResource : public Resource {
+public:
+    const Payload& getPayload() const { // Only reference to payload can be obtained and it's immutable
+        return *(Payload*)getData();
+    }
+};
+
+/*
+ * This template contains payload that is stored in memory can be written to flash. It is mutable.
+ */
+template<typename Payload>
+class MemoryResource : public Resource {
+public:
+    Payload payload;
+    MemoryResource() {
+        magic = 0xDADADEED;
+        size = sizeof(*this);
+    }
+    MemoryResource(Payload payload) : payload(payload) {
+        MemoryResource();
+    }
+    MemoryResource& operator=(const MemoryResource&) = delete; // We want to move and not copy data in memory.
+    MemoryResource& operator=(const StorageResource<Payload>& resource) { // Copy from storage to memory.
+        std::memcpy((void*)&payload, (void*)&resource.getPayload(), sizeof(Payload));
+        setName(resource.name);
+        return *this;
+    }
+    MemoryResource(const MemoryResource&) = delete;
+};
+
+
+class ResourceStorage {
+public:
+    ResourceStorage() {
+        init();
+    };
+    // Disable copy and assignment
+    ResourceStorage& operator=(const ResourceStorage&) = delete;
+    ResourceStorage(const ResourceStorage&) = delete;
+
+    // This is just an explicit call to return data retrieved by init()
+    uint8_t getResourceCount() const {
+        return num_resources;
+    };
+    uint8_t getResourceId(const char* name) const;
+    bool deleteResource(uint8_t index);
+    
+    // Untyped resource access - maybe we can get rid of this? Othrewise we could also add
+    // untyped storeResource version, but this would have to rely on user setting correct data size
+    const Resource* getResource(uint8_t index) const;
+    const Resource* getResource(const char* name) const;
+
+    // Typed resource access
+    // Note: template function implementations must be visible to all translation units that use
+    // it, so we can't place the following 3 methods in CPP file.
+    template<typename Payload>
+    const StorageResource<Payload>* getResource(uint8_t index) const {
+        return reinterpret_cast<const StorageResource<Payload>*>(getResource(index));
+    }
+
+    template<typename Payload>
+    const StorageResource<Payload>* getResource(const char* name) const {
+        return reinterpret_cast<const StorageResource<Payload>*>(getResource(name));
+    }
+
+    template<typename Payload>
+    bool storeResource(uint8_t index, const MemoryResource<Payload>& resource) {
+        void (*callback)(uint8_t, void*) = NULL;
+        void* args[] = {
+            (void*)(SYSTEM_FUNCTION_RESOURCE_STORE), &callback
+        };
+        int ret = getProgramVector()->serviceCall(OWL_SERVICE_REQUEST_CALLBACK, args, 2);
+        if (ret == OWL_SERVICE_OK){
+            callback(index, (void*)&resource);
+            init();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+private:
+    uint8_t num_resources;
+    // This could be made public if necessary. For now it's called automaticall on
+    // patch start and after deleting resource. We might have a callback that would
+    // call this if resource gets deleted outside of patch, i.e. by MIDI or in UI.
+    void init();
+};
+
+#endif

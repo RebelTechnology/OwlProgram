@@ -8,7 +8,7 @@ CPP_SRC += ShortArray.cpp
 CPP_SRC += Envelope.cpp VoltsPerOctave.cpp Window.cpp
 CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
 CPP_SRC += SmoothValue.cpp PatchParameter.cpp
-CPP_SRC += PatchProgram.cpp 
+CPP_SRC += PatchProgram.cpp ResourceStorage.cpp
 # CPP_SRC += ShortPatchProgram.cpp 
 
 SOURCE       = $(BUILDROOT)/Source
