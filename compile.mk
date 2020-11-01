@@ -9,6 +9,7 @@ CPP_SRC += Envelope.cpp VoltsPerOctave.cpp Window.cpp
 CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
 CPP_SRC += SmoothValue.cpp PatchParameter.cpp
 CPP_SRC += MonochromeScreenPatch.cpp ColourScreenPatch.cpp
+CPP_SRC += Resource.cpp
 C_SRC += font.c
 
 SOURCE       = $(BUILDROOT)/Source
