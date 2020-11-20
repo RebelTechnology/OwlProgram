@@ -16,8 +16,8 @@ MEMORY
   PATCHFLASH (rx)  : ORIGIN = 0x08040000, LENGTH = 128K   /* Sector 6 */ /* total Flash memory is 1Mb */
   CCMHEAP (rw)     : ORIGIN = 0x10004000, LENGTH = 32K
   CCMRAM (rw)      : ORIGIN = 0x1000c000, LENGTH = 16K    /* total CCM is 64kb */
-  LOADERRAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 48K
-  PATCHRAM (rwx)   : ORIGIN = 0x2000c000, LENGTH = 64K    /* total RAM is 112kb */
+  FIRMWARERAM (rwx): ORIGIN = 0x20000000, LENGTH = 48K
+  PATCHRAM (rwx)   : ORIGIN = 0x2000c000, LENGTH = 144K   /* total RAM is 192kb */
   NVRAM (rw)       : ORIGIN = 0x40024000, LENGTH = 4K
   EXTRAM (rx)      : ORIGIN = 0x68000000, LENGTH = 1M
 }

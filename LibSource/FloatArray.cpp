@@ -507,6 +507,15 @@ void FloatArray::ramp(float from, float to){
   }
 }
 
+void FloatArray::tanh(FloatArray destination){
+  for(size_t i=0; i<size; i++)
+    destination[i] = tanhf(data[i]);  
+}
+
+void FloatArray::tanh(){
+  tanh(*this);
+}
+
 FloatArray FloatArray::create(int size){
   FloatArray fa(new float[size], size);
   fa.clear();

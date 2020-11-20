@@ -21,6 +21,9 @@ public:
   void setTune(float octaves){
     tune = octaves;
   }
+  void setMidiNote(float note){
+    tune = (note-69)/12.0f; // 440Hz == A4 == MIDI Note 69
+  }
   float getFrequency(float sample){
     return voltsToHertz(sampleToVolts(sample) + tune);
   }
@@ -32,6 +35,12 @@ public:
   }
   static float voltsToHertz(float volts){
     return 440.f * exp2f(volts);
+  }
+  static float hertzToNote(float freq){
+    return 12 * log2f(freq/440.f) + 69;
+  }
+  static float noteToHertz(float note){
+    return 440.0f * exp2f((note - 69) / 12);
   }
   float voltsToSample(float volts){
     return volts / multiplier + offset;
