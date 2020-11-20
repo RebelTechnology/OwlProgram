@@ -1,4 +1,7 @@
 #include "ScreenBuffer.h"
+
+#ifndef NO_SCREEN
+
 #include <string.h>
 #include <stddef.h>
 #include "font.c"
@@ -226,3 +229,4 @@ void ScreenBuffer::write(uint8_t c) {
     }
   }
 }
+#endif

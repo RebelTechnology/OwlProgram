@@ -7,9 +7,6 @@
 #include "PatchParameter.h"
 #include "SmoothValue.h"
 #include "OpenWareMidiControl.h"
-#ifdef USE_SCREEN
-#include "ScreenBuffer.h"
-#endif /* USE_SCREEN */
 
 #ifdef USE_MIDI_CALLBACK
 #include "MidiMessage.h"
@@ -68,11 +65,6 @@ public:
   virtual void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){}
   /* virtual void parameterChanged(PatchParameterId pid, float value, int samples){} */
   virtual void processAudio(AudioBuffer& audio) = 0;
-#ifdef USE_SCREEN
-  uint16_t getScreenWidth();
-  uint16_t getScreenHeight();
-  virtual void processScreen(ScreenBuffer& screen);
-#endif /* USE_SCREEN */
 #ifdef USE_MIDI_CALLBACK
   virtual void processMidi(MidiMessage msg);
   virtual void sendMidi(MidiMessage msg);

@@ -4,13 +4,18 @@
 #include <stdint.h>
 #include "device.h"
 
-#if defined SSD1309
-typedef uint8_t Colour;
-// Color definitions mono
-#define	BLACK           0x00
-#define WHITE           0x01
-#elif defined SSD1331 || defined SEPS114A
-typedef uint16_t Colour;
+enum ScreenDriver {
+   SSD1309 = 0x01,
+   SSD1331 = 0x02
+};
+
+// #if defined SSD1309
+// typedef uint8_t Colour;
+// // Color definitions mono
+// #define	BLACK           0x00
+// #define WHITE           0x01
+// #elif defined SSD1331 || defined SEPS114A
+// typedef uint16_t Colour;
 // Color definitions
 #define	BLACK           0x0000
 #define	BLUE            0x001F
@@ -20,10 +25,11 @@ typedef uint16_t Colour;
 #define MAGENTA         0xF81F
 #define YELLOW          0xFFE0  
 #define WHITE           0xFFFF
-#else
-#error "Invalid configuration"
-#endif
+// #else
+// #define NO_SCREEN
+// #endif
 
+template<ScreenDriver driver, typename Colour>
 class ScreenBuffer {
 private:
   const uint16_t width;
@@ -88,10 +94,5 @@ public:
   void print(float num);
   static ScreenBuffer* create(uint16_t width, uint16_t height);
 };
-
-/* class VideoPatch : public Patch { */
-/* public: */
-/*   virtual void processVideo(ScreenBuffer& video, AudioBuffer& audio) = 0; */
-/* }; */
 
 #endif // __ScreenBuffer_h__
