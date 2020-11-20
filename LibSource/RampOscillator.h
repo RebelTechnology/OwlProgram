@@ -1,18 +1,18 @@
-#ifndef PHASOR_H
-#define PHASOR_H
+#ifndef RAMPOSCILLATOR_H
+#define RAMPOSCILLATOR_H
 
 #include "Oscillator.h"
 
-class Phasor : public Oscillator {
+class RampOscillator : public Oscillator {
 private:
   float mul;
   float phase;
   float incr;
 public:
-  Phasor() : phase(0.0f), incr(0.0f) {    
+  RampOscillator() : phase(0.0f), incr(0.0f) {    
     setSampleRate(48000);
   }
-  Phasor(float sr) : phase(0.0f), incr(0.0f){
+  RampOscillator(float sr) : phase(0.0f), incr(0.0f){
     setSampleRate(sr);
   }    
   void setSampleRate(float sr){
@@ -46,12 +46,12 @@ public:
       phase -= 1.0f;
     return sample;
   }  
-  static Phasor* create(float sr){
-    return new Phasor(sr);
+  static RampOscillator* create(float sr){
+    return new RampOscillator(sr);
   }
-  static void destroy(Phasor* osc){
+  static void destroy(RampOscillator* osc){
     delete osc;
   }
 };
 
-#endif /* PHASOR_H */
+#endif /* RAMPOSCILLATOR_H */
