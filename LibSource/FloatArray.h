@@ -473,6 +473,16 @@ public:
    * Create a linear ramp from one value to another across all values in the Float
    */
   void ramp(float from, float to);
+  
+  /**
+   * Apply tanh to each element in the array
+   */
+  void tanh(FloatArray destination);
+
+  /**
+   * In-place tanh
+   */
+  void tanh();
 
   /**
    * Creates a new FloatArray.
