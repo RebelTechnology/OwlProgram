@@ -100,9 +100,6 @@ void* pvPortRealloc(void *pv, size_t xWantedSize);
 #define sqrt(x) arm_sqrtf(x)
 #define sqrtf(x) arm_sqrtf(x)
 #define rand() arm_rand32()
-#define tanh(x) tanhf(x)
-#define sinh(x) sinhf(x)
-#define cosh(x) coshf(x)
 
 #ifdef __FAST_MATH__ /* set by gcc option -ffast-math */
 
