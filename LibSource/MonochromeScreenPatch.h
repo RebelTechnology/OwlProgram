@@ -7,6 +7,10 @@
 typedef uint8_t Colour;
 typedef ScreenBuffer<uint8_t, BLACK, WHITE> MonochromeScreenBuffer;
 
+/**
+ * Abstract base class for patches that use a monochrome screen.
+ * Compatible OLED drivers: SSD1309
+ */
 class MonochromeScreenPatch : public Patch {
 public:
   MonochromeScreenPatch();

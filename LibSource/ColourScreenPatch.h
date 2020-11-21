@@ -13,6 +13,11 @@
 typedef uint16_t Colour;
 typedef ScreenBuffer<uint16_t, BLACK, WHITE> ColourScreenBuffer;
 
+/**
+ * Abstract base class for patches that use a colour screen.
+ * Colour format is 16 bits RGB565: RRRRR GGGGGG BBBBB
+ * Compatible OLED drivers: SSD1331, SEPS1114A
+ */
 class ColourScreenPatch : public Patch {
 public:
   ColourScreenPatch();
