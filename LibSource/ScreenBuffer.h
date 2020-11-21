@@ -196,33 +196,59 @@ ScreenBuffer(uint16_t w, uint16_t h) :
     }
   }
 
-  // void invert();
-  // void invert(int x, int y, int width, int height);
-  // void draw(int x, int y, ScreenBuffer& pixels);
+  void drawCircle(uint16_t x, uint16_t y, uint16_t r, Colour c){
+    /*
+     * Bresenhams midpoint circle algorithm AKA "Make turbo C great again!"
+     * We don't use floating point or any slow maths to find circle points.
+     * But since we draw it around center, circles with even radius become
+     * slightly asymmetric.
+     */
+    int16_t tx = r;
+    int16_t ty = 0;
+    int16_t err = 0;
+    while (tx >= ty) {
+      setPixel(x + tx, y + ty, c); // p1
+      setPixel(x + ty, y + tx, c); // p2
+      setPixel(x - ty, y + tx, c); // p3
+      setPixel(x - tx, y + ty, c); // p4
+      setPixel(x - tx, y - ty, c); // p5
+      setPixel(x - ty, y - tx, c); // p6
+      setPixel(x + ty, y - tx, c); // p7
+      setPixel(x + tx, y - ty, c); // p8 
+      if (err <= 0){
+	ty += 1;
+	err += 2 * ty + 1;
+      } 
+      if (err >= 0){
+	tx -= 1;
+	err -= 2 * tx + 1;
+      }
+    }
+  }
 
-  // // lines and rectangles
-  // void drawLine(int fromX, int fromY, int toX, int toY, Colour c);
-  // void drawVerticalLine(int x, int y, int length, Colour c);
-  // void drawHorizontalLine(int x, int y, int length, Colour c);
-  // void drawRectangle(int x, int y, int width, int height, Colour c);
-  // void fillRectangle(int x, int y, int width, int height, Colour c);
-
-  // void setCursor(uint16_t x, uint16_t y);
-  // void setTextColour(Colour c);
-  // void setTextColour(Colour fg, Colour bg);
-  // void setTextSize(uint8_t s);
-  // void setTextWrap(bool w);
-  // // void setFont(int font, int size);
-  // void write(uint8_t c);
-  // void print(const char* str);
-  // void print(int num);
-  // void print(float num);
-  // static ScreenBuffer* create(uint16_t width, uint16_t height);
-
-  
-  // // todo: load font as resources et c
-  // void drawChar(uint16_t x, uint16_t y, unsigned char c, Colour fg, Colour bg, uint8_t size);
-  // void drawRotatedChar(uint16_t x, uint16_t y, unsigned char c, Colour fg, Colour bg, uint8_t size);
+  void fillCircle(uint16_t x, uint16_t y, uint16_t r, Colour c){
+    /*
+     * This is based of code from drawCircle, but we connect circle's points
+     * with horizontal lines
+     */
+    int16_t tx = r;
+    int16_t ty = 0;
+    int16_t err = 0;
+    while (tx >= ty) {
+      drawHorizontalLine(x - tx, y + ty, tx * 2 + 1, c); // p4 -> p1
+      drawHorizontalLine(x - ty, y + tx, ty * 2 + 1, c); // p3 -> p2
+      drawHorizontalLine(x - tx, y - ty, tx * 2 + 1, c); // p5 -> p8
+      drawHorizontalLine(x - ty, y - tx, ty * 2 + 1, c); // p6 -> p7 
+      if (err <= 0){
+	ty += 1;
+	err += 2 * ty + 1;
+      } 
+      if (err >= 0){
+	tx -= 1;
+	err -= 2 * tx + 1;
+      }
+    }
+  }
 
   // Draw a character
   void drawChar(uint16_t x, uint16_t y, unsigned char ch,
