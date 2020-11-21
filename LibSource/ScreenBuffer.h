@@ -3,33 +3,23 @@
 
 #include <stdint.h>
 #include "device.h"
+#include "message.h"
 
-enum ScreenDriver {
-   SSD1309 = 0x01,
-   SSD1331 = 0x02
-};
+#define	BLACK           0
+#define	WHITE           1
 
-// #if defined SSD1309
-// typedef uint8_t Colour;
-// // Color definitions mono
-// #define	BLACK           0x00
-// #define WHITE           0x01
-// #elif defined SSD1331 || defined SEPS114A
-// typedef uint16_t Colour;
-// Color definitions
-#define	BLACK           0x0000
-#define	BLUE            0x001F
-#define	RED             0xF800
-#define	GREEN           0x07E0
-#define CYAN            0x07FF
-#define MAGENTA         0xF81F
-#define YELLOW          0xFFE0  
-#define WHITE           0xFFFF
-// #else
-// #define NO_SCREEN
-// #endif
+#define swap(a, b) { int16_t t = a; a = b; b = t; }
+#ifndef min
+#define min(a,b) ((a)<(b)?(a):(b))
+#endif
+#ifndef max
+#define max(a,b) ((a)>(b)?(a):(b))
+#endif
+#ifndef abs
+#define abs(x) ((x)>0?(x):-(x))
+#endif
 
-template<ScreenDriver driver, typename Colour>
+template<typename Colour>
 class ScreenBuffer {
 private:
   const uint16_t width;
@@ -42,7 +32,10 @@ private:
   uint16_t textbgcolor;
   bool wrap;
 public:
-  ScreenBuffer(uint16_t w, uint16_t h);
+ScreenBuffer(uint16_t w, uint16_t h) : 
+  width(w), height(h), pixels(NULL),
+  cursor_x(0), cursor_y(0), textsize(1),
+  textcolor(WHITE), textbgcolor(WHITE), wrap(true) {}
   inline int getWidth(){
     return width;
   }
@@ -67,32 +60,171 @@ public:
   void clear(int x, int y, int width, int height){
     fillRectangle(x, y, width, height, BLACK);
   }
-  void invert();
-  void invert(int x, int y, int width, int height);
-  void draw(int x, int y, ScreenBuffer& pixels);
-
-  // lines and rectangles
-  void drawLine(int fromX, int fromY, int toX, int toY, Colour c);
-  void drawVerticalLine(int x, int y, int length, Colour c);
-  void drawHorizontalLine(int x, int y, int length, Colour c);
-  void drawRectangle(int x, int y, int width, int height, Colour c);
-  void fillRectangle(int x, int y, int width, int height, Colour c);
 
   // text
-  void print(int x, int y, const char* text);
+  void print(const char* str) {
+    unsigned int len = strnlen(str, 256);
+    for(unsigned int i=0; i<len; ++i)
+      write(str[i]);
+  }
+  
+void print(float num) {
+  print(msg_ftoa(num, 10));
+}
+
+void print(int num) {
+  print(msg_itoa(num, 10));
+}
+
+void print(int x, int y, const char* text){
+  setCursor(x, y);
+  print(text);
+}
+
+  // todo: load font as resources et c
   void drawChar(uint16_t x, uint16_t y, unsigned char c, Colour fg, Colour bg, uint8_t size);
   void drawRotatedChar(uint16_t x, uint16_t y, unsigned char c, Colour fg, Colour bg, uint8_t size);
-  void setCursor(uint16_t x, uint16_t y);
-  void setTextColour(Colour c);
-  void setTextColour(Colour fg, Colour bg);
-  void setTextSize(uint8_t s);
-  void setTextWrap(bool w);
-  // void setFont(int font, int size);
-  void write(uint8_t c);
-  void print(const char* str);
-  void print(int num);
-  void print(float num);
-  static ScreenBuffer* create(uint16_t width, uint16_t height);
+  
+void drawVerticalLine(int x, int y,
+				    int length, Colour c){
+  // drawLine(x, y, x, y+length-1, c);
+  length += y;
+  while(y < length)
+    setPixel(x, y++, c);
+}
+
+void drawHorizontalLine(int x, int y,
+				      int length, Colour c){
+  // drawLine(x, y, x+length-1, y, c);
+  length += x;
+  while(x < length)
+    setPixel(x++, y, c);
+}
+
+void fillRectangle(int x, int y, int w, int h,
+				 Colour c) {
+  // for(int i=x; i<x+w; i++)
+  //   drawVerticalLine(i, y, h, c);
+  for(int i=y; i<y+h; i++)
+    drawHorizontalLine(x, i, w, c);
+}
+
+void drawRectangle(int x, int y, int w, int h,
+				 Colour c) {
+  drawHorizontalLine(x+1, y, w-2, c);
+  drawHorizontalLine(x+1, y+h-1, w-2, c);
+  drawVerticalLine(x, y, h, c);
+  drawVerticalLine(x+w-1, y, h, c);
+}
+
+  
+// Bresenham's algorithm - thx wikpedia
+void drawLine(int x0, int y0,
+			    int x1, int y1,
+			    Colour c) {
+  int steep = abs(y1 - y0) > abs(x1 - x0);
+  if (steep) {
+    swap(x0, y0);
+    swap(x1, y1);
+  }
+  if (x0 > x1) {
+    swap(x0, x1);
+    swap(y0, y1);
+  }
+  int dx, dy;
+  dx = x1 - x0;
+  dy = abs(y1 - y0);
+  int err = dx / 2;
+  int ystep;
+  if (y0 < y1)
+    ystep = 1;
+  else
+    ystep = -1;
+  for (; x0<=x1; x0++) {
+    if (steep)
+      setPixel(y0, x0, c);
+    else
+      setPixel(x0, y0, c);
+    err -= dy;
+    if (err < 0) {
+      y0 += ystep;
+      err += dx;
+    }
+  }
+}
+
+void setCursor(uint16_t x, uint16_t y) {
+  cursor_x = x;
+  cursor_y = y;
+}
+
+void setTextSize(uint8_t s) {
+  textsize = (s > 0) ? s : 1;
+}
+
+void setTextColour(Colour c) {
+  // For 'transparent' background, we'll set the bg 
+  // to the same as fg instead of using a flag
+  textcolor = textbgcolor = c;
+}
+
+void setTextColour(Colour c, Colour b) {
+  textcolor   = c;
+  textbgcolor = b; 
+}
+
+void setTextWrap(bool w) {
+  wrap = w;
+}
+
+void invert(){
+  invert(0, 0, width, height);
+}
+
+void invert(int x, int y, int w, int h){
+  for(int i=x; i<x+w; ++i)
+    for(int j=y; j<y+h; ++j)
+      invertPixel(i, j);
+}
+
+void write(uint8_t c) {
+  if (c == '\n') {
+    cursor_y += textsize*8;
+    cursor_x  = 0;
+  } else if (c == '\r') {
+    // skip em
+  } else {
+    drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize);
+    cursor_x += textsize*6;
+    if(wrap && (cursor_x > (width - textsize*6))){
+      cursor_y += textsize*8;
+      cursor_x = 0;
+    }
+  }
+}
+
+  // void invert();
+  // void invert(int x, int y, int width, int height);
+  // void draw(int x, int y, ScreenBuffer& pixels);
+
+  // // lines and rectangles
+  // void drawLine(int fromX, int fromY, int toX, int toY, Colour c);
+  // void drawVerticalLine(int x, int y, int length, Colour c);
+  // void drawHorizontalLine(int x, int y, int length, Colour c);
+  // void drawRectangle(int x, int y, int width, int height, Colour c);
+  // void fillRectangle(int x, int y, int width, int height, Colour c);
+
+  // void setCursor(uint16_t x, uint16_t y);
+  // void setTextColour(Colour c);
+  // void setTextColour(Colour fg, Colour bg);
+  // void setTextSize(uint8_t s);
+  // void setTextWrap(bool w);
+  // // void setFont(int font, int size);
+  // void write(uint8_t c);
+  // void print(const char* str);
+  // void print(int num);
+  // void print(float num);
+  // static ScreenBuffer* create(uint16_t width, uint16_t height);
 };
 
 #endif // __ScreenBuffer_h__

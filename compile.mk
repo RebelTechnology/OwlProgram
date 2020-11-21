@@ -10,7 +10,8 @@ CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
 CPP_SRC += SmoothValue.cpp PatchParameter.cpp
 CPP_SRC += PatchProgram.cpp 
 # CPP_SRC += ShortPatchProgram.cpp 
-CPP_SRC += ScreenBuffer.cpp ScreenBufferDevice.cpp
+# CPP_SRC += ScreenBuffer.cpp ScreenBufferDevice.cpp
+CPP_SRC += MonochromeScreenPatch.cpp
 
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
