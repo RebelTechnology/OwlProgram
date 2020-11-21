@@ -1,5 +1,8 @@
 #include "Patch.h"
-#include "MonochromeScreenBuffer.h"
+#include "ScreenBuffer.h"
+
+typedef uint8_t Colour;
+typedef ScreenBuffer<uint8_t> MonochromeScreenBuffer;
 
 class MonochromeScreenPatch : public Patch {
 public:
