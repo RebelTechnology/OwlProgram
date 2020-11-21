@@ -10,7 +10,7 @@
 
 PatchProcessor* getInitialisingPatchProcessor();
 
-void onDrawCallback(uint8_t* pixels, uint16_t width, uint16_t height){
+static void onDrawCallback(uint8_t* pixels, uint16_t width, uint16_t height){
   MonochromeScreenPatch* patch = (MonochromeScreenPatch*)getInitialisingPatchProcessor()->patch;
   if(patch != NULL){
     MonochromeScreenBuffer screen(width, height);
@@ -25,31 +25,6 @@ MonochromeScreenPatch::MonochromeScreenPatch(){
 }
 
 MonochromeScreenPatch::~MonochromeScreenPatch(){}
-
-void drawMessage(MonochromeScreenBuffer& screen){
-  ProgramVector* pv = getProgramVector();
-  if(pv->message != NULL){
-    screen.setTextSize(1);
-    screen.setTextWrap(true);
-    screen.print(0, 26, pv->message);
-  }    
-}
-void drawTitle(const char* title, MonochromeScreenBuffer& screen){
-  // draw title
-  screen.setTextSize(2);
-  screen.print(0, 16, title);
-}
-
-void MonochromeScreenPatch::processScreen(MonochromeScreenBuffer& screen){
-  // screen.clear();
-  const char* title = getInitialisingPatchProcessor()->getPatchName();
-  drawTitle(title, screen);
-  drawMessage(screen);
-  // const char title[] = "KickBox";
-  // screen.setTextSize(2);
-  // screen.print(0, 16, title);
-}
-
 
 template<>
 Colour MonochromeScreenBuffer::getPixel(unsigned int x, unsigned int y){

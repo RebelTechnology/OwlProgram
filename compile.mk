@@ -11,7 +11,7 @@ CPP_SRC += SmoothValue.cpp PatchParameter.cpp
 CPP_SRC += PatchProgram.cpp 
 # CPP_SRC += ShortPatchProgram.cpp 
 # CPP_SRC += ScreenBuffer.cpp ScreenBufferDevice.cpp
-CPP_SRC += MonochromeScreenPatch.cpp
+CPP_SRC += MonochromeScreenPatch.cpp ColourScreenPatch.cpp
 
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource

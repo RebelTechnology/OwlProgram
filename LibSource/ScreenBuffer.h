@@ -5,9 +5,6 @@
 #include "device.h"
 #include "message.h"
 
-#define	BLACK           0
-#define	WHITE           1
-
 #define swap(a, b) { int16_t t = a; a = b; b = t; }
 #ifndef min
 #define min(a,b) ((a)<(b)?(a):(b))
@@ -19,7 +16,7 @@
 #define abs(x) ((x)>0?(x):-(x))
 #endif
 
-template<typename Colour>
+template<typename Colour, Colour BLACK, Colour WHITE>
 class ScreenBuffer {
 private:
   const uint16_t width;
