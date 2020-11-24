@@ -6,8 +6,6 @@
 #include "PatchProcessor.h"
 #include "ServiceCall.h"
 
-#include "font.c" // todo load as resource
-
 PatchProcessor* getInitialisingPatchProcessor();
 
 static void onDrawCallback(uint8_t* pixels, uint16_t width, uint16_t height){
