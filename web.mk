@@ -26,6 +26,8 @@ C_SRC   += $(wildcard $(GENSOURCE)/*.c)
 CPP_SRC += $(wildcard $(GENSOURCE)/*.cpp)
 C_SRC   += $(wildcard $(PATCHSOURCE)/*.c)
 CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
+CPP_SRC += MonochromeScreenPatch.cpp ColourScreenPatch.cpp
+C_SRC += font.c
 WEBDIR   = $(BUILD)/web
 
 # EMCCFLAGS += -s WASM=0 # disables wasm output
