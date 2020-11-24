@@ -1,23 +1,5 @@
 #include <inttypes.h>
 
-#if defined OWL_MAGUS
-#define USE_SCREEN
-#define SSD1309
-#define AUDIO_MAX_BLOCK_SIZE         512
-#elif defined OWL_PRISM
-#define USE_SCREEN
-#define SEPS114A
-#define AUDIO_MAX_BLOCK_SIZE         256
-#elif defined OWL_PLAYER
-#define USE_SCREEN
-#define SSD1309
-#define AUDIO_MAX_BLOCK_SIZE         512
-#elif defined OWL_ALCHEMIST
-#define AUDIO_MAX_BLOCK_SIZE         512
-#elif defined OWL_WIZARD
-#define AUDIO_MAX_BLOCK_SIZE         512
-#endif
-
 #define USE_MIDI_CALLBACK
 
 #if !defined OWL_CLASSIC

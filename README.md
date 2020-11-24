@@ -73,7 +73,6 @@ Make sure to do a `make clean` before compiling a new patch, or add `clean` to y
 * PATCHOUT: number of output channels, default 2
 * SLOT: user program slot to store patch in, default 0
 * TARGET: changes the output prefix, default 'patch'
-* PLATFORM: Alchemist, Wizard, Prism, Magus, Player, default 'OWL'
 
 If you follow the convention of SimpleDelay then you don't have to specify `PATCHCLASS` and `PATCHFILE`, they will be deduced from `PATCHNAME`.
 t
@@ -122,18 +121,18 @@ do it like this from the main directory of OwlProgram (this will store in slot 6
 
 # Examples
 
-Compile the puredata file owl_hypersaw.pd[[7]](#ref7) for magus platform:
+Compile the puredata file owl_hypersaw.pd[[7]](#ref7):
 
-    make HEAVY=owl_hypersaw PLATFORM=Magus clean patch
+    make HEAVY=owl_hypersaw clean patch
 
 
-Compile puredata file owl_hypersaw.pd for magus platform and send to device to be run immediately:
+Compile puredata file owl_hypersaw.pd and send to device to be run immediately:
 
-    make HEAVY=owl_hypersaw PLATFORM=Magus clean run
+    make HEAVY=owl_hypersaw clean run
 
-Compile KickBox[[8]](#ref8) C++ patch for for magus platform:
+Compile KickBox[[8]](#ref8) C++ patch:
 
-    make PATCHNAME=KickBox PLATFORM=Magus clean patch
+    make PATCHNAME=KickBox clean patch
     
 
 # References

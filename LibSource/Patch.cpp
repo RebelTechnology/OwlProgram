@@ -75,31 +75,6 @@ int Patch::getElapsedCycles(){
   return *DWT_CYCCNT;
 }
 
-#ifdef USE_SCREEN
-  void drawMessage(ScreenBuffer& screen){
-    ProgramVector* pv = getProgramVector();
-    if(pv->message != NULL){
-      screen.setTextSize(1);
-      screen.setTextWrap(true);
-      screen.print(0, 26, pv->message);
-    }    
-  }
-  void drawTitle(const char* title, ScreenBuffer& screen){
-    // draw title
-    screen.setTextSize(2);
-    screen.print(0, 16, title);
-  }
-void Patch::processScreen(ScreenBuffer& screen){
-  // screen.clear();
-  const char* title = getInitialisingPatchProcessor()->getPatchName();
-  drawTitle(title, screen);
-  drawMessage(screen);
-  // const char title[] = "KickBox";
-  // screen.setTextSize(2);
-  // screen.print(0, 16, title);
-}
-#endif /* USE_SCREEN */
-
 #ifdef USE_MIDI_CALLBACK
 void Patch::processMidi(MidiMessage msg){}
 

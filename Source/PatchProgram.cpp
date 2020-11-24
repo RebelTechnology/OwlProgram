@@ -46,16 +46,6 @@ void onButtonChanged(uint8_t id, uint16_t value, uint16_t samples){
     processor.patch->buttonChanged((PatchButtonId)id, value, samples);
 }
 
-#ifdef USE_SCREEN
-void onDrawCallback(uint8_t* pixels, uint16_t width, uint16_t height){
-  if(processor.patch != NULL){
-    ScreenBuffer screen(width, height);
-    screen.setBuffer(pixels);
-    processor.patch->processScreen(screen);
-  }
-}
-#endif /* USE_SCREEN */
-
 #ifdef USE_MIDI_CALLBACK
 void onMidiCallback(uint8_t port, uint8_t status, uint8_t d1, uint8_t d2){
   static MidiMessage msg;
@@ -88,10 +78,6 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
 static SampleBuffer* samples;
 void setup(ProgramVector* pv){
   setSystemTables(pv);
-#ifdef USE_SCREEN
-  void* drawArgs[] = {(void*)SYSTEM_FUNCTION_DRAW, (void*)&onDrawCallback};
-  getProgramVector()->serviceCall(OWL_SERVICE_REGISTER_CALLBACK, drawArgs, 2);
-#endif /* USE_SCREEN */
 #ifdef USE_MIDI_CALLBACK
   void* midiRxArgs[] = {(void*)SYSTEM_FUNCTION_MIDI, (void*)&onMidiCallback};
   getProgramVector()->serviceCall(OWL_SERVICE_REGISTER_CALLBACK, midiRxArgs, 2);
