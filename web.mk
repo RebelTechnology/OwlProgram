@@ -19,7 +19,7 @@ EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_proc
 CPP_SRC  = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/message.cpp
 CPP_SRC += WebSource/web.cpp
 C_SRC   += $(LIBSOURCE)/basicmaths.c
-CPP_SRC += $(LIBSOURCE)/Patch.cpp $(LIBSOURCE)/FloatArray.cpp $(LIBSOURCE)/ComplexFloatArray.cpp $(LIBSOURCE)/FastFourierTransform.cpp $(LIBSOURCE)/Envelope.cpp $(LIBSOURCE)/VoltsPerOctave.cpp $(LIBSOURCE)/Window.cpp $(LIBSOURCE)/WavetableOscillator.cpp $(LIBSOURCE)/PolyBlepOscillator.cpp $(LIBSOURCE)/SmoothValue.cpp
+CPP_SRC += $(LIBSOURCE)/Patch.cpp $(LIBSOURCE)/FloatArray.cpp $(LIBSOURCE)/ComplexFloatArray.cpp $(LIBSOURCE)/FastFourierTransform.cpp $(LIBSOURCE)/Envelope.cpp $(LIBSOURCE)/VoltsPerOctave.cpp $(LIBSOURCE)/Window.cpp $(LIBSOURCE)/WavetableOscillator.cpp $(LIBSOURCE)/PolyBlepOscillator.cpp $(LIBSOURCE)/SmoothValue.cpp $(LIBSOURCE)/PatchParameter.cpp
 C_SRC   += $(LIBSOURCE)/fastpow.c $(LIBSOURCE)/fastlog.c
 C_SRC   += Libraries/KissFFT/kiss_fft.c
 C_SRC   += $(wildcard $(GENSOURCE)/*.c)
