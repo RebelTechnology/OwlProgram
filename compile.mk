@@ -10,6 +10,9 @@ CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
 CPP_SRC += SmoothValue.cpp PatchParameter.cpp
 CPP_SRC += PatchProgram.cpp 
 # CPP_SRC += ShortPatchProgram.cpp 
+# CPP_SRC += ScreenBuffer.cpp ScreenBufferDevice.cpp
+CPP_SRC += MonochromeScreenPatch.cpp ColourScreenPatch.cpp
+C_SRC += font.c
 
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
@@ -53,21 +56,6 @@ CXXFLAGS = -fno-rtti -fno-exceptions
 
 ifdef HEAVY
 CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
-else ifeq ($(PLATFORM),Alchemist)
-CPPFLAGS    += -DOWL_ALCHEMIST
-else ifeq ($(PLATFORM),Wizard)
-CPPFLAGS    += -DOWL_WIZARD
-else ifeq ($(PLATFORM),Prism)
-CPPFLAGS    += -DOWL_PRISM
-CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
-else ifeq ($(PLATFORM),Magus)
-CPPFLAGS    += -DOWL_MAGUS
-CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
-else ifeq ($(PLATFORM),Player)
-CPPFLAGS    += -DOWL_PLAYER
-CPP_SRC     += ScreenBuffer.cpp ScreenBufferDevice.cpp
-else
-CPPFLAGS    += -DOWL_CLASSIC
 endif
 
 CC=gcc

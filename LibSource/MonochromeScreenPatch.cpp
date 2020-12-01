@@ -1,11 +1,31 @@
-#include "ScreenBuffer.h"
+#include <cstddef>
 #include <string.h>
-#include <stddef.h>
-#include "font.c"
+#include "device.h"
+#include "MonochromeScreenPatch.h"
+#include "ProgramVector.h"
+#include "PatchProcessor.h"
+#include "ServiceCall.h"
 
-#if defined SSD1309
+PatchProcessor* getInitialisingPatchProcessor();
 
-Colour ScreenBuffer::getPixel(unsigned int x, unsigned int y){
+static void onDrawCallback(uint8_t* pixels, uint16_t width, uint16_t height){
+  MonochromeScreenPatch* patch = (MonochromeScreenPatch*)getInitialisingPatchProcessor()->patch;
+  if(patch != NULL){
+    MonochromeScreenBuffer screen(width, height);
+    screen.setBuffer(pixels);
+    patch->processScreen(screen);
+  }
+}
+
+MonochromeScreenPatch::MonochromeScreenPatch(){
+  void* drawArgs[] = {(void*)SYSTEM_FUNCTION_DRAW, (void*)&onDrawCallback};
+  getProgramVector()->serviceCall(OWL_SERVICE_REGISTER_CALLBACK, drawArgs, 2);
+}
+
+MonochromeScreenPatch::~MonochromeScreenPatch(){}
+
+template<>
+Colour MonochromeScreenBuffer::getPixel(unsigned int x, unsigned int y){
   if(x >= width || y >= height)
     return 0;
   uint8_t  ucByteOffset = 0;
@@ -19,7 +39,8 @@ Colour ScreenBuffer::getPixel(unsigned int x, unsigned int y){
   // return pixels[y*width+x];
 }
 
-void ScreenBuffer::setPixel(unsigned int x, unsigned int y, Colour c){
+template<>
+void MonochromeScreenBuffer::setPixel(unsigned int x, unsigned int y, Colour c){
   if(x < width && y < height){
     uint8_t  ucByteOffset = 0;
     uint16_t usiArrayLoc = 0;
@@ -35,7 +56,8 @@ void ScreenBuffer::setPixel(unsigned int x, unsigned int y, Colour c){
   }
 }
 
-void ScreenBuffer::invertPixel(unsigned int x, unsigned int y){
+template<>
+void MonochromeScreenBuffer::invertPixel(unsigned int x, unsigned int y){
   if(x < width && y < height){
     uint8_t  ucByteOffset = 0;
     uint16_t usiArrayLoc = 0;
@@ -52,7 +74,8 @@ void ScreenBuffer::invertPixel(unsigned int x, unsigned int y){
   }
 }
 
-void ScreenBuffer::fade(uint16_t steps){
+template<>
+void MonochromeScreenBuffer::fade(uint16_t steps){
   // for(unsigned int i=0; i<height*width; ++i)
   //   pixels[i] = 
   //     (((pixels[i] & RED) >> steps) & RED) | 
@@ -63,43 +86,9 @@ void ScreenBuffer::fade(uint16_t steps){
   // todo: update contrast setting
 }
 
-void ScreenBuffer::fill(Colour c) {
+template<>
+void MonochromeScreenBuffer::fill(Colour c) {
   memset(pixels, c, height*width/8);
   // for(unsigned int i=0; i<height*width; ++i)
   //   pixels[i] = c;
 }
-
-#elif defined SEPS114A
-
-Colour ScreenBuffer::getPixel(unsigned int x, unsigned int y){
-  if(x >= width || y >= height)
-    return 0;
-  return pixels[y*width+x];
-}
-
-void ScreenBuffer::setPixel(unsigned int x, unsigned int y, Colour c){
-  if(x < width && y < height)
-    pixels[y*width+x] = c;
-}
-
-void ScreenBuffer::invertPixel(unsigned int x, unsigned int y){
-  if(x < width && y < height)
-    pixels[y*width+x] ^= WHITE;
-}
-
-void ScreenBuffer::fade(uint16_t steps){
-  for(int i=0; i<height*width; ++i)
-    pixels[i] = 
-      (((pixels[i] & RED) >> steps) & RED) | 
-      (((pixels[i] & GREEN) >> steps) & GREEN) |
-      (((pixels[i] & BLUE) >> steps) & BLUE);
-}
-
-void ScreenBuffer::fill(Colour c) {
-  for(int i=0; i<height*width; ++i)
-    pixels[i] = c;
-}
-
-#else
-#error "Invalid screen configuration"
-#endif

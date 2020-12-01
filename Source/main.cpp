@@ -69,11 +69,6 @@ int main(void){
     return -1;
   }
 
-  if(pv->audio_blocksize > AUDIO_MAX_BLOCK_SIZE){     
-    error(CONFIGURATION_ERROR_STATUS, "Invalid blocksize");
-    return -1;
-  }
-
   size_t before = xPortGetFreeHeapSize();
   setup(pv);
   pv->heap_bytes_used = before - xPortGetFreeHeapSize();
