@@ -18,7 +18,7 @@ enum MidiStatus {
   RESERVED_F4                   = 0xF4,
   RESERVED_F5                   = 0xF5,
   TUNE_REQUEST                  = 0xF6,
-  SYSEX_EOX                     = 0xF7,		
+  SYSEX_EOX                     = 0xF7,
   SYSTEM_REAL_TIME		= 0xF8,
   TIMING_CLOCK		        = 0xF8,
   RESERVED_F9                   = 0xF9,
