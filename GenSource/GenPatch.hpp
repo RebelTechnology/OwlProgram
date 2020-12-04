@@ -203,7 +203,7 @@ public:
     for(int ch=channels; ch<gen::num_outputs(); ++ch){
       buffers[ch] = new float[getBlockSize()];
       name[3] = '1'+ch;
-      registerParameter((PatchParameterId)(PARAMETER_F+ch), name);
+      registerParameter((PatchParameterId)(PARAMETER_F+(ch-channels)), name);
     }
   }
 
