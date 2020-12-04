@@ -28,6 +28,13 @@ int Patch::getBlockSize(){
   return getProgramVector()->audio_blocksize;
 }
 
+int Patch::getNumberOfChannels(){
+  uint8_t format = getProgramVector()->audio_format;
+  if((format & 0xf0) == AUDIO_FORMAT_24B32)
+    return format & 0x0f;
+  return 2;
+}
+
 float Patch::getParameterValue(PatchParameterId pid){
   //  return getInitialisingPatchProcessor()->getParameterValue(pid);
   // if(pid < getProgramVector()->parameters_size)

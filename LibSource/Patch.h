@@ -57,6 +57,7 @@ public:
   int getSamplesSinceButtonPressed(PatchButtonId bid);
   void setButton(PatchButtonId bid, uint16_t value, uint16_t samples=0);
   int getBlockSize();
+  int getNumberOfChannels();
   float getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
   float getElapsedBlockTime();
