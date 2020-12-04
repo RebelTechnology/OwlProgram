@@ -155,11 +155,12 @@ private:
   CommonState *context;
   GenParameterBase* params[GEN_OWL_MAX_PARAM_COUNT];
   size_t param_count = 0;
- float freq = 440.0f;
- float gain = 0.0f;
- float gate = 0.0f;
- float bend = 1.0;
+  float freq = 440.0f;
+  float gain = 0.0f;
+  float gate = 0.0f;
+  float bend = 1.0;
   MonoVoiceAllocator allocator;
+  float** buffers;
 public:
   GenPatch() : allocator(freq, gain, gate, bend) {
     context = (CommonState*)gen::create(getSampleRate(), getBlockSize());
@@ -195,12 +196,23 @@ public:
 	params[param_count++] = new GenParameter(this, context, name, (PatchParameterId)index, i);
       }
     }
+    buffers = new float*[gen::num_outputs()];
+    size_t channels = getNumberOfChannels();
+    debugMessage("SR/CH/BS", (int)getSampleRate(), getNumberOfChannels(), getBlockSize());
+    char name[] = "Out0>";
+    for(int ch=channels; ch<gen::num_outputs(); ++ch){
+      buffers[ch] = new float[getBlockSize()];
+      name[3] = '1'+ch;
+      registerParameter((PatchParameterId)(PARAMETER_F+ch), name);
+    }
   }
 
   ~GenPatch() {
     gen::destroy(context);
     for(int i=0; i<param_count; ++i)
       delete params[i];
+    for(int i=getNumberOfChannels(); i<gen::num_outputs(); ++i)
+      delete[] buffers[i];
   }
 
   void processMidi(MidiMessage msg){
@@ -210,8 +222,15 @@ public:
   void processAudio(AudioBuffer &buffer) {
     for(int i=0; i<param_count; ++i)
       params[i]->update(this, context);
-    float* outputs[] = {buffer.getSamples(0), buffer.getSamples(1) };
-    gen::perform(context, outputs, 2, outputs, 2, buffer.getSize());
+    size_t channels = buffer.getChannels();
+    size_t ch;
+    for(ch=0; ch<channels; ++ch)
+      buffers[ch] = buffer.getSamples(ch);
+    gen::perform(context, buffers, channels, buffers, gen::num_outputs(), buffer.getSize());
+    for(int ch=channels; ch<gen::num_outputs(); ++ch){
+      float avg = FloatArray(buffers[ch], buffer.getSize()).getMean();
+      setParameterValue((PatchParameterId)(PARAMETER_F+(ch-channels)), avg);
+    }
   }
 };
 
