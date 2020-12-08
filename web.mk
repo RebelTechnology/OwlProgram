@@ -14,8 +14,8 @@ EMCCFLAGS += -Wno-warn-absolute-paths
 EMCCFLAGS += -Wno-unknown-warning-option
 EMCCFLAGS += -Wno-c++11-extensions
 EMCCFLAGS += --memory-init-file 0 # don't create separate memory init file .mem
-EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus','_WEB_getButtons','_WEB_setButtons', '_WEB_processMidi']"
-# EMCCFLAGS += -s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']"
+EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus','_WEB_getButtons','_WEB_setButtons', '_WEB_processMidi', '_malloc']"
+EMCCFLAGS += -s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']"
 CPP_SRC  = $(SOURCE)/PatchProgram.cpp $(SOURCE)/PatchProcessor.cpp $(SOURCE)/message.cpp
 CPP_SRC += WebSource/web.cpp
 C_SRC   += $(LIBSOURCE)/basicmaths.c
@@ -30,7 +30,7 @@ CPP_SRC += MonochromeScreenPatch.cpp ColourScreenPatch.cpp
 C_SRC += font.c
 WEBDIR   = $(BUILD)/web
 
-# EMCCFLAGS += -s WASM=0 # disables wasm output
+EMCCFLAGS += -s WASM=0 # disables wasm output
 
 CPPFLAGS =
 CFLAGS   = $(EMCCFLAGS) -std=gnu11

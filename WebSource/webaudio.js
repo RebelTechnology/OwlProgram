@@ -24,7 +24,7 @@ owl.initPatchAudio = function () {
     } else {
         throw new Error('no web audio api');
     }
-    
+
     var WEB_setup = Module.cwrap('WEB_setup', 'number', ['number', 'number']);
     var WEB_processBlock = Module.cwrap('WEB_processBlock', 'number', ['number', 'number']);
     var WEB_setParameter = Module.cwrap('WEB_setParameter', 'number', ['number', 'number']);
@@ -36,8 +36,8 @@ owl.initPatchAudio = function () {
     var WEB_getButtons;
     var WEB_processMidi;
     try {
-        WEB_setButtons = Module.cwrap('WEB_setButtons', 'number', ['number']);
-        WEB_getButtons = Module.cwrap('WEB_getButtons', 'number', []);
+	WEB_setButtons = Module.cwrap('WEB_setButtons', 'number', ['number']);
+	WEB_getButtons = Module.cwrap('WEB_getButtons', 'number', []);
 	WEB_processMidi = Module.cwrap('WEB_processMidi', 'number', ['number', 'number', 'number', 'number']);
     }catch(x){}
 
@@ -48,8 +48,9 @@ owl.initPatchAudio = function () {
 	micNode: null
     };
     that.vectorsize = 2048;      
-    console.log("audio[fs "+owl.audioContext.sampleRate+"][bs "+that.vectorsize+"]");
+
     WEB_setup(owl.audioContext.sampleRate, that.vectorsize);
+    console.log("audio[fs "+owl.audioContext.sampleRate+"][bs "+that.vectorsize+"]");
     
     for(var i = 0; i < 5; i++){
 	console.log("parameter "+i+": "+WEB_getParameterName(i));
