@@ -149,9 +149,11 @@ owl.initPatchAudio = function () {
 
     that.setButton = function(key, value) {
 	// key should be 0 for BUTTON_A, 1 for BUTTON_B et c
-	console.log("button "+key+": "+value);
-	if(WEB_setButton)
-	    WEB_setButton(key, value);
+	if(WEB_setButton){
+	    if(key == 0)
+		WEB_setButton(1, value); // also set PUSHBUTTON
+	    WEB_setButton(key+4, value);
+	}
         return that;
     };
 

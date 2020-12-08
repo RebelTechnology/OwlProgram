@@ -79,7 +79,7 @@ void WEB_setParameter(int pid, float value){
 }
 
 void WEB_setButton(int key, int value){
-  getInitialisingPatchProcessor()->patch->buttonChanged((PatchButtonId)(BUTTON_A+key), value, 0);
+  getInitialisingPatchProcessor()->patch->buttonChanged((PatchButtonId)key, value, 0);
 }
 
 void WEB_setButtons(int values){
