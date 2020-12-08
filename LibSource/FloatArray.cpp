@@ -413,7 +413,7 @@ void FloatArray::noise(float min, float max){
   ASSERT(getSize()>10, "10<getSize");
   ASSERT(size==getSize(), "getSize");
   for(size_t n=0; n<size; n++){
-    data[n]=(rand()/(RAND_MAX+1.0f)) * amplitude + offset;
+    data[n]=(rand()/(float)RAND_MAX) * amplitude + offset;
   }
 }
 
