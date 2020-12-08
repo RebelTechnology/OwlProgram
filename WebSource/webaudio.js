@@ -32,10 +32,12 @@ owl.initPatchAudio = function () {
     var WEB_getParameterName = Module.cwrap('WEB_getParameterName', 'string', ['number']);
     var WEB_getMessage = Module.cwrap('WEB_getMessage', 'string', []);
     var WEB_getStatus = Module.cwrap('WEB_getStatus', 'string', []);
+    var WEB_setButton;
     var WEB_setButtons;
     var WEB_getButtons;
     var WEB_processMidi;
     try {
+	WEB_setButton = Module.cwrap('WEB_setButton', 'number', ['number', 'number']);
 	WEB_setButtons = Module.cwrap('WEB_setButtons', 'number', ['number']);
 	WEB_getButtons = Module.cwrap('WEB_getButtons', 'number', []);
 	WEB_processMidi = Module.cwrap('WEB_processMidi', 'number', ['number', 'number', 'number', 'number']);
@@ -147,22 +149,9 @@ owl.initPatchAudio = function () {
 
     that.setButton = function(key, value) {
 	// key should be 0 for BUTTON_A, 1 for BUTTON_B et c
-	if(key == 0){
-	    if(value)
-		that.setPushButtonDown();
-	    else
-		that.setPushButtonUp();
-	}else{
-	    if(WEB_setButtons){
-		var buttonState = WEB_getButtons();
-		var mask = 1<<(key+3);
-		if(value)
-		    buttonState |= mask
-		else
-		    buttonState &= ~mask;
-		WEB_setButtons(buttonState);
-	    }
-        }
+	console.log("button "+key+": "+value);
+	if(WEB_setButton)
+	    WEB_setButton(key, value);
         return that;
     };
 

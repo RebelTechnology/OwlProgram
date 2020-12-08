@@ -40,6 +40,7 @@ extern "C"{
   int WEB_setup(long fs, int bs);
   void WEB_processBlock(float** inputs, float** outputs);
   void WEB_setParameter(int pid, float value);
+  void WEB_setButton(int key, int value);
   void WEB_setButtons(int values);
   int WEB_getButtons();
   int WEB_processMidi(int port, int status, int d1, int d2);
@@ -77,16 +78,22 @@ void WEB_setParameter(int pid, float value){
     parameters[pid] = value*4096;
 }
 
+void WEB_setButton(int key, int value){
+  getInitialisingPatchProcessor()->patch->buttonChanged((PatchButtonId)(BUTTON_A+key), value, 0);
+}
+
 void WEB_setButtons(int values){
   if(values != buttons){
     if((buttons&(1<<PUSHBUTTON)) != (values&(1<<PUSHBUTTON)))
       getInitialisingPatchProcessor()->patch->buttonChanged(PUSHBUTTON, values&(1<<PUSHBUTTON)?4095:0, 0);
+    else if((buttons&(1<<BUTTON_A)) != (values&(1<<BUTTON_A)))
+      getInitialisingPatchProcessor()->patch->buttonChanged(BUTTON_A, values&(1<<BUTTON_A)?4095:0, 0);
     else if((buttons&(1<<BUTTON_B)) != (values&(1<<BUTTON_B)))
       getInitialisingPatchProcessor()->patch->buttonChanged(BUTTON_B, values&(1<<BUTTON_B)?4095:0, 0);
     else if((buttons&(1<<BUTTON_C)) != (values&(1<<BUTTON_C)))
-      getInitialisingPatchProcessor()->patch->buttonChanged(BUTTON_C, values&(1<<BUTTON_B)?4095:0, 0);
+      getInitialisingPatchProcessor()->patch->buttonChanged(BUTTON_C, values&(1<<BUTTON_C)?4095:0, 0);
     else if((buttons&(1<<BUTTON_D)) != (values&(1<<BUTTON_D)))
-      getInitialisingPatchProcessor()->patch->buttonChanged(BUTTON_D, values&(1<<BUTTON_B)?4095:0, 0);
+      getInitialisingPatchProcessor()->patch->buttonChanged(BUTTON_D, values&(1<<BUTTON_D)?4095:0, 0);
     buttons = values;
   }
 }

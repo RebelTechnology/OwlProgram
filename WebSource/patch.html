@@ -35,6 +35,22 @@
 	     onmousedown="toggleButton(); return false;"
 	     onmouseup="toggleButton(); return false;"
 	     value="Pushbutton"/>
+      <input type="button" 
+	     onmousedown="patch.update(80, 4095); return false;"
+	     onmouseup="patch.update(80, 0); return false;"
+	     value="Button A"/>
+      <input type="button" 
+	     onmousedown="patch.update(81, 4095); return false;"
+	     onmouseup="patch.update(81, 0); return false;"
+	     value="Button B"/>
+      <input type="button" 
+	     onmousedown="patch.update(82, 4095); return false;"
+	     onmouseup="patch.update(82, 0); return false;"
+	     value="Button C"/>
+      <input type="button" 
+	     onmousedown="patch.update(83, 4095); return false;"
+	     onmouseup="patch.update(83, 0); return false;"
+	     value="Button D"/>
       <h2>Diagnostics</h2>
       <div>
         <input type="button" onclick="getMessage(); return false;" value="Message"/>
