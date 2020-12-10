@@ -40,6 +40,7 @@ extern "C"{
   int WEB_setup(long fs, int bs);
   void WEB_processBlock(float** inputs, float** outputs);
   void WEB_setParameter(int pid, float value);
+  float WEB_getParameter(int pid);
   void WEB_setButton(int key, int value);
   void WEB_setButtons(int values);
   int WEB_getButtons();
@@ -73,6 +74,26 @@ static int16_t parameters[NOF_PARAMETERS];
 static char* parameterNames[NOF_PARAMETERS];
 static volatile uint16_t buttons = 1<<2; // GREEN
 
+extern "C" {
+  // callbacks received from running patch (cv/gate output)
+  void setButtonCallback(uint8_t id, uint16_t state, uint16_t samples){
+    if(state)
+      buttons |= (1<<id);
+    else
+      buttons &= ~(1<<id);
+  }
+  void setPatchParameterCallback(uint8_t id, int16_t value){
+    if(id < NOF_PARAMETERS)
+      parameters[id] = value;
+  }
+}
+
+float WEB_getParameter(int pid){
+  if(pid < NOF_PARAMETERS)
+    return parameters[pid]/4096.0f;
+  return 0.5f;
+}
+
 void WEB_setParameter(int pid, float value){
   if(pid < NOF_PARAMETERS)
     parameters[pid] = value*4096;
@@ -80,22 +101,10 @@ void WEB_setParameter(int pid, float value){
 
 void WEB_setButton(int key, int value){
   getInitialisingPatchProcessor()->patch->buttonChanged((PatchButtonId)key, value, 0);
-}
-
-void WEB_setButtons(int values){
-  if(values != buttons){
-    if((buttons&(1<<PUSHBUTTON)) != (values&(1<<PUSHBUTTON)))
-      getInitialisingPatchProcessor()->patch->buttonChanged(PUSHBUTTON, values&(1<<PUSHBUTTON)?4095:0, 0);
-    else if((buttons&(1<<BUTTON_A)) != (values&(1<<BUTTON_A)))
-      getInitialisingPatchProcessor()->patch->buttonChanged(BUTTON_A, values&(1<<BUTTON_A)?4095:0, 0);
-    else if((buttons&(1<<BUTTON_B)) != (values&(1<<BUTTON_B)))
-      getInitialisingPatchProcessor()->patch->buttonChanged(BUTTON_B, values&(1<<BUTTON_B)?4095:0, 0);
-    else if((buttons&(1<<BUTTON_C)) != (values&(1<<BUTTON_C)))
-      getInitialisingPatchProcessor()->patch->buttonChanged(BUTTON_C, values&(1<<BUTTON_C)?4095:0, 0);
-    else if((buttons&(1<<BUTTON_D)) != (values&(1<<BUTTON_D)))
-      getInitialisingPatchProcessor()->patch->buttonChanged(BUTTON_D, values&(1<<BUTTON_D)?4095:0, 0);
-    buttons = values;
-  }
+  if(value)
+    buttons |= (1<<key);
+  else
+    buttons &= ~(1<<key);
 }
 
 int WEB_getButtons(){
@@ -159,6 +168,8 @@ int WEB_setup(long fs, int bs){
   pv->programStatus = programStatus;
   pv->serviceCall = serviceCall;
   pv->message = NULL;
+  pv->setButton = setButtonCallback;
+  pv->setPatchParameter = setPatchParameterCallback;
   pv->heapLocations = NULL;
   setup(pv);
 
