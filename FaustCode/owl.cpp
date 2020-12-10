@@ -399,19 +399,7 @@ class OwlUI : public UI {
         if(label[strlen(label) - 1] != '>')
             debugMessage("Add '>' character for output parameters");
         if (fParameterIndex < MAXOWLPARAMETERS) {
-            if (meta.midiOn && strcasecmp(label, "freq") == 0) {
-                fParameterTable[fParameterIndex++] =
-                    new OwlVariable(fPatch, &fFreq, zone, label, lo, lo, hi, true);
-            }
-            else if (meta.midiOn && strcasecmp(label, "gain") == 0) {
-                fParameterTable[fParameterIndex++] =
-                    new OwlVariable(fPatch, &fGain, zone, label, lo, lo, hi, true);
-            }
-            else if (meta.midiOn && strcasecmp(label, "bend") == 0) {
-                fParameterTable[fParameterIndex++] =
-                    new OwlVariable(fPatch, &fBend, zone, label, lo, lo, hi, true);
-            }
-            else if (fParameter != NO_PARAMETER) {
+	    if (fParameter != NO_PARAMETER) {
                 fParameterTable[fParameterIndex++] = new OwlParameter(
                     fPatch, fParameter, zone, label, lo, lo, hi, true);
             }
@@ -570,7 +558,7 @@ public:
                                 std::min(int(PARAMETER_DH), param_tmp + *id - '0'));
                         }
                     }
-                    else if (param_tmp == PARAMETER_B && *id >= '0' && *id <= '9') {
+                    else if (param_tmp == PARAMETER_B && *id > '0' && *id <= '9') {
                         fButton = PatchButtonId(BUTTON_A + *id - '1');
                     }
                     else {
