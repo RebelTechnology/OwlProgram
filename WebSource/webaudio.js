@@ -160,10 +160,9 @@ owl.initPatchAudio = function () {
     };
 
     that.update = function (key, value) {
-	console.log("update "+key+" value "+value);
-	if(key < 80)
+	if(key < 80){
   	    WEB_setParameter(key, value);
-	else if(key == 80){
+	}else if(key == 80){
 	    that.setButton(1, value);
 	    that.setButton(4, value);
 	}else{
