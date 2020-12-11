@@ -48,6 +48,7 @@ codes.
     $ cd ../../../
    
 ## Make targets
+* make libs: build library archives
 * make patch: build patch binary
 * make sysex: package binary as sysex
 * make run: upload patch to attached OWL
@@ -61,22 +62,28 @@ codes.
 * make help: print target information
 * make docs: generate HTML documentation
 
-All files for a patch must be copied in the `PatchSource` directory, take care to put only files related to the one patch you want to compile here.
+Before you compile a patch you must first call `make libs`. This will create archive files in the `Libraries` folder which will be reused each time you compile a patch.
+The archive files must be updated with `make libs` if you make any changes to the library source code (e.g. with a `git pull`), or to the compiler.
+If you don't have emscripten installed, then the second part of `make libs` will fail. You will still be able to compile normal patches, but compiling to Javascript with `make web` will fail.
 
-Make sure to do a `make clean` before compiling a new patch, or add `clean` to your make target, otherwise the previous patch name will be retained.
+Make sure to do a `make clean` before compiling a new patch, or add `clean` to your make target (e.g. `make clean patch`), otherwise the previous patch name will be retained.
 
 ## Make options
-* PATCHNAME: specify name of patch, e.g. SimpleDelay
-* PATCHCLASS: name of patch class, e.g. SimpleDelayPatch
-* PATCHFILE: name of main patch file, e.g. SimpleDelayPatch.hpp
+* PATCHSOURCE: patch source directory, default `PatchSource`
+* PATCHNAME: specify name of patch, default `Template`
+* PATCHCLASS: name of patch class, default `TemplatePatch`
+* PATCHFILE: name of main patch file, default `TemplatePatch.hpp`
 * PATCHIN: number of input channels, default 2
 * PATCHOUT: number of output channels, default 2
-* SLOT: user program slot to store patch in, default 0
+* SLOT: user program slot to store patch in, default 0, use with `store`
 * TARGET: changes the output prefix, default 'patch'
 
-If you follow the convention of SimpleDelay then you don't have to specify `PATCHCLASS` and `PATCHFILE`, they will be deduced from `PATCHNAME`.
-t
-Note that when storing user programs, the current OWL firmware has four user defined patches, numbered 37 to 40. These correspond to slot number 0 to 3.
+
+All files for a patch must be copied to the `PATCHSOURCE` directory. Take care to put only files required by the patch you want to compile here.
+
+If you follow the naming convention above (e.g. `XyzPatch.hpp`) then you don't have to specify `PATCHCLASS` and `PATCHFILE`, they will be deduced from `PATCHNAME`.
+
+Note that when storing user programs, the legacy OwlWare firmware has four user defined patches, numbered 37 to 40. These correspond to slot number 0 to 3. For OpenWare firmwares, the slots are numbered from 1 and up.
 
 ## Building C++ patches
 First copy all patch files to `PatchSource` folder, then issue the appropriate make command.
