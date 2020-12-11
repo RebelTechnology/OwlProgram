@@ -9,7 +9,7 @@ CMSIS ?= Libraries/CMSIS/Include/
 # Tools
 CC=$(TOOLROOT)arm-none-eabi-gcc
 LD=$(TOOLROOT)arm-none-eabi-gcc
-AR=$(TOOLROOT)arm-none-eabi-ar
+AR=$(TOOLROOT)arm-none-eabi-gcc-ar
 AS=$(TOOLROOT)arm-none-eabi-as
 NM=$(TOOLROOT)arm-none-eabi-nm
 CXX=$(TOOLROOT)arm-none-eabi-g++

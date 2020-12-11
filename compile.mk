@@ -8,9 +8,6 @@ CPP_SRC += ShortArray.cpp
 CPP_SRC += Envelope.cpp VoltsPerOctave.cpp Window.cpp
 CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
 CPP_SRC += SmoothValue.cpp PatchParameter.cpp
-CPP_SRC += PatchProgram.cpp 
-# CPP_SRC += ShortPatchProgram.cpp 
-# CPP_SRC += ScreenBuffer.cpp ScreenBufferDevice.cpp
 CPP_SRC += MonochromeScreenPatch.cpp ColourScreenPatch.cpp
 C_SRC += font.c
 
@@ -24,10 +21,12 @@ CPPFLAGS += -I$(GENSOURCE)
 CPPFLAGS += -I$(TESTPATCHES)
 PATCH_C_SRC    = $(wildcard $(PATCHSOURCE)/*.c)
 PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
+PATCH_CPP_SRC += PatchProgram.cpp
 PATCH_C_SRC   += $(wildcard $(GENSOURCE)/*.c)
 PATCH_CPP_SRC += $(wildcard $(GENSOURCE)/*.cpp)
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_C_SRC:.c=.o)))
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
+PATCH_OBJS += $(BUILD)/startup.o
 
 CPPFLAGS += -DARM_CORTEX
 CPPFLAGS += -DEXTERNAL_SRAM
@@ -72,7 +71,6 @@ OBJDUMP=objdump
 
 # object files
 OBJS  = $(C_SRC:%.c=$(BUILD)/%.o) $(CPP_SRC:%.cpp=$(BUILD)/%.o)
-OBJS += $(BUILD)/startup.o
 OBJS += $(BUILD)/libnosys_gnu.o
 
 # include common make file
@@ -94,6 +92,8 @@ vpath %.c $(GENSOURCE)
 vpath %.s $(GENSOURCE)
 vpath %.c Libraries/syscalls
 
+.PHONY: libs as map compile
+
 $(BUILD)/ShortPatchProgram.o: $(SOURCE)/ShortPatchProgram.cpp $(DEPS)
 	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/ShortPatchProgram.cpp -o $@
 	@$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/ShortPatchProgram.cpp > $(@:.o=.d)
@@ -102,13 +102,18 @@ $(BUILD)/PatchProgram.o: $(SOURCE)/PatchProgram.cpp $(DEPS)
 	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/PatchProgram.cpp -o $@
 	@$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) -I$(BUILD) $(SOURCE)/PatchProgram.cpp > $(@:.o=.d)
 
-$(BUILD)/$(TARGET).elf: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
-	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(OBJS) $(LDLIBS)
+Libraries/libowlprg.a: $(OBJS)
+	@$(AR) rcs $@ $^
+
+$(BUILD)/$(TARGET).elf: $(PATCH_OBJS) $(LDSCRIPT)
+	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(LDLIBS) Libraries/libowlprg.a
+
+libs: Libraries/libowlprg.a
 
 as: $(BUILD)/$(TARGET).elf
 	@$(OBJDUMP) -S $< > $(BUILD)/$(TARGET).s
 
-map: $(PATCH_OBJS) $(OBJS) $(LDSCRIPT)
-	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/$(TARGET).map $(OBJS) $(PATCH_OBJS) $(LDLIBS)
+map: $(PATCH_OBJS) $(LDSCRIPT)
+	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/$(TARGET).map $(PATCH_OBJS) $(LDLIBS) Libraries/libowlprg.a
 
 compile: $(BUILD)/$(TARGET).bin
