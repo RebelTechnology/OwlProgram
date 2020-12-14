@@ -5,7 +5,7 @@ ifndef CONFIG
 endif
 
 ifndef PLATFORM
-  PLATFORM=OWL
+  PLATFORM=Daisy
 endif
 
 DEPS = .FORCE

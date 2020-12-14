@@ -35,6 +35,7 @@ CPPFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
 
 ifeq ($(PLATFORM), Daisy)
 CPPFLAGS += -mtune=cortex-m7
+CPPFLAGS += -DOWL_DAISY
 else
 CPPFLAGS += -mtune=cortex-m4
 endif
