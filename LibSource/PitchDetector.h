@@ -47,7 +47,7 @@ public:
   int getSize(){
     return fft.getSize();
   }
-  void setsamplingRate(float asamplingRate){
+  void setSamplingRate(float asamplingRate){
     samplingRate=asamplingRate;
   }
   void setMinFrequency(float aMinFrequency){

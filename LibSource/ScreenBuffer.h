@@ -2,18 +2,12 @@
 #define __ScreenBuffer_h__
 
 #include <stdint.h>
+#include <string.h>
 #include "device.h"
 #include "message.h"
 
-#define swap(a, b) { int16_t t = a; a = b; b = t; }
-#ifndef min
-#define min(a,b) ((a)<(b)?(a):(b))
-#endif
-#ifndef max
-#define max(a,b) ((a)>(b)?(a):(b))
-#endif
-#ifndef abs
-#define abs(x) ((x)>0?(x):-(x))
+#ifndef swap
+#define swap(a, b) { int t = a; a = b; b = t; }
 #endif
 
 template<typename Colour, Colour BLACK, Colour WHITE>
