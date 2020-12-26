@@ -22,20 +22,24 @@ bool Resource::setData(void* src, uint32_t length, bool copy){
 }
 
 template<typename Array, typename Element>
-const Array Resource::asArray() const {
+const Array Resource::asArray(uint32_t offset, uint32_t max_size) const {
     // Data is expected to be aligned
-    return Array((Element*)getData(), size / sizeof(Element));
+    if (max_size > size - offset)
+        max_size = size - offset;
+    return Array((Element*)(getData() + offset), max_size / sizeof(Element));
 }
 
-template const FloatArray Resource::asArray<FloatArray, float>() const;
+template const FloatArray Resource::asArray<FloatArray, float>(uint32_t offset, uint32_t max_size) const;
 
 template<typename Array, typename Element>
-Array Resource::asArray() {
+Array Resource::asArray(uint32_t offset, uint32_t max_size) {
     // Data is expected to be aligned
-    return Array((Element*)getData(), size / sizeof(Element));
+    if (max_size > size - offset)
+        max_size = size - offset;
+    return Array((Element*)(getData() + offset), max_size / sizeof(Element));
 }
 
-template FloatArray Resource::asArray<FloatArray, float>();
+template FloatArray Resource::asArray<FloatArray, float>(uint32_t offset, uint32_t max_size);
 
 void Resource::destroy(Resource resource) {
     if (resource.isAllocated()){

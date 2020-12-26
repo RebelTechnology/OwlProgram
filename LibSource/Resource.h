@@ -51,25 +51,31 @@ public:
     /**
      * Get pointer to data. This may be NULL if no buffer is assigned yet.
      * This is the **const** version
+     *
+     * @param offset: offset in bytes
      */
-    const uint8_t* getData() const {
-        return const_cast<const uint8_t*>(data);
+    const uint8_t* getData(uint32_t offset = 0) const {
+        return const_cast<const uint8_t*>(data + offset);
     }
 
     /**
      * Template method for converting data to an object of particular class
+     *
+     * @param offset: offset in bytes
      */
     template<typename Payload>
-    const Payload& getData() const {
-        return *(reinterpret_cast<const Payload*>(data));
+    const Payload& getData(uint32_t offset = 0) const {
+        return *(reinterpret_cast<const Payload*>(data + offset));
     }
 
     /**
      * Template method for converting data to an object. This is the **const** version
+     *
+     * @param offset: offset in bytes
      */
     template<typename Payload>
-    Payload& getData() {
-        return *(reinterpret_cast<Payload*>(data));
+    Payload& getData(uint32_t offset = 0) {
+        return *(reinterpret_cast<Payload*>(data + offset));
     }    
 
     /**
@@ -140,15 +146,21 @@ public:
 
     /**
      * Array conversion
+     *
+     * @param offset: offset in bytes
+     * @param max_size maximum size, actual size can be smaller depending on object size
      */
     template<typename Array, typename Element>
-    const Array asArray() const;
+    const Array asArray(uint32_t offset = 0, uint32_t max_size = 0xFFFFFFFF) const;
 
     /**
      * Array conversion. This is the **const** version
+     *
+     * @param offset: offset in bytes
+     * @param max_size maximum size, actual size can be smaller depending on object size
      */
     template<typename Array, typename Element>
-    Array asArray();
+    Array asArray(uint32_t offset = 0, uint32_t max_size = 0xFFFFFFFF);
 
     /**
      * Create a new resource with allocated buffer
