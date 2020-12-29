@@ -1,93 +1,71 @@
-#include <cstddef>
+#include <algorithm>
+#include <cstring>
 #include "Resource.h"
-
-bool Resource::setData(void* src, uint32_t length, bool copy){
-    if (hasData()){
-        // Buffer is allocated, we don't allow doing it more than once
-        return false;
-    }
-    else if (copy) {
-        // Allocate a new buffer and copy there
-        size = length;
-        data = new uint8_t[size];
-        memcpy((void*)data, src, length);
-        allocated = true;
-    }
-    else {
-        // Set pointer to source data, but don't allocate a new buffer
-        data = (uint8_t*)src;
-        size = length;
-    }
-    return true;
-}
+#include "OpenWareMidiControl.h"
+#include "ServiceCall.h"
+#include "ProgramVector.h"
+#include "FloatArray.h"
 
 template<typename Array, typename Element>
-const Array Resource::asArray(uint32_t offset, uint32_t max_size) const {
+Array Resource::asArray(size_t offset, size_t max_size) {
     // Data is expected to be aligned
     if (max_size > size - offset)
         max_size = size - offset;
-    return Array((Element*)(getData() + offset), max_size / sizeof(Element));
+    return Array((Element*)((uint8_t*)getData() + offset), max_size / sizeof(Element));
 }
 
-template const FloatArray Resource::asArray<FloatArray, float>(uint32_t offset, uint32_t max_size) const;
+template FloatArray Resource::asArray<FloatArray, float>(size_t offset, size_t max_size);
 
-template<typename Array, typename Element>
-Array Resource::asArray(uint32_t offset, uint32_t max_size) {
-    // Data is expected to be aligned
-    if (max_size > size - offset)
-        max_size = size - offset;
-    return Array((Element*)(getData() + offset), max_size / sizeof(Element));
+void Resource::destroy(Resource* resource) {
+  if (resource && resource->allocated)
+    delete[] (uint8_t*)resource->data;
+  delete resource;
 }
 
-template FloatArray Resource::asArray<FloatArray, float>(uint32_t offset, uint32_t max_size);
-
-void Resource::destroy(Resource resource) {
-    if (resource.isAllocated()){
-        delete [] resource.getData();
-    }
+Resource* Resource::open(const char* name){
+  uint8_t* data = NULL;
+  size_t offset = 0;
+  size_t size = 0;
+  void* args[] = {
+		  (void*)name, (void*)&data, (void*)&offset, (void*)&size
+  };
+  if(getProgramVector()->serviceCall(OWL_SERVICE_LOAD_RESOURCE, args, 4) == OWL_SERVICE_OK)
+    return new Resource(name, size, data);
+  return NULL;
 }
 
-const Resource* Resource::get(const char* name, uint32_t offset, uint32_t max_size) {
-    uint8_t* buffer = NULL;
-    // Load resource with a pointer to empty buffer
+Resource* Resource::load(const char* name){
+  Resource* resource = Resource::open(name);
+  if(resource != NULL && resource->data == NULL){
+    uint8_t* data = new uint8_t[resource->size];
+    size_t offset = 0;
     void* args[] = {
-        (void*)name, (void*)&buffer, (void*)&offset, (void*)&max_size
-    };
-    if (getProgramVector()->serviceCall(OWL_SERVICE_LOAD_RESOURCE, args, 4) == OWL_SERVICE_OK && buffer != NULL) {
-        Resource* resource = new Resource(name);
-        resource->setData(buffer, max_size, false);
-        return resource;
-    }
-    else {
-        return NULL;
-    }
-}
-
-Resource Resource::load(const char* name, uint32_t offset, uint32_t max_size) {
-    uint8_t* buffer = NULL;
-    // Load resource header separately to know full resource size in advance
-    void* args[] = {
-        (void*)name, (void*)&buffer, (void*)&offset, (void*)&max_size
+		    (void*)name, (void*)&data, (void*)&offset, (void*)&resource->size
     };
     if (getProgramVector()->serviceCall(OWL_SERVICE_LOAD_RESOURCE, args, 4) == OWL_SERVICE_OK){
-        // Reset data pointer to force allocation on memory mapped resources.
-        Resource allocated_resource = Resource::create(max_size);
-        args[1] = &allocated_resource.data;
-        if (getProgramVector()->serviceCall(OWL_SERVICE_LOAD_RESOURCE, args, 4) == OWL_SERVICE_OK){
-            return allocated_resource;
-        }
-        else {
-            Resource::destroy(allocated_resource);
-        }
+      resource->data = data;
+      resource->allocated = true;
+    }else{
+      delete[] data;
     }
-    // An empty resource is returned if we've failed to load one
-    Resource resource(name);
-    return resource;
+  }
+  return resource;
 }
 
-Resource Resource::create(uint32_t size) {
-    Resource resource;
-    resource.setData(new uint8_t[size], size, false);
-    resource.allocated = true;
-    return resource;
+
+size_t Resource::read(void* dest, size_t len, size_t offset){
+  if(this->data == NULL){
+    void* args[] = {
+		    (void*)this->name, (void*)&dest, (void*)&offset, (void*)&len
+    };
+    if (getProgramVector()->serviceCall(OWL_SERVICE_LOAD_RESOURCE, args, 4) == OWL_SERVICE_OK){
+      return len;
+    }else{
+      return 0;
+    }
+  }else{
+    len = std::min(this->size-offset, len);
+    memcpy(dest, (uint8_t*)this->data+offset, len);
+    return len;
+  }
 }
