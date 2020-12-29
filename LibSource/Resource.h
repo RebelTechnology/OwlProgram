@@ -9,11 +9,19 @@
 #include "FloatArray.h"
 
 
-/*
- * This class should not be instantiated directly, but it can be returned by untyped 
- * getResource() calls to storage.
+/**
+ * Resource class is an interface for accessing data stored on flash. Use one of two methods
+ * to access it:
+ * - get() returns a read-only reference to data stored on flash
+ * - load() copies data to a new buffer in dynamic memory
+ *
+ * After that you can access raw data with getData() method. This method also has a
+ * template version getData<typename Payload>() that is useful when you want to load
+ * data into a datastructure.
+ *
+ * If data stored in resource is an array, it can be converted to FloatArray or other array
+ * classes with asArray() template method.
  */
-
 class Resource {
 public:
     /**
@@ -43,8 +51,10 @@ public:
 
     /**
      * Get pointer to data. This may be NULL if no buffer is assigned yet.
+     *
+     * @param offset: offset in bytes
      */
-    uint8_t* getData() {
+    uint8_t* getData(uint32_t offset = 0) {
         return data;
     }
 
@@ -191,8 +201,8 @@ public:
     /**
      * Load resource to a new buffer in memory
      * 
-     * This will always allocate a buffer in memory and copy object into it. This
-     * buffer is mutable. This object should be destroyed after it's used to deallocated
+     * This method will always allocate a buffer in memory and copy object into it. This
+     * buffer is mutable. The object should be destroyed after it's used to deallocated
      * stored buffer.
      * 
      * @param name resource name
