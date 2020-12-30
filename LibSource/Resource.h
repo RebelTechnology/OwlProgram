@@ -44,7 +44,7 @@ public:
 
   /**
    * Get resource from storage. Creates a new Resource on the heap.
-   * Shoule be garbage collected with Resource::destroy()
+   * Should be garbage collected with Resource::destroy()
    * 
    * @param name resource name
    * 
