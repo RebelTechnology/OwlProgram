@@ -4,7 +4,6 @@
 #include "OpenWareMidiControl.h"
 #include "ServiceCall.h"
 #include "ProgramVector.h"
-#include "FloatArray.h"
 
 template<typename Array, typename Element>
 Array Resource::asArray(size_t offset, size_t max_size) {
@@ -16,13 +15,12 @@ Array Resource::asArray(size_t offset, size_t max_size) {
 
 template FloatArray Resource::asArray<FloatArray, float>(size_t offset, size_t max_size);
 
-void Resource::destroy(Resource* resource) {
-  if (resource && resource->allocated)
-    delete[] (uint8_t*)resource->data;
-  delete resource;
+Resource::~Resource() {
+  if(allocated)
+    delete[] (uint8_t*)data;
 }
 
-Resource* Resource::open(const char* name){
+Resource Resource::open(const char* name){
   uint8_t* data = NULL;
   size_t offset = 0;
   size_t size = 0;
@@ -30,28 +28,27 @@ Resource* Resource::open(const char* name){
 		  (void*)name, (void*)&data, (void*)&offset, (void*)&size
   };
   if(getProgramVector()->serviceCall(OWL_SERVICE_LOAD_RESOURCE, args, 4) == OWL_SERVICE_OK)
-    return new Resource(name, size, data);
-  return NULL;
+    return Resource(name, size, data);
+  return Resource();
 }
 
-Resource* Resource::load(const char* name){
-  Resource* resource = Resource::open(name);
-  if(resource != NULL && resource->data == NULL){
-    uint8_t* data = new uint8_t[resource->size];
+Resource Resource::load(const char* name){
+  Resource resource = Resource::open(name);
+  if(resource.exists() && !resource.hasData()){
+    uint8_t* data = new uint8_t[resource.size];
     size_t offset = 0;
     void* args[] = {
-		    (void*)name, (void*)&data, (void*)&offset, (void*)&resource->size
+		    (void*)name, (void*)&data, (void*)&offset, (void*)&resource.size
     };
     if (getProgramVector()->serviceCall(OWL_SERVICE_LOAD_RESOURCE, args, 4) == OWL_SERVICE_OK){
-      resource->data = data;
-      resource->allocated = true;
+      resource.data = data;
+      resource.allocated = true;
     }else{
       delete[] data;
     }
   }
   return resource;
 }
-
 
 size_t Resource::read(void* dest, size_t len, size_t offset){
   if(this->data == NULL){

@@ -2,6 +2,7 @@
 #define __RESOURCE_STORAGE_H__
 
 #include <cstddef>
+#include "FloatArray.h"
 
 class Resource {
 public:
@@ -26,6 +27,10 @@ public:
     return size;
   }    
 
+  bool exists() const {
+    return size != 0;
+  }
+
   /**
    * Get resource name
    */
@@ -42,28 +47,26 @@ public:
   template<typename Array, typename Element>
   Array asArray(size_t offset = 0, size_t max_size = 0xFFFFFFFF);
 
+  FloatArray asFloatArray(size_t offset = 0, size_t max_size = 0xFFFFFFFF){
+    return asArray<FloatArray, float>(offset, max_size);
+  }
+  
   /**
-   * Get resource from storage. Creates a new Resource on the heap.
-   * Should be garbage collected with Resource::destroy()
+   * Get resource from storage.
    * 
    * @param name resource name
    * 
    * @return NULL if resource does not exist or can't be read.
    * 
    */
-  static Resource* open(const char* name);
+  static Resource open(const char* name);
 
   /**
-   * Open resource and load data. Creates a new Resource on the heap and 
-   * allocates extra memory if required.
-   * Must be garbage collected with Resource::destroy()
+   * Open resource and load data.
+   * Allocates extra memory if required, which will be garbage collected 
+   * in the object destructor.
    */
-  static Resource* load(const char* name);
-
-  /**
-   * Destroy allocated memory used by a resource
-   */
-  static void destroy(Resource* resource);
+  static Resource load(const char* name);
 
   /**
    * Read data from resource into memory
@@ -75,12 +78,14 @@ public:
    */
   size_t read(void* dest, size_t len, size_t offset=0); 
 
+  Resource(): name(NULL), size(0), data(NULL), allocated(false) {}
+  ~Resource();
 protected:
   Resource(const char* name, size_t size, void* data)
     : name(name), size(size), data(data) {}
-  const char* name = NULL;
-  size_t size = 0;
-  void* data = NULL;
-  bool allocated = false;
+  const char* name;
+  size_t size;
+  void* data;
+  bool allocated;
 };
 #endif
