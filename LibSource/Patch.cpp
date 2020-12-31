@@ -6,6 +6,7 @@
 #include "PatchProcessor.h"
 #include "basicmaths.h"
 #include "main.h"
+#include "message.h"
 
 AudioBuffer::~AudioBuffer(){}
 
@@ -90,6 +91,13 @@ void Patch::sendMidi(MidiMessage msg){
 }
 
 #endif /* USE_MIDI_CALLBACK */
+
+Resource* Patch::getResource(const char* name){
+  Resource* resource = Resource::load(name);
+  if(resource == NULL)
+    error(CONFIGURATION_ERROR_STATUS, "Missing Resource");
+  return resource;
+}
 
 #include "MemoryBuffer.hpp"
 AudioBuffer* AudioBuffer::create(int channels, int samples){

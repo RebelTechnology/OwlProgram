@@ -2,6 +2,7 @@
 #define __RESOURCE_STORAGE_H__
 
 #include <cstddef>
+#include <stdint.h>
 #include "FloatArray.h"
 
 class Resource {
@@ -31,6 +32,10 @@ public:
     return size != 0;
   }
 
+  bool isMutable() const {
+    return allocated;
+  }
+
   /**
    * Get resource name
    */
@@ -53,20 +58,26 @@ public:
   
   /**
    * Get resource from storage.
+   * Returned object must be garbage collected with Resource::destroy()
    * 
    * @param name resource name
    * 
    * @return NULL if resource does not exist or can't be read.
    * 
    */
-  static Resource open(const char* name);
+  static Resource* open(const char* name);
 
   /**
    * Open resource and load data.
-   * Allocates extra memory if required, which will be garbage collected 
-   * in the object destructor.
+   * Allocates extra memory to hold the resource if required.
+   * Returned object must be garbage collected with Resource::destroy()
    */
-  static Resource load(const char* name);
+  static Resource* load(const char* name);
+
+  /**
+   * Clean up used memory resources.
+   */
+  static void destroy(Resource* resource);
 
   /**
    * Read data from resource into memory
@@ -82,10 +93,10 @@ public:
   ~Resource();
 protected:
   Resource(const char* name, size_t size, void* data)
-    : name(name), size(size), data(data) {}
+    : name(name), size(size), data((uint8_t*)data) {}
   const char* name;
+  uint8_t* data;
   size_t size;
-  void* data;
   bool allocated;
 };
 #endif

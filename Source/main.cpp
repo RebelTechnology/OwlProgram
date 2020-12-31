@@ -21,7 +21,7 @@ ProgramVector programVector __attribute__ ((section (".pv")));
 
 extern "C" {
   void vApplicationMallocFailedHook( void ){
-    error(0x60, "Memory overflow");
+    error(OUT_OF_MEMORY_ERROR_STATUS, "Memory overflow");
   }
 }
 
