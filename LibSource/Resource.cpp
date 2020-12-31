@@ -18,6 +18,7 @@ template FloatArray Resource::asArray<FloatArray, float>(size_t offset, size_t m
 void Resource::destroy(Resource* resource) {
   if(resource && resource->allocated)
     delete[] resource->data;
+  delete resource;
 }
 
 Resource* Resource::open(const char* name){
