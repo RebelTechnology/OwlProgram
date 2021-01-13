@@ -90,7 +90,7 @@ public:
   size_t read(void* dest, size_t len, size_t offset=0); 
 
   Resource(): name(NULL), size(0), data(NULL), allocated(false) {}
-  ~Resource();
+  ~Resource(){}
 protected:
   Resource(const char* name, size_t size, void* data)
     : name(name), size(size), data((uint8_t*)data) {}
