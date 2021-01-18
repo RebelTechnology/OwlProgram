@@ -124,8 +124,8 @@ void run(ProgramVector* pv){
       processor.patch->processAudio(*samples);
       samples->comb16(pv->audio_output);
     }
-#endif
   }
+#endif
 }
 
 #if 0

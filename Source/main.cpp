@@ -32,7 +32,7 @@ int main(void){
 #endif /* STARTUP_CODE */
 
   ProgramVector* pv = getProgramVector();
-  HeapRegion_t regions[5];
+  HeapRegion_t regions[6];
   if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V13 && pv->heapLocations != NULL){
     int cnt = 0;
     extern char _eprogram, _eram; // remaining program space
