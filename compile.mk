@@ -30,10 +30,14 @@ PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
 PATCH_OBJS += $(BUILD)/startup.o
 
 CPPFLAGS += -DARM_CORTEX
-CPPFLAGS += -DEXTERNAL_SRAM
 CPPFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
+
+ifeq ($(PLATFORM), H7)
+CPPFLAGS += -mtune=cortex-m7
+else
 CPPFLAGS += -mtune=cortex-m4
-# CPPFLAGS += -mtune=cortex-m7
+endif
+
 CPPFLAGS += -fpic
 CPPFLAGS += -fpie
 CPPFLAGS += -fdata-sections
