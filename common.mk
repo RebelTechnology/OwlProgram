@@ -27,14 +27,11 @@ ARCH_FLAGS = -fsingle-precision-constant -mthumb
 
 ifeq ($(PLATFORM), H7)
 ARCH_FLAGS += -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-sp-d16
-DEF_FLAGS = -DSTM32H750xx -DARM_MATH_CM7 -D__FPU_PRESENT -D__FPU_USED=1
+DEF_FLAGS = -DSTM32H753xx -DARM_MATH_CM7 -D__FPU_PRESENT -D__FPU_USED=1
 else
 ARCH_FLAGS += -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 DEF_FLAGS = -DSTM32F4XX -DARM_MATH_CM4 -D__FPU_PRESENT -D__FPU_USED=1
 endif
-
-# DEF_FLAGS = -DSTM32F4XX -DARM_MATH_CM4 -D__FPU_PRESENT -D__FPU_USED=1
-# DEF_FLAGS = -DSTM32F745xx -DARM_MATH_CM7 -D__FPU_PRESENT -D__FPU_USED=1
 
 INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(DEVICE) -I$(CMSIS) -I$(PERIPH_FILE)/inc -I$(SOURCE)
 INC_FLAGS += -I$(DEVICE)/Include -I$(CMSIS)
