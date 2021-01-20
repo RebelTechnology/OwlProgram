@@ -410,11 +410,8 @@ void FloatArray::noise(){
 void FloatArray::noise(float min, float max){
   float amplitude = fabsf(max-min);
   float offset = min;
-  ASSERT(getSize()>10, "10<getSize");
-  ASSERT(size==getSize(), "getSize");
-  for(size_t n=0; n<size; n++){
-    data[n]=(rand()/(float)RAND_MAX) * amplitude + offset;
-  }
+  for(size_t n=0; n<size; n++)
+    data[n] = randf() * amplitude + offset;
 }
 
 
