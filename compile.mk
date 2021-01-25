@@ -56,7 +56,8 @@ LDFLAGS += -fpic
 LDFLAGS += -fpie
 LDFLAGS += -flto
 
-CXXFLAGS = -fno-rtti -fno-exceptions
+CXXFLAGS = -fno-rtti
+CXXFLAGS += -fno-exceptions
 
 ifdef HEAVY
 CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
