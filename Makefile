@@ -50,7 +50,7 @@ PATCHNAME   ?= $(SOUL)
 PATCHCLASS  ?= SoulPatch
 PATCHFILE   ?= SoulPatch.hpp
 SOULCLASS   ?= $(SOUL)
-SOULFILE    ?= $(SOUL).soul
+SOULFILE    ?= $(SOUL).soulpatch
 SOULHPP     ?= $(SOUL).hpp
 DEPS        += soul
 else

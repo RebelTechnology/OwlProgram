@@ -3,6 +3,7 @@ SOULCC	?= Tools/soul
 SOULINC = $(BUILD)/Source/soul.hpp
 
 vpath %.soul $(PATCHSOURCE)
+vpath %.soulpatch $(PATCHSOURCE)
 
 .PHONY: .FORCE soul
 
