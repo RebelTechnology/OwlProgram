@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "heap.h"
+#include "message.h"
 
 extern "C" void *__gxx_personality_v0;
 extern "C" void __cxa_end_cleanup (void);
@@ -19,3 +20,9 @@ extern "C" int __cxa_guard_acquire ( __int64_t *guard_object ){ return !*(char *
 // Sets the first byte of the guard object to a non-zero value.
 extern "C" void __cxa_guard_release ( __int64_t *guard_object ){ *(char *)guard_object = 1; }
 extern "C" void __cxa_guard_abort ( __int64_t *guard_object ){}
+
+namespace std {
+  void __throw_bad_alloc (void) { error(PROGRAM_ERROR_STATUS, "bad alloc"); while(1); }
+  void __throw_bad_function_call() { error(PROGRAM_ERROR_STATUS, "bad func"); while(1); }
+  void __throw_length_error (const char *) { error(PROGRAM_ERROR_STATUS, "bad len"); while(1); }
+}
