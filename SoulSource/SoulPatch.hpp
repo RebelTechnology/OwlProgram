@@ -31,6 +31,10 @@ public:
     params = soulpatch.createParameterList();
     for(size_t i=0; i<params.size(); ++i){
       registerParameter(PatchParameterId(PARAMETER_A+i), params[i].properties.name);
+      float min = params[i].properties.minValue;
+      float max = params[i].properties.maxValue;
+      float value = (params[i].properties.initialValue - min)/(max-min);
+      setParameterValue(PatchParameterId(PARAMETER_A+i), value);
     }
     ASSERT(getNumberOfChannels() >= SOULPATCH::numAudioInputChannels, "Too many input channels in SOUL patch");
     ASSERT(getNumberOfChannels() >= SOULPATCH::numAudioOutputChannels, "Too many output channels in SOUL patch");
