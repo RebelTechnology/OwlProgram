@@ -16,10 +16,12 @@ SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
 GENSOURCE    = $(BUILD)/Source
 TESTPATCHES  = $(BUILDROOT)/TestPatches
+DAISYSP      = $(BUILDROOT)/Libraries/DaisySP
 CPPFLAGS += -I$(PATCHSOURCE)
 CPPFLAGS += -I$(LIBSOURCE)
 CPPFLAGS += -I$(GENSOURCE)
 CPPFLAGS += -I$(TESTPATCHES)
+CPPFLAGS += -I$(DAISYSP)
 PATCH_C_SRC    = $(wildcard $(PATCHSOURCE)/*.c)
 PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
 PATCH_CPP_SRC += PatchProgram.cpp
@@ -28,6 +30,8 @@ PATCH_CPP_SRC += $(wildcard $(GENSOURCE)/*.cpp)
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_C_SRC:.c=.o)))
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
 PATCH_OBJS += $(BUILD)/startup.o
+DAISYSP_CPP_SRC = $(wildcard $(DAISYSP)/modules/*.cpp)
+DAISYSP_OBJS = $(addprefix $(BUILD)/, $(notdir $(DAISYSP_CPP_SRC:.cpp=.o)))
 
 CPPFLAGS += -DARM_CORTEX
 CPPFLAGS += -DEXTERNAL_SRAM
@@ -92,6 +96,7 @@ vpath %.s $(PATCHSOURCE)
 vpath %.cpp $(GENSOURCE)
 vpath %.c $(GENSOURCE)
 vpath %.s $(GENSOURCE)
+vpath %.cpp $(DAISYSP)/modules/
 vpath %.c Libraries/syscalls
 
 .PHONY: libs as map compile
@@ -107,15 +112,18 @@ $(BUILD)/PatchProgram.o: $(SOURCE)/PatchProgram.cpp $(DEPS)
 Libraries/libowlprg.a: $(OBJS)
 	@$(AR) rcs $@ $^
 
-$(BUILD)/$(TARGET).elf: $(PATCH_OBJS) $(LDSCRIPT)
-	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(LDLIBS) Libraries/libowlprg.a
+Libraries/libdaisysp.a: $(DAISYSP_OBJS)
+	@$(AR) rcs $@ $^
 
-libs: Libraries/libowlprg.a
+$(BUILD)/$(TARGET).elf: $(PATCH_OBJS) $(DAISYSP_OBJS) $(LDSCRIPT)
+	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(DAISYSP_OBJS) $(LDLIBS) Libraries/libowlprg.a Libraries/libdaisysp.a
+
+libs: Libraries/libowlprg.a Libraries/libdaisysp.a
 
 as: $(BUILD)/$(TARGET).elf
 	@$(OBJDUMP) -S $< > $(BUILD)/$(TARGET).s
 
 map: $(PATCH_OBJS) $(LDSCRIPT)
-	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/$(TARGET).map $(PATCH_OBJS) $(LDLIBS) Libraries/libowlprg.a
+	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/$(TARGET).map $(PATCH_OBJS) $(LDLIBS) Libraries/libowlprg.a Libraries/libdaisysp.a
 
 compile: $(BUILD)/$(TARGET).bin
