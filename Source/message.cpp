@@ -24,12 +24,12 @@ char* msg_itoa(int val, int base){
 char* msg_ftoa(float val, int base){
   static char buf[16] = {0};
   int i = 14;
-  // print 4 decimal points
-  unsigned int part = abs((int)((val-int(val))*10000));
+  // print 2 decimal points
+  unsigned int part = abs((int)((val-int(val))*100));
   do{
     buf[i--] = hexnumerals[part % base];
     part /= base;
-  }while(i>10);
+  }while(i > 12);
   buf[i--] = '.';
   part = abs(int(val));
   do{

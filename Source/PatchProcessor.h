@@ -18,7 +18,10 @@ public:
   PatchProcessor();
   ~PatchProcessor();
   void clear();
-  void setPatch(Patch* patch);
+  void setPatch(Patch* patch, const char* name);
+  const char* getPatchName(){
+    return name;
+  }
   int getBlockSize();
   double getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
@@ -36,6 +39,7 @@ private:
   ParameterUpdater* parameters[MAX_NUMBER_OF_PARAMETERS];
   uint8_t parameterCount;
   AudioBuffer* buffers[MAX_BUFFERS_PER_PATCH];
+  const char* name;
 };
 
 

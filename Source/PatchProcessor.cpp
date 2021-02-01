@@ -33,8 +33,9 @@ void PatchProcessor::clear(){
   // memset(parameterNames, 0, sizeof(parameterNames));
 }
 
-void PatchProcessor::setPatch(Patch* p){
+void PatchProcessor::setPatch(Patch* p, const char* n){
   patch = p;
+  name = n;
 }
 
 AudioBuffer* PatchProcessor::createMemoryBuffer(int channels, int size){
@@ -118,7 +119,7 @@ int PatchProcessor::getBlockSize(){
 }
 
 void PatchProcessor::setDefaultValue(int pid, float value){
-  doSetPatchParameter(pid, value*4095);
+  doSetPatchParameter(pid, value*4096);
 }
 
 void PatchProcessor::setDefaultValue(int pid, int value){

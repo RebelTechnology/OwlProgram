@@ -68,6 +68,8 @@
    float fast_log10f(float x);
    void fast_log_set_table(const float* table, int size);
 
+   uint32_t fast_log2i(uint32_t x);
+
    // fast approximations
    float fast_atan2f(float a, float b);
 
@@ -78,14 +80,17 @@
      return (31 - __builtin_clz (x));
    }
 
+
+#define malloc(x) pvPortMalloc(x)
+#define calloc(x, y) pvPortCalloc(x, y)
+#define free(x) vPortFree(x)
+#define realloc(x, y) pvPortRealloc(x, y);
+void* pvPortCalloc(size_t nmemb, size_t size);
+void* pvPortRealloc(void *pv, size_t xWantedSize);
+
 #ifdef __cplusplus
 }
 #endif
-
-
-#define malloc(x) pvPortMalloc(x)
-#define calloc(x, y) pvPortMalloc(x*y)
-#define free(x) vPortFree(x)
 
 #ifdef ARM_CORTEX
 #define sin(x) arm_sin_f32(x)
@@ -95,9 +100,6 @@
 #define sqrt(x) arm_sqrtf(x)
 #define sqrtf(x) arm_sqrtf(x)
 #define rand() arm_rand32()
-#define tanh(x) tanhf(x)
-#define sinh(x) sinhf(x)
-#define cosh(x) coshf(x)
 
 #ifdef __FAST_MATH__ /* set by gcc option -ffast-math */
 
@@ -121,10 +123,6 @@
 #define log2f(x) fast_log2f(x)
 #define log10(x) fast_log10f(x)
 #define log10f(x) fast_log10f(x)
-
-// fast approximate math functions
-#define atan2(x, y) fast_atan2f(x, y)
-#define atan2f(x, y) fast_atan2f(x, y)
 
 #endif
 

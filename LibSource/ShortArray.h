@@ -13,16 +13,16 @@
 class ShortArray {
 private:
   int16_t* data;
-  int size;
+  size_t size;
 public:
   ShortArray();
-  ShortArray(int16_t* data, int size);
+  ShortArray(int16_t* data, size_t size);
 
-  int getSize() const{
+  size_t getSize() const{
     return size;
   }
 
-  int getSize(){
+  size_t getSize(){
     return size;
   }
 
@@ -269,7 +269,7 @@ public:
    * @remarks **destination[n]** is left unchanged for n<offset and the result is stored from destination[offset] onwards
    * that is, in the same position where they would be if a full convolution was performed.
   */
-  void convolve(ShortArray operand2, ShortArray destination, int offset, int samples);
+  void convolve(ShortArray operand2, ShortArray destination, int offset, size_t samples);
   
   /** 
    * Correlation between arrays.
@@ -306,7 +306,7 @@ public:
    * as long as the ShortArray returned by this method is still in use.
    * @remarks Calling ShortArray::destroy() on a ShortArray instance created with this method might cause an exception.
   */
-  ShortArray subArray(int offset, int length);
+  ShortArray subArray(int offset, size_t length);
   
   /**
    * Copies the content of the array to another array.
@@ -320,7 +320,7 @@ public:
    * The **length***sizeof(int16_t) bytes of memory starting at this location must have been allocated before calling this method.
    * @param[in] length number of samples to copy
   */
-  void copyTo(int16_t* destination, int length);
+  void copyTo(int16_t* destination, size_t length);
 
   /**
    * Copies the content of the array to a FloatArray, interpreting the content
@@ -340,7 +340,7 @@ public:
    * @param[in] source a pointer to the beginning of the portion of memory to read from.
    * @param[in] length number of samples to copy.
   */
-  void copyFrom(int16_t* source, int length);
+  void copyFrom(int16_t* source, size_t length);
   
   /**
    * Copies the content of a FloatArray into a ShortArray, converting
@@ -373,7 +373,7 @@ public:
    * @param[in] samples the number of samples to copy
    *
   */
-  void insert(ShortArray source, int destinationOffset, int samples);
+  void insert(ShortArray source, int destinationOffset, size_t samples);
 
   /**
    * Copies the content of an array into a subset of the array.
@@ -383,7 +383,7 @@ public:
    * @param[in] destinationOffset the offset into the destination array
    * @param[in] samples the number of samples to copy
   */
-  void insert(ShortArray source, int sourceOffset, int destinationOffset, int samples);
+  void insert(ShortArray source, int sourceOffset, int destinationOffset, size_t samples);
   
   /**
    * Copies values within an array.
@@ -393,7 +393,7 @@ public:
    * @param[in] length the number of elements to copy
    * @remarks this method uses *memmove()* so that the source memory and the destination memory can overlap. As a consequence it might have slow performances.
   */
-  void move(int fromIndex, int toIndex, int length);
+  void move(int fromIndex, int toIndex, size_t length);
   
   /**
    * Allows to index the array using array-style brackets.
@@ -431,7 +431,7 @@ public:
     if(size!=other.getSize()){
       return false;
     }
-    for(int n=0; n<size; n++){
+    for(size_t n=0; n<size; n++){
       if(data[n]!=other[n]){
         return false;
       }

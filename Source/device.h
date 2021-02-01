@@ -1,5 +1,11 @@
 #include <inttypes.h>
 
+#define USE_MIDI_CALLBACK
+
+#if !defined OWL_CLASSIC
+#define AUDIO_SATURATE_SAMPLES
+#endif
+
 #define DEBUG_MEM
 /* #define STARTUP_CODE */
 
@@ -7,16 +13,12 @@
 /* #define AUDIO_SATURATE_SAMPLES // SATURATE adds almost 500 cycles to 24-bit mode */
 #define AUDIO_CHANNELS               2
 #define AUDIO_BITDEPTH               24    /* bits per sample */
+#ifndef AUDIO_MAX_BLOCK_SIZE
 #define AUDIO_MAX_BLOCK_SIZE         1024
+#endif
 
 #define MAX_BUFFERS_PER_PATCH        8
-#define MAX_NUMBER_OF_PATCHES        32
-#define MAX_NUMBER_OF_PARAMETERS     24
-
-#define LED_PORT                     GPIOE
-#define LED_GREEN                    GPIO_Pin_5
-#define LED_RED                      GPIO_Pin_3
-#define LED_CLOCK                    RCC_AHB1Periph_GPIOE
+#define MAX_NUMBER_OF_PARAMETERS     42
 
 #ifdef  USE_FULL_ASSERT
 #ifdef __cplusplus

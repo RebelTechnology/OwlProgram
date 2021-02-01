@@ -4,6 +4,10 @@ ifndef CONFIG
   CONFIG=Release
 endif
 
+ifndef PLATFORM
+  PLATFORM=OWL
+endif
+
 DEPS = .FORCE
 TARGET ?= patch
 
@@ -14,7 +18,7 @@ ASFLAGS      = -g
 endif
 
 ifeq ($(CONFIG),Release)
-CPPFLAGS    ?= -O2 -specs=nano.specs -ffast-math
+CPPFLAGS    ?= -Os -specs=nano.specs -ffast-math
 EMCCFLAGS   ?= -Oz # optimise for size
 endif
 
@@ -46,6 +50,15 @@ else ifdef TEST
 PATCHNAME   ?= $(TEST)
 PATCHCLASS  ?= $(PATCHNAME)Patch
 PATCHFILE   ?= $(PATCHNAME)Patch.hpp
+else ifdef SOUL
+# options for SOUL patch compilation
+PATCHNAME   ?= $(SOUL)
+PATCHCLASS  ?= SoulPatch
+PATCHFILE   ?= SoulPatch.hpp
+SOULCLASS   ?= $(SOUL)
+SOULFILE    ?= $(SOUL).soulpatch
+SOULHPP     ?= $(SOUL).hpp
+DEPS        += soul
 else
 # options for C++ compilation
 PATCHNAME   ?= "Template"
@@ -56,9 +69,10 @@ endif
 PATCHIN     ?= 2
 PATCHOUT    ?= 2
 SLOT        ?= 0
-OWLDEVICE   ?= OWL-MIDI
+OWLDEVICE   ?= OWL-*
 BUILD       ?= $(BUILDROOT)/Build
 LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
+# LDSCRIPT    ?= $(BUILDROOT)/Source/STM32F746ZGTx_FLASH.ld
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
 FIRMWARESENDER ?= Tools/FirmwareSender
 
@@ -66,22 +80,25 @@ export BUILD BUILDROOT TARGET
 export PATCHNAME PATCHCLASS PATCHSOURCE 
 export PATCHFILE PATCHIN PATCHOUT
 export HEAVYTOKEN HEAVYSERVICETOKEN  HEAVY
+export SOUL SOULCLASS SOULFILE SOULHPP
 export LDSCRIPT CPPFLAGS EMCCFLAGS ASFLAGS
+export CONFIG PLATFORM
 
 DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
 
 all: patch
 
-.PHONY: .FORCE clean realclean run store docs help
+.PHONY: .FORCE patch libs faust gen heavy web minify clean realclean run store docs help
 
 .FORCE:
-	@echo Building patch $(PATCHNAME)
 	@mkdir -p $(BUILD)/Source
+	@mkdir -p $(BUILD)/web
 
 $(BUILD)/registerpatch.cpp: .FORCE
 	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $@
 
 $(BUILD)/registerpatch.h: .FORCE
+	@echo Building patch $(PATCHNAME)
 	@echo "#include \"$(PATCHFILE)\"" > $@
 
 $(BUILD)/Source/startup.s: .FORCE
@@ -93,9 +110,13 @@ $(BUILD)/%.syx: $(BUILD)/%.bin
 patch: $(DEPS) ## build patch binary
 	@$(MAKE) -s -f compile.mk compile
 
+libs: .FORCE ## build patch libraries
+	@$(MAKE) -s -f compile.mk libs
+	@$(MAKE) -s -f web.mk libs
+
 web: $(DEPS) ## build Javascript patch
 	@$(MAKE) -s -f web.mk web
-	@echo Built Web Audio $(PATCHNAME) in $(BUILD)/web/$(TARGET).js
+	@echo Built javascript $(PATCHNAME) in $(BUILD)/web/$(TARGET).js
 
 minify: $(DEPS)
 	@$(MAKE) -s -f web.mk minify
@@ -112,6 +133,9 @@ gen: .FORCE
 maximilian: .FORCE
 	@$(MAKE) -s -f maximilian.mk maximilian
 
+soul: .FORCE
+	@$(MAKE) -s -f soul.mk soul
+
 sysex: patch $(BUILD)/$(TARGET).syx ## package patch binary as MIDI sysex
 	@echo Built sysex $(PATCHNAME) in $(BUILD)/$(TARGET).syx
 
@@ -123,6 +147,10 @@ store: patch ## upload and save patch to attached OWL
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to store in slot $(SLOT)
 	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out "$(OWLDEVICE)" -store $(SLOT)
 
+resource: $(RESOURCE) ## upload and save resource to attached OWL
+	@echo Sending resource $(RESOURCE) to $(OWLDEVICE) to store in slot $(SLOT)
+	@$(FIRMWARESENDER) -q -in $(RESOURCE) -out "$(OWLDEVICE)" -store $(SLOT)
+
 docs: ## generate HTML documentation
 	@doxygen Doxyfile
 
@@ -133,7 +161,7 @@ clean: ## remove generated patch files
 	@rm -rf $(BUILD)/*
 
 realclean: clean ## remove all library object files
-	@find Libraries/ -name '*.o' -delete
+	@find Libraries/ -name '*.a' -delete
 
 size: patch ## show binary size metrics and large object summary
 	@$(MAKE) -s -f common.mk size

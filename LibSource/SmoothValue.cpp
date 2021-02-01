@@ -3,25 +3,26 @@
 
 template<>
 SmoothFloat::SmoothValue()
-  : lambda(0.9), value(0.0){}
+  : value(0.0), lambda(0.9) {}
 
 template<>
 SmoothFloat::SmoothValue(float l)
-  : lambda(l), value(0.0){}
+  : value(0.0), lambda(l) {}
 
 template<>
 SmoothFloat::SmoothValue(float l, float initialValue)
-  : lambda(l), value(initialValue){}
+  : value(initialValue), lambda(l) {}
 
 template<>
-SmoothInt::SmoothValue(int divider) : lambda(divider) {
+SmoothInt::SmoothValue(int divider)
+  : value(0), lambda(divider) {
 // lambda = 1 - 1/divider
 // divider 4:0.75, 5:0.8, 6:0.833, 7:0.857, 8:0.875, 9:0.888, 10:0.9 et c
 }
 
 template<>
 SmoothInt::SmoothValue(int divider, int initialValue) 
-  : lambda(divider), value(initialValue) {}
+  : value(initialValue), lambda(divider) {}
 
 template<>
 void SmoothFloat::update(float newValue){

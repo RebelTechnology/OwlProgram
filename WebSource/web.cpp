@@ -1,12 +1,26 @@
-#include <string.h>
-#include <inttypes.h>
 #include "ProgramVector.h"
 #include "Patch.h"
 #include "device.h"
 #include "main.h"
 #include "message.h"
 #include "PatchProcessor.h"
-#include "malloc.h"
+#ifdef USE_MIDI_CALLBACK
+#include "MidiMessage.h"
+#endif
+
+#ifdef malloc
+#undef malloc
+#endif
+#ifdef calloc
+#undef calloc
+#endif
+#ifdef free
+#undef free
+#endif
+
+#include <string.h>
+#include <inttypes.h>
+#include <malloc.h>
 #include <math.h>
 #include <time.h>
 
@@ -26,8 +40,11 @@ extern "C"{
   int WEB_setup(long fs, int bs);
   void WEB_processBlock(float** inputs, float** outputs);
   void WEB_setParameter(int pid, float value);
+  float WEB_getParameter(int pid);
+  void WEB_setButton(int key, int value);
   void WEB_setButtons(int values);
   int WEB_getButtons();
+  int WEB_processMidi(int port, int status, int d1, int d2);
   char* WEB_getMessage();
   char* WEB_getStatus();
   char* WEB_getPatchName();
@@ -57,21 +74,72 @@ static int16_t parameters[NOF_PARAMETERS];
 static char* parameterNames[NOF_PARAMETERS];
 static volatile uint16_t buttons = 1<<2; // GREEN
 
+extern "C" {
+  // callbacks received from running patch (cv/gate output)
+  void setButtonCallback(uint8_t id, uint16_t state, uint16_t samples){
+    if(state)
+      buttons |= (1<<id);
+    else
+      buttons &= ~(1<<id);
+  }
+  void setPatchParameterCallback(uint8_t id, int16_t value){
+    if(id < NOF_PARAMETERS)
+      parameters[id] = value;
+  }
+}
+
+float WEB_getParameter(int pid){
+  if(pid < NOF_PARAMETERS)
+    return parameters[pid]/4096.0f;
+  return 0.5f;
+}
+
 void WEB_setParameter(int pid, float value){
   if(pid < NOF_PARAMETERS)
     parameters[pid] = value*4096;
 }
 
-void WEB_setButtons(int values){
-  if(values != buttons){
-    if((buttons&(1<<PUSHBUTTON)) != (values&(1<<PUSHBUTTON)))
-      getInitialisingPatchProcessor()->patch->buttonChanged(PUSHBUTTON, values&(1<<PUSHBUTTON)?4095:0, 0);
-    buttons = values;
-  }
+void WEB_setButton(int key, int value){
+  getInitialisingPatchProcessor()->patch->buttonChanged((PatchButtonId)key, value, 0);
+  if(value)
+    buttons |= (1<<key);
+  else
+    buttons &= ~(1<<key);
 }
 
 int WEB_getButtons(){
   return buttons;
+}
+
+int WEB_processMidi(int port, int status, int d1, int d2){
+  switch(status & 0xf0){
+  case 0x80: // NOTE_OFF
+    getInitialisingPatchProcessor()->patch->buttonChanged((PatchButtonId)(MIDI_NOTE_BUTTON+d1), 0, 0);
+    break;
+  case 0x90: // NOTE_ON
+    getInitialisingPatchProcessor()->patch->buttonChanged((PatchButtonId)(MIDI_NOTE_BUTTON+d1), d2, 0);
+    break;
+  case 0xE0: // PITCH_BEND_CHANGE
+    // set PARAMETER_G
+    if(PARAMETER_G < NOF_PARAMETERS)
+      parameters[PARAMETER_G] = (d1 | (d2<<7)) - 8192;
+    break;
+  case 0xB0: // CONTROL_CHANGE
+    // todo: PARAMETER_F for CC 1
+    if(d1 == 0x01 && PARAMETER_F < NOF_PARAMETERS)
+      parameters[PARAMETER_F] = d2<<5;
+    break;
+  }    
+ // todo: set PARAMETER_FREQ, PARAMETER_GAIN
+#ifdef USE_MIDI_CALLBACK
+  static MidiMessage msg;
+  msg.data[0] = port;
+  msg.data[1] = status;
+  msg.data[2] = d1;
+  msg.data[3] = d2;
+  getInitialisingPatchProcessor()->patch->processMidi(msg);
+#endif
+  return 0;
 }
 
 int WEB_setup(long fs, int bs){
@@ -100,6 +168,8 @@ int WEB_setup(long fs, int bs){
   pv->programStatus = programStatus;
   pv->serviceCall = serviceCall;
   pv->message = NULL;
+  pv->setButton = setButtonCallback;
+  pv->setPatchParameter = setPatchParameterCallback;
   pv->heapLocations = NULL;
   setup(pv);
 
@@ -109,7 +179,7 @@ int WEB_setup(long fs, int bs){
 
   return 0;
 }
-
+	       
 class MemBuffer : public AudioBuffer {
 protected:
   float** buffer;
@@ -231,15 +301,9 @@ int serviceCall(int service, void** params, int len){
 }
 
 void *pvPortMalloc( size_t xWantedSize ){
-#ifdef malloc
-#undef malloc
-#endif
   return malloc(xWantedSize);
 }
 void vPortFree( void *pv ){
-#ifdef free
-#undef free
-#endif
   free(pv);
 }
 
