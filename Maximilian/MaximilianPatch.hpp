@@ -28,7 +28,7 @@ public:
     maxiSettings::bufferSize = getBlockSize();
     setup();
     char name[] = "A";
-    maxiParameterCount = min(7, maxiParameterCount);
+    maxiParameterCount = std::min(7u, maxiParameterCount);
     for(int i=0; i<maxiParameterCount; ++i){
       if(maxiParameters[i]->name == NULL){
 	name[0] = 'A'+maxiParameters[i]->pid;
