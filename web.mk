@@ -69,7 +69,6 @@ EMCCFLAGS += -s ASSERTIONS=1
 endif
 
 PHONY: libs web minify
->>>>>>> develop
 
 # JavaScript minifiers
 #CLOSURE = java -jar Tools/node_modules/google-closure-compiler/compiler.jar --language_in=ECMASCRIPT5
