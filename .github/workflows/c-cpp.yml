@@ -19,6 +19,10 @@ jobs:
       uses: fiam/arm-none-eabi-gcc@v1
       with:
         release: '9-2020-q2' # The arm-none-eabi-gcc release to use.
+    - name: Setup emsdk
+      uses: mymindstorm/setup-emsdk@v7
+      with:
+        version: 2.0.10
     - name: make
       run: make
     - name: make check
