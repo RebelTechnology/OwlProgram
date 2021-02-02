@@ -2,7 +2,7 @@
 DSPLIB=Libraries/CMSIS/DSP_Lib/Source
 
 # Tool path
-TOOLROOT ?= Tools/gcc-arm-none-eabi-9-2020-q2-update/bin/
+# TOOLROOT ?= Tools/gcc-arm-none-eabi-9-2020-q2-update/bin/
 
 CMSIS ?= Libraries/CMSIS/Include/
 
