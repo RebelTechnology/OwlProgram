@@ -4,12 +4,13 @@
 #include "Patch.h"
 #include "maximilian.h"
 
-static maxiParam* maxiParameters[8];
+#define MAX_MAXIPARAMS 20
+static maxiParam* maxiParameters[MAX_MAXIPARAMS];
 static unsigned int maxiParameterCount = 0;
 maxiParam::maxiParam() : value(0.5), minValue(0.0), maxValue(1.0),
-			 name(NULL), pid(maxiParameterCount++){
-  if(pid < 8)
-    maxiParameters[pid] = this;
+			 name(NULL), pid(maxiParameterCount){
+  if(maxiParameterCount < MAX_MAXIPARAMS)
+    maxiParameters[maxiParameterCount++] = this;
 }
 
 void maxiParam::update(double v){
@@ -32,22 +33,25 @@ public:
     maxiSettings::bufferSize = getBlockSize();
     setup();
     char name[] = "A";
-    maxiParameterCount = std::min(7u, maxiParameterCount);
-    for(int i=0; i<maxiParameterCount; ++i){
+    for(size_t i=0; i<maxiParameterCount; ++i){
       if(maxiParameters[i]->name == NULL){
 	name[0] = 'A'+maxiParameters[i]->pid;
 	registerParameter((PatchParameterId)(maxiParameters[i]->pid), name);
       }else{
 	registerParameter((PatchParameterId)(maxiParameters[i]->pid), maxiParameters[i]->name);
       }
+      float min = maxiParameters[i]->minValue;
+      float max = maxiParameters[i]->maxValue;
+      float value = (maxiParameters[i]->value - min)/(max-min);
+      setParameterValue((PatchParameterId)(maxiParameters[i]->pid), value);
     }
   }
   void processAudio(AudioBuffer &buffer) {
     float* left = buffer.getSamples(LEFT_CHANNEL);
     float* right = buffer.getSamples(RIGHT_CHANNEL);
-    for(int i=0; i<maxiParameterCount; ++i)
+    for(size_t i=0; i<maxiParameterCount; ++i)
       maxiParameters[i]->update(getParameterValue((PatchParameterId)(maxiParameters[i]->pid)));
-    for(int i=0; i<buffer.getSize(); ++i){
+    for(size_t i=0; i<buffer.getSize(); ++i){
       play(output);
       left[i] = output[0];
       right[i] = output[1];
