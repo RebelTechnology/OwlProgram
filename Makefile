@@ -177,6 +177,8 @@ as: patch ## build assembly file (Build/patch.s)
 test: $(DEPS) ## run test patch
 	@$(MAKE) -s -f test.mk test
 
+check: patch ## run tests (compile dummy patch)
+
 help: ## show this help
 	@echo 'Usage: make [target] ...'
 	@echo 'Targets:'
