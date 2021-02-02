@@ -20,7 +20,7 @@ private:
   uint16_t textbgcolor;
   bool wrap;
 
-  inline void swap(int a, int b) { int t = a; a = b; b = t; };
+  inline void swap(int& a, int& b) { int t = a; a = b; b = t; };
 
 public:
 ScreenBuffer(uint16_t w, uint16_t h) : 
