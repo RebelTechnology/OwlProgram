@@ -116,10 +116,19 @@ To compile and run a Gen patch called `Foo`:
 
 Note: use OWL parameters in Gen with parameter names: `A`, `B`, `C`, `D`, `Exp`, and `Push`.
 
+## Building Maximilian patches
+Requires your Maximilian code to be in a `.cpp` file.
+
+To compile and run a Maximilian patch called `Foo`:
+* copy `Foo.cpp` into `PatchSource`
+* `make MAXIMILIAN=Foo run`
+
+Note: use OWL parameters in Maximilian by adding maxiParam objects to your patch.
+
 ## Building SOUL patches
 
 * put your SOUL patch file (e.g. 'Foo.soul') into `PatchSource`
-* `make SOUL=Foo run`
+* `make SOUL=Foo clean patch`
 
 ## Using FirmwareSender
 
@@ -141,7 +150,6 @@ Compile puredata file owl_hypersaw.pd and send to device to be run immediately:
 Compile KickBox[[9]](#ref9) C++ patch:
 
     make PATCHNAME=KickBox clean patch
-    
 
 # References
 <a name="ref1">[1]</a> https://developer.arm.com/open-source/gnu-toolchain/gnu-rm

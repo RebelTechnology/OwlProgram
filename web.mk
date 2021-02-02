@@ -24,6 +24,9 @@ C_SRC   += $(LIBSOURCE)/fastpow.c $(LIBSOURCE)/fastlog.c
 C_SRC   += Libraries/KissFFT/kiss_fft.c
 CPP_SRC += MonochromeScreenPatch.cpp ColourScreenPatch.cpp
 C_SRC += font.c
+ifdef MAXIMILIAN
+EMCC_SRC := $(filter-out $(PATCHSOURCE)/$(MAXIMILIAN).cpp, $(EMCC_SRC))
+endif
 WEBDIR   = $(BUILD)/web
 
 EMCCFLAGS += -s WASM=0 # disables wasm output

@@ -25,6 +25,9 @@ PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
 PATCH_CPP_SRC += PatchProgram.cpp
 PATCH_C_SRC   += $(wildcard $(GENSOURCE)/*.c)
 PATCH_CPP_SRC += $(wildcard $(GENSOURCE)/*.cpp)
+ifdef MAXIMILIAN
+PATCH_CPP_SRC := $(filter-out $(PATCHSOURCE)/$(MAXIMILIAN).cpp, $(PATCH_CPP_SRC))
+endif
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_C_SRC:.c=.o)))
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
 PATCH_OBJS += $(BUILD)/startup.o
