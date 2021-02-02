@@ -86,7 +86,7 @@ export CONFIG PLATFORM
 
 DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
 
-all: patch
+all: libs
 
 .PHONY: .FORCE patch libs faust gen heavy web minify clean realclean run store docs help
 
