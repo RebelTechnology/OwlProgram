@@ -6,14 +6,18 @@
 
 static maxiParam* maxiParameters[8];
 static unsigned int maxiParameterCount = 0;
-maxiParam::maxiParam() : value(0.0), minValue(0.0), maxValue(1.0),
+maxiParam::maxiParam() : value(0.5), minValue(0.0), maxValue(1.0),
 			 name(NULL), pid(maxiParameterCount++){
   if(pid < 8)
     maxiParameters[pid] = this;
 }
 
 void maxiParam::update(double v){
+#ifdef ARM_CORTEX
   const static double lambda = 0.9; // factor for exponential smoothing
+#else
+  const static double lambda = 0.5; // factor for exponential smoothing
+#endif
   value = value*lambda + scale(v)*(1-lambda);
 }
 
