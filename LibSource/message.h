@@ -23,6 +23,9 @@
 #ifndef CONFIGURATION_ERROR_STATUS
 #define CONFIGURATION_ERROR_STATUS -30
 #endif
+#ifndef PROGRAM_ERROR_STATUS
+#define PROGRAM_ERROR_STATUS -40
+#endif
 
 #ifdef __cplusplus
  extern "C" {
