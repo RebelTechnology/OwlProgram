@@ -17,7 +17,6 @@
 #define MULTIPLIER_31B 0x80000000
 #define MULTIPLIER_30B 0x40000000
 #define MULTIPLIER_23B 0x00800000
-#undef AUDIO_SATURATE_SAMPLES
 
 class SampleBuffer : public AudioBuffer {
 protected:
