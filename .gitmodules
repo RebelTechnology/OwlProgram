@@ -1,3 +1,3 @@
 [submodule "Libraries/DaisySP"]
 	path = Libraries/DaisySP
-	url = https://github.com/electro-smith/DaisySP.git
+	url = https://github.com/antisvin/DaisySP/tree/custom-dsp

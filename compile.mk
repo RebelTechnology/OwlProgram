@@ -16,12 +16,21 @@ SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
 GENSOURCE    = $(BUILD)/Source
 TESTPATCHES  = $(BUILDROOT)/TestPatches
-DAISYSP      = $(BUILDROOT)/Libraries/DaisySP
+DAISYSP      = $(BUILDROOT)/Libraries/DaisySP/Source
 CPPFLAGS += -I$(PATCHSOURCE)
 CPPFLAGS += -I$(LIBSOURCE)
 CPPFLAGS += -I$(GENSOURCE)
 CPPFLAGS += -I$(TESTPATCHES)
-CPPFLAGS += -I$(DAISYSP)
+CPPFLAGS += -idirafter $(DAISYSP)
+CPPFLAGS += -idirafter $(DAISYSP)/Control
+CPPFLAGS += -idirafter $(DAISYSP)/Drums
+CPPFLAGS += -idirafter $(DAISYSP)/Dynamics
+CPPFLAGS += -idirafter $(DAISYSP)/Effects
+CPPFLAGS += -idirafter $(DAISYSP)/Filters
+CPPFLAGS += -idirafter $(DAISYSP)/Noise
+CPPFLAGS += -idirafter $(DAISYSP)/PhysicalModeling
+CPPFLAGS += -idirafter $(DAISYSP)/Synthesis
+CPPFLAGS += -idirafter $(DAISYSP)/Utility
 PATCH_C_SRC    = $(wildcard $(PATCHSOURCE)/*.c)
 PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
 PATCH_CPP_SRC += PatchProgram.cpp
@@ -30,7 +39,7 @@ PATCH_CPP_SRC += $(wildcard $(GENSOURCE)/*.cpp)
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_C_SRC:.c=.o)))
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
 PATCH_OBJS += $(BUILD)/startup.o
-DAISYSP_CPP_SRC = $(wildcard $(DAISYSP)/modules/*.cpp)
+DAISYSP_CPP_SRC = $(wildcard $(DAISYSP)/*/*.cpp)
 DAISYSP_OBJS = $(addprefix $(BUILD)/, $(notdir $(DAISYSP_CPP_SRC:.cpp=.o)))
 
 CPPFLAGS += -DARM_CORTEX
@@ -96,7 +105,16 @@ vpath %.s $(PATCHSOURCE)
 vpath %.cpp $(GENSOURCE)
 vpath %.c $(GENSOURCE)
 vpath %.s $(GENSOURCE)
-vpath %.cpp $(DAISYSP)/modules/
+vpath %.cpp $(DAISYSP)/Control
+vpath %.cpp $(DAISYSP)/Drums
+vpath %.cpp $(DAISYSP)/Dynamics
+vpath %.cpp $(DAISYSP)/Effects
+vpath %.cpp $(DAISYSP)/Filters
+vpath %.cpp $(DAISYSP)/Noise
+vpath %.cpp $(DAISYSP)/PhysicalModeling
+vpath %.cpp $(DAISYSP)/Synthesis
+vpath %.cpp $(DAISYSP)/Utility
+
 vpath %.c Libraries/syscalls
 
 .PHONY: libs as map compile
