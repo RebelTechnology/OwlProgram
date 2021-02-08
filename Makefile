@@ -161,7 +161,7 @@ clean: ## remove generated patch files
 	@rm -rf $(BUILD)/*
 
 realclean: clean ## remove all library object files
-	@find Libraries/ -name '*.a' -delete
+	@find Libraries/ -name '*.[a|o]' -delete
 
 size: patch ## show binary size metrics and large object summary
 	@$(MAKE) -s -f common.mk size
