@@ -18,13 +18,19 @@
 
 #include <limits>
 namespace owl {
-  inline float sqrt(float x){ return arm_sqrtf(x); }
   inline float pow(float x, float y){ return fast_powf(x, y); }
   inline float exp(float x){ return fast_expf(x); }
   inline float log(float x){ return fast_logf(x); }
   inline float log10(float x){ return fast_log10f(x); }
+#ifdef ARM_CORTEX
+  inline float sqrt(float x){ return arm_sqrtf(x); }
   inline float sin(float x){ return arm_sin_f32(x); }
   inline float cos(float x){ return arm_cos_f32(x); }
+#else
+  inline float sqrt(float x){ return std::sqrt(x); }
+  inline float sin(float x){ return std::sin(x); }
+  inline float cos(float x){ return std::cos(x); }
+#endif
   inline float tan(float x){ return std::tan(x); }
   inline float sinh(float x){ return std::sinh(x); }
   inline float cosh(float x){ return std::cosh(x); }
