@@ -48,8 +48,7 @@ namespace owl {
 class SoulPatch : public Patch {
 private:
   SOULPATCH soulpatch;
-  std::array<SOULPATCH::Parameter, SOULPATCH::numParameters> params;
-  // SOULPATCH::span<SOULPATCH::Parameter> params;
+  SOULPATCH::ParameterList params;
   AudioBuffer* outputBuffer;
   SOULPATCH::MIDIMessage midiBuffer[32];
   size_t numMIDIMessages = 0;
