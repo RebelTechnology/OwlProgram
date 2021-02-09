@@ -1,4 +1,4 @@
 [submodule "Libraries/DaisySP"]
 	path = Libraries/DaisySP
-	url = https://github.com/antisvin/DaisySP.git
-	branch = custom-dsp
+	url = https://github.com/electro-smith/DaisySP.git
+	branch = master
