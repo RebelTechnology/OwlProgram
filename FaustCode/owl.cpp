@@ -39,7 +39,7 @@
 #include "Patch.h"
 #include "VoltsPerOctave.h"
 
-// We have to undefine min/max from Owl's basicmaths.h, otherwise they cause
+// We have to undefine min/max from OWL's basicmaths.h, otherwise they cause
 // errors when Faust calls functions with the same names in std:: namespace
 #undef min
 #undef max
@@ -54,10 +54,11 @@
 #include "faust/gui/UI.h"
 #include "faust/gui/meta.h"
 
-static float fFreq, fGain, fGate;
+static float fKey, fFreq, fGain, fGate;
 static float fBend = 1.0f;
 
 class MonoVoiceAllocator {
+    float& key;
     float& freq;
     float& gain;
     float& gate;
@@ -66,8 +67,9 @@ class MonoVoiceAllocator {
     uint8_t lastNote = 0;
 
 public:
-    MonoVoiceAllocator(float& fq, float& gn, float& gt, float& bd)
-        : freq(fq)
+    MonoVoiceAllocator(float& ky, float& fq, float& gn, float& gt, float& bd)
+        : key(ky)
+        , freq(fq)
         , gain(gn)
         , gate(gt)
         , bend(bd) {
@@ -114,6 +116,7 @@ public:
     void noteOn(uint8_t note, uint16_t velocity, uint16_t delay) {
         if (lastNote < 16)
             notes[lastNote++] = note;
+	key = note;
         freq = noteToHz(note);
         gain = velocityToGain(velocity);
         gate = 1.0f;
@@ -130,11 +133,12 @@ public:
                 notes[i] = notes[i + 1];
                 i++;
             }
-            freq = noteToHz(notes[lastNote - 1]);
+	    key = notes[lastNote - 1];
+            freq = noteToHz(key);
         }
         else {
             gate = 0.0f;
-            lastNote = 0;
+            lastNote = 0;	    
         }
     }
     void allNotesOff() {
@@ -153,8 +157,7 @@ enum ParserState {
  * To enable MIDI in current patch, add this to source Faust file:
  *     declare options "[midi:on]";
  *
- * You can also add descrpiption to be displayed with debugMessage function like
- * this:
+ * You can also add a description to be displayed like this:
  *     declare message "Hello World";
  *
  * To add V/Oct scaling support, use something likes this:
@@ -251,8 +254,8 @@ private:
 
 /**************************************************************************************
  *
- * OwlParameter : object used by OwlUI to ensures the connection between an Owl
- * parameter and a Faust widget
+ * OwlParameter : object used by OwlUI to ensures the connection between an OWL
+ * parameter and a FAUST widget
  *
  ***************************************************************************************/
 
@@ -349,8 +352,8 @@ public:
  * OwlUI : Faust User Interface builder. Passed to buildUserInterface OwlU
  * ensures the mapping between owl parameters and faust widgets. It relies on
  * specific metadata "...[OWL:PARAMETER_X]..." in widget's label for that. For
- * example any faust widget with metadata [OWL:PARAMETER_B] will be controlled
- * by PARAMETER_B (the second knob).
+ * example any faust widget with metadata [OWL:B] will be controlled by
+ * PARAMETER_B (the second knob).
  *
  ***************************************************************************************/
 
@@ -359,7 +362,7 @@ public:
 #define NO_PARAMETER ((PatchParameterId)-1)
 #define NO_BUTTON ((PatchButtonId)-1)
 
-MonoVoiceAllocator allocator(fFreq, fGain, fGate, fBend);
+MonoVoiceAllocator allocator(fKey, fFreq, fGain, fGate, fBend);
 VoltsPerOctave* fVOctInput;
 VoltsPerOctave* fVOctOutput;
 
@@ -384,6 +387,10 @@ class OwlUI : public UI {
             else if (meta.midiOn && strcasecmp(label, "bend") == 0) {
                 fParameterTable[fParameterIndex++] =
                     new OwlVariable(fPatch, &fBend, zone, label, init, lo, hi);
+            }
+            else if (meta.midiOn && strcasecmp(label, "key") == 0) {
+                fParameterTable[fParameterIndex++] =
+                    new OwlVariable(fPatch, &fKey, zone, label, init, lo, hi);
             }
             else if (fParameter != NO_PARAMETER) {
                 fParameterTable[fParameterIndex++] =
@@ -451,7 +458,7 @@ public:
             delete fVOctOutput;
     }
 
-    // should be called before compute() to update widget's zones registered as Owl parameters
+    // should be called before compute() to update widget's zones registered as OWL parameters
     void update() {
         for (int i = 0; i < fParameterIndex; i++)
             fParameterTable[i]->update();
@@ -513,7 +520,6 @@ public:
         if (strcasecmp(k, "OWL") == 0) {
             if (strncasecmp(id, "PARAMETER_", 10) == 0)
                 id += 10;
-
             if (strlen(id) == 1) {
                 // Single char parameter name.
                 // Note that we can use I - P as aliases for AA-AH.
@@ -581,12 +587,13 @@ public:
             else if (strcasecmp(id, "PUSH") == 0)
                 fButton = PUSHBUTTON;
         }
-        else if (strcasecmp(k, "midi") == 0) {
-            // todo!
-            // if (strcasecmp(id,"pitchwheel") == 0)  fParameter = PARAMETER_G;
-            // // mapped to pitch wheel declare(&fHslider1, "midi",
-            // "pitchwheel"); declare(&fButton1, "midi", "ctrl 64");
-        }
+        // else if (strcasecmp(k, "midi") == 0) {
+	//   if (strcasecmp(id, "pitchwheel") == 0){ // PB
+	//   }else if (strcasecmp(id, "ctrl") == 0){ // CC
+	//   }else if (strcasecmp(id, "chanpress") == 0){ // AT
+	//   }else if (strcasecmp(id, "pgm") == 0){ // PC
+	//   }
+        // }
     }
 
     // -- V/Oct
