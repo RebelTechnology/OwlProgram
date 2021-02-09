@@ -8,13 +8,10 @@
 #undef min
 #undef max
 #undef abs
-#undef sin
-#undef cos
 #undef exp
 #undef sqrt
 #undef pow
 #undef log
-#undef log10
 #undef rand
 
 /** PIs
