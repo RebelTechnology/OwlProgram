@@ -25,6 +25,9 @@ This has been done on a Ubuntu server 18.04
     $ sudo apt install build-essential
     $ sudo apt install make gcc-arm-none-eabi
     $ git clone https://github.com/pingdynasty/OwlProgram
+    $ cd OwlProgram
+    $ git submodule init
+    $ git submodule update
 
 edit OwlProgram/common.mk and point TOOLROOT to where arm-none-eabi binaries are installed
 
