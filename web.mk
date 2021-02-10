@@ -1,6 +1,7 @@
 LIBSOURCE    = $(BUILDROOT)/LibSource
 SOURCE       = $(BUILDROOT)/Source
 GENSOURCE    = $(BUILD)/Source
+DAISYSP      = $(BUILDROOT)/Libraries/DaisySP/Source
 
 # emscripten
 EMCC      ?= emcc
@@ -9,7 +10,17 @@ EMCCFLAGS += -fno-rtti -fno-exceptions
 # EMCCFLAGS += -s ASSERTIONS=1 -Wall
 EMCCFLAGS += -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(GENSOURCE) -I$(BUILD)
 EMCCFLAGS += -I$(BUILD)/Source
-EMCCFLAGS +=  -ILibraries -ILibraries/KissFFT -DHV_SIMD_NONE
+EMCCFLAGS += -I$(DAISYSP)
+EMCCFLAGS += -I$(DAISYSP)/Control
+EMCCFLAGS += -I$(DAISYSP)/Drums
+EMCCFLAGS += -I$(DAISYSP)/Dynamics
+EMCCFLAGS += -I$(DAISYSP)/Effects
+EMCCFLAGS += -I$(DAISYSP)/Filters
+EMCCFLAGS += -I$(DAISYSP)/Noise
+EMCCFLAGS += -I$(DAISYSP)/PhysicalModeling
+EMCCFLAGS += -I$(DAISYSP)/Synthesis
+EMCCFLAGS += -I$(DAISYSP)/Utility
+EMCCFLAGS +=  -ILibraries -ILibraries/KissFFT -DHV_SIMD_NONE -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
 EMCCFLAGS += -Wno-warn-absolute-paths
 EMCCFLAGS += -Wno-unknown-warning-option
 EMCCFLAGS += --memory-init-file 0 # don't create separate memory init file .mem
@@ -39,6 +50,9 @@ LDFLAGS  = $(EMCCFLAGS)
 EMCC_OBJS = $(addprefix $(WEBDIR)/, $(notdir $(CPP_SRC:.cpp=.o)))
 EMCC_OBJS += $(addprefix $(WEBDIR)/, $(notdir $(C_SRC:.c=.o)))
 
+EMDAISYSP_CPP_SRC = $(wildcard $(DAISYSP)/*/*.cpp)
+EMDAISYSP_OBJS = $(addprefix $(WEBDIR)/, $(notdir $(EMDAISYSP_CPP_SRC:.cpp=.o)))
+
 PATCH_C_SRC   = $(wildcard $(GENSOURCE)/*.c)
 PATCH_CPP_SRC = $(wildcard $(GENSOURCE)/*.cpp) $(SOURCE)/PatchProgram.cpp
 PATCH_C_SRC   += $(wildcard $(PATCHSOURCE)/*.c)
@@ -61,6 +75,16 @@ vpath %.s $(PATCHSOURCE)
 vpath %.cpp $(GENSOURCE)
 vpath %.c $(GENSOURCE)
 vpath %.s $(GENSOURCE)
+vpath %.cpp $(DAISYSP)
+vpath %.cpp $(DAISYSP)/Control
+vpath %.cpp $(DAISYSP)/Drums
+vpath %.cpp $(DAISYSP)/Dynamics
+vpath %.cpp $(DAISYSP)/Effects
+vpath %.cpp $(DAISYSP)/Filters
+vpath %.cpp $(DAISYSP)/Noise
+vpath %.cpp $(DAISYSP)/PhysicalModeling
+vpath %.cpp $(DAISYSP)/Synthesis
+vpath %.cpp $(DAISYSP)/Utility
 vpath %.cpp WebSource
 vpath %.c Libraries/KissFFT
 
@@ -75,7 +99,7 @@ PHONY: libs web minify
 UGLIFYJS = Tools/node_modules/uglifyjs/bin/uglifyjs
 
 $(WEBDIR)/$(TARGET).js: $(PATCH_OBJS)
-	$(EMCC) $(LDFLAGS) $(PATCH_OBJS) -o $(WEBDIR)/$(TARGET).js Libraries/libowlweb.a
+	$(EMCC) $(LDFLAGS) $(PATCH_OBJS) -o $(WEBDIR)/$(TARGET).js Libraries/libowlweb.a -Wl,--whole-archive Libraries/libdaisyspweb.a -Wl,--no-whole-archive
 	@cp WebSource/*.js WebSource/*.html $(WEBDIR)
 
 $(WEBDIR)/%.min.js: $(WEBDIR)/%.js
@@ -85,7 +109,10 @@ $(WEBDIR)/%.min.js: $(WEBDIR)/%.js
 Libraries/libowlweb.a: $(EMCC_OBJS)
 	$(EMAR) rcs $@ $^
 
-libs: Libraries/libowlweb.a
+Libraries/libdaisyspweb.a: $(EMDAISYSP_OBJS)
+	$(EMAR) rcs $@ $^
+
+libs: Libraries/libowlweb.a Libraries/libdaisyspweb.a
 
 # compile and generate dependency info
 $(WEBDIR)/%.o: %.c
