@@ -2,7 +2,7 @@
 DSPLIB=Libraries/CMSIS/DSP_Lib/Source
 
 # Tool path
-TOOLROOT ?= Tools/gcc-arm-none-eabi-9-2020-q2-update/bin/
+# TOOLROOT ?= Tools/gcc-arm-none-eabi-9-2020-q2-update/bin/
 
 CMSIS ?= Libraries/CMSIS/Include/
 
@@ -32,6 +32,8 @@ else
 ARCH_FLAGS += -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 DEF_FLAGS = -DSTM32F4XX -DARM_MATH_CM4 -D__FPU_PRESENT -D__FPU_USED=1
 endif
+
+DEF_FLAGS += -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
 
 INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(DEVICE) -I$(CMSIS) -I$(PERIPH_FILE)/inc -I$(SOURCE)
 INC_FLAGS += -I$(DEVICE)/Include -I$(CMSIS)

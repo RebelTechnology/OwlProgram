@@ -1,6 +1,6 @@
 GENSRC     ?= $(BUILDROOT)/GenSource
 
-.PHONY: .FORCE
+.PHONY: .FORCE gen
 
 $(BUILD)/Source/gen.h: .FORCE
 	@echo "#include \"$(GEN).h\"" > $@
