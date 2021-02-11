@@ -136,8 +136,8 @@ Libraries/libowlprg.a: $(OBJS)
 Libraries/libdaisysp.a: $(DAISYSP_OBJS)
 	@$(AR) rcs $@ $^
 
-$(BUILD)/$(TARGET).elf: $(PATCH_OBJS) $(DAISYSP_OBJS) $(LDSCRIPT)
-	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(DAISYSP_OBJS) $(LDLIBS) Libraries/libowlprg.a Libraries/libdaisysp.a
+$(BUILD)/$(TARGET).elf: $(PATCH_OBJS) $(LDSCRIPT)
+	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(LDLIBS) Libraries/libdaisysp.a Libraries/libowlprg.a
 
 libs: Libraries/libowlprg.a Libraries/libdaisysp.a
 
@@ -145,6 +145,6 @@ as: $(BUILD)/$(TARGET).elf
 	@$(OBJDUMP) -S $< > $(BUILD)/$(TARGET).s
 
 map: $(PATCH_OBJS) $(LDSCRIPT)
-	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/$(TARGET).map $(PATCH_OBJS) $(LDLIBS) Libraries/libowlprg.a Libraries/libdaisysp.a
+	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/$(TARGET).map $(PATCH_OBJS) $(LDLIBS) Libraries/libdaisysp.a Libraries/libowlprg.a
 
 compile: $(BUILD)/$(TARGET).bin
