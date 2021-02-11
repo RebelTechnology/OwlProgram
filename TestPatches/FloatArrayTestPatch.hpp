@@ -1,7 +1,10 @@
 #ifndef __FloatArrayTestPatch_hpp__
 #define __FloatArrayTestPatch_hpp__
 
-#include "StompBox.h"
+#include "Patch.h"
+#ifdef assert
+#undef assert
+#endif
 
 class FloatArrayTestPatch : public Patch {
 private:
