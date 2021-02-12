@@ -55,6 +55,7 @@ public:
   void setParameterValue(PatchParameterId pid, float value);
   bool isButtonPressed(PatchButtonId bid);
   /** @deprecated */
+  [[deprecated]]
   int getSamplesSinceButtonPressed(PatchButtonId bid);
   void setButton(PatchButtonId bid, uint16_t value, uint16_t samples=0);
   int getBlockSize();
