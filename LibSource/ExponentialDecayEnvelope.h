@@ -40,7 +40,7 @@ public:
   }
   static ExponentialDecayEnvelope* create(float rate, float sr){
     ExponentialDecayEnvelope* env = new ExponentialDecayEnvelope();
-    env->setRate(rate, sr);
+    env->setDecay(rate, sr);
     return env;
   }
   static void destroy(ExponentialDecayEnvelope* env){
