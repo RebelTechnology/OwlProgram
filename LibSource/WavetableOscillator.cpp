@@ -2,11 +2,11 @@
 #include "basicmaths.h"
 #include <stdint.h>
 
-WavetableOscillator* WavetableOscillator::create(float sr, size_t size) {
+WavetableOscillator* WavetableOscillator::create(size_t size) {
   FloatArray wave = FloatArray::create(size);
   for(size_t i=0; i<size; ++i)
     wave[i] = sin(2*M_PI*i/(size-1));    
-  return new WavetableOscillator(sr, wave);
+  return new WavetableOscillator(wave);
 }
 
 void WavetableOscillator::destroy(WavetableOscillator* osc){
@@ -14,19 +14,13 @@ void WavetableOscillator::destroy(WavetableOscillator* osc){
   delete osc;
 }
 
-WavetableOscillator::WavetableOscillator(float sr, const FloatArray wavetable): 
-  multiplier(1.0/sr),
+WavetableOscillator::WavetableOscillator(const FloatArray wavetable): 
   wave(wavetable),
   acc(0.0), inc(0.1)
 {}
 
-void WavetableOscillator::setSampleRate(float value){
-  multiplier = 1.0/value;
-}
-
 void WavetableOscillator::setFrequency(float freq){
-  //    inc = max(0.0, min(0.5, freq*multiplier));
-  inc = freq*multiplier;  
+  inc = freq;
 }
 
 float WavetableOscillator::getSample(float phase){
@@ -36,15 +30,23 @@ float WavetableOscillator::getSample(float phase){
   return wave[index];
 }
 
-float WavetableOscillator::getNextSample(){
+float WavetableOscillator::generate(){
   float s = getSample(acc);
   acc += inc;
+  if(acc >= 1.0)
+    acc -= 1.0;
+  return s;
+}
+
+float WavetableOscillator::generate(float fm){
+  float s = getSample(acc);
+  acc += inc + fm;
   if(acc > 1.0)
     acc -= 1.0;
   return s;
 }
 
-void WavetableOscillator::getSamples(FloatArray samples){
+void WavetableOscillator::generate(FloatArray samples){
   for(size_t i=0; i<samples.getSize();++i)
-    samples[i] = getNextSample();
+    samples[i] = generate();
 }

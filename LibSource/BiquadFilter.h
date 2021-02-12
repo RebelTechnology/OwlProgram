@@ -2,6 +2,7 @@
 #define __BiquadFilter_h__
 
 #include "FloatArray.h"
+#include "SignalProcessor.h"
 
 class FilterStage {
 public:
@@ -38,7 +39,7 @@ public:
   void setHighShelf(float fc, float gain){
     setHighShelf(coefficients, fc, gain);
   }
-  void setCoefficients(FloatArray newCoefficients){
+  void copyCoefficients(FloatArray newCoefficients){
     ASSERT(coefficients.getSize()==newCoefficients.getSize(), "wrong size");
     coefficients.copyFrom(newCoefficients);
   }  
@@ -51,7 +52,7 @@ public:
   }
 
   static void setLowPass(float* coefficients, float fc, float q){
-    float omega = M_PI*fc/2;
+    float omega = M_PI*fc;
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
     coefficients[0] = K * K * norm;
@@ -62,7 +63,7 @@ public:
   }
 
   static void setHighPass(float* coefficients, float fc, float q){
-    float omega = M_PI*fc/2;
+    float omega = M_PI*fc;
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
     coefficients[0] = 1 * norm;
@@ -73,7 +74,7 @@ public:
   }
 
   static void setBandPass(float* coefficients, float fc, float q){
-    float omega = M_PI*fc/2;
+    float omega = M_PI*fc;
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
     coefficients[0] = K / q * norm;
@@ -84,7 +85,7 @@ public:
   }
 
   static void setNotch(float* coefficients, float fc, float q){
-    float omega = M_PI*fc/2;
+    float omega = M_PI*fc;
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
     coefficients[0] = (1 + K * K) * norm;
@@ -95,7 +96,7 @@ public:
   }
 
   static void setPeak(float* coefficients, float fc, float q, float gain){
-    float omega = M_PI*fc/2;
+    float omega = M_PI*fc;
     float K = tanf(omega);
     float V = fabs(gain-0.5)*60 + 1; // Gain
     float norm;
@@ -118,7 +119,7 @@ public:
   }
 
   static void setLowShelf(float* coefficients, float fc, float gain){
-    float omega = M_PI*fc/2;
+    float omega = M_PI*fc;
     float K = tanf(omega);
     float V = fabs(gain-0.5)*60 + 1; // Gain
     float norm;
@@ -140,7 +141,7 @@ public:
   }
 
   static void setHighShelf(float* coefficients, float fc, float gain){
-    float omega = M_PI*fc/2;
+    float omega = M_PI*fc;
     float K = tanf(omega);
     float V = fabs(gain-0.5)*60 + 1; // Gain
     float norm;
@@ -170,7 +171,7 @@ public:
  */
 #define BIQUAD_COEFFICIENTS_PER_STAGE    5
 #define BIQUAD_STATE_VARIABLES_PER_STAGE 2
-class BiquadFilter {
+class BiquadFilter : public SignalProcessor {
 private:
 #ifdef ARM_CORTEX
   // arm_biquad_casd_df1_inst_f32 df1;
@@ -287,31 +288,56 @@ public:
     return output;
   }
 
+  void setLowPass(float fc, float q, float sr){
+    setLowPass(fc/sr, q);
+  }
   void setLowPass(float fc, float q){
     FilterStage::setLowPass(coefficients, fc, q);
     copyCoefficients();
   }
 
+  void setHighPass(float fc, float q, float sr){
+    setHighPass(fc/sr, q);
+  }
   void setHighPass(float fc, float q){
     FilterStage::setHighPass(coefficients, fc, q);
     copyCoefficients();
   }
 
+  void setBandPass(float fc, float q, float sr){
+    setBandPass(fc/sr, q);
+  }
   void setBandPass(float fc, float q){
     FilterStage::setBandPass(coefficients, fc, q);
     copyCoefficients();
+  }
+
+  void setNotch(float fc, float q, float sr){
+    setNotch(fc/sr, q);
   }
   void setNotch(float fc, float q){
     FilterStage::setNotch(coefficients, fc, q);
     copyCoefficients();
   }
+
+  void setPeak(float fc, float q, float gain, float sr){
+    setPeak(fc/sr, q, gain);
+  }
   void setPeak(float fc, float q, float gain){
     FilterStage::setPeak(coefficients, fc, q, gain);
     copyCoefficients();
   }
+
+  void setLowShelf(float fc, float gain, float sr){
+    setLowShelf(fc/sr, gain);
+  }
   void setLowShelf(float fc, float gain){
     FilterStage::setLowShelf(coefficients, fc, gain);
     copyCoefficients();
+  }
+
+  void setHighShelf(float fc, float gain, float sr){
+    setHighShelf(fc/sr, gain);
   }
   void setHighShelf(float fc, float gain){
     FilterStage::setHighShelf(coefficients, fc, gain);
@@ -324,10 +350,14 @@ public:
     init();
   }
 
-  void setCoefficients(FloatArray newCoefficients){//copies coefficients to all stages
+  void copyCoefficients(FloatArray newCoefficients){
     ASSERT(newCoefficients.getSize()==BIQUAD_COEFFICIENTS_PER_STAGE, "wrong size");
-    getFilterStage(0).setCoefficients(newCoefficients);
+    getFilterStage(0).copyCoefficients(newCoefficients);
     copyCoefficients(); //set all the other stages
+  }
+  [[deprecated("use copyCoefficients() instead.")]]
+  void setCoefficients(FloatArray newCoefficients){ // copies coefficients to all stages
+    copyCoefficients(newCoefficients);
   }
 
   static BiquadFilter* create(int stages){

@@ -1,12 +1,14 @@
 #ifndef __StateVariableFilter_h__
 #define __StateVariableFilter_h__
 
+#include "FloatArray.h"
+#include "SignalProcessor.h"
+
 /**
- * State Variable Filter based on Andy Simper's code:
+ * State Variable Filter based on Andy Simper's code and analysis:
  * @ref http://www.cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
  */
-
-class StateVariableFilter {
+class StateVariableFilter : public SignalProcessor {
 public:
 
   void process(FloatArray input, FloatArray output){

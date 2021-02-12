@@ -2,8 +2,9 @@
 #define __FirFilter_h__
 
 #include "FloatArray.h"
+#include "SignalProcessor.h"
 
-class FirFilter {
+class FirFilter : public SignalProcessor {
 private:
   FloatArray coefficients;
   FloatArray states;
@@ -48,17 +49,26 @@ public:
   ~FirFilter(){
   }
   
-  void processBlock(FloatArray buffer){
+  void process(FloatArray buffer){
     ASSERT(buffer.getSize()<=blockSize, "Too large"); //TODO: check that in-place actually works properly
     processBlock(buffer.getData(), buffer.getData(), buffer.getSize());
   }
-  
-  void processBlock(FloatArray source, FloatArray destination){
+
+  void process(FloatArray source, FloatArray destination){
     ASSERT(source.getSize()<=blockSize, "Too large");
     ASSERT(source.getSize()==destination.getSize(), "Sizes don't match");
     processBlock(source.getData(), destination.getData(), destination.getSize());
   }
-  
+
+  [[deprecated("use process() instead.")]]  
+  void processBlock(FloatArray buffer){
+    process(buffer);
+  }
+  [[deprecated("use process() instead.")]]  
+  void processBlock(FloatArray source, FloatArray destination){
+    process(source, destination);
+  }
+
   FloatArray getCoefficients(){
     return coefficients;
   };

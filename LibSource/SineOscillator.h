@@ -5,49 +5,47 @@
 
 class SineOscillator : public Oscillator {
 private:
-  float mul;
   float phase;
   float incr;
 public:
-  SineOscillator() : phase(0.0f), incr(0.0f) {    
-    setSampleRate(48000);
+  SineOscillator() : phase(0.0f), incr(0.0f) {}
+  SineOscillator(float freq, float sr) : phase(0.0f){
+    setFrequency(freq, sr);
   }
-  SineOscillator(float sr) : phase(0.0f), incr(0.0f){
-    setSampleRate(sr);
-  }    
-  void setSampleRate(float sr){
-    mul = 2*M_PI/sr;
+  using Oscillator::setFrequency;
+  void setFrequency(float nfreq){
+    incr = nfreq*2*M_PI;
   }
-  void setFrequency(float freq){
-    incr = freq*mul;
+  void reset(){
+    phase = 0.0f;
   }
   void setPhase(float ph){
     phase = ph;
     while(phase >= 2*M_PI)
       phase -= 2*M_PI;
   }
-  void reset(){
-    phase = 0.0f;
-  }
   float getPhase(){
     return phase;
   }
-  float getNextSample(){
+  float generate(){
     float sample = sinf(phase);
     phase += incr;
     if(phase >= 2*M_PI)
       phase -= 2*M_PI;
     return sample;
   }
-  float getNextSample(float fm){
+  float generate(float fm){
     float sample = sinf(phase);
     phase += incr + fm;
     if(phase >= 2*M_PI)
       phase -= 2*M_PI;
     return sample;
-  }  
-  static SineOscillator* create(float sr){
-    return new SineOscillator(sr);
+  }
+  static SineOscillator* create(){
+    return new SineOscillator();
+  }
+  static SineOscillator* create(float freq, float sr){
+    return new SineOscillator(freq, sr);
   }
   static void destroy(SineOscillator* osc){
     delete osc;

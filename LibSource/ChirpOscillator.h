@@ -5,33 +5,36 @@
 
 class ChirpOscillator : public Oscillator {
 private:
-  const float fs;
   float phase;
   float incr;
 public:
   float rate;
-  ChirpOscillator(float sr)
-    : fs(sr), phase(0.0f), incr(1.0f){}
-  void setFrequency(float freq){
-    incr = freq*2*M_PI/fs;
+  ChirpOscillator()
+    : phase(0.0f), incr(1.0f), rate(0) {}
+  using Oscillator::setFrequency;
+  void setFrequency(float nfreq){
+    incr = nfreq*M_PI;
   }
-  void setRate(float r){
+  void setRate(float r, float sr){
     // should be: rate 0: 1 (constant), rate -1: 1-0.5/sr (halved in a second), rate 1: 1+1/sr (doubled in a second)
     if(r < 0)
-      rate = 1.0f - 10*(1/(1-r))/fs;
+      rate = 1.0f - 10*(1/(1-r))/sr;
     else
-      rate = 1.0f + 10*(1/(1+r))/fs;
+      rate = 1.0f + 10*(1/(1+r))/sr;
   }
   /**
    * Set expontential decay rate.
    */
-  void setDecay(float d){
-    setRate(-(d+1/fs));
+  void setDecay(float d, float sr){
+    setRate(-(d+1/sr), sr);
   }
   void trigger(){
+    reset();
+  }
+  void reset(){
     phase = 0.0f;
   }
-  float getNextSample(){
+  float generate(){
     float sample = sinf(phase);
     phase += incr;
     incr *= rate;
@@ -40,8 +43,14 @@ public:
     //   phase -= 2*M_PI;
     return sample;
   }
-  static ChirpOscillator* create(float sr){
-    return new ChirpOscillator(sr);
+  float generate(float fm){
+    float sample = sinf(phase);
+    phase += incr + fm;
+    incr *= rate;
+    return sample;
+  }
+  static ChirpOscillator* create(){
+    return new ChirpOscillator();
   }
   static void destroy(ChirpOscillator* osc){
     delete osc;

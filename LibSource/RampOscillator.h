@@ -5,49 +5,48 @@
 
 class RampOscillator : public Oscillator {
 private:
-  float mul;
   float phase;
   float incr;
 public:
   RampOscillator() : phase(0.0f), incr(0.0f) {    
-    setSampleRate(48000);
   }
-  RampOscillator(float sr) : phase(0.0f), incr(0.0f){
-    setSampleRate(sr);
+  RampOscillator(float freq, float sr) : phase(0.0f){
+    setFrequency(freq, sr);
   }    
-  void setSampleRate(float sr){
-    mul = 1.0f/sr;
+  void reset(){
+    phase = 0.0f;
   }
+  using Oscillator::setFrequency;
   void setFrequency(float freq){
-    incr = freq*mul;
+    incr = freq*2;
   }
   void setPhase(float ph){
     phase = ph;
     while(phase >= 1)
       phase -= 1;
   }
-  void reset(){
-    phase = 0.0f;
-  }
   float getPhase(){
     return phase;
   }
-  float getNextSample(){
+  float generate(){
     float sample = phase;
     phase += incr;
     if(phase >= 1.0f)
       phase -= 2.0f;
     return sample;
   }
-  float getNextSample(float fm){
+  float generate(float fm){
     float sample = phase;
     phase += incr + fm;
     if(phase >= 1.0f)
       phase -= 2.0f;
     return sample;
   }  
-  static RampOscillator* create(float sr){
-    return new RampOscillator(sr);
+  static RampOscillator* create(){
+    return new RampOscillator();
+  }
+  static RampOscillator* create(float freq, float sr){
+    return new RampOscillator(freq, sr);
   }
   static void destroy(RampOscillator* osc){
     delete osc;
