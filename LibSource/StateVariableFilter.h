@@ -10,7 +10,14 @@
  */
 class StateVariableFilter : public SignalProcessor {
 public:
-
+  float process(float v0){
+    mV3 = v0 - mIc2eq;
+    mV1 = m_a1 * mIc1eq + m_a2*mV3;
+    mV2 = mIc2eq + m_a2 * mIc1eq + m_a3 * mV3;
+    mIc1eq = 2. * mV1 - mIc1eq;
+    mIc2eq = 2. * mV2 - mIc2eq;
+    return m_m0 * v0 + m_m1 * mV1 + m_m2 * mV2;
+  }
   void process(FloatArray input, FloatArray output){
     size_t nFrames = input.getSize();
     for(size_t s = 0; s < nFrames; s++){
