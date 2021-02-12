@@ -1,4 +1,6 @@
-#include "malloc.h"
+#include <stdio.h>
+#include <malloc.h>
+
 #include "heap.h"
 void *pvPortMalloc( size_t xWantedSize ){
   return malloc(xWantedSize);
@@ -8,12 +10,22 @@ void vPortFree( void *pv ){
 }
 #include "basicmaths.h"
 #include "message.h"
-#include "TestPatch.hpp"
+#include "Patch.h"
 #include "ProgramVector.h"
 #include "PatchProcessor.h"
-#include <stdio.h>
+#include "SampleBuffer.hpp"
+
+#include "MemoryBuffer.hpp"
+AudioBuffer* AudioBuffer::create(int channels, int samples){
+  return new ManagedMemoryBuffer(channels, samples);
+}
+AudioBuffer::~AudioBuffer(){}
 
 #include "registerpatch.h"
+
+#define SAMPLE_RATE 48000
+#define CHANNELS    2
+#define BLOCKSIZE   128
 
 extern "C" {
   // http://www.keil.com/forum/60479/
@@ -41,7 +53,7 @@ extern "C" {
 void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTab)
 {
   #warning TODO!
-  ASSERT(false, "arm_bitreversal_16");
+  // ASSERT(false, "arm_bitreversal_16");
 }
 }
 
@@ -85,18 +97,48 @@ Patch::Patch(){}
 Patch::~Patch(){}
 PatchProcessor::PatchProcessor(){}
 PatchProcessor::~PatchProcessor(){}
-int Patch::getBlockSize(){return 128;}
+void Patch::registerParameter(PatchParameterId pid, const char* name){
+  printf("Register parameter %c: %s\n", 'A'+pid, name);
+}  
 void Patch::processMidi(MidiMessage msg){}
 void Patch::sendMidi(MidiMessage msg){
   printf("Sending MIDI [%x:%x:%x:%x]\n", msg.data[0], msg.data[1], msg.data[2], msg.data[3]);
 }  
 
+float Patch::getSampleRate(){
+  return SAMPLE_RATE;
+}
+
+int Patch::getBlockSize(){
+  return BLOCKSIZE;
+}
+
+int Patch::getNumberOfChannels(){
+  return CHANNELS;
+}
+
+float Patch::getParameterValue(PatchParameterId pid){
+  return 0.0f;
+}
+
+void Patch::setParameterValue(PatchParameterId pid, float value){
+  printf("Set parameter %c: %d\n", 'A'+pid, value);
+}
+
+void Patch::setButton(PatchButtonId bid, uint16_t value, uint16_t samples){
+  printf("Set button %c: %d\n", 'A'+bid, value);
+}
+
+bool Patch::isButtonPressed(PatchButtonId bid){
+  return false;
+}
+
 PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
 }
 
-static TestPatch* testpatch = NULL;
-void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, TestPatch* patch){
+static Patch* testpatch = NULL;
+void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){
   //if(patch == NULL)
   //  error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
   testpatch = patch;
@@ -106,14 +148,10 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, TestPatch*
 
 int main(int argc, char** argv){
 #include "registerpatch.cpp"
-  ASSERT(testpatch != NULL, "Missing test patch");    
+  ASSERT(testpatch != NULL, "Missing patch");    
   int ret = 0;
-  printf("Passed %d Failed %d\n", testpatch->passed, testpatch->failed);
-  if(testpatch->success){
-    printf("Success\n");
-  }else{
-    printf("Fail\n");
-    ret = -1;
-  }
+  SampleBuffer* samples = new SampleBuffer(128);
+  testpatch->processAudio(*samples);
+  delete samples;
   return ret;
 }

@@ -88,11 +88,12 @@ DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/star
 
 all: libs patch
 
-.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as test check tables resource size clean realclean sysex run store docs help
+.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as test perform check tables resource size clean realclean sysex run store docs help
 
 .FORCE:
 	@mkdir -p $(BUILD)/Source
 	@mkdir -p $(BUILD)/web
+	@mkdir -p $(BUILD)/Test
 
 $(BUILD)/registerpatch.cpp: .FORCE
 	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $@
@@ -177,7 +178,11 @@ as: patch ## build assembly file (Build/patch.s)
 test: $(DEPS) ## run test patch
 	@$(MAKE) -s -f test.mk test
 
+perform: $(DEPS) ## run patch locally
+	@$(MAKE) -s -f test.mk perform
+
 check: patch ## run tests (compile dummy patch)
+	@$(MAKE) -s TEST=ShortArrayTest test
 
 help: ## show this help
 	@echo 'Usage: make [target] ...'

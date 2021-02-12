@@ -18,6 +18,7 @@ GENSOURCE    = $(BUILD)/Source
 TESTPATCHES  = $(BUILDROOT)/TestPatches
 CPPFLAGS  = -g -Wall -m32
 CPPFLAGS += -I$(SOURCE)
+CPPFLAGS += -I$(PATCHSOURCE)
 CPPFLAGS += -I$(LIBSOURCE)
 CPPFLAGS += -I$(GENSOURCE)
 CPPFLAGS += -I$(TESTPATCHES)
@@ -47,7 +48,7 @@ LDFLAGS  = -Wl,--gc-sections
 CXXFLAGS = -std=c++11
 
 # object files
-OBJS  = $(C_SRC:%.c=$(BUILD)/%.o) $(CPP_SRC:%.cpp=$(BUILD)/%.o)
+OBJS  = $(C_SRC:%.c=$(BUILD)/Test/%.o) $(CPP_SRC:%.cpp=$(BUILD)/Test/%.o)
 
 # Set up search path
 vpath %.cpp $(SOURCE)
@@ -169,16 +170,23 @@ OBJS += $(DSPLIB)/StatisticsFunctions/arm_var_q15.o
 OBJS += $(DSPLIB)/BasicMathFunctions/arm_add_q31.o
 # include $(BUILDROOT)/libs.mk
 
+.PHONY: perform test
+
+perform: $(TESTPATCHES)/PatchRun.cpp $(DEPS) $(OBJS)
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTPATCHES)/PatchRun.cpp -I$(BUILD) $(OBJS) -o $(BUILD)/Test/patch
+	@$(BUILD)/Test/patch
+
+
 test: $(TESTPATCHES)/PatchTest.cpp $(DEPS) $(OBJS)
-	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTPATCHES)/PatchTest.cpp -I$(BUILD) $(OBJS) -o $(BUILD)/$@
-	@$(BUILD)/$@
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTPATCHES)/PatchTest.cpp -I$(BUILD) $(OBJS) -o $(BUILD)/Test/$@
+	@$(BUILD)/Test/$@
 
 # compile and generate dependency info
-$(BUILD)/%.o: %.c
+$(BUILD)/Test/%.o: %.c
 	@$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 	@$(CC) -MM -MT"$@" $(CPPFLAGS) $(CFLAGS) $< > $(@:.o=.d)
 
-$(BUILD)/%.o: %.cpp
+$(BUILD)/Test/%.o: %.cpp
 	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 	@$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) $< > $(@:.o=.d)
 
