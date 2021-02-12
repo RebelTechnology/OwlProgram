@@ -175,13 +175,13 @@ as: patch ## build assembly file (Build/patch.s)
 	@$(MAKE) -s -f compile.mk as
 	@echo Built $(PATCHNAME) assembly in $(BUILD)/$(TARGET).s
 
-test: $(DEPS) ## run test patch
+test: $(DEPS) ## run test patch locally
 	@$(MAKE) -s -f test.mk test
 
 perform: $(DEPS) ## run patch locally
 	@$(MAKE) -s -f test.mk perform
 
-check: patch ## run tests (compile dummy patch)
+check: ## run tests
 	@$(MAKE) -s TEST=ShortArrayTest test
 
 help: ## show this help
