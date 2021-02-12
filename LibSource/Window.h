@@ -18,6 +18,8 @@
  * applyTriangularWindow(float *signal, int size)
  */
 class Window : public FloatArray, SignalProcessor {
+private:
+  size_t index = 0;
 public:
   typedef enum WindowType {
     HammingWindow,
@@ -33,6 +35,12 @@ public:
   }
   void apply(float *signalIn, float *signalOut){
     Window::applyWindow(signalIn, getData(), signalOut, getSize());
+  }
+  float process(float input){
+    float value = input*getData()[index++];
+    if(index >= getSize())
+      index = 0;
+    return value;
   }
   void process(FloatArray input, FloatArray output){
     Window::applyWindow(input, getData(), output, getSize());    

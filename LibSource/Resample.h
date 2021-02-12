@@ -92,6 +92,9 @@ public:
     BiquadFilter::destroy(obj->filter);
     delete obj;
   }
+  float process(float input){
+    return filter->process(input); // this doesn't really make sense
+  }
   /**
    * Up-sample param @input and put results into @param output. Note: in-place processing not supported
    */
@@ -122,6 +125,9 @@ public:
   static void destroy(DownSampler* obj){
     BiquadFilter::destroy(obj->filter);
     delete obj;
+  }
+  float process(float input){
+    return filter->process(input); // this doesn't really make sense
   }
   /**
    * Down-sample param @input and put results into @param output. Note: in-place processing not supported

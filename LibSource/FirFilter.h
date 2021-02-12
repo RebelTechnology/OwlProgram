@@ -14,6 +14,7 @@ private:
 #else
   size_t pointer = 0;
 #endif /* ARM_CORTEX */
+  size_t index = 0;
 
   void processBlock(float* source, float* destination, int size){
 #ifdef ARM_CORTEX
@@ -48,7 +49,13 @@ public:
   
   ~FirFilter(){
   }
-  
+
+  float process(float input){
+    float output;
+    processBlock(&input, &output, 1);
+    return output;
+  }
+
   void process(FloatArray buffer){
     ASSERT(buffer.getSize()<=blockSize, "Too large"); //TODO: check that in-place actually works properly
     processBlock(buffer.getData(), buffer.getData(), buffer.getSize());

@@ -8,7 +8,11 @@
  */
 class SignalProcessor {
 public:
-  virtual void process(FloatArray input, FloatArray output) = 0;
+  virtual float process(float input) = 0;
+  virtual void process(FloatArray input, FloatArray output){
+    for(size_t i=0; i<output.getSize(); ++i)
+      output[i] = process(input[i]);
+  }
 };
 
 #endif // __SignalProcessor_h__

@@ -19,6 +19,9 @@ public:
     gate(state, 0);
   }
   virtual void gate(bool state, int gateDelay){}
+  virtual float process(float input){
+    return input*generate();
+  }
   /**
    * Attenuate samples in @param input by envelope and place results in @param output
    */
