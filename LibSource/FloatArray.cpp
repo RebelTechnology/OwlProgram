@@ -520,5 +520,5 @@ FloatArray FloatArray::create(int size){
 }
 
 void FloatArray::destroy(FloatArray array){
-  delete array.data;
+  delete[] array.data;
 }
