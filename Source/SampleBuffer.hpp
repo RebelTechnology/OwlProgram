@@ -26,6 +26,10 @@ public:
     left = FloatArray::create(blocksize);
     right = FloatArray::create(blocksize);
   }
+  ~SampleBuffer(){
+    FloatArray::destroy(left);
+    FloatArray::destroy(right);
+  }
   void split32(int32_t* input, uint16_t blocksize){
     size = blocksize;
     for(int i=0; i<size; ++i){
