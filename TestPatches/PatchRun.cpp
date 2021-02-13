@@ -2,6 +2,7 @@
 #include <malloc.h>
 
 #include "heap.h"
+// define these before defining the malloc/free macros
 void *pvPortMalloc( size_t xWantedSize ){
   return malloc(xWantedSize);
 }
@@ -14,13 +15,7 @@ void vPortFree( void *pv ){
 #include "ProgramVector.h"
 #include "PatchProcessor.h"
 #include "SampleBuffer.hpp"
-
 #include "MemoryBuffer.hpp"
-AudioBuffer* AudioBuffer::create(int channels, int samples){
-  return new ManagedMemoryBuffer(channels, samples);
-}
-AudioBuffer::~AudioBuffer(){}
-
 #include "registerpatch.h"
 
 #define SAMPLE_RATE 48000
@@ -57,9 +52,6 @@ void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t
 }
 }
 
-PatchProcessor processor;
-ProgramVector programVector;
-
 void assert_failed(const char* msg, const char* location, int line){
   printf("Assertion failed: %s, in %s line %d\n", msg, location, line);
   exit(-1);
@@ -92,6 +84,11 @@ void debugMessage(char const* msg, float a, float b, float c){
 void debugMessage(char const* msg){
   printf("%s\n", msg);
 }
+
+AudioBuffer* AudioBuffer::create(int channels, int samples){
+  return new ManagedMemoryBuffer(channels, samples);
+}
+AudioBuffer::~AudioBuffer(){}
 
 Patch::Patch(){}
 Patch::~Patch(){}
@@ -133,14 +130,18 @@ bool Patch::isButtonPressed(PatchButtonId bid){
   return false;
 }
 
+static PatchProcessor processor;
+ProgramVector programVector;
+static Patch* testpatch = NULL;
+
 PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
 }
 
-static Patch* testpatch = NULL;
 void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){
   //if(patch == NULL)
   //  error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
+  printf("Register patch %s (%d ins, %d outs)\n", name, inputs, outputs);
   testpatch = patch;
 }
 
