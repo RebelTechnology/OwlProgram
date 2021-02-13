@@ -1,14 +1,17 @@
 BUILDROOT ?= .
 
-C_SRC   = basicmaths.c
-C_SRC   += kiss_fft.c
-C_SRC   += fastpow.c fastlog.c
-CPP_SRC += FloatArray.cpp
-CPP_SRC += ShortArray.cpp
+C_SRC   = kiss_fft.c
+C_SRC   += basicmaths.c fastpow.c fastlog.c # sbrk.c heap_5.c 
+CPP_SRC = operators.cpp system_tables.cpp # message.cpp main.cpp 
+# CPP_SRC += PatchProcessor.cpp Patch.cpp 
+CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp FastFourierTransform.cpp 
+CPP_SRC += ShortArray.cpp # ComplexShortArray.cpp ShortFastFourierTransform.cpp 
 CPP_SRC += Envelope.cpp VoltsPerOctave.cpp Window.cpp
 CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
 CPP_SRC += SmoothValue.cpp # PatchParameter.cpp
-CPP_SRC += system_tables.cpp
+CPP_SRC += MonochromeScreenPatch.cpp ColourScreenPatch.cpp
+CPP_SRC += Resource.cpp
+C_SRC += font.c
 
 BUILD       ?= $(BUILDROOT)/Build
 
