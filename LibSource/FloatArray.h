@@ -81,10 +81,12 @@ public:
   void rectify(FloatArray& destination);
   
   /**
-   * Absolute value of the array.
+   * Absolute value of the array, in-place version.
    * Sets each element in the array to its absolute value.
-  */
-  void rectify(); //in place
+   */
+  void rectify(){
+    rectify(*this);
+  }
   
   /**
    * Reverse the array
@@ -107,23 +109,28 @@ public:
   void reciprocal(FloatArray& destination);
   
   /**
-   * Reciprocal of the array.
+   * Reciprocal of the array, in-place version.
    * Sets each element in the array to its reciprocal.
   */
-  void reciprocal(); 
+  void reciprocal(){
+    reciprocal(*this);
+  }
   
   /**
    * Negate the array.
    * Stores the opposite of the elements in the array into destination.
    * @param[out] destination the destination array.
-  */
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+   */
   void negate(FloatArray& destination);
   
   /**
    * Negate the array.
    * Sets each element in the array to its opposite.
   */
-  void negate(); 
+  void negate(){
+    negate(*this);
+  }
   
   /**
    * Random values
@@ -268,12 +275,13 @@ public:
   */
   void multiply(float scalar, FloatArray destination);
 
-/**
+  /**
    * Convolution between arrays.
    * Sets **destination** to the result of the convolution between the array and **operand2**
    * @param[in] operand2 the second operand for the convolution
    * @param[out] destination array. It must have a minimum size of this+other-1.
-  */
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+   */
   void convolve(FloatArray operand2, FloatArray destination);
   
   /** 
@@ -285,6 +293,7 @@ public:
    * @param[in] samples number of samples to compute
    * @remarks **destination[n]** is left unchanged for n<offset and the result is stored from destination[offset] onwards
    * that is, in the same position where they would be if a full convolution was performed.
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   */
   void convolve(FloatArray operand2, FloatArray destination, int offset, size_t samples);
   
@@ -293,6 +302,7 @@ public:
    * Sets **destination** to the correlation of the array and **operand2**.
    * @param[in] operand2 the second operand for the correlation
    * @param[out] destination the destination array. It must have a minimum size of 2*max(srcALen, srcBLen)-1
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   */
   void correlate(FloatArray operand2, FloatArray destination);
   
@@ -470,10 +480,23 @@ public:
   }
   
   /**
-   * Create a linear ramp from one value to another across all values in the Float
+   * Create a linear ramp from one value to another.
+   * Interpolates all samples in the FloatArray between the endpoints @param from to @param to.
    */
   void ramp(float from, float to);
-  
+
+  /**
+   * Scale all values along a linear ramp from one value to another.
+   */  
+  void scale(float from, float to, FloatArray destination);
+
+  /**
+   * In-place scale.
+   */  
+  void scale(float from, float to){
+    scale(from, to, *this);
+  }
+
   /**
    * Apply tanh to each element in the array
    */
@@ -482,7 +505,9 @@ public:
   /**
    * In-place tanh
    */
-  void tanh();
+  void tanh(){
+    tanh(*this);
+  }
 
   /**
    * Creates a new FloatArray.

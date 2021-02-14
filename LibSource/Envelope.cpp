@@ -9,7 +9,8 @@ void EnvelopeGenerator::calculateMultiplier(double startLevel,
 }
 */
 
-AdsrEnvelope::AdsrEnvelope() : 
+AdsrEnvelope::AdsrEnvelope(float sampleRate) :
+  samplePeriod(1.0/sampleRate),
   stage(kIdle),
   trig(kGate),
   level(0.0),
@@ -24,16 +25,29 @@ AdsrEnvelope::AdsrEnvelope() :
 
 AdsrEnvelope::~AdsrEnvelope(){}
 
+void AdsrEnvelope::setSampleRate(float sampleRate){
+  samplePeriod = 1.0/sampleRate;
+}
+
 void AdsrEnvelope::setAttack(float newAttack){
-  attackIncrement = 1 / newAttack;
+  if(newAttack > 0)
+    attackIncrement = samplePeriod / newAttack;
+  else
+    attackIncrement = 1;
 }
 
 void AdsrEnvelope::setDecay(float newDecay){
-  decayIncrement = - 1 / newDecay;
+  if(newDecay > 0)
+    decayIncrement = - samplePeriod / newDecay;
+  else
+    decayIncrement = - 1;
 }
 
 void AdsrEnvelope::setRelease(float newRelease){
-  releaseIncrement = - 1 / newRelease;
+  if(newRelease > 0)
+    releaseIncrement = - samplePeriod / newRelease;
+  else
+    releaseIncrement = -1;
 }
 
 void AdsrEnvelope::setSustain(float newSustain){

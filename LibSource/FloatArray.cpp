@@ -92,11 +92,6 @@ void FloatArray::rectify(FloatArray& destination){ //this is actually "copy data
 #endif  
 }
 
-void FloatArray::rectify(){//in place
-  /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  rectify(*this);
-}
-
 void FloatArray::reverse(FloatArray& destination){ //this is actually "copy data with reverse"
   if(destination==*this){ //make sure it is not called "in-place"
     reverse();
@@ -119,10 +114,6 @@ void FloatArray::reciprocal(FloatArray& destination){
   float* data = getData();
   for(size_t n=0; n<getSize(); n++)
     destination[n] = 1.0f/data[n];
-}
-
-void FloatArray::reciprocal(){//in place
-  reciprocal(*this);
 }
 
 float FloatArray::getRms(){
@@ -389,18 +380,13 @@ void FloatArray::multiply(float scalar, FloatArray destination){
 }
 
 void FloatArray::negate(FloatArray& destination){//allows in-place
-  /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_negate_f32(data, destination.getData(), size); 
-  #else
+#else
   for(size_t n=0; n<size; n++){
     destination[n]=-data[n];
   }
-  #endif /* ARM_CORTEX */
-}
-void FloatArray::negate(){
-  /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  negate(*this);
+#endif /* ARM_CORTEX */
 }
 
 void FloatArray::noise(){
@@ -417,7 +403,6 @@ void FloatArray::noise(float min, float max){
 
 void FloatArray::convolve(FloatArray operand2, FloatArray destination){
   ASSERT(destination.size >= size + operand2.size -1, "Destination array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_conv_f32(data, size, operand2.data, operand2.size, destination);
 #else
@@ -507,10 +492,6 @@ void FloatArray::ramp(float from, float to){
 void FloatArray::tanh(FloatArray destination){
   for(size_t i=0; i<size; i++)
     destination[i] = tanhf(data[i]);  
-}
-
-void FloatArray::tanh(){
-  tanh(*this);
 }
 
 FloatArray FloatArray::create(int size){

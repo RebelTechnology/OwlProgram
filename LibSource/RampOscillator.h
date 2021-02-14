@@ -5,20 +5,24 @@
 
 class RampOscillator : public Oscillator {
 private:
+  float mul;
   float phase;
   float incr;
 public:
-  RampOscillator() : phase(0.0f), incr(0.0f) {    
+  RampOscillator(float sr=48000) : phase(0.0f), incr(0.0f) {
   }
   RampOscillator(float freq, float sr) : phase(0.0f){
-    setFrequency(freq, sr);
-  }    
+    setSampleRate(sr);
+    setFrequency(freq);
+  }
   void reset(){
     phase = 0.0f;
   }
-  using Oscillator::setFrequency;
+  void setSampleRate(float sr){
+    mul = 1.0f/sr;
+  }
   void setFrequency(float freq){
-    incr = freq*2;
+    incr = freq*mul;
   }
   void setPhase(float ph){
     phase = ph;

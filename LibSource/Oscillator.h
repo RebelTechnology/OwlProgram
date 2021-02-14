@@ -14,15 +14,11 @@ public:
   virtual ~Oscillator(){}
   using SignalGenerator::generate;
   /**
-   * Set oscillator frequency (at given sample rate @param sr)
+   * Set oscillator sample rate
    */
-  void setFrequency(float freq, float sr){
-    setFrequency(freq/sr);
-  }
+  virtual void setSampleRate(float value){}
   /**
-   * Set normalised frequency.
-   * Normalised frequency equals frequency divided by sample rate.
-   * Values 0 to 0.5 represents 0 Hz to Nyquist frequency.
+   * Set oscillator frequency in Hertz
    */
   virtual void setFrequency(float value){}
   /**
@@ -52,8 +48,6 @@ public:
   void getSamples(FloatArray output, FloatArray fm){
     generate(output, fm);
   }
-  [[deprecated("use setFrequency(freq, SR) instead.")]]
-  virtual void setSampleRate(float value){}
 };
 
 #endif /* OSCILLATOR_HPP */

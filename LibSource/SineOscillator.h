@@ -5,19 +5,25 @@
 
 class SineOscillator : public Oscillator {
 private:
+  float mul;
   float phase;
   float incr;
 public:
-  SineOscillator() : phase(0.0f), incr(0.0f) {}
-  SineOscillator(float freq, float sr) : phase(0.0f){
-    setFrequency(freq, sr);
+  SineOscillator(float sr=48000) : phase(0), incr(0) {
+    setSampleRate(sr);
   }
-  using Oscillator::setFrequency;
-  void setFrequency(float nfreq){
-    incr = nfreq*2*M_PI;
+  SineOscillator(float freq, float sr) : phase(0.0f) {
+    setSampleRate(sr);
+    setFrequency(freq);
   }
   void reset(){
     phase = 0.0f;
+  }
+  void setSampleRate(float sr){
+    mul = 2*M_PI/sr;
+  }
+  void setFrequency(float freq){
+    incr = freq*mul;
   }
   void setPhase(float ph){
     phase = ph;

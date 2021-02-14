@@ -40,21 +40,13 @@ private:
   enum EnvelopeTrigger { kGate, kTrigger };
 
 public:
-  AdsrEnvelope();
+  AdsrEnvelope(float sampleRate=48000);
   virtual ~AdsrEnvelope();
   using Envelope::process;
   using SignalGenerator::generate;
-  void setAttack(float newAttack, float sr){
-    setAttack(newAttack/sr);
-  }
+  void setSampleRate(float sampleRate);
   void setAttack(float newAttack);
-  void setDecay(float newDecay, float sr){
-    setDecay(newDecay/sr);
-  }
   void setDecay(float newDecay);
-  void setRelease(float newRelease, float sr){
-    setRelease(newRelease/sr);
-  }
   void setRelease(float newRelease);
   void setSustain(float newSustain);
   void trigger();
@@ -81,21 +73,22 @@ public:
   void attenuate(FloatArray buf){
     process(buf, buf); // increments envelope by buffer length
   }
-  static AdsrEnvelope* create(){
-    return new AdsrEnvelope();
+  static AdsrEnvelope* create(float sampleRate){
+    return new AdsrEnvelope(sampleRate);
   }
-  static AdsrEnvelope* create(float a, float d, float s, float r, float sr){
-     AdsrEnvelope* env = new AdsrEnvelope();
-     env->setAttack(a, sr);
-     env->setDecay(d, sr);
+  static AdsrEnvelope* create(float a, float d, float s, float r, float sampleRate){
+     AdsrEnvelope* env = new AdsrEnvelope(sampleRate);
+     env->setAttack(a);
+     env->setDecay(d);
      env->setSustain(s);
-     env->setRelease(r, sr);
+     env->setRelease(r);
      return env;
   }
   static void destroy(AdsrEnvelope* env){
     delete env;
   }
 private:
+  float samplePeriod;
   EnvelopeStage stage;
   EnvelopeTrigger trig;
   bool retrigger;

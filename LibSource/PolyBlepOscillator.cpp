@@ -1,7 +1,8 @@
 #include "PolyBlepOscillator.h"
 #include "basicmaths.h"
 
-PolyBlepOscillator::PolyBlepOscillator():
+PolyBlepOscillator::PolyBlepOscillator(float sr):
+  mul(1.0/sr),
   frequency(0), 
   shape(0.5), 
   pw(0.5) {
@@ -9,14 +10,19 @@ PolyBlepOscillator::PolyBlepOscillator():
 }
 
 PolyBlepOscillator::PolyBlepOscillator(float freq, float sr):
+  mul(1.0/sr),
   shape(0.5), 
   pw(0.5) {
-  setFrequency(freq, sr);
+  setFrequency(freq);
   osc.Init();
 }
 
-void PolyBlepOscillator::setFrequency(float value){
-  frequency = value;
+void PolyBlepOscillator::setSampleRate(float sr){
+  mul = 1.0/sr;
+}
+
+void PolyBlepOscillator::setFrequency(float freq){
+  frequency = mul*freq;
 }
 
 void PolyBlepOscillator::setShape(float value){
@@ -49,11 +55,12 @@ void PolyBlepOscillator::generate(FloatArray output, FloatArray fm){
 }
 
 void PolyBlepOscillator::getSamples(FloatArray output, FloatArray freqs){
+  freqs.multiply(mul); // normalise frequencies
   osc.Render<true>(freqs, pw, shape, output, output.getSize());
 }
 
-PolyBlepOscillator* PolyBlepOscillator::create(){
-  return new PolyBlepOscillator();
+PolyBlepOscillator* PolyBlepOscillator::create(float sr){
+  return new PolyBlepOscillator(sr);
 }
 
 PolyBlepOscillator* PolyBlepOscillator::create(float freq, float sr){

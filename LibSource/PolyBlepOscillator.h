@@ -7,13 +7,14 @@
 
 class PolyBlepOscillator : public Oscillator {
 private:
+  float mul;
   stmlib::Oscillator osc;
   float frequency, shape, pw;
 public:
-  PolyBlepOscillator();
+  PolyBlepOscillator(float sr=48000);
   PolyBlepOscillator(float freq, float sr);
-  using Oscillator::setFrequency;
-  void setFrequency(float value);
+  void setSampleRate(float sr);
+  void setFrequency(float freq);
   /** set waveform shape: 0.0 for saw, 1.0 for square wave */
   void setShape(float value);
   /** set square wave pulse width: 0.0 to 1.0 for 0% to 100% */
@@ -25,9 +26,9 @@ public:
   /* put a block of output samples into @param output, frequency modulated by @param fm */
   void generate(FloatArray output, FloatArray fm);
   /* put a block of output samples into @param samples, 
-     with normalised frequency determined by samples in @param frequency */
-  void getSamples(FloatArray output, FloatArray nfreq);
-  static PolyBlepOscillator* create();
+     with frequency determined by samples in @param frequency */
+  void getSamples(FloatArray output, FloatArray freq);
+  static PolyBlepOscillator* create(float sr);
   static PolyBlepOscillator* create(float freq, float sr);
   static void destroy(PolyBlepOscillator* osc);
 };

@@ -5,20 +5,24 @@
 
 class ExponentialDecayEnvelope : public Envelope {
 private:
+  float sr;
   float value;
   float incr;
 public:
-  ExponentialDecayEnvelope(): value(0), incr(0){}
+  ExponentialDecayEnvelope(float sr=48000): sr(sr), value(0), incr(0){}
   using Envelope::process;
   using SignalGenerator::generate;
-  void setRate(float r, float sr){
+  void setSampleRate(float sampleRate){
+    sr = sampleRate;
+  }
+  void setRate(float r){
     if(r < 0)
       incr = 1.0f - 100*(1/(1-r))/sr;
     else
       incr = 1.0f + 100*r/sr;
   }
-  void setDecay(float d, float sr){
-    setRate(-(d+1/sr), sr);
+  void setDecay(float d){
+    setRate(-(d+1/sr));
   }
   void trigger(){
     value = 1.0;
@@ -35,12 +39,12 @@ public:
   float getNextSample(){
     return generate(); // increments envelope one step
   }  
-  static ExponentialDecayEnvelope* create(){
-    return new ExponentialDecayEnvelope();
+  static ExponentialDecayEnvelope* create(float sr){
+    return new ExponentialDecayEnvelope(sr);
   }
   static ExponentialDecayEnvelope* create(float rate, float sr){
-    ExponentialDecayEnvelope* env = new ExponentialDecayEnvelope();
-    env->setDecay(rate, sr);
+    ExponentialDecayEnvelope* env = new ExponentialDecayEnvelope(sr);
+    env->setDecay(rate);
     return env;
   }
   static void destroy(ExponentialDecayEnvelope* env){

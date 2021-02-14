@@ -10,6 +10,8 @@
  */
 class StateVariableFilter : public SignalProcessor {
 public:
+  StateVariableFilter(float sr): pioversr(M_PI/sr) {}
+
   float process(float v0){
     mV3 = v0 - mIc2eq;
     mV1 = m_a1 * mIc1eq + m_a2*mV3;
@@ -18,6 +20,7 @@ public:
     mIc2eq = 2. * mV2 - mIc2eq;
     return m_m0 * v0 + m_m1 * mV1 + m_m2 * mV2;
   }
+
   void process(FloatArray input, FloatArray output){
     size_t nFrames = input.getSize();
     for(size_t s = 0; s < nFrames; s++){
@@ -39,12 +42,8 @@ public:
     mIc2eq = 0.;
   }
 
-  void setLowPass(float freq, float q, float sampleRate){
-    setLowPass(freq/sampleRate, q);
-  }
-
-  void setLowPass(float fnorm, float q){
-    const float w = tanf(M_PI * fnorm);
+  void setLowPass(float fc, float q){
+    const float w = tanf(pioversr*fc);
     const float g = w;
     const float k = 1. / q;
     m_a1 = 1./(1. + g * (g + k));
@@ -55,11 +54,8 @@ public:
     m_m2 = 1.;
   }
 
-  void setHighPass(float freq, float q, float sampleRate){
-    setHighPass(freq/sampleRate, q);
-  }
-  void setHighPass(float fnorm, float q){
-    const float w = tanf(M_PI * fnorm);
+  void setHighPass(float fc, float q){
+    const float w = tanf(pioversr*fc);
     const float g = w;
     const float k = 1. / q;
     m_a1 = 1./(1. + g * (g + k));
@@ -70,11 +66,8 @@ public:
     m_m2 = -1.;
   }
 
-  void setBandPass(float freq, float q, float sampleRate){
-    setBandPass(freq/sampleRate, q);
-  }
-  void setBandPass(float fnorm, float q){
-    const float w = tanf(M_PI * fnorm);
+  void setBandPass(float fc, float q){
+    const float w = tanf(pioversr*fc);
     const float g = w;
     const float k = 1. / q;
     m_a1 = 1./(1. + g * (g + k));
@@ -85,11 +78,8 @@ public:
     m_m2 = 0.;
   }
 
-  void setNotch(float freq, float q, float sampleRate){
-    setNotch(freq/sampleRate, q);
-  }
-  void setNotch(float fnorm, float q){
-    const float w = tanf(M_PI * fnorm);
+  void setNotch(float fc, float q){
+    const float w = tanf(pioversr*fc);
     const float g = w;
     const float k = 1. / q;
     m_a1 = 1./(1. + g * (g + k));
@@ -100,11 +90,8 @@ public:
     m_m2 = 0.;
   }
 
-  void setPeak(float freq, float q, float sampleRate){
-    setPeak(freq/sampleRate, q);
-  }
-  void setPeak(float fnorm, float q){
-    const float w = tanf(M_PI * fnorm);
+  void setPeak(float fc, float q){
+    const float w = tanf(pioversr*fc);
     const float g = w;
     const float k = 1. / q;
     m_a1 = 1./(1. + g * (g + k));
@@ -115,11 +102,8 @@ public:
     m_m2 = -2.;
   }
   
-  void setBell(float freq, float q, float gain, float sampleRate){
-    setBell(freq/sampleRate, q, gain);
-  }
-  void setBell(float fnorm, float q, float gain){
-    const float w = tanf(M_PI * fnorm);
+  void setBell(float fc, float q, float gain){
+    const float w = tanf(pioversr*fc);
     const float A = exp10f(gain/40.);
     const float g = w;
     const float k = 1 / q;
@@ -131,11 +115,8 @@ public:
     m_m2 = 0.;
   }
   
-  void setLowShelf(float freq, float q, float gain, float sampleRate){
-    setLowShelf(freq/sampleRate, q, gain);
-  }
-  void setLowShelf(float fnorm, float q, float gain){
-    const float w = tanf(M_PI * fnorm);
+  void setLowShelf(float fc, float q, float gain){
+    const float w = tanf(pioversr*fc);
     const float A = exp10f(gain/40.);
     const float g = w / sqrtf(A);
     const float k = 1. / q;
@@ -147,11 +128,8 @@ public:
     m_m2 = (A * A - 1.);
   }
 
-  void setHighShelf(float freq, float q, float gain, float sampleRate){
-    setHighShelf(freq/sampleRate, q, gain);
-  }
-  void setHighShelf(float fnorm, float q, float gain){
-    const float w = tanf(M_PI * fnorm);
+  void setHighShelf(float fc, float q, float gain){
+    const float w = tanf(pioversr*fc);
     const float A = exp10f(gain/40.);
     const float g = w / sqrtf(A);
     const float k = 1. / q;
@@ -163,7 +141,16 @@ public:
     m_m2 = (1. - A*A);
   }
 
+  static StateVariableFilter* create(float sr){
+    return new StateVariableFilter(sr);
+  }
+
+  static void destroy(StateVariableFilter* svf){
+    delete svf;
+  }
+  
 private:
+  float pioversr;
   // state
   float mV1 = 0.;
   float mV2 = 0.;

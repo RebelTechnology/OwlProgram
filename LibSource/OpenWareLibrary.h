@@ -15,5 +15,12 @@
 #include "Envelope.h"
 #include "ExponentialDecayEnvelope.h"
 #include "Resample.h"
+#include "ComplexFloatArray.h"
+#include "FastFourierTransform.h"
+#include "ShortArray.h"
+#include "ComplexShortArray.h"
+#include "ShortFastFourierTransform.h"
+#include "IntArray.h"
+#include "FloatMatrix.h"
 
 #endif	/* __OpenWareLibrary_h__ */

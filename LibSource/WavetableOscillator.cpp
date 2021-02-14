@@ -2,11 +2,11 @@
 #include "basicmaths.h"
 #include <stdint.h>
 
-WavetableOscillator* WavetableOscillator::create(size_t size) {
+WavetableOscillator* WavetableOscillator::create(float sr, size_t size) {
   FloatArray wave = FloatArray::create(size);
   for(size_t i=0; i<size; ++i)
-    wave[i] = sin(2*M_PI*i/(size-1));    
-  return new WavetableOscillator(wave);
+    wave[i] = sinf(2*M_PI*i/(size-1));    
+  return new WavetableOscillator(sr, wave);
 }
 
 void WavetableOscillator::destroy(WavetableOscillator* osc){
@@ -14,13 +14,18 @@ void WavetableOscillator::destroy(WavetableOscillator* osc){
   delete osc;
 }
 
-WavetableOscillator::WavetableOscillator(const FloatArray wavetable): 
+WavetableOscillator::WavetableOscillator(float sr, const FloatArray wavetable):
+  mul(1.0/sr),
   wave(wavetable),
   acc(0.0), inc(0.1)
 {}
+ 
+void WavetableOscillator::setSampleRate(float sr){
+  mul = 1.0/sr;
+}
 
 void WavetableOscillator::setFrequency(float freq){
-  inc = freq;
+  inc = freq*mul;
 }
 
 float WavetableOscillator::getSample(float phase){
