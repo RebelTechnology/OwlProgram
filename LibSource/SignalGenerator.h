@@ -24,4 +24,14 @@ public:
   }
 };
 
+class AudioBuffer;
+template<size_t channels>
+class MultiSignalGenerator {
+public:
+  virtual ~MultiSignalGenerator(){}
+  virtual void generate(AudioBuffer& output) = 0;
+};
+
+typedef MultiSignalGenerator<2> StereoSignalGenerator;
+
 #endif // __SignalGenerator_h__

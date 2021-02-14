@@ -16,4 +16,14 @@ public:
   }
 };
 
+class AudioBuffer;
+template<size_t channels>
+class MultiSignalProcessor {
+public:
+  virtual ~MultiSignalProcessor(){}
+  virtual void process(AudioBuffer& input, AudioBuffer& output) = 0;
+};
+
+typedef MultiSignalProcessor<2> StereoSignalProcessor;
+
 #endif // __SignalProcessor_h__

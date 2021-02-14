@@ -350,7 +350,7 @@ public:
   }
 };
 
-class StereoBiquadFilter : public BiquadFilter {
+class StereoBiquadFilter : public BiquadFilter, public StereoSignalProcessor {
 private:
   BiquadFilter right;
 public:
@@ -366,12 +366,12 @@ public:
     return &right;
   }
 
-  void process(AudioBuffer &buffer){
-    BiquadFilter::process(buffer.getSamples(LEFT_CHANNEL));
-    right.process(buffer.getSamples(RIGHT_CHANNEL));
+  void process(AudioBuffer &input, AudioBuffer &output){
+    BiquadFilter::process(input.getSamples(LEFT_CHANNEL), output.getSamples(LEFT_CHANNEL));
+    right.process(input.getSamples(RIGHT_CHANNEL), output.getSamples(RIGHT_CHANNEL));
   }
 
-  static StereoBiquadFilter* create(float sr, int stages){
+  static StereoBiquadFilter* create(float sr, int stages=1){
     return new StereoBiquadFilter(sr, new float[stages*5], new float[stages*2], new float[stages*2], stages);
   }
 
