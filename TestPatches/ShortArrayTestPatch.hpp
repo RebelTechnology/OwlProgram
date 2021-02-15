@@ -18,7 +18,7 @@ public:
       CHECK_EQUAL((int)array.getSize(), 512);
       REQUIRE(array.getData() != NULL);
       for(size_t i=0; i<512; ++i){
-	CHECK_CLOSE(array[i], 0.0, DEFAULT_TOLERANCE);
+	CHECK_EQUAL((int)array[i], 0);
       }
       ShortArray::destroy(array);
     }
@@ -142,11 +142,11 @@ public:
       ar.copyTo(ar2);
       ar2.reciprocal();
       for(size_t n = 0; n < ar.getSize(); ++n){
-        CHECK_CLOSE(ar2[n], (0.5 + 1.f/ar[n]), 2);
+        CHECK_CLOSE((int)ar2[n], int(0.5 + 1.f/ar[n]), 2);
       }
       ar.reciprocal(ar2);
       for(size_t n = 0; n < ar.getSize(); ++n){
-        CHECK_CLOSE(ar2[n], (0.5 + 1.f/ar[n]), 2);
+        CHECK_CLOSE((int)ar2[n], int(0.5 + 1.f/ar[n]), 2);
       }
       ShortArray::destroy(ar);
       ShortArray::destroy(ar2);
@@ -179,7 +179,7 @@ public:
         acc += ar[n] * ar[n] / (float)ar.getSize(); 
       } 
       int rms=(sqrtf(acc + 0.5));
-      CHECK_CLOSE(rms, ar.getRms(), 5);
+      CHECK_CLOSE(rms, (int)ar.getRms(), 5);
       ShortArray::destroy(ar);
       ShortArray::destroy(ar2);
     }
@@ -195,7 +195,7 @@ public:
       mean = mean > SHRT_MAX ? SHRT_MAX : mean;
       mean = mean < SHRT_MIN ? SHRT_MIN : mean;
 
-      CHECK_CLOSE(mean, ar.getMean(), 30);
+      CHECK_CLOSE(mean, (int32_t)ar.getMean(), 30);
       ShortArray::destroy(ar);
     }
     {
@@ -206,7 +206,9 @@ public:
       for(size_t n = 0; n < ar.getSize(); ++n){
         power += ar[n] * ar[n];
       }
-      CHECK_CLOSE(power, ar.getPower(), 30);
+      float a = power/float(INT64_MAX);
+      float b = ar.getPower()/float(INT64_MAX);
+      CHECK_CLOSE(a, b, 0.00001f);
       ShortArray::destroy(ar);
     }
     {
@@ -426,7 +428,7 @@ public:
       for(size_t n = 0; n < ar.getSize(); ++n){
         float value = rand() / (float)RAND_MAX * 2 - 1;
         ar.setFloatValue(n, value);
-        CHECK_CLOSE(ar[n], value * (float)-SHRT_MIN, 2);
+        CHECK_CLOSE((int)ar[n], int(value * (float)-SHRT_MIN), 2);
         CHECK_CLOSE(ar.getFloatValue(n), ar[n] / (float)-SHRT_MIN, 0.0004f);
         CHECK_CLOSE(ar.getFloatValue(n), value, 0.0004f);
       }

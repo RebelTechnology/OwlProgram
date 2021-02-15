@@ -1,10 +1,9 @@
 # Code Paths
-DSPLIB=Libraries/CMSIS/DSP_Lib/Source
+CMSIS ?= Libraries/CMSIS/Include/
+DSPLIB = Libraries/CMSIS/DSP_Lib/Source
 
 # Tool path
 # TOOLROOT ?= Tools/gcc-arm-none-eabi-9-2020-q2-update/bin/
-
-CMSIS ?= Libraries/CMSIS/Include/
 
 # Tools
 CC=$(TOOLROOT)arm-none-eabi-gcc
@@ -38,20 +37,30 @@ LDFLAGS += -T$(LDSCRIPT) $(ARCH_FLAGS)
 
 # compile and generate dependency info
 $(BUILD)/%.o: %.c
-	@$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
-	@$(CC) -MM -MT"$@" $(CPPFLAGS) $(CFLAGS) $< > $(@:.o=.d)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+	$(CC) -MM -MT"$@" $(CPPFLAGS) $(CFLAGS) $< > $(@:.o=.d)
 
 $(BUILD)/%.o: %.cpp
-	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
-	@$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) $< > $(@:.o=.d)
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+	$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) $< > $(@:.o=.d)
+
+$(BUILD)/%.o: %.cc
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+	$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) $< > $(@:.o=.d)
 
 $(BUILD)/%.o: %.s
-	@$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+
+$(BUILD)/%.o: %.S
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 
 $(BUILD)/%.s: %.c
-	@$(CC) -S $(CPPFLAGS) $(CFLAGS) $< -o $@
+	$(CC) -S $(CPPFLAGS) $(CFLAGS) $< -o $@
 
 $(BUILD)/%.s: %.cpp
+	@$(CXX) -S $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+
+$(BUILD)/%.s: %.cc
 	@$(CXX) -S $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 
 $(BUILD)/%.bin: $(BUILD)/%.elf

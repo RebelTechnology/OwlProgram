@@ -1,6 +1,33 @@
 #include "ComplexShortArray.h"
 #include "basicmaths.h"
 #include "message.h"
+#include "qint.h"
+
+int16_t ComplexShort::getMagnitude(){
+#ifdef ARM_CORTEX
+  int16_t out;
+  int16_t in[2] = {re, im};
+  arm_cmplx_mag_q15(in, &out, 1);
+  // function above returns 2.14, so we shift it back to 1.15
+  // but first we check we do not lose data.
+  // TODO: make sure it saturates
+  out = out >> 1;
+  return out;
+#else
+  float fre = Q15_TO_FLOAT(re);
+  float fim = Q15_TO_FLOAT(im);
+  return FLOAT_TO_Q15(sqrtf(fre*fre+fim*fim) + 0.5);
+#endif
+}
+
+float ComplexShort::getPhase(){
+  return atan2(Q15_TO_FLOAT(im), Q15_TO_FLOAT(re));
+}
+
+void ComplexShort::setPolar(int16_t magnitude, float phase){
+  re = FLOAT_TO_Q15(Q15_TO_FLOAT(magnitude)*cosf(phase) + 0.5);
+  im = FLOAT_TO_Q15(Q15_TO_FLOAT(magnitude)*sinf(phase) + 0.5);
+}
 
 int16_t ComplexShortArray::mag(const int i){
   int16_t result;
@@ -8,8 +35,7 @@ int16_t ComplexShortArray::mag(const int i){
 #ifdef ARM_CORTEX
   arm_cmplx_mag_q15((int16_t*)&(data[i]), &result,1);
 #else
-  #error TODO
-  result=sqrtf(mag2(i));
+  result = FLOAT_TO_Q15(sqrtf(Q15_TO_FLOAT(mag2(i))));
 #endif
   return result;
 }
@@ -36,10 +62,9 @@ int16_t ComplexShortArray::mag2(const int i){
   // this is saturating
   arm_shift_q15((int16_t*)&result, 2, (int16_t*)&result, 1);
 #else
-  #error TODO
-  int16_t re=data[i].re;
-  int16_t im=data[i].im;
-  result=re*re+im*im;
+  float re=Q15_TO_FLOAT(data[i].re);
+  float im=Q15_TO_FLOAT(data[i].im);
+  result=FLOAT_TO_Q15(re*re+im*im);
 #endif  
   return result;
 }
@@ -85,14 +110,15 @@ void ComplexShortArray::complexByComplexMultiplication(ComplexShortArray operand
 #ifdef ARM_CORTEX
   arm_cmplx_mult_cmplx_q15((int16_t*)getData(), (int16_t*)operand2.getData(), (int16_t*)result.getData(), size );  
 #else
-  ASSERT(false, "TODO");
-  float *pSrcA=(float*)data;
-  float *pSrcB=(float*)operand2;
-  float *pDst=(float*)result;
-  for(int n=0; n<size; n++) {        
-    pDst[(2*n)+0] = pSrcA[(2*n)+0] * pSrcB[(2*n)+0] - pSrcA[(2*n)+1] * pSrcB[(2*n)+1];        
-    pDst[(2*n)+1] = pSrcA[(2*n)+0] * pSrcB[(2*n)+1] + pSrcA[(2*n)+1] * pSrcB[(2*n)+0];        
-  }        
+  int16_t* pSrcA = (int16_t*)data;
+  int16_t* pSrcB = (int16_t*)operand2.getData();
+  int16_t* pDst = (int16_t*)result.getData();
+  for(int n=0; n<size; n++) {
+    pDst[(2*n)+0] = Q15_MUL_Q15(pSrcA[(2*n)+0], pSrcB[(2*n)+0]) -
+                    Q15_MUL_Q15(pSrcA[(2*n)+1], pSrcB[(2*n)+1]);
+    pDst[(2*n)+1] = Q15_MUL_Q15(pSrcA[(2*n)+0], pSrcB[(2*n)+1]) +
+                    Q15_MUL_Q15(pSrcA[(2*n)+1], pSrcB[(2*n)+0]);
+  }
 #endif  
 }
 
@@ -109,7 +135,7 @@ void ComplexShortArray::setAll(int16_t value){
 #ifdef ARM_CORTEX
   arm_fill_q15(value, (int16_t*)data, size*2 ); //note the *2 multiplier which accounts for real and imaginary parts
 #else
-  ComplexFloat val;
+  ComplexShort val;
   val.re=value;
   val.im=value;
   setAll(val);

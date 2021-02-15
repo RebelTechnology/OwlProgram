@@ -66,7 +66,7 @@ public:
     temp.scale(1.0f/getSize());
     inout.copyFrom(temp);
   }
-  int getSize(){
+  size_t getSize(){
     return temp.getSize();
   }
 };

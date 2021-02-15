@@ -46,10 +46,6 @@ PATCHNAME   ?= $(MAXIMILIAN)
 PATCHCLASS  ?= MaximilianPatch
 PATCHFILE   ?= MaximilianPatch.hpp
 DEPS        += maximilian
-else ifdef TEST
-PATCHNAME   ?= $(TEST)
-PATCHCLASS  ?= $(PATCHNAME)Patch
-PATCHFILE   ?= $(PATCHNAME)Patch.hpp
 else ifdef SOUL
 # options for SOUL patch compilation
 PATCHNAME   ?= $(SOUL)
@@ -59,6 +55,10 @@ SOULCLASS   ?= $(SOUL)
 SOULFILE    ?= $(SOUL).soulpatch
 SOULHPP     ?= $(SOUL).hpp
 DEPS        += soul
+else ifdef TEST
+PATCHNAME   = $(TEST)
+PATCHCLASS  = $(PATCHNAME)Patch
+PATCHFILE   = $(PATCHNAME)Patch.hpp
 else
 # options for C++ compilation
 PATCHNAME   ?= "Template"
@@ -182,6 +182,9 @@ perform: $(DEPS) ## run patch locally
 	@$(MAKE) -s -f test.mk perform
 
 check: ## run tests
+	@$(MAKE) -s TEST=ComplexFourierTransformTest test
+	# @$(MAKE) -s TEST=ComplexFloatArrayTest test
+	@$(MAKE) -s TEST=FloatArrayTest test
 	@$(MAKE) -s TEST=ShortArrayTest test
 
 help: ## show this help
