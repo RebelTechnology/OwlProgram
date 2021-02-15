@@ -52,7 +52,7 @@ public:
   }
   void downsample(FloatArray input, FloatArray output){
     ASSERT(input.getSize()==output.getSize()*factor, "wrong size");
-    downfilter->process(input, input.getSize());
+    downfilter->process(input, input);
     float* p = (float*)input;
     for(int i=0; i<input.getSize(); ++i){
       output[i] = *p;
@@ -68,7 +68,7 @@ public:
       *p++ = 0;
       *p++ = 0;
     }
-    upfilter->process(output, output.getSize());
+    upfilter->process(output, output);
   }
 };
 
@@ -104,7 +104,7 @@ public:
     output.clear();
     for(int i=0; i<input.getSize(); i+= factor)
       *p++ = input[i];
-    filter->process(output, output.getSize());
+    filter->process(output, output);
   }
 };
 
@@ -134,7 +134,7 @@ public:
    */
   void process(FloatArray input, FloatArray output){
     ASSERT(input.getSize()==output.getSize()*factor, "wrong size");
-    filter->process(input, input.getSize());
+    filter->process(input, input);
     float* p = (float*)input;
     for(int i=0; i<input.getSize(); ++i){
       output[i] = *p;
