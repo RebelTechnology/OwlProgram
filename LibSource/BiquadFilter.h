@@ -1,6 +1,7 @@
 #ifndef __BiquadFilter_h__
 #define __BiquadFilter_h__
 
+#include <string.h> // for memcpy
 #include "FloatArray.h"
 #include "SignalProcessor.h"
 
@@ -154,7 +155,6 @@ public:
       coefficients[4] = - (V - sqrtf(2*V) * K + K * K) * norm;
     }
   }
-
 };
 
 /** 
@@ -163,7 +163,7 @@ public:
  * Each cascaded stage implements a second order filter.
  */
 #define BIQUAD_COEFFICIENTS_PER_STAGE    5
-#define BIQUAD_STATE_VARIABLES_PER_STAGE 2
+#define BIQUAD_STATE_VARIABLES_PER_STAGE 2 // 4 for df1, 2 for df2
 class BiquadFilter : public SignalProcessor {
 private:
   float pioversr;
@@ -185,13 +185,8 @@ protected:
    * and so on.  The <code>coeffs</code> array must contain a total of <code>5*stages</code> values.   
    */
   void copyCoefficients(){
-    for(int i=1; i<stages; ++i){
-      coefficients[0+i*5] = coefficients[0];
-      coefficients[1+i*5] = coefficients[1];
-      coefficients[2+i*5] = coefficients[2];
-      coefficients[3+i*5] = coefficients[3];
-      coefficients[4+i*5] = coefficients[4];
-    }
+    for(int i=1; i<stages; ++i)
+      memcpy(coefficients+i*BIQUAD_COEFFICIENTS_PER_STAGE, coefficients, BIQUAD_COEFFICIENTS_PER_STAGE);
   }
   void init(){
 #ifdef ARM_CORTEX
@@ -219,6 +214,9 @@ public:
   int getStages(){
     return stages;
   }
+  void setStages(int newStages){
+    stages = newStages;
+  }
 
   static int getCoefficientsPerStage(){
     return BIQUAD_COEFFICIENTS_PER_STAGE;
@@ -226,6 +224,11 @@ public:
 
   FloatArray getCoefficients(){
     return FloatArray(coefficients, BIQUAD_COEFFICIENTS_PER_STAGE*stages);
+  }
+
+  void setState(FloatArray newState){
+    ASSERT(BIQUAD_STATE_VARIABLES_PER_STAGE*stages == newState.getSize(), "wrong size");
+    state = newState;
   }
 
   FloatArray getState(){
@@ -266,10 +269,6 @@ public:
   }
 
   /* perform in-place processing */
-  void process(float* buf, int size){
-    process(buf, buf, size);
-  }
-
   void process(FloatArray in){
     process(in, in, in.getSize());
   }
@@ -338,9 +337,7 @@ public:
   }
 
   static BiquadFilter* create(float sr, int stages=1){
-    return new BiquadFilter(sr, new float[stages*5], new float[stages*2], stages);
-    // for df1: state requires stages*4
-    // return new BiquadFilter(new float[stages*5], new float[stages*4], stages);
+    return new BiquadFilter(sr, new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE], new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE], stages);
   }
 
   static void destroy(BiquadFilter* filter){
@@ -350,36 +347,48 @@ public:
   }
 };
 
-class StereoBiquadFilter : public BiquadFilter, public StereoSignalProcessor {
+template<size_t channels>
+class MultiBiquadFilter : public BiquadFilter, public MultiSignalProcessor {
 private:
-  BiquadFilter right;
+  BiquadFilter filters[channels-1];
+protected:
 public:
-  StereoBiquadFilter(float sr, float* coefs, float* lstate, float* rstate, int sgs) : 
-    BiquadFilter(sr, coefs, lstate, sgs), 
-    right(sr, coefs, rstate, sgs) {}
-
-  BiquadFilter* getLeftFilter(){
-    return this;
+  MultiBiquadFilter(){}
+  MultiBiquadFilter(float sr, float* coefs, float* states, int stages) :
+    BiquadFilter(sr, coefs, states, stages) {
+    for(size_t ch=1; ch<channels; ++ch){
+      states += stages*BIQUAD_STATE_VARIABLES_PER_STAGE;
+      filters[ch-1].setSampleRate(sr);
+      filters[ch-1].setStages(stages);
+      filters[ch-1].setCoefficientsPointer(FloatArray(coefs, stages*BIQUAD_COEFFICIENTS_PER_STAGE)); // shared coefficients
+      filters[ch-1].setState(FloatArray(states, stages*BIQUAD_STATE_VARIABLES_PER_STAGE));
+    }
   }
-
-  BiquadFilter* getRightFilter(){
-    return &right;
+  static MultiBiquadFilter<channels>* create(float sr, int stages=1){
+    return new MultiBiquadFilter<channels>(sr, new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE], new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE*channels], stages);
+  }  
+  static void destroy(MultiBiquadFilter<channels>* obj){
+    for(size_t ch=1; ch<channels; ++ch)
+      FloatArray::destroy(obj->filters[ch-1].getState());
+    BiquadFilter::destroy(obj);
   }
-
+  BiquadFilter* getFilter(size_t channel){
+    if(channel == 0)
+      return this;
+    if(channel < channels)
+      return &filters[channel-1];
+    return NULL;
+  }
+  
   void process(AudioBuffer &input, AudioBuffer &output){
-    BiquadFilter::process(input.getSamples(LEFT_CHANNEL), output.getSamples(LEFT_CHANNEL));
-    right.process(input.getSamples(RIGHT_CHANNEL), output.getSamples(RIGHT_CHANNEL));
-  }
-
-  static StereoBiquadFilter* create(float sr, int stages=1){
-    return new StereoBiquadFilter(sr, new float[stages*5], new float[stages*2], new float[stages*2], stages);
-  }
-
-  static void destroy(StereoBiquadFilter* filter){
-    FloatArray::destroy(filter->right.getState());
-    BiquadFilter::destroy(filter);
+    size_t len = min(channels, min(input.getChannels(), output.getChannels()));
+    BiquadFilter::process(input.getSamples(0), output.getSamples(0));
+    for(size_t ch=1; ch<len; ++ch)
+      filters[ch-1].process(input.getSamples(ch), output.getSamples(ch));
   }
 };
+
+typedef MultiBiquadFilter<2> StereoBiquadFilter;
 
 const float FilterStage::BESSEL_Q = 1/sqrtf(3); // 1/sqrt(3)
 const float FilterStage::SALLEN_KEY_Q = 0.5f; // 1/2

@@ -452,6 +452,7 @@ void FloatArray::correlate(FloatArray operand2, FloatArray destination){
   /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   correlateInitialized(operand2, destination);
 }
+
 void FloatArray::correlateInitialized(FloatArray operand2, FloatArray destination){
   ASSERT(destination.size >= size+operand2.size-1, "Destination array too small"); //TODO: change CMSIS docs, which state a different size
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
@@ -487,6 +488,15 @@ void FloatArray::ramp(float from, float to){
     data[i] = from;
     from += step;
   }
+}
+
+void FloatArray::scale(float from, float to, FloatArray destination){
+  float step = (to-from)/size;
+  float value = from;
+  for(size_t i=0; i<size; i++){
+    data[i] *= from;
+    from += step;
+  }  
 }
 
 void FloatArray::tanh(FloatArray destination){
