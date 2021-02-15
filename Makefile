@@ -86,7 +86,7 @@ export CONFIG PLATFORM
 
 DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
 
-all: libs patch
+all: libs patch web
 
 .PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as test perform check tables resource size clean realclean sysex run store docs help
 
@@ -183,9 +183,11 @@ perform: $(DEPS) ## run patch locally
 
 check: ## run tests
 	@$(MAKE) -s TEST=ComplexFourierTransformTest test
-	# @$(MAKE) -s TEST=ComplexFloatArrayTest test
 	@$(MAKE) -s TEST=FloatArrayTest test
 	@$(MAKE) -s TEST=ShortArrayTest test
+	@$(MAKE) -s TEST=FastExpTest test
+	@$(MAKE) -s TEST=FastLogTest test
+	@$(MAKE) -s TEST=FastPowTest test
 
 help: ## show this help
 	@echo 'Usage: make [target] ...'

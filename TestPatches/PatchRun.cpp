@@ -26,30 +26,35 @@ void vPortFree( void *pv ){
 
 static PatchProcessor processor;
 ProgramVector programVector;
-static Patch* testpatch = NULL;
-
-int serviceCall(int service, void** params, int len){
-  printf("Service call (todo) : %d\n", service);
-}
+static int errorcode = 0;
 
 PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
 }
 
+extern "C"{
+  int serviceCall(int service, void** params, int len){
+    printf("Service call (todo) : %d\n", service);
+    return -1;
+  }
+  void error(int8_t code, const char* reason){
+    printf("%s\n", reason);
+    errorcode = -1;
+  }
+}
+
 void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){
-  //if(patch == NULL)
-  //  error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
   printf("Register patch %s (%d ins, %d outs)\n", name, inputs, outputs);
-  testpatch = patch;
+  getInitialisingPatchProcessor()->setPatch(patch, name);
 }
 
 #define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
 
 int main(int argc, char** argv){
+  errorcode = 0;
   programVector.serviceCall = serviceCall;
 #include "registerpatch.cpp"
-  ASSERT(testpatch != NULL, "Missing patch");    
-  int ret = 0;
+  ASSERT(processor.patch != NULL, "Missing test patch");    
   SampleBuffer* samples = new SampleBuffer(BLOCKSIZE);
   if(argc > 1){
     const char* input_filename = argv[1];
@@ -65,7 +70,7 @@ int main(int argc, char** argv){
     int16_t* end = data+len;
     while(src+BLOCKSIZE <= end){
       samples->split16(src, BLOCKSIZE);
-      testpatch->processAudio(*samples);
+      processor.patch->processAudio(*samples);
       samples->comb16(src);
       src += BLOCKSIZE*channels;
     }
@@ -76,9 +81,9 @@ int main(int argc, char** argv){
     free(data);
     delete wav_header;
   }else{
-    testpatch->processAudio(*samples);
+    processor.patch->processAudio(*samples);
   }
   delete samples;
-  delete testpatch;  
-  return ret;
+  delete processor.patch;  
+  return errorcode;
 }

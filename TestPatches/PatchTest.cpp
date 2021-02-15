@@ -24,38 +24,32 @@ void vPortFree( void *pv ){
 
 PatchProcessor processor;
 ProgramVector programVector;
+static int errorcode = 0;
 
 PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
 }
 
 extern "C"{
-void error(int8_t code, const char* reason){
-  printf("%s\n", reason);
-  exit(-1);
+  void error(int8_t code, const char* reason){
+    printf("%s\n", reason);
+    errorcode = -1;
+  }
 }
-}
-static Patch* testpatch = NULL;
+
 void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){
-  if(patch == NULL)
-   error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
-  testpatch = patch;
+  getInitialisingPatchProcessor()->setPatch(patch, name);
 }
 
 #define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
 
 int main(int argc, char** argv){
+  errorcode = 0;
 #include "registerpatch.cpp"
-  ASSERT(testpatch != NULL, "Missing test patch");    
-  int ret = 0;
+  ASSERT(getInitialisingPatchProcessor()->patch != NULL, "Missing test patch");    
   AudioBuffer* samples = AudioBuffer::create(CHANNELS, BLOCKSIZE);
-  testpatch->processAudio(*samples);
-  // printf("Passed %d Failed %d\n", testpatch->passed, testpatch->failed);
-  // if(testpatch->success){
-  //   printf("Success\n");
-  // }else{
-  //   printf("Fail\n");
-  //   ret = -1;
-  // }
-  return ret;
+  getInitialisingPatchProcessor()->patch->processAudio(*samples);
+  delete samples;
+  delete getInitialisingPatchProcessor()->patch;  
+  return errorcode;
 }

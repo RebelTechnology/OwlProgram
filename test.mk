@@ -1,34 +1,21 @@
 BUILDROOT ?= .
 
-# C_SRC   += basicmaths.c fastpow.c fastlog.c # sbrk.c heap_5.c 
-# CPP_SRC = operators.cpp system_tables.cpp # message.cpp main.cpp 
-# # CPP_SRC += PatchProcessor.cpp Patch.cpp 
-# CPP_SRC += FloatArray.cpp ComplexFloatArray.cpp FastFourierTransform.cpp 
-# CPP_SRC += ShortArray.cpp # ComplexShortArray.cpp ShortFastFourierTransform.cpp 
-# CPP_SRC += Envelope.cpp VoltsPerOctave.cpp Window.cpp
-# CPP_SRC += WavetableOscillator.cpp PolyBlepOscillator.cpp
-# CPP_SRC += SmoothValue.cpp # PatchParameter.cpp
-# CPP_SRC += MonochromeScreenPatch.cpp ColourScreenPatch.cpp
-# CPP_SRC += Resource.cpp
-# C_SRC += font.c
-
 BUILD       ?= $(BUILDROOT)/Build
-
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
 GENSOURCE    = $(BUILD)/Source
 TESTPATCHES  = $(BUILDROOT)/TestPatches
 DSPLIB       = Libraries/CMSIS/DSP_Lib/Source
-CPPFLAGS  = -g -Wall -m32
-CPPFLAGS += -I$(SOURCE)
-CPPFLAGS += -I$(PATCHSOURCE)
-CPPFLAGS += -I$(LIBSOURCE)
-CPPFLAGS += -I$(GENSOURCE)
-CPPFLAGS += -I$(TESTPATCHES)
-CPPFLAGS += -ILibraries -ILibraries/KissFFT
-CPPFLAGS += -ILibraries/CMSIS/Include
-CPPFLAGS +=  -DARM_MATH_CM0
-CPPFLAGS +=  -fno-builtin -ffreestanding
+CPPFLAGS     = -g -Wall
+CPPFLAGS    += -I$(SOURCE)
+CPPFLAGS    += -I$(PATCHSOURCE)
+CPPFLAGS    += -I$(LIBSOURCE)
+CPPFLAGS    += -I$(GENSOURCE)
+CPPFLAGS    += -I$(TESTPATCHES)
+CPPFLAGS    += -ILibraries -ILibraries/KissFFT
+CXXFLAGS     = -std=c++14
+LDLIBS       = -lm
+LDFLAGS      = -Wl,--gc-sections
 
 # Tools
 CC=$(TOOLROOT)gcc
@@ -43,25 +30,22 @@ RANLIB=$(TOOLROOT)ranlib
 OBJCOPY=$(TOOLROOT)objcopy
 OBJDUMP=$(TOOLROOT)objdump
 
-LDLIBS   = -lm
-LDFLAGS  = -Wl,--gc-sections
+# Uncomment lines below to build in 32-bit mode
+# include $(BUILDROOT)/libs.mk
+# CPPFLAGS += -ILibraries/CMSIS/Include
+# CPPFLAGS += -DARM_MATH_CM0
+# CPPFLAGS += -fno-builtin -ffreestanding -m32
+# C_SRC += $(DSPLIB)/TransformFunctions/arm_bitreversal.c
 
-CXXFLAGS = -std=c++11
-
-# object files
-# OBJS  = $(C_SRC:%.c=$(BUILD)/Test/%.o) $(CPP_SRC:%.cpp=$(BUILD)/Test/%.o)
-
-include $(BUILDROOT)/libs.mk
 include $(BUILDROOT)/sources.mk
 C_SRC += Libraries/KissFFT/kiss_fft.c
-C_SRC += $(DSPLIB)/TransformFunctions/arm_bitreversal.c
 
 # Set up search path
 OBJS = $(addprefix $(BUILD)/Test/,$(notdir $(C_SRC:.c=.o)))
-vpath %.c $(sort $(dir $(C_SRC)))
 OBJS += $(addprefix $(BUILD)/Test/,$(notdir $(CPP_SRC:.cpp=.o)))
-vpath %.cpp $(sort $(dir $(CPP_SRC)))
 
+vpath %.c $(sort $(dir $(C_SRC)))
+vpath %.cpp $(sort $(dir $(CPP_SRC)))
 vpath %.cpp $(SOURCE) $(LIBSOURCE) $(GENSOURCE)
 vpath %.c $(SOURCE) $(LIBSOURCE) $(GENSOURCE)
 
@@ -70,7 +54,6 @@ vpath %.c $(SOURCE) $(LIBSOURCE) $(GENSOURCE)
 perform: $(TESTPATCHES)/PatchRun.cpp $(DEPS) $(OBJS)
 	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTPATCHES)/PatchRun.cpp -I$(BUILD) $(OBJS) -o $(BUILD)/Test/patch
 	@$(BUILD)/Test/patch
-
 
 test: $(TESTPATCHES)/PatchTest.cpp $(DEPS) $(OBJS)
 	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTPATCHES)/PatchTest.cpp -I$(BUILD) $(OBJS) -o $(BUILD)/Test/$@

@@ -1,3 +1,6 @@
+#include "FastPowTable.h"
+#include "FastLogTable.h"
+#include "basicmaths.h"
 
 static float parameter_values[40] = {};
 static uint32_t button_values = 0;
@@ -47,10 +50,10 @@ public:
   }
 };
 
+#ifdef ARM_MATH_CM0
 extern "C" {
   // http://www.keil.com/forum/60479/
-  void arm_bitreversal_32(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTab)
-{
+  void arm_bitreversal_32(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTab){
   uint32_t r3 = (bitRevLen + 1) / 2;
   uint32_t *r2, *r6;
   uint32_t r4, r5;
@@ -69,12 +72,12 @@ extern "C" {
     pBitRevTab += 2;
   }
 }
-
 void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTab)
 {
   ASSERT(false, "TODO: arm_bitreversal_16");
 }
 }
+#endif
 
 void assert_failed(const char* msg, const char* location, int line){
   printf("Assertion failed: %s, in %s line %d\n", msg, location, line);
@@ -116,7 +119,15 @@ AudioBuffer::~AudioBuffer(){}
 
 Patch::Patch(){}
 Patch::~Patch(){}
-PatchProcessor::PatchProcessor(){}
+PatchProcessor::PatchProcessor(){
+  fast_log_set_table(fast_log_table, fast_log_table_size);
+  fast_pow_set_table(fast_pow_table, fast_pow_table_size);
+}
+void PatchProcessor::setPatch(Patch* patch, const char* name){
+  if(patch == NULL)
+    error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
+  this->patch = patch;
+}
 PatchProcessor::~PatchProcessor(){}
 
 void PatchProcessor::setPatchParameter(int pid, FloatParameter* param){

@@ -10,8 +10,7 @@
  */
 
 #define TESTCHECK(x, y) TEST(y); CHECK(x)
-#define TESTCHECK_EQUAL(a, b, y) TEST(y); CHECK_EQUAL(a, b)
-#define TESTCHECK_CLOSE(a, b, y, z) TEST(y); CHECK_CLOSE(a, b, z)
+#define TESTCHECK_CLOSE(a, b, y) TEST(y); CHECK_CLOSE(a, b, DEFAULT_TOLERANCE)
 
 class FloatArrayTestPatch : public TestPatch {
 public:
@@ -159,23 +158,23 @@ public:
       tempFa3.copyFrom(tempFa1);
       fa.add(tempFa1,tempFa2);
       for(size_t n=0; n<size; n++){
-        TESTCHECK_EQUAL(fa[n], backupData[n], "add(operand2, destination) source not modified");
-        TESTCHECK_EQUAL(tempFa1[n], tempFa3[n], "add(operand2, destination) operand2 not modified");
-        TESTCHECK_EQUAL(tempFa2[n], tempFa1[n]+fa[n], "add(operand2, destination) sum is correct");
+        TESTCHECK_CLOSE(fa[n], backupData[n], "add(operand2, destination) source not modified");
+        TESTCHECK_CLOSE(tempFa1[n], tempFa3[n], "add(operand2, destination) operand2 not modified");
+        TESTCHECK_CLOSE(tempFa2[n], tempFa1[n]+fa[n], "add(operand2, destination) sum is correct");
       }
       //test fa.add(fa, fa)
       tempFa1.noise();
       tempFa2.copyFrom(tempFa1);
       tempFa1.add(tempFa1,tempFa1);
       for(size_t n=0; n<size; n++){
-        TESTCHECK_EQUAL(tempFa1[n], tempFa2[n]+tempFa2[n], "fa.add(fa, fa) sum is correct");
+        TESTCHECK_CLOSE(tempFa1[n], tempFa2[n]+tempFa2[n], "fa.add(fa, fa) sum is correct");
       }
       //test add(scalar)
       float scalar=0.4;
       tempFa1.copyFrom(tempFa3);
       tempFa1.add(scalar);
       for(size_t n=0; n<size; n++){
-        TESTCHECK_EQUAL(tempFa1[n], tempFa3[n]+scalar, "add(scalar)");
+        TESTCHECK_CLOSE(tempFa1[n], tempFa3[n]+scalar, "add(scalar)");
       }
     }    
     
@@ -187,8 +186,8 @@ public:
       tempFa3.copyFrom(tempFa1);
       tempFa2.subtract(tempFa1);
       for(size_t n=0; n<size; n++){
-        TESTCHECK_EQUAL(fa[n]-tempFa1[n], tempFa2[n], "subtract(operand2) subtraction is correct");
-        TESTCHECK_EQUAL(tempFa1[n], tempFa3[n], "subtract(operand2) operand2 not modified");
+        TESTCHECK_CLOSE(fa[n]-tempFa1[n], tempFa2[n], "subtract(operand2) subtraction is correct");
+        TESTCHECK_CLOSE(tempFa1[n], tempFa3[n], "subtract(operand2) operand2 not modified");
       }
       //test subtract(operand2, destination)
       tempFa1.noise();
@@ -196,23 +195,23 @@ public:
       tempFa3.copyFrom(tempFa1);
       fa.subtract(tempFa1,tempFa2);
       for(size_t n=0; n<size; n++){
-        TESTCHECK_EQUAL(fa[n], backupData[n], "subtract(operand2, destination) source not modified");
-        TESTCHECK_EQUAL(tempFa1[n], tempFa3[n], "subtract(operand2, destination) operand2 not modified");
-        TESTCHECK_EQUAL(tempFa2[n], fa[n]-tempFa1[n], "subtract(operand2, destination) subtraction is correct");
+        TESTCHECK_CLOSE(fa[n], backupData[n], "subtract(operand2, destination) source not modified");
+        TESTCHECK_CLOSE(tempFa1[n], tempFa3[n], "subtract(operand2, destination) operand2 not modified");
+        TESTCHECK_CLOSE(tempFa2[n], fa[n]-tempFa1[n], "subtract(operand2, destination) subtraction is correct");
       }
       //test fa.subtract(fa, fa)
       tempFa1.noise();
       tempFa2.copyFrom(tempFa1);
       tempFa1.subtract(tempFa1,tempFa1);
       for(size_t n=0; n<size; n++){
-        TESTCHECK_EQUAL(tempFa1[n], tempFa2[n]-tempFa2[n], "fa.subtract(fa, fa) subtraction is correct");
+        TESTCHECK_CLOSE(tempFa1[n], tempFa2[n]-tempFa2[n], "fa.subtract(fa, fa) subtraction is correct");
       }
       //test subtract(scalar)
       float scalar=0.4;
       tempFa1.copyFrom(tempFa3);
       tempFa1.subtract(scalar);
       for(size_t n=0; n<size; n++){
-        TESTCHECK_EQUAL(tempFa1[n], tempFa3[n]-scalar, "subtract(scalar)");
+        TESTCHECK_CLOSE(tempFa1[n], tempFa3[n]-scalar, "subtract(scalar)");
       }
     }
     
@@ -224,8 +223,8 @@ public:
       tempFa3.copyFrom(tempFa1);
       tempFa2.multiply(tempFa1);
       for(size_t n=0; n<size; n++){
-        TESTCHECK_EQUAL(fa[n]*tempFa1[n], tempFa2[n], "multiply(operand2) multiplication is correct");
-        TESTCHECK_EQUAL(tempFa1[n], tempFa3[n], "multiply(operand2) operand2 not modified");
+        TESTCHECK_CLOSE(fa[n]*tempFa1[n], tempFa2[n], "multiply(operand2) multiplication is correct");
+        TESTCHECK_CLOSE(tempFa1[n], tempFa3[n], "multiply(operand2) operand2 not modified");
       }
       //test multiply(operand2, destination)
       tempFa1.noise();
@@ -233,23 +232,23 @@ public:
       tempFa3.copyFrom(tempFa1);
       fa.multiply(tempFa1,tempFa2);
       for(size_t n=0; n<size; n++){
-        TESTCHECK_EQUAL(fa[n], backupData[n], "multiply(operand2, destination) source not modified");
-        TESTCHECK_EQUAL(tempFa1[n], tempFa3[n], "multiply(operand2, destination) operand2 not modified");
-        TESTCHECK_EQUAL(tempFa2[n], fa[n]*tempFa1[n], "multiply(operand2, destination) multiplication is correct");
+        TESTCHECK_CLOSE(fa[n], backupData[n], "multiply(operand2, destination) source not modified");
+        TESTCHECK_CLOSE(tempFa1[n], tempFa3[n], "multiply(operand2, destination) operand2 not modified");
+        TESTCHECK_CLOSE(tempFa2[n], fa[n]*tempFa1[n], "multiply(operand2, destination) multiplication is correct");
       }
       //test fa.multiply(fa, fa)
       tempFa1.noise();
       tempFa2.copyFrom(tempFa1);
       tempFa1.multiply(tempFa1,tempFa1);
       for(size_t n=0; n<size; n++){
-        TESTCHECK_EQUAL(tempFa1[n], tempFa2[n]*tempFa2[n], "fa.multiply(fa, fa) multiplication is correct");
+        TESTCHECK_CLOSE(tempFa1[n], tempFa2[n]*tempFa2[n], "fa.multiply(fa, fa) multiplication is correct");
       }
       //test multiply(scalar)
       float scalar=0.4;
       tempFa1.copyFrom(tempFa3);
       tempFa1.multiply(scalar);
       for(size_t n=0; n<size; n++){
-        TESTCHECK_EQUAL(tempFa1[n], tempFa3[n]*scalar, "multiply(scalar)");
+        TESTCHECK_CLOSE(tempFa1[n], tempFa3[n]*scalar, "multiply(scalar)");
       }
     }
     
@@ -277,7 +276,7 @@ public:
                 destinationReference[n]+=fa[n1]*operand2[k];
             n1--;
         }
-        TESTCHECK_EQUAL(destinationReference[n],destination[n],"convolve() result");
+        TESTCHECK_CLOSE(destinationReference[n],destination[n],"convolve() result");
       }
       //test partial convolve with offset and samples 
       size_t offset=20;
@@ -307,7 +306,7 @@ public:
       //and convolve it with fa to obtain the correlation
       fa.convolve(operand2, destinationReference);
       for(size_t n=0; n<size+size2-1; n++){
-        TESTCHECK_CLOSE(destinationReference[n],destination[n], "correlate()",0.00001f); //TODO: find out why this requires a large tolerance
+        TESTCHECK_CLOSE(destinationReference[n],destination[n], "correlate()"); //TODO: find out why this requires a large tolerance
       }
       //now redo correlation, but pre-initialize output to 0 and call convolveInitialized() isntead
       destination.setAll(0);
@@ -418,7 +417,7 @@ public:
         rms+=fa[n]*fa[n];
       } 
       rms=sqrt(rms/size);
-      TESTCHECK_CLOSE(fa.getRms(), rms, "getRms()", 0.00001f);
+      TESTCHECK_CLOSE(fa.getRms(), rms, "getRms()");
     }      
 
     //test power
@@ -427,7 +426,7 @@ public:
       for(size_t n=0; n<size; n++){
         power+=fa[n]*fa[n];
       } 
-      TESTCHECK_CLOSE(power, fa.getPower(), "getPower()", 0.00001f);
+      TESTCHECK_CLOSE(power, fa.getPower(), "getPower()");
     }    
     
     //quantities needed for mean, variance, standardDeviation
@@ -440,7 +439,7 @@ public:
       }
       //test mean
       float mean=sum/size;
-      TESTCHECK_CLOSE(mean, fa.getMean(),"mean()", 0.00001f);
+      TESTCHECK_CLOSE(mean, fa.getMean(),"mean()");
       //test variance
       //variance is The average of the squared differences from the Mean."
       float var=0;
@@ -449,10 +448,10 @@ public:
         var+=diff*diff;
       }
       var=var/(size-1);
-      TESTCHECK_CLOSE(var, fa.getVariance(), "getVariance()", 0.00001f);
+      TESTCHECK_CLOSE(var, fa.getVariance(), "getVariance()");
       //test standardDeviation
       float std = sqrtf(var);
-      TESTCHECK_CLOSE(std, fa.getStandardDeviation(), "getStandardDeviation()", 0.00001f);
+      TESTCHECK_CLOSE(std, fa.getStandardDeviation(), "getStandardDeviation()");
     }
     
     //test noise using statistics
@@ -466,33 +465,13 @@ public:
     // FloatArray subarray(int offset, int length);
     // float getDb();
 
-//check that the original data were not changed by any of the methods
+    //check that the original data were not changed by any of the methods
     for(size_t n=0; n<size; n++){
       TESTCHECK(data[n]==backupData[n],"original data");
     }
     FloatArray::destroy(tempFa1);
     FloatArray::destroy(tempFa2);
     FloatArray::destroy(tempFa3);
-    if(success==true){
-      debugMessage("Tests passed: ",passed);
-    }
-  };
-  void processAudio(AudioBuffer &buffer){
-    float *sig=buffer.getSamples(0);
-    if(success==false){
-
-      for(int n=0; n<getBlockSize(); n++){
-        sig[n]+=0.05*rand()/(float)RAND_MAX;
-      }
-    } else {
-      static float phase=0;
-      float inc=2*M_PI/200.0f;
-      for(int n=0; n<getBlockSize(); n++){
-        sig[n]+=0.2*sinf(phase);
-        phase+=inc;
-        phase= phase>2*M_PI ? phase-2*M_PI : phase;
-      }
-    }
   }
 };
 
