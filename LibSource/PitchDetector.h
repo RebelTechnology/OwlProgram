@@ -127,7 +127,7 @@ public:
     // RAII constructor
     filterOutput = FloatArray::create(blocksize);
     counts = FloatArray::create(POINTS_AVERAGE); //number of zcc to be averaged
-    filter = BiquadFilter::create(numLowPassStages+numHighPassStages);
+    filter = BiquadFilter::create(aSamplingRate, numLowPassStages+numHighPassStages);
     setLowPassCutoff(0.03);
     setHighPassCutoff(0.001);
   }
@@ -142,22 +142,12 @@ public:
   void setLowPassCutoff(float fc){
     if(numLowPassStages<1)
       return;
-    FilterStage stage0=filter->getFilterStage(0);
-    stage0.setLowPass(fc/samplingRate, FilterStage::BUTTERWORTH_Q);
-    for(int n=1; n<numLowPassStages; n++){
-      FilterStage stage=filter->getFilterStage(n);
-      stage.setCoefficients(FloatArray(stage0.getCoefficients(), 5));
-    }
+    filter->setLowPass(fc, FilterStage::BUTTERWORTH_Q);
   };
   void setHighPassCutoff(float fc){
     if(numHighPassStages<1)
       return;
-    FilterStage stage0=filter->getFilterStage(numLowPassStages);
-    stage0.setHighPass(fc/samplingRate, FilterStage::BUTTERWORTH_Q);
-    for(int n=numLowPassStages+1; n<numHighPassStages+numLowPassStages; n++){
-      FilterStage stage=filter->getFilterStage(n);
-      stage.setCoefficients(stage0.getCoefficients());
-    }
+    filter->setHighPass(fc, FilterStage::BUTTERWORTH_Q);
   };
   void process(FloatArray input){
     ASSERT(input.getSize()<=filterOutput.getSize(), "wrong size");
