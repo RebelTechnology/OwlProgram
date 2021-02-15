@@ -12,6 +12,11 @@ v21.1
 v21.0
 -----
 
-* Matches release v21.0 of OpenWare.
-* Adds support for patch resources.
+* Matches release v21.0 of OpenWare
+* Add support for patch resources
+
+Prehistory
+-----------
+
+A wise old OWL sat in an oak
 
