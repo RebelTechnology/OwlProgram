@@ -150,10 +150,6 @@ Compile puredata file owl_hypersaw.pd and send to device to be run immediately:
 
     make HEAVY=owl_hypersaw clean run
 
-Compile KickBox[[9]](#ref9) C++ patch:
-
-    make PATCHNAME=KickBox clean patch
-
 # References
 <a name="ref1">[1]</a> https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
 
@@ -170,6 +166,4 @@ Compile KickBox[[9]](#ref9) C++ patch:
 <a name="ref7">[7]</a> http://sourceforge.net/projects/mingw/
 
 <a name="ref8">[8]</a> https://www.rebeltech.org/patch-library/patch/4_saw
-
-<a name="ref9">[9]</a> https://github.com/marsus/MyPatches (AudioDisplay.hpp, BassDrum.hpp, Cymbal.hpp, Drum.hpp, KickBoxPatch.hpp, Oscillators.hpp, Sequence.h, SynthVoice.hpp, bjorklund.h)
 
