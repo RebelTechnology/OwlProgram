@@ -84,6 +84,40 @@ void assert_failed(const char* msg, const char* location, int line){
   exit(-1);
 }
 
+const char hexnumerals[] = "0123456789abcdef";
+char* msg_itoa(int val, int base){
+  static char buf[13] = {0};
+  int i = 11;
+  unsigned int part = abs(val);
+  do{
+    buf[i--] = hexnumerals[part % base];
+    part /= base;
+  }while(part && i);
+  if(val < 0)
+    buf[i--] = '-';
+  return &buf[i+1];
+}
+
+char* msg_ftoa(float val, int base){
+  static char buf[16] = {0};
+  int i = 14;
+  // print 2 decimal points
+  unsigned int part = abs((int)((val-int(val))*100));
+  do{
+    buf[i--] = hexnumerals[part % base];
+    part /= base;
+  }while(i > 12);
+  buf[i--] = '.';
+  part = abs(int(val));
+  do{
+    buf[i--] = hexnumerals[part % base];
+    part /= base;
+  }while(part && i);
+  if(val < 0.0f)
+    buf[i--] = '-';
+  return &buf[i+1];
+}
+
 void debugMessage(char const* msg, int a){
   printf("%s %d\n", msg, a);
 }
@@ -177,13 +211,24 @@ void Patch::setParameterValue(PatchParameterId pid, float value){
 }
 
 void Patch::setButton(PatchButtonId bid, uint16_t value, uint16_t samples){
-  printf("Set button %c: %d\n", 'A'+bid, value);
-  if(value)
-    button_values |= (1<<bid);
-  else
-    button_values &= ~(1<<bid);
+  doSetButton(bid, value, samples);
 }
 
 bool Patch::isButtonPressed(PatchButtonId bid){
   return button_values & (1<<bid);
+}
+
+extern "C"{
+  void doSetButton(uint8_t bid, uint16_t value, uint16_t samples){
+    printf("Set button %c: %d\n", 'A'+bid, value);
+    if(value)
+      button_values |= (1<<bid);
+    else
+      button_values &= ~(1<<bid);
+  }
+  void doSetPatchParameter(uint8_t pid, int16_t value){
+    printf("Set parameter %c: %d\n", 'A'+pid, value);
+    if(pid < 40)
+      parameter_values[pid] = value/4096.0f;
+  }
 }
