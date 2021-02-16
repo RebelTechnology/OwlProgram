@@ -93,10 +93,10 @@ public:
   ~Resource(){}
 protected:
   Resource(const char* name, size_t size, void* data)
-    : name(name), size(size), data((uint8_t*)data) {}
+    : name(name), size(size), data((uint8_t*)data), allocated(false) {}
   const char* name;
-  uint8_t* data;
   size_t size;
+  uint8_t* data;
   bool allocated;
 };
 #endif

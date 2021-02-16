@@ -16,10 +16,21 @@ SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
 GENSOURCE    = $(BUILD)/Source
 TESTPATCHES  = $(BUILDROOT)/TestPatches
+DAISYSP      = $(BUILDROOT)/Libraries/DaisySP/Source
 CPPFLAGS += -I$(PATCHSOURCE)
 CPPFLAGS += -I$(LIBSOURCE)
 CPPFLAGS += -I$(GENSOURCE)
 CPPFLAGS += -I$(TESTPATCHES)
+CPPFLAGS += -I$(DAISYSP)
+CPPFLAGS += -I$(DAISYSP)/Control
+CPPFLAGS += -I$(DAISYSP)/Drums
+CPPFLAGS += -I$(DAISYSP)/Dynamics
+CPPFLAGS += -I$(DAISYSP)/Effects
+CPPFLAGS += -I$(DAISYSP)/Filters
+CPPFLAGS += -I$(DAISYSP)/Noise
+CPPFLAGS += -I$(DAISYSP)/PhysicalModeling
+CPPFLAGS += -I$(DAISYSP)/Synthesis
+CPPFLAGS += -I$(DAISYSP)/Utility
 PATCH_C_SRC    = $(wildcard $(PATCHSOURCE)/*.c)
 PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
 PATCH_CPP_SRC += PatchProgram.cpp
@@ -31,6 +42,8 @@ endif
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_C_SRC:.c=.o)))
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
 PATCH_OBJS += $(BUILD)/startup.o
+DAISYSP_CPP_SRC = $(wildcard $(DAISYSP)/*/*.cpp)
+DAISYSP_OBJS = $(addprefix $(BUILD)/, $(notdir $(DAISYSP_CPP_SRC:.cpp=.o)))
 
 CPPFLAGS += -DARM_CORTEX
 CPPFLAGS += -DEXTERNAL_SRAM
@@ -95,6 +108,16 @@ vpath %.s $(PATCHSOURCE)
 vpath %.cpp $(GENSOURCE)
 vpath %.c $(GENSOURCE)
 vpath %.s $(GENSOURCE)
+vpath %.cpp $(DAISYSP)/Control
+vpath %.cpp $(DAISYSP)/Drums
+vpath %.cpp $(DAISYSP)/Dynamics
+vpath %.cpp $(DAISYSP)/Effects
+vpath %.cpp $(DAISYSP)/Filters
+vpath %.cpp $(DAISYSP)/Noise
+vpath %.cpp $(DAISYSP)/PhysicalModeling
+vpath %.cpp $(DAISYSP)/Synthesis
+vpath %.cpp $(DAISYSP)/Utility
+
 vpath %.c Libraries/syscalls
 
 .PHONY: libs as map compile
@@ -110,15 +133,18 @@ $(BUILD)/PatchProgram.o: $(SOURCE)/PatchProgram.cpp $(DEPS)
 Libraries/libowlprg.a: $(OBJS)
 	@$(AR) rcs $@ $^
 
-$(BUILD)/$(TARGET).elf: $(PATCH_OBJS) $(LDSCRIPT)
-	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(LDLIBS) Libraries/libowlprg.a
+Libraries/libdaisysp.a: $(DAISYSP_OBJS)
+	@$(AR) rcs $@ $^
 
-libs: Libraries/libowlprg.a
+$(BUILD)/$(TARGET).elf: $(PATCH_OBJS) $(LDSCRIPT)
+	@$(LD) $(LDFLAGS) -o $@ $(PATCH_OBJS) $(LDLIBS) Libraries/libdaisysp.a Libraries/libowlprg.a
+
+libs: Libraries/libowlprg.a Libraries/libdaisysp.a
 
 as: $(BUILD)/$(TARGET).elf
 	@$(OBJDUMP) -S $< > $(BUILD)/$(TARGET).s
 
 map: $(PATCH_OBJS) $(LDSCRIPT)
-	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/$(TARGET).map $(PATCH_OBJS) $(LDLIBS) Libraries/libowlprg.a
+	@$(LD) $(LDFLAGS) -Wl,-Map=$(BUILD)/$(TARGET).map $(PATCH_OBJS) $(LDLIBS) Libraries/libdaisysp.a Libraries/libowlprg.a
 
 compile: $(BUILD)/$(TARGET).bin

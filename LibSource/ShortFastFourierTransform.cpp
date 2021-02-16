@@ -47,7 +47,7 @@ ShortFastFourierTransform::ShortFastFourierTransform(int aSize){
 }
 
 ShortFastFourierTransform::~ShortFastFourierTransform(){
-  assert(false, "TODO");
+  ASSERT(false, "TODO");
   ComplexShortArray::destroy(temp);
 }
 

@@ -86,9 +86,9 @@ export CONFIG PLATFORM
 
 DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
 
-all: libs
+all: libs patch
 
-.PHONY: .FORCE patch libs faust gen heavy web minify clean realclean run store docs help
+.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as test check tables resource size clean realclean sysex run store docs help
 
 .FORCE:
 	@mkdir -p $(BUILD)/Source
@@ -161,7 +161,7 @@ clean: ## remove generated patch files
 	@rm -rf $(BUILD)/*
 
 realclean: clean ## remove all library object files
-	@find Libraries/ -name '*.a' -delete
+	@find Libraries/ -name '*.[a|o]' -delete
 
 size: patch ## show binary size metrics and large object summary
 	@$(MAKE) -s -f common.mk size

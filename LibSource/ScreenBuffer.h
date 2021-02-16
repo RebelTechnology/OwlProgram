@@ -6,9 +6,6 @@
 #include "device.h"
 #include "message.h"
 
-#ifndef swap
-#define swap(a, b) { int t = a; a = b; b = t; }
-#endif
 
 template<typename Colour, Colour BLACK, Colour WHITE>
 class ScreenBuffer {
@@ -22,6 +19,9 @@ private:
   uint16_t textcolor;
   uint16_t textbgcolor;
   bool wrap;
+
+  inline void swap(int& a, int& b) { int t = a; a = b; b = t; };
+
 public:
 ScreenBuffer(uint16_t w, uint16_t h) : 
   width(w), height(h), pixels(NULL),

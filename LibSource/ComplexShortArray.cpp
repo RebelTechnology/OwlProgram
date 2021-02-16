@@ -85,7 +85,7 @@ void ComplexShortArray::complexByComplexMultiplication(ComplexShortArray operand
 #ifdef ARM_CORTEX
   arm_cmplx_mult_cmplx_q15((int16_t*)getData(), (int16_t*)operand2.getData(), (int16_t*)result.getData(), size );  
 #else
-  assert(false, "TODO");
+  ASSERT(false, "TODO");
   float *pSrcA=(float*)data;
   float *pSrcB=(float*)operand2;
   float *pDst=(float*)result;
