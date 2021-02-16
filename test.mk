@@ -1,16 +1,15 @@
-BUILDROOT ?= .
-
+BUILDROOT   ?= .
 BUILD       ?= $(BUILDROOT)/Build
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
-GENSOURCE    = $(BUILD)/Source
+BUILDSOURCE  = $(BUILD)/Source
 TESTPATCHES  = $(BUILDROOT)/TestPatches
 DSPLIB       = Libraries/CMSIS/DSP_Lib/Source
 CPPFLAGS     = -g -Wall
 CPPFLAGS    += -I$(SOURCE)
 CPPFLAGS    += -I$(PATCHSOURCE)
 CPPFLAGS    += -I$(LIBSOURCE)
-CPPFLAGS    += -I$(GENSOURCE)
+CPPFLAGS    += -I$(BUILDSOURCE)
 CPPFLAGS    += -I$(TESTPATCHES)
 CPPFLAGS    += -ILibraries -ILibraries/KissFFT
 CXXFLAGS     = -std=c++14
@@ -38,7 +37,9 @@ OBJDUMP=$(TOOLROOT)objdump
 # C_SRC += $(DSPLIB)/TransformFunctions/arm_bitreversal.c
 
 include $(BUILDROOT)/sources.mk
-C_SRC += Libraries/KissFFT/kiss_fft.c
+C_SRC   += Libraries/KissFFT/kiss_fft.c
+C_SRC   += $(wildcard $(BUILDSOURCE)/*.c)
+CPP_SRC += $(wildcard $(BUILDSOURCE)/*.cpp)
 
 # Set up search path
 OBJS = $(addprefix $(BUILD)/Test/,$(notdir $(C_SRC:.c=.o)))
@@ -46,8 +47,8 @@ OBJS += $(addprefix $(BUILD)/Test/,$(notdir $(CPP_SRC:.cpp=.o)))
 
 vpath %.c $(sort $(dir $(C_SRC)))
 vpath %.cpp $(sort $(dir $(CPP_SRC)))
-vpath %.cpp $(SOURCE) $(LIBSOURCE) $(GENSOURCE)
-vpath %.c $(SOURCE) $(LIBSOURCE) $(GENSOURCE)
+vpath %.cpp $(SOURCE) $(LIBSOURCE) $(BUILDSOURCE)
+vpath %.c $(SOURCE) $(LIBSOURCE) $(BUILDSOURCE)
 
 .PHONY: perform test
 

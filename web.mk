@@ -1,6 +1,6 @@
 LIBSOURCE    = $(BUILDROOT)/LibSource
 SOURCE       = $(BUILDROOT)/Source
-GENSOURCE    = $(BUILD)/Source
+BUILDSOURCE    = $(BUILD)/Source
 DAISYSP      = $(BUILDROOT)/Libraries/DaisySP/Source
 
 # emscripten
@@ -8,7 +8,7 @@ EMCC      ?= emcc
 EMAR      ?= emar
 EMCCFLAGS += -fno-rtti -fno-exceptions
 # EMCCFLAGS += -s ASSERTIONS=1 -Wall
-EMCCFLAGS += -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(GENSOURCE) -I$(BUILD)
+EMCCFLAGS += -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILDSOURCE) -I$(BUILD)
 EMCCFLAGS += -I$(BUILD)/Source
 EMCCFLAGS += -I$(DAISYSP)
 EMCCFLAGS += -I$(DAISYSP)/Control
@@ -55,10 +55,10 @@ EMCC_OBJS += $(addprefix $(WEBDIR)/, $(notdir $(C_SRC:.c=.o)))
 EMDAISYSP_CPP_SRC = $(wildcard $(DAISYSP)/*/*.cpp)
 EMDAISYSP_OBJS = $(addprefix $(WEBDIR)/, $(notdir $(EMDAISYSP_CPP_SRC:.cpp=.o)))
 
-PATCH_C_SRC  = $(wildcard $(GENSOURCE)/*.c)
+PATCH_C_SRC  = $(wildcard $(BUILDSOURCE)/*.c)
 PATCH_C_SRC  += $(wildcard $(PATCHSOURCE)/*.c)
 PATCH_CPP_SRC = $(SOURCE)/PatchProgram.cpp
-PATCH_CPP_SRC += $(wildcard $(GENSOURCE)/*.cpp)
+PATCH_CPP_SRC += $(wildcard $(BUILDSOURCE)/*.cpp)
 PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
 
 PATCH_OBJS = $(addprefix $(WEBDIR)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
@@ -84,9 +84,9 @@ vpath %.s $(LIBSOURCE)
 vpath %.cpp $(PATCHSOURCE)
 vpath %.c $(PATCHSOURCE)
 vpath %.s $(PATCHSOURCE)
-vpath %.cpp $(GENSOURCE)
-vpath %.c $(GENSOURCE)
-vpath %.s $(GENSOURCE)
+vpath %.cpp $(BUILDSOURCE)
+vpath %.c $(BUILDSOURCE)
+vpath %.s $(BUILDSOURCE)
 vpath %.cpp WebSource
 vpath %.c Libraries/KissFFT
 
