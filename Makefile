@@ -176,10 +176,10 @@ as: patch ## build assembly file (Build/patch.s)
 	@echo Built $(PATCHNAME) assembly in $(BUILD)/$(TARGET).s
 
 test: $(DEPS) ## test patch locally
-	@$(MAKE) -s -f test.mk test
+	@$(MAKE) -s -f native.mk test
 
 run: $(DEPS) ## run patch locally
-	@$(MAKE) -s -f test.mk run
+	@$(MAKE) -s -f native.mk run
 
 check: ## run tests
 	@$(MAKE) -s TEST=ComplexFourierTransformTest test
