@@ -88,7 +88,7 @@ DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/star
 
 all: libs patch web
 
-.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as test run check tables resource size clean realclean sysex load store docs help
+.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as native test run check tables resource size clean realclean sysex load store docs help
 
 .FORCE:
 	@mkdir -p $(BUILD)/Source
@@ -174,6 +174,9 @@ map: patch ## build map file (Build/patch.map)
 as: patch ## build assembly file (Build/patch.s)
 	@$(MAKE) -s -f compile.mk as
 	@echo Built $(PATCHNAME) assembly in $(BUILD)/$(TARGET).s
+
+native: $(DEPS) ## build native executable of patch
+	@$(MAKE) -s -f native.mk native
 
 test: $(DEPS) ## test patch locally
 	@$(MAKE) -s -f native.mk test
