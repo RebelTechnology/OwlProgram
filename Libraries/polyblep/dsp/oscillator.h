@@ -120,7 +120,10 @@ class Oscillator {
     previous_pw_ = 0.5f;
     previous_waveshape_ = 0.0f;
   }
-  
+
+  float getMasterPhase(){
+    return master_phase_;
+  }
 
   template<bool interpolate_parameters>
   void Render(
