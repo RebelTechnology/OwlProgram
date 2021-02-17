@@ -165,7 +165,7 @@ realclean: clean ## remove all library object files
 	@find Libraries/ -name '*.[a|o]' -delete
 
 size: patch ## show binary size metrics and large object summary
-	@$(MAKE) -s -f common.mk size
+	@$(MAKE) -s -f compile.mk size
 
 map: patch ## build map file (Build/patch.map)
 	@$(MAKE) -s -f compile.mk map
