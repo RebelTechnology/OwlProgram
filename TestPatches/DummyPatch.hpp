@@ -79,9 +79,24 @@ void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t
 }
 #endif
 
-void assert_failed(const char* msg, const char* location, int line){
-  printf("Assertion failed: %s, in %s line %d\n", msg, location, line);
-  exit(-1);
+extern "C"{
+  void doSetButton(uint8_t bid, uint16_t value, uint16_t samples){
+    printf("Set button %c: %d\n", 'A'+bid, value);
+    if(value)
+      button_values |= (1<<bid);
+    else
+      button_values &= ~(1<<bid);
+  }
+  void doSetPatchParameter(uint8_t pid, int16_t value){
+    printf("Set parameter %c: %d\n", 'A'+pid, value);
+    if(pid < 40)
+      parameter_values[pid] = value/4096.0f;
+  }
+
+  void assert_failed(const char* msg, const char* location, int line){
+    printf("Assertion failed: %s, in %s line %d\n", msg, location, line);
+    exit(-1);
+  }
 }
 
 const char hexnumerals[] = "0123456789abcdef";
@@ -216,19 +231,4 @@ void Patch::setButton(PatchButtonId bid, uint16_t value, uint16_t samples){
 
 bool Patch::isButtonPressed(PatchButtonId bid){
   return button_values & (1<<bid);
-}
-
-extern "C"{
-  void doSetButton(uint8_t bid, uint16_t value, uint16_t samples){
-    printf("Set button %c: %d\n", 'A'+bid, value);
-    if(value)
-      button_values |= (1<<bid);
-    else
-      button_values &= ~(1<<bid);
-  }
-  void doSetPatchParameter(uint8_t pid, int16_t value){
-    printf("Set parameter %c: %d\n", 'A'+pid, value);
-    if(pid < 40)
-      parameter_values[pid] = value/4096.0f;
-  }
 }

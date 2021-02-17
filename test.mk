@@ -50,10 +50,13 @@ vpath %.cpp $(sort $(dir $(CPP_SRC)))
 vpath %.cpp $(SOURCE) $(LIBSOURCE) $(BUILDSOURCE)
 vpath %.c $(SOURCE) $(LIBSOURCE) $(BUILDSOURCE)
 
-.PHONY: perform test
+.PHONY: native run test
 
-perform: $(TESTPATCHES)/PatchRun.cpp $(DEPS) $(OBJS)
+native: $(TESTPATCHES)/PatchRun.cpp $(DEPS) $(OBJS)
 	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTPATCHES)/PatchRun.cpp -I$(BUILD) $(OBJS) -o $(BUILD)/Test/patch
+	@echo Built $(PATCHNAME) native executable in $(BUILD)/Test/patch
+
+run: native
 	@$(BUILD)/Test/patch
 
 test: $(TESTPATCHES)/PatchTest.cpp $(DEPS) $(OBJS)

@@ -88,7 +88,7 @@ DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/star
 
 all: libs patch web
 
-.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as test perform check tables resource size clean realclean sysex run store docs help
+.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as test run check tables resource size clean realclean sysex load store docs help
 
 .FORCE:
 	@mkdir -p $(BUILD)/Source
@@ -140,8 +140,8 @@ soul: .FORCE
 sysex: patch $(BUILD)/$(TARGET).syx ## package patch binary as MIDI sysex
 	@echo Built sysex $(PATCHNAME) in $(BUILD)/$(TARGET).syx
 
-run: patch ## upload patch to attached OWL via MIDI
-	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to run
+load: patch ## upload patch to attached OWL via MIDI
+	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to load
 	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out "$(OWLDEVICE)" -run
 
 store: patch ## upload and save patch to attached OWL
@@ -178,8 +178,8 @@ as: patch ## build assembly file (Build/patch.s)
 test: $(DEPS) ## test patch locally
 	@$(MAKE) -s -f test.mk test
 
-perform: $(DEPS) ## run patch locally
-	@$(MAKE) -s -f test.mk perform
+run: $(DEPS) ## run patch locally
+	@$(MAKE) -s -f test.mk run
 
 check: ## run tests
 	@$(MAKE) -s TEST=ComplexFourierTransformTest test
