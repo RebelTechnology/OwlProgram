@@ -46,10 +46,6 @@ PATCHNAME   ?= $(MAXIMILIAN)
 PATCHCLASS  ?= MaximilianPatch
 PATCHFILE   ?= MaximilianPatch.hpp
 DEPS        += maximilian
-else ifdef TEST
-PATCHNAME   ?= $(TEST)
-PATCHCLASS  ?= $(PATCHNAME)Patch
-PATCHFILE   ?= $(PATCHNAME)Patch.hpp
 else ifdef SOUL
 # options for SOUL patch compilation
 PATCHNAME   ?= $(SOUL)
@@ -59,6 +55,10 @@ SOULCLASS   ?= $(SOUL)
 SOULFILE    ?= $(SOUL).soulpatch
 SOULHPP     ?= $(SOUL).hpp
 DEPS        += soul
+else ifdef TEST
+PATCHNAME   = $(TEST)
+PATCHCLASS  = $(PATCHNAME)Patch
+PATCHFILE   = $(PATCHNAME)Patch.hpp
 else
 # options for C++ compilation
 PATCHNAME   ?= "Template"
@@ -86,13 +86,14 @@ export CONFIG PLATFORM
 
 DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
 
-all: libs patch
+all: libs patch web
 
-.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as test check tables resource size clean realclean sysex run store docs help
+.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as native test run check tables resource size clean realclean sysex load store docs help
 
 .FORCE:
 	@mkdir -p $(BUILD)/Source
 	@mkdir -p $(BUILD)/web
+	@mkdir -p $(BUILD)/Test
 
 $(BUILD)/registerpatch.cpp: .FORCE
 	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $@
@@ -139,8 +140,8 @@ soul: .FORCE
 sysex: patch $(BUILD)/$(TARGET).syx ## package patch binary as MIDI sysex
 	@echo Built sysex $(PATCHNAME) in $(BUILD)/$(TARGET).syx
 
-run: patch ## upload patch to attached OWL via MIDI
-	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to run
+load: patch ## upload patch to attached OWL via MIDI
+	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to load
 	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out "$(OWLDEVICE)" -run
 
 store: patch ## upload and save patch to attached OWL
@@ -174,10 +175,22 @@ as: patch ## build assembly file (Build/patch.s)
 	@$(MAKE) -s -f compile.mk as
 	@echo Built $(PATCHNAME) assembly in $(BUILD)/$(TARGET).s
 
-test: $(DEPS) ## run test patch
-	@$(MAKE) -s -f test.mk test
+native: $(DEPS) ## build native executable of patch
+	@$(MAKE) -s -f native.mk native
 
-check: patch ## run tests (compile dummy patch)
+test: $(DEPS) ## test patch locally
+	@$(MAKE) -s -f native.mk test
+
+run: $(DEPS) ## run patch locally
+	@$(MAKE) -s -f native.mk run
+
+check: ## run tests
+	@$(MAKE) -s TEST=ComplexFourierTransformTest test
+	@$(MAKE) -s TEST=FloatArrayTest test
+	@$(MAKE) -s TEST=ShortArrayTest test
+	@$(MAKE) -s TEST=FastExpTest test
+	@$(MAKE) -s TEST=FastLogTest test
+	@$(MAKE) -s TEST=FastPowTest test
 
 help: ## show this help
 	@echo 'Usage: make [target] ...'

@@ -34,6 +34,6 @@ public:
       error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
   }
   ~ManagedMemoryBuffer(){
-    delete buffer;
+    delete[] buffer;
   }
 };
