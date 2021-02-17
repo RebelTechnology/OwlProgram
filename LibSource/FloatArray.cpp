@@ -406,13 +406,13 @@ void FloatArray::convolve(FloatArray operand2, FloatArray destination){
 #ifdef ARM_CORTEX
   arm_conv_f32(data, size, operand2.data, operand2.size, destination);
 #else
-  size_t size2=operand2.getSize();
-  for (size_t n=0; n<size+size2-1; n++){
-    int n1=n;
-    destination[n] =0;
+  size_t size2 = operand2.getSize();
+  for(size_t n=0; n<size+size2-1; n++){
+    size_t n1 = n;
+    destination[n] = 0;
     for(size_t k=0; k<size2; k++){
       if(n1>=0 && n1<size)
-        destination[n]+=data[n1]*operand2[k];
+        destination[n] += data[n1]*operand2[k];
       n1--;
     }
   }
@@ -436,7 +436,7 @@ void FloatArray::convolve(FloatArray operand2, FloatArray destination, int offse
   */
   size_t size2=operand2.getSize();
   for (size_t n=offset; n<offset+samples; n++){
-    int n1=n;
+    size_t n1=n;
     destination[n] =0; //this should be [n-offset]
     for(size_t k=0; k<size2; k++){
       if(n1>=0 && n1<size)
@@ -483,7 +483,6 @@ void FloatArray::decibelToGain(FloatArray destination){
 
 void FloatArray::ramp(float from, float to){
   float step = (to-from)/size;
-  float value = from;
   for(size_t i=0; i<size; i++){
     data[i] = from;
     from += step;
@@ -492,7 +491,6 @@ void FloatArray::ramp(float from, float to){
 
 void FloatArray::scale(float from, float to, FloatArray destination){
   float step = (to-from)/size;
-  float value = from;
   for(size_t i=0; i<size; i++){
     data[i] *= from;
     from += step;
