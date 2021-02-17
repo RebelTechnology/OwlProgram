@@ -1,7 +1,6 @@
 #include "TestPatch.hpp"
 #include "ShortArray.h"
 #include <limits.h>
-#include <stdio.h>
 
 class ShortArrayTestPatch : public TestPatch {
 public:
