@@ -17,8 +17,14 @@ public:
     incr = freq*2*M_PI/sr;
     basefreq = freq;
   }
+  float getFrequency(){
+    return basefreq;
+  }
   void setSampleRate(float sample_rate){
     sr = sample_rate;
+  }
+  float getSampleRate(){
+    return sr;
   }
   /**
    * Set rate of change: positive for ascending chirp, negative for descending.
@@ -34,6 +40,9 @@ public:
   }
   void reset(){
     phase = 0.0f;
+  }
+  float getPhase(){
+    return phase;
   }
   float generate(){
     float sample = sinf(phase);

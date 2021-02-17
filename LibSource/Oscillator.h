@@ -18,9 +18,26 @@ public:
    */
   virtual void setSampleRate(float value){}
   /**
+   * Get oscillator sample rate
+   */
+  virtual float getSampleRate(){
+    return 0.0f;
+  }
+  /**
    * Set oscillator frequency in Hertz
    */
   virtual void setFrequency(float value){}
+  /**
+   * Get oscillator frequency in Hertz
+   */
+  virtual float getFrequency(float value){
+    return 0.0f;
+  }
+  /**
+   * Get current oscillator phase in radians
+   * @return a value between 0 and 2*pi
+   */
+  virtual float getPhase() = 0;
   /**
    * Reset oscillator (typically resets phase)
    */

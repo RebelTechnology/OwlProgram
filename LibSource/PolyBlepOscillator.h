@@ -9,16 +9,19 @@ class PolyBlepOscillator : public Oscillator {
 private:
   float mul;
   stmlib::Oscillator osc;
-  float frequency, shape, pw;
+  float nfreq, shape, pw;
 public:
   PolyBlepOscillator(float sr=48000);
   PolyBlepOscillator(float freq, float sr);
   void setSampleRate(float sr);
+  float getSampleRate();
   void setFrequency(float freq);
+  float getFrequency();
   /** set waveform shape: 0.0 for saw, 1.0 for square wave */
   void setShape(float value);
   /** set square wave pulse width: 0.0 to 1.0 for 0% to 100% */
   void setPulseWidth(float value);
+  float getPhase();
   float generate();
   float generate(float fm);
   /* put a block of output samples into @param output */

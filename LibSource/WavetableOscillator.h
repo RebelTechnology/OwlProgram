@@ -13,8 +13,11 @@ private:
 public:
   WavetableOscillator(float sr, const FloatArray wavetable);
   void setSampleRate(float sr);
+  float getSampleRate();
   void setFrequency(float freq);
+  float getFrequency();
   float getSample(float phase);
+  float getPhase();
   float generate();
   float generate(float fm);
   void generate(FloatArray samples);

@@ -9,26 +9,29 @@ private:
   float phase;
   float incr;
 public:
-  SineOscillator(float sr=48000) : phase(0), incr(0) {
-    setSampleRate(sr);
-  }
-  SineOscillator(float freq, float sr) : phase(0.0f) {
-    setSampleRate(sr);
+  SineOscillator(float sr=48000) : mul(2*M_PI/sr), phase(0), incr(0) {}
+  SineOscillator(float freq, float sr) : mul(2*M_PI/sr), phase(0.0f) {
     setFrequency(freq);
   }
   void reset(){
     phase = 0.0f;
   }
   void setSampleRate(float sr){
+    float freq = getFrequency();
     mul = 2*M_PI/sr;
+    setFrequency(freq);
+  }
+  float getSampleRate(){
+    return (2*M_PI)/mul;
   }
   void setFrequency(float freq){
     incr = freq*mul;
   }
+  float getFrequency(){
+    return incr/mul;
+  }
   void setPhase(float ph){
     phase = ph;
-    while(phase >= 2*M_PI)
-      phase -= 2*M_PI;
   }
   float getPhase(){
     return phase;
@@ -39,6 +42,16 @@ public:
     if(phase >= 2*M_PI)
       phase -= 2*M_PI;
     return sample;
+  }
+  void generate(FloatArray output){
+    size_t len = output.getSize();
+    for(size_t i=0; i<len; ++i){
+      output[i] = sinf(phase);
+      phase += incr; // allow phase to overrun
+    }
+    int rw = (int)(phase/2*M_PI);
+    if(rw > 0)
+      phase -= rw*2*M_PI;
   }
   float generate(float fm){
     float sample = sinf(phase);

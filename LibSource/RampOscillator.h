@@ -19,18 +19,23 @@ public:
     phase = 0.0f;
   }
   void setSampleRate(float sr){
-    mul = 1.0f/sr;
+    mul = 2.0f/sr;
+  }
+  float getS2ampleRate(){
+    return 2.0f/mul;
   }
   void setFrequency(float freq){
     incr = freq*mul;
   }
+  float getFrequency(){
+    return incr/mul;
+  }
   void setPhase(float ph){
-    phase = ph;
-    while(phase >= 1)
-      phase -= 1;
+    phase = ph/M_PI - 1.0f; // internal phase is -1 to 1
   }
   float getPhase(){
-    return phase;
+    // return phase 0 to 2*pi
+    return phase*M_PI+M_PI;
   }
   float generate(){
     float sample = phase;
@@ -38,6 +43,24 @@ public:
     if(phase >= 1.0f)
       phase -= 2.0f;
     return sample;
+  }
+  void generate(FloatArray output){
+    size_t len = output.getSize();
+    float* dest = output;
+    while(phase + incr*len >= 1.0f){
+      float remain = 1.0f - phase;
+      size_t steps = (size_t)(remain/incr);
+      for(size_t i=0; i<steps; ++i){
+	*dest++ = phase;
+	phase += incr;
+      }
+      phase -= 2.0f;
+      len -= steps;
+    }
+    for(size_t i=0; i<len; ++i){
+      *dest++ = phase;
+      phase += incr;
+    }
   }
   float generate(float fm){
     float sample = phase;

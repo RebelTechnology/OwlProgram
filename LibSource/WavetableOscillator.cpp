@@ -2,6 +2,60 @@
 #include "basicmaths.h"
 #include <stdint.h>
 
+WavetableOscillator::WavetableOscillator(float sr, const FloatArray wavetable):
+  mul(1.0f/sr),
+  wave(wavetable),
+  acc(0.0f), inc(0.1f)
+{}
+ 
+void WavetableOscillator::setSampleRate(float sr){
+  mul = 1.0f/sr;
+}
+
+float WavetableOscillator::getSampleRate(){
+  return 1.0f/mul;
+}
+
+void WavetableOscillator::setFrequency(float freq){
+  inc = freq*mul;
+}
+
+float WavetableOscillator::getFrequency(){
+  return inc/mul;
+}
+
+float WavetableOscillator::getSample(float phase){
+  uint32_t size = wave.getSize();
+  uint32_t index = phase*(size-1);
+  index = min(index, size-1);
+  return wave[index];
+}
+
+float WavetableOscillator::getPhase(){
+  return acc*2*M_PI;
+}
+
+float WavetableOscillator::generate(){
+  float s = getSample(acc);
+  acc += inc;
+  if(acc >= 1.0f)
+    acc -= 1.0f;
+  return s;
+}
+
+float WavetableOscillator::generate(float fm){
+  float s = getSample(acc);
+  acc += inc + fm;
+  if(acc > 1.0f)
+    acc -= 1.0f;
+  return s;
+}
+
+void WavetableOscillator::generate(FloatArray samples){
+  for(size_t i=0; i<samples.getSize();++i)
+    samples[i] = generate();
+}
+
 WavetableOscillator* WavetableOscillator::create(float sr, size_t size) {
   FloatArray wave = FloatArray::create(size);
   for(size_t i=0; i<size; ++i)
@@ -12,46 +66,4 @@ WavetableOscillator* WavetableOscillator::create(float sr, size_t size) {
 void WavetableOscillator::destroy(WavetableOscillator* osc){
   FloatArray::destroy(osc->wave);
   delete osc;
-}
-
-WavetableOscillator::WavetableOscillator(float sr, const FloatArray wavetable):
-  mul(1.0/sr),
-  wave(wavetable),
-  acc(0.0), inc(0.1)
-{}
- 
-void WavetableOscillator::setSampleRate(float sr){
-  mul = 1.0/sr;
-}
-
-void WavetableOscillator::setFrequency(float freq){
-  inc = freq*mul;
-}
-
-float WavetableOscillator::getSample(float phase){
-  uint32_t size = wave.getSize();
-  uint32_t index = phase*(size-1);
-  index = min(index, size-1);
-  return wave[index];
-}
-
-float WavetableOscillator::generate(){
-  float s = getSample(acc);
-  acc += inc;
-  if(acc >= 1.0)
-    acc -= 1.0;
-  return s;
-}
-
-float WavetableOscillator::generate(float fm){
-  float s = getSample(acc);
-  acc += inc + fm;
-  if(acc > 1.0)
-    acc -= 1.0;
-  return s;
-}
-
-void WavetableOscillator::generate(FloatArray samples){
-  for(size_t i=0; i<samples.getSize();++i)
-    samples[i] = generate();
 }

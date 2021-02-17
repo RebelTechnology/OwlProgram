@@ -2,27 +2,35 @@
 #include "basicmaths.h"
 
 PolyBlepOscillator::PolyBlepOscillator(float sr):
-  mul(1.0/sr),
-  frequency(0), 
-  shape(0.5), 
-  pw(0.5) {
+  mul(1.0f/sr),
+  nfreq(0.0f), 
+  shape(0.5f), 
+  pw(0.5f) {
   osc.Init();
 }
 
 PolyBlepOscillator::PolyBlepOscillator(float freq, float sr):
-  mul(1.0/sr),
-  shape(0.5), 
-  pw(0.5) {
+  mul(1.0f/sr),
+  shape(0.5f), 
+  pw(0.5f) {
   setFrequency(freq);
   osc.Init();
 }
 
 void PolyBlepOscillator::setSampleRate(float sr){
-  mul = 1.0/sr;
+  mul = 1.0f/sr;
+}
+
+float PolyBlepOscillator::getSampleRate(){
+  return 1.0f/mul;
 }
 
 void PolyBlepOscillator::setFrequency(float freq){
-  frequency = mul*freq;
+  nfreq = mul*freq;
+}
+
+float PolyBlepOscillator::getFrequency(){
+  return nfreq/mul;
 }
 
 void PolyBlepOscillator::setShape(float value){
@@ -33,24 +41,28 @@ void PolyBlepOscillator::setPulseWidth(float value){
   pw = value;
 }
 
+float PolyBlepOscillator::getPhase(){
+  return osc.getMasterPhase()*2*M_PI;
+}
+
 float PolyBlepOscillator::generate(){
   float sample;
-  osc.Render<true>(frequency, pw, shape, &sample, 1);
+  osc.Render<true>(nfreq, pw, shape, &sample, 1);
   return sample;
 }
 
 float PolyBlepOscillator::generate(float fm){
   float sample;
-  osc.Render<true>(frequency+fm, pw, shape, &sample, 1);
+  osc.Render<true>(nfreq+fm, pw, shape, &sample, 1);
   return sample;
 }
 
 void PolyBlepOscillator::generate(FloatArray output){
-  osc.Render<true>(frequency, pw, shape, output, output.getSize());
+  osc.Render<true>(nfreq, pw, shape, output, output.getSize());
 }
 
 void PolyBlepOscillator::generate(FloatArray output, FloatArray fm){
-  fm.add(frequency); // add our base frequency
+  fm.add(nfreq); // add our base frequency
   osc.Render<true>(fm, pw, shape, output, output.getSize());
 }
 

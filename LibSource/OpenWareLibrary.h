@@ -1,12 +1,14 @@
 #ifndef __OpenWareLibrary_h__
 #define __OpenWareLibrary_h__
 
+#include "AcBlockingFilter.h"
 #include "BiquadFilter.h"
 #include "ChirpOscillator.h"
 #include "ComplexFloatArray.h"
 #include "ComplexFourierTransform.h"
 #include "ComplexShortArray.h"
 #include "Control.h"
+#include "DcBlockingFilter.h"
 #include "Envelope.h"
 #include "ExponentialDecayEnvelope.h"
 #include "FastFourierTransform.h"
