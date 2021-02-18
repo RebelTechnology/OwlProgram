@@ -103,8 +103,7 @@ include $(BUILDROOT)/sources.mk
 
 C_SRC   += $(SOURCE)/heap_5.c
 CPP_SRC += $(LIBSOURCE)/Patch.cpp
-CPP_SRC += $(LIBSOURCE)/ComplexShortArray.cpp
-CPP_SRC += $(LIBSOURCE)/ShortFastFourierTransform.cpp 
+# CPP_SRC += $(LIBSOURCE)/ShortFastFourierTransform.cpp 
 CPP_SRC += $(SOURCE)/PatchProcessor.cpp
 CPP_SRC += $(SOURCE)/main.cpp
 CPP_SRC += $(SOURCE)/operators.cpp

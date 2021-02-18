@@ -1,5 +1,6 @@
 C_SRC   += Source/font.c
-C_SRC   += LibSource/fastpow.c LibSource/fastlog.c
+C_SRC   += LibSource/fastpow.c
+C_SRC   += LibSource/fastlog.c
 C_SRC   += LibSource/basicmaths.c
 CPP_SRC += LibSource/FloatArray.cpp
 CPP_SRC += LibSource/ComplexFloatArray.cpp
