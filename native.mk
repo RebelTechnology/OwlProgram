@@ -1,5 +1,6 @@
 BUILDROOT   ?= .
 BUILD       ?= $(BUILDROOT)/Build
+PATCHSOURCE ?= $(BUILDROOT)/PatchSource
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
 BUILDSOURCE  = $(BUILD)/Source
@@ -54,7 +55,7 @@ vpath %.c $(SOURCE) $(LIBSOURCE) $(BUILDSOURCE)
 
 native: $(TESTPATCHES)/PatchRun.cpp $(DEPS) $(OBJS)
 	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTPATCHES)/PatchRun.cpp -I$(BUILD) $(OBJS) -o $(BUILD)/Test/patch
-	@echo Built $(PATCHNAME) native executable in $(BUILD)/Test/patch
+	echo Built $(PATCHNAME) native executable in $(BUILD)/Test/patch
 
 run: native
 	@$(BUILD)/Test/patch

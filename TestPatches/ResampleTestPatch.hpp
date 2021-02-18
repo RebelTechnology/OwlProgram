@@ -29,7 +29,8 @@
 #ifndef __ResampleTestPatch_hpp__
 #define __ResampleTestPatch_hpp__
 
-#include "StompBox.h"
+#include "Patch.h"
+#include "Resample.h"
 
 class ResampleTestPatch : public Patch {
 public:

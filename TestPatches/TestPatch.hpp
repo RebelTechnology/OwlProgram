@@ -6,14 +6,14 @@
 
 #define TEST(name) do{ errormessage = (char*)("Test " name " failed line"); }while(0)
 #define CHECK(cond) if(!(cond)){ fail("CHECK(" #cond ") fail", __LINE__); }else{ pass(); }
-#define CHECK_EQUAL(a, b) if((a) != (b)){ fail("CHECK_EQUAL(" #a ", " #b ") fail", __LINE__); }else{ pass(); }
-#define CHECK_CLOSE(a, b, c) if(abs((a)-(b))>(c)){ fail("CHECK_CLOSE(" #a ", " #b ", " #c ") fail", __LINE__); }else{ pass(); }
+// #define CHECK_EQUAL(a, b) if((a) != (b)){ fail("CHECK_EQUAL(" #a ", " #b ") fail", __LINE__); }else{ pass(); }
+// #define CHECK_CLOSE(a, b, c) if(abs((a)-(b))>(c)){ fail("CHECK_CLOSE(" #a ", " #b ", " #c ") fail", __LINE__); }else{ pass(); }
 #define CHECK_RELATIVE(a, b, c) if(abs(((a)-(b))/(a))>(c)){ fail("CHECK_RELATIVE(" #a ", " #b ", " #c ") fail", __LINE__); }else{ pass(); }
 #define REQUIRE(cond) if(!(cond)){ assert_failed("REQUIRE(" #cond ") fail", "", __LINE__); }else{ pass(); }
 
 /* alternatively use templates to check different typed values */
-// #define CHECK_EQUAL(a, b) check_equal(a, b, __LINE__)
-// #define CHECK_CLOSE(a, b, c) check_close(a, b, c, __LINE__)
+#define CHECK_EQUAL(a, b) check_equal(a, b, __LINE__)
+#define CHECK_CLOSE(a, b, c) check_close(a, b, c, __LINE__)
 
 /** Abstract base class for tests */
 class TestPatch : public Patch {
@@ -33,8 +33,9 @@ public:
     success = false;
     failed++;
   }
-  template<typename T>
-  void check_equal(T a, T b, int line){
+  // template<typename T>
+  // void check_equal(T a, T b, int line){
+  void check_equal(float a, float b, int line){
     if(a != b){
       debugMessage("CHECK_EQUAL", a, b);
       debugMessage(errormessage, line);
@@ -44,8 +45,9 @@ public:
       pass();
     }
   }
-  template<typename T>
-  void check_close(T a, T b, T c, int line){
+  // template<typename T>
+  // void check_close(T a, T b, T c, int line){
+  void check_close(float a, float b, float c, int line){
     if(abs((a)-(b))>(c)){
       debugMessage("CHECK_CLOSE", a, b, c);
       debugMessage(errormessage, line);

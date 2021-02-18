@@ -29,7 +29,8 @@
 #ifndef __BiquadFilterTestPatch_hpp__
 #define __BiquadFilterTestPatch_hpp__
 
-#include "StompBox.h"
+#include "Patch.h"
+#include "BiquadFilter.h"
 
 class BiquadFilterTestPatch : public Patch {
 public:
@@ -37,24 +38,24 @@ public:
   BiquadFilterTestPatch(){
     registerParameter(PARAMETER_A, "Cutoff");
     registerParameter(PARAMETER_B, "Resonance");
-    int stages=3;
-    filter=BiquadFilter::create(stages);
-    float cutoff=0.2;
+    size_t stages=3;
+    filter=BiquadFilter::create(getSampleRate(), stages);
+    float cutoff=1200;
     float resonance=2;
     //test setLowPass
-    FloatArray coefficients=FloatArray::create(5*stages);
-    FloatArray states=FloatArray::create(2*stages);
+    FloatArray coefficients=FloatArray::create(BIQUAD_COEFFICIENTS_PER_STAGE*stages);
+    FloatArray states=FloatArray::create(BIQUAD_STATE_VARIABLES_PER_STAGE*stages);
     FilterStage stage(coefficients, states);
     filter->setLowPass(cutoff, resonance);
-    stage.setLowPass(cutoff, resonance);
-    for(int k=0; k<stages; k++){ 
-      for(int n=0; n<5; n++){
+    stage.setLowPass(cutoff, resonance, getSampleRate());
+    for(size_t k=0; k<stages; k++){ 
+      for(size_t n=0; n<5; n++){
         float filterC=filter->getFilterStage(k).getCoefficients()[n];
         float stageC=stage.getCoefficients()[n];
-        ASSERT(filterC==stageC, "Coefficients not initialized"); //check that filter coefficients are properly initialized
+        ASSERT(abs(filterC-stageC) < 0.000001, "Coefficients not initialized"); //check that filter coefficients are properly initialized
       }
     }
-    int signalLength=100;
+    size_t signalLength=100;
     
     FloatArray x=FloatArray::create(signalLength);
     FloatArray x1=FloatArray::create(signalLength);
@@ -70,10 +71,10 @@ public:
     float b2=filter->getFilterStage(0).getCoefficients()[2];
     float a1=filter->getFilterStage(0).getCoefficients()[3];
     float a2=filter->getFilterStage(0).getCoefficients()[4];
-    for(int n=0; n<stages; n++){
+    for(size_t n=0; n<stages; n++){
       float d1=0;
       float d2=0;
-      for(int n=0; n<x.getSize(); n++){ //manually apply filter, one stage
+      for(size_t n=0; n<x.getSize(); n++){ //manually apply filter, one stage
         y[n] = b0 * x[n] + d1;
         d1 = b1 * x[n] + a1 * y[n] + d2;
         d2 = b2 * x[n] + a2 * y[n];   
@@ -81,7 +82,7 @@ public:
       x.copyFrom(y); //copy the output to the input for the next iteration. INEFFICIENT
     }
     //done with the filter
-    for(int n=0; n<x.getSize(); n++){
+    for(size_t n=0; n<x.getSize(); n++){
       // ASSERT(abs(y[n]-y1[n])<0.0001, "");//BiquadFilter.process(FloatArray, FloatArray) result"); //TODO: fails for non-arm
     }
     FloatArray::destroy(x);
@@ -90,8 +91,11 @@ public:
     FloatArray::destroy(y1);
     debugMessage("All tests passed");
   }
+  ~BiquadFilterTestPatch(){
+    BiquadFilter::destroy(filter);
+  }
   void processAudio(AudioBuffer &buffer){
-    float cutoff=getParameterValue(PARAMETER_A);
+    float cutoff=getParameterValue(PARAMETER_A)*12000+200;
     float resonance=10*getParameterValue(PARAMETER_B);
     FloatArray fa=buffer.getSamples(0);
     // fa.noise();

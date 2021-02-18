@@ -29,11 +29,11 @@
 #ifndef __FourierPitchDetectorTestPatch_hpp__
 #define __FourierPitchDetectorTestPatch_hpp__
 
-#include "StompBox.h"
+#include "Patch.h"
+#include "PitchDetector.h"
 
 class FourierPitchDetectorTestPatch : public Patch {
 public:
-  BiquadFilter *filter;
   FourierPitchDetector fpd;
   FloatArray aux;
   int fftOccurrency;
