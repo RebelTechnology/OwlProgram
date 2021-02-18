@@ -59,8 +59,8 @@ public:
       phase -= 2*M_PI;
     return sample;
   }
-  static SineOscillator* create(){
-    return new SineOscillator();
+  static SineOscillator* create(float sr){
+    return new SineOscillator(sr);
   }
   static SineOscillator* create(float freq, float sr){
     return new SineOscillator(freq, sr);

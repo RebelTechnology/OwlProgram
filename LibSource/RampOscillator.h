@@ -69,8 +69,8 @@ public:
       phase -= 2.0f;
     return sample;
   }  
-  static RampOscillator* create(){
-    return new RampOscillator();
+  static RampOscillator* create(float sr){
+    return new RampOscillator(sr);
   }
   static RampOscillator* create(float freq, float sr){
     return new RampOscillator(freq, sr);
