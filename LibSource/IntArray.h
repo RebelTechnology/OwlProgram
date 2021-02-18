@@ -1,8 +1,11 @@
-class IntArray
-{
-private:
-  int32_t* data;
-  int size;
+#ifndef __IntArray_h__
+#define __IntArray_h__
+
+#include <stdint.h>
+#include "AbstractArray.h"
+#include "FloatArray.h"
+
+class IntArray : public AbstractArray<int32_t> {
 public:
   IntArray();
   IntArray(int32_t* data, int size);
@@ -160,3 +163,5 @@ public:
 #endif
   }
 };
+
+#endif // __IntArray_h__

@@ -3,18 +3,29 @@
 
 #include <cstddef>
 
+#define USE_TEMPLATE
+
 /**
  * This class contains useful methods for manipulating arrays of floats.
  * It also provides a convenient handle to the array pointer and the size of the array.
  * FloatArray objects can be passed by value without copying the contents of the array.
  */
+#ifdef USE_TEMPLATE
+#include "AbstractArray.h"
+class FloatArray : public AbstractArray<float> {
+public:
+  FloatArray(){}
+  FloatArray(float* data, size_t size) :
+    AbstractArray(data, size) {}
+
+#else
 class FloatArray {
 private:
   float* data;
   size_t size;
 public:
-  FloatArray();
-  FloatArray(float* data, size_t size);
+  FloatArray(){}
+  FloatArray(float* data, size_t size) : data(data), size(size){}
 
   size_t getSize() const{
     return size;
@@ -23,6 +34,37 @@ public:
   size_t getSize(){
     return size;
   }
+  /**
+   * Casting operator to float*
+   * @return a float* pointer to the data stored in the FloatArray
+   */
+  operator float*(){
+    return data;
+  }
+  
+  /**
+   * Get the data stored in the FloatArray.
+   * @return a float* pointer to the data stored in the FloatArray
+   */
+  float* getData(){
+    return data;
+  }
+
+  /**
+   * Get a single float stored in the FloatArray.
+   * @return the float stored at index @param index
+   */
+  float getElement(int index){
+    return data[index];
+  }
+
+  /**
+   * Set a single float in the FloatArray.
+   */
+  void setElement(int index, float value){
+    data[index] = value;
+  }
+#endif
 
   /**
    * Clear the array.
@@ -446,37 +488,6 @@ public:
       }
     }
     return true;
-  }
-  
-  /**
-   * Casting operator to float*
-   * @return a float* pointer to the data stored in the FloatArray
-  */
-  operator float*(){
-    return data;
-  }
-  
-  /**
-   * Get the data stored in the FloatArray.
-   * @return a float* pointer to the data stored in the FloatArray
-  */
-  float* getData(){
-    return data;
-  }
-
-  /**
-   * Get a single float stored in the FloatArray.
-   * @return the float stored at index @param index
-  */
-  float getElement(int index){
-    return data[index];
-  }
-
-  /**
-   * Set a single float in the FloatArray.
-  */
-  void setElement(int index, float value){
-    data[index] = value;
   }
   
   /**

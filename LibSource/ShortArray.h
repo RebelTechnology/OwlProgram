@@ -2,7 +2,7 @@
 #define __ShortArray_h__
 
 #include <stdint.h>
-#include "basicmaths.h"
+#include "AbstractArray.h"
 #include "FloatArray.h"
 
 /**
@@ -10,10 +10,7 @@
  * It also provides a convenient handle to the array pointer and the size of the array.
  * ShortArray objects can be passed by value without copying the contents of the array.
  */
-class ShortArray {
-private:
-  int16_t* data;
-  size_t size;
+class ShortArray : public AbstractArray<int16_t> {
 public:
   ShortArray();
   ShortArray(int16_t* data, size_t size);
