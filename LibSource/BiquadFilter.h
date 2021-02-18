@@ -174,7 +174,7 @@ private:
 protected:
   float* coefficients; // stages*5
   float* state; // stages*4 for df1, stages*2 for df2
-  int stages;
+  size_t stages;
   /*
    * The coefficients are stored in the array <code>coefficients</code> in the following order:
    * <pre>
@@ -185,15 +185,15 @@ protected:
    * and so on.  The <code>coeffs</code> array must contain a total of <code>5*stages</code> values.   
    */
   void copyCoefficients(){
-    for(int i=1; i<stages; ++i)
-      memcpy(coefficients+i*BIQUAD_COEFFICIENTS_PER_STAGE, coefficients, BIQUAD_COEFFICIENTS_PER_STAGE);
+    for(size_t i=1; i<stages; ++i)
+      memcpy(coefficients+i*BIQUAD_COEFFICIENTS_PER_STAGE, coefficients, BIQUAD_COEFFICIENTS_PER_STAGE*sizeof(float));
   }
   void init(){
 #ifdef ARM_CORTEX
     // arm_biquad_cascade_df1_init_f32(&df1, stages, coefficients, state);
     arm_biquad_cascade_df2T_init_f32(&df2, stages, coefficients, state);
 #else
-    for(int n=0; n<stages*BIQUAD_STATE_VARIABLES_PER_STAGE; n++){
+    for(size_t n=0; n<stages*BIQUAD_STATE_VARIABLES_PER_STAGE; n++){
       state[n]=0;
     }
 #endif /* ARM_CORTEX */
@@ -202,7 +202,7 @@ public:
   BiquadFilter()
     : pioversr(0), coefficients(NULL), state(NULL), stages(0) {}
 
-  BiquadFilter(float sr, float* coefs, float* ste, int sgs) :
+  BiquadFilter(float sr, float* coefs, float* ste, size_t sgs) :
     pioversr(M_PI/sr), coefficients(coefs), state(ste), stages(sgs) {
     init();
   }
@@ -211,14 +211,14 @@ public:
     pioversr = M_PI/sr;
   }
 
-  int getStages(){
+  size_t getStages(){
     return stages;
   }
-  void setStages(int newStages){
+  void setStages(size_t newStages){
     stages = newStages;
   }
 
-  static int getCoefficientsPerStage(){
+  static size_t getCoefficientsPerStage(){
     return BIQUAD_COEFFICIENTS_PER_STAGE;
   }
 
@@ -235,7 +235,7 @@ public:
     return FloatArray(state, BIQUAD_STATE_VARIABLES_PER_STAGE*stages);
   }
 
-  FilterStage getFilterStage(int stage){
+  FilterStage getFilterStage(size_t stage){
     ASSERT(stage < stages, "Invalid filter stage index");
     FloatArray c(coefficients+BIQUAD_COEFFICIENTS_PER_STAGE*stage, BIQUAD_COEFFICIENTS_PER_STAGE);
     FloatArray s(state+BIQUAD_STATE_VARIABLES_PER_STAGE*stage, BIQUAD_STATE_VARIABLES_PER_STAGE);
@@ -243,12 +243,12 @@ public:
   }
 
   /* process into output, leaving input intact */
-  void process(float* input, float* output, int size){
+  void process(float* input, float* output, size_t size){
 #ifdef ARM_CORTEX
     // arm_biquad_cascade_df1_f32(&df1, input, output, size);
     arm_biquad_cascade_df2T_f32(&df2, input, output, size);
 #else
-    for(int k=0; k<stages; k++){
+    for(size_t k=0; k<stages; k++){
       float b0=getFilterStage(k).getCoefficients()[0];
       float b1=getFilterStage(k).getCoefficients()[1];
       float b2=getFilterStage(k).getCoefficients()[2];
@@ -256,7 +256,7 @@ public:
       float a2=getFilterStage(k).getCoefficients()[4];
       float d1=state[k*BIQUAD_STATE_VARIABLES_PER_STAGE];
       float d2=state[k*BIQUAD_STATE_VARIABLES_PER_STAGE+1];
-      for(int n=0; n<size; n++){ //manually apply filter, one stage
+      for(size_t n=0; n<size; n++){ //manually apply filter, one stage
         float out=b0 * input[n] + d1; 
         d1 = b1 * input[n] + a1 * out + d2;
         d2 = b2 * input[n] + a2 * out;
@@ -336,7 +336,7 @@ public:
     copyCoefficients(newCoefficients);
   }
 
-  static BiquadFilter* create(float sr, int stages=1){
+  static BiquadFilter* create(float sr, size_t stages=1){
     return new BiquadFilter(sr, new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE], new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE], stages);
   }
 
@@ -354,7 +354,7 @@ private:
 protected:
 public:
   MultiBiquadFilter(){}
-  MultiBiquadFilter(float sr, float* coefs, float* states, int stages) :
+  MultiBiquadFilter(float sr, float* coefs, float* states, size_t stages) :
     BiquadFilter(sr, coefs, states, stages) {
     for(size_t ch=1; ch<channels; ++ch){
       states += stages*BIQUAD_STATE_VARIABLES_PER_STAGE;
@@ -364,7 +364,7 @@ public:
       filters[ch-1].setState(FloatArray(states, stages*BIQUAD_STATE_VARIABLES_PER_STAGE));
     }
   }
-  static MultiBiquadFilter<channels>* create(float sr, int stages=1){
+  static MultiBiquadFilter<channels>* create(float sr, size_t stages=1){
     return new MultiBiquadFilter<channels>(sr, new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE], new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE*channels], stages);
   }  
   static void destroy(MultiBiquadFilter<channels>* obj){
