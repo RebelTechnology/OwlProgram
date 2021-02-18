@@ -3,11 +3,6 @@
 
 #include <cstddef>
 
-/**
- * This class contains useful methods for manipulating arrays of int16_ts.
- * It also provides a convenient handle to the array pointer and the size of the array.
- * AbstractArray objects can be passed by value without copying the contents of the array.
- */
 template<typename T>
 class AbstractArray {
 protected:
