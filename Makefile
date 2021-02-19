@@ -189,8 +189,8 @@ run: $(DEPS) ## run patch locally
 	@$(MAKE) -s -f native.mk run
 
 check:
-	for nm in $(TESTS) ; do \
-		$(MAKE) TEST=$$nm test || exit;\
+	@for nm in $(TESTS) ; do \
+		$(MAKE) -s TEST=$$nm test || exit;\
 	done
 
 help: ## show this help
