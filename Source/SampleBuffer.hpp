@@ -35,7 +35,6 @@ public:
       FloatArray::destroy(buffers[i]);
     delete[] buffers;
   }
-
   void split32(int32_t* input, uint16_t blocksize){
     const float mul = 1.0f/MULTIPLIER_23B;
     size = blocksize;

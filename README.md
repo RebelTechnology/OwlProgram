@@ -3,19 +3,20 @@ Dynamically loaded OWL program.
 
 OwlProgram is the patch build environment for the OWL Pedal, OWL Modular, Magus, Wizard and Alchemist products from Rebel Technology. For details see https://www.rebeltech.org (moved from http://hoxtonowl.com).
 
-It is used to build, run and store patches written in PD, FAUST, Max Gen and C++.
+It is used to build, run and store patches written in Pure Data, FAUST, Max Gen, SOUL, Maximilian and C++.
 
 # Instructions
 
 ## Prerequisites
 * gcc arm compiler (to make patch binary) [[1]](#ref1)
-* FirmwareSender (to make sysex and run) [[2]](#ref2)
+* FirmwareSender (to make, load and store sysex) [[2]](#ref2)
 * emcc (to make web) [[3]](#ref3)
 * faust2owl (to compile FAUST patches) [[4]](#ref4)
-* The heavy hvcc compiler (to compile PD patches) [[5]](#ref5)
-* The soul compiler (to compile SOUL patches) [[6]](#ref6)
+* The Heavy `hvcc` compiler (to compile PD patches) [[5]](#ref5)
+* The `soul` compiler (to compile SOUL patches) [[6]](#ref6)
+* gcc native compiler (to test locally) [[9]](#ref9)
 
-* On Windows, you'll need a MAKE utility [[7]](#ref7).  You'll also need to open common.mk and point TOOLROOT to your gcc installation directory, using a path string without spaces (such as using 8.3 filenames).
+* On Windows, you'll need a MAKE utility [[7]](#ref7).  You'll also need to open compile.mk and point TOOLROOT to your gcc installation directory, using a path string without spaces (such as using 8.3 filenames).
 
 ## Preparing the environment
 This has been done on a Ubuntu server 18.04
@@ -29,18 +30,22 @@ This has been done on a Ubuntu server 18.04
     $ git submodule init
     $ git submodule update
 
-edit OwlProgram/common.mk and point TOOLROOT to where arm-none-eabi binaries are installed
+Either install gcc-arm-none-eabi system-wide and ensure the binaries are in your path, or edit OwlProgram/compile.mk and point TOOLROOT to where arm-none-eabi binaries are installed.
 
-    TOOLROOT ?= /usr/bin/ 
+    TOOLROOT = /usr/bin/ 
 
-to compile puredata patches you need hvcc
+To compile puredata patches you need `hvcc`, the Heavy compiler.
 
     $ sudo apt install python python-enum34 python-jinja2 python-nose2
     $ git clone https://github.com/pingdynasty/hvcc.git
-    
-compile FirmwareSender 
 
-FirmwareSender makes it possible to use `run` and `store` make targets, or by invoking FirmwareSender directly to run/store a compiled patch to the device using sysex codes. 
+To compile patches in native format (e.g. for testing) you will also need the gcc compiler:
+
+    $ sudo apt install gcc
+    
+Compile FirmwareSender 
+
+FirmwareSender makes it possible to use `load` and `store` make targets, or by invoking FirmwareSender directly to load/store a compiled patch to the device using sysex codes.
 
     $ sudo apt install libasound2-dev libcurl4-openssl-dev pkg-config
     $ git clone https://github.com/pingdynasty/FirmwareSender
@@ -53,12 +58,15 @@ FirmwareSender makes it possible to use `run` and `store` make targets, or by in
 * make libs: build library archives
 * make patch: build patch binary
 * make sysex: package binary as sysex
-* make run: upload patch to attached OWL
-* make store: upload and save to attached OWL
+* make load: upload patch to attached OWL and run from RAM
+* make store: upload patch to attached OWL and store in FLASH
 * make web: build Javascript patch
 * make clean: remove intermediary and target files
 * make realclean: remove all (library+patch) intermediary and target files
 * make size: show binary size metrics and large object summary
+* make native: build a native format binary of your patch
+* make test: build and test a native format binary of your patch
+* make run: build and run a native format binary of your patch
 * make map: build map file (Build/patch.map)
 * make as: build assembly file (Build/patch.s)
 * make help: print target information
@@ -90,17 +98,17 @@ Note that when storing user programs, the legacy OwlWare firmware has four user 
 ## Building C++ patches
 First copy all patch files to `PatchSource` folder, then issue the appropriate make command.
 
-Example: Compile and run the TestTone patch, defined in file `PatchSource/TestTonePatch.hpp` as class `TestTonePatch`:
-`make PATCHNAME=TestTone run`
+Example: Compile and load the TestTone patch, defined in file `PatchSource/TestTonePatch.hpp` as class `TestTonePatch`:
+`make PATCHNAME=TestTone load`
 
 Example: Compile and run in browser
 `make PATCHNAME=TestTone web`
 Then open `Build/web/patch.html`
 
 ## Building FAUST patches
-To compile and run a FAUST patch
+To compile and load a FAUST patch
 * copy .dsp file and dependencies into `PatchSource`, e.g. `LowShelf.dsp`
-* `make FAUST=LowShelf run`
+* `make FAUST=LowShelf load`
 
 Note: assign OWL parameters with slider metadata: `[OWL:A]`, `[OWL:B]` et c. For example:
 ```gain = vslider("gain[OWL:C]", 1,0,1,0.1);```. Assign push button with e.g. ```gate = button("gate[OWL:Push]");```
@@ -108,23 +116,23 @@ Note: assign OWL parameters with slider metadata: `[OWL:A]`, `[OWL:B]` et c. For
 ## Building Pure Data patches
 
 * put your PD patch file (e.g. `Foo.pd`) into `PatchSource`
-* `make HEAVY=Foo run`
+* `make HEAVY=Foo load`
 
 ## Building Max Gen patches
 Requires the `.cpp` and `.h` files of a Gen patch generated by Max Gen.
 
-To compile and run a Gen patch called `Foo`:
+To compile and load a Gen patch called `Foo`:
 * copy `Foo.cpp` and `Foo.h` into `PatchSource`
-* `make GEN=Foo run`
+* `make GEN=Foo load`
 
 Note: use OWL parameters in Gen with parameter names: `A`, `B`, `C`, `D`, `Exp`, and `Push`.
 
 ## Building Maximilian patches
 Requires your Maximilian code to be in a `.cpp` file.
 
-To compile and run a Maximilian patch called `Foo`:
+To compile and load a Maximilian patch called `Foo`:
 * copy `Foo.cpp` into `PatchSource`
-* `make MAXIMILIAN=Foo run`
+* `make MAXIMILIAN=Foo load`
 
 Note: use OWL parameters in Maximilian by adding maxiParam objects to your patch.
 
@@ -140,19 +148,24 @@ do it like this from the main directory of OwlProgram (this will store in slot 6
 
     Tools/FirmwareSender -in ./Build/patch.bin -out "OWL-MIDI*" -store 6
 
+## Testing Patches
+
+You can also build and test your patches locally, in native format. This requires having gcc installed locally (i.e. the native gcc compiler, not the arm gcc cross-compiler).
+Specify your patch name (and optionally the PATCHSOURCE directory) as usual, but substitute for the `test` target:
+
+* `make SOUL=Foo clean patch`
+
+
+
 # Examples
 
 Compile the puredata file owl_hypersaw.pd[[8]](#ref8):
 
     make HEAVY=owl_hypersaw clean patch
 
-Compile puredata file owl_hypersaw.pd and send to device to be run immediately:
+Compile puredata file owl_hypersaw.pd and send to device to be run immediately from RAM:
 
-    make HEAVY=owl_hypersaw clean run
-
-Compile KickBox[[9]](#ref9) C++ patch:
-
-    make PATCHNAME=KickBox clean patch
+    make HEAVY=owl_hypersaw clean load
 
 # References
 <a name="ref1">[1]</a> https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
@@ -171,5 +184,4 @@ Compile KickBox[[9]](#ref9) C++ patch:
 
 <a name="ref8">[8]</a> https://www.rebeltech.org/patch-library/patch/4_saw
 
-<a name="ref9">[9]</a> https://github.com/marsus/MyPatches (AudioDisplay.hpp, BassDrum.hpp, Cymbal.hpp, Drum.hpp, KickBoxPatch.hpp, Oscillators.hpp, Sequence.h, SynthVoice.hpp, bjorklund.h)
-
+<a name="ref9">[9]</a> https://gcc.gnu.org/

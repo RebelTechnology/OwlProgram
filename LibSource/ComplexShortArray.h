@@ -24,30 +24,14 @@ struct ComplexShort {
   Computes and returns the magnitude of the complex number.
   @return The magnitude of the complex number.
   */
-  int16_t getMagnitude(){
-  #ifdef ARM_CORTEX
-    int16_t out;
-    int16_t in[2] = {re, im};
-    arm_cmplx_mag_q15(in, &out, 1);
-  // function above returns 2.14, so we shift it back to 1.15
-  // but first we check we do not lose data.
-  // TODO: make sure it saturates
-    out = out >> 1;
-    return out;
-  #else
-    #error TODO
-    return int16_t(sqrtf(re*re+im*im) + 0.5);
-  #endif
-  }
+  int16_t getMagnitude();
   
   /**
   Get the phase of the complex number.
   Computes and returns the phase of the complex number.
   @return The phase of the complex number.
   */  
-  float getPhase(){
-    return atan2(im,re);
-  }
+  float getPhase();
   
   /**
   Set the phase of the complex number.
@@ -55,7 +39,7 @@ struct ComplexShort {
   @param phase The new phase of the complex number
   */
   void setPhase(float phase){
-    int16_t magnitude=getMagnitude();
+    int16_t magnitude = getMagnitude();
     setPolar(magnitude, phase);
   }
   
@@ -65,7 +49,7 @@ struct ComplexShort {
   @param magnitude The new magnitude of the complex number
   */
   void setMagnitude(int16_t magnitude){
-    float phase=getPhase();
+    float phase = getPhase();
     setPolar(magnitude, phase);
   }
   
@@ -74,10 +58,7 @@ struct ComplexShort {
   @param magnitude The new magnitude of the complex number
   @param phase The new phase of the complex number
   */
-  void setPolar(int16_t magnitude, float phase){
-    re=(int16_t)(magnitude*cosf(phase) + 0.5);
-    im=(int16_t)(magnitude*sinf(phase) + 0.5);
-  }
+  void setPolar(int16_t magnitude, float phase);
 };
 
 class ComplexShortArray {

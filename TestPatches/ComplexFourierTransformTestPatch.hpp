@@ -51,7 +51,7 @@ public:
     fftArm.fft(inout);
     fftArm.ifft(inout);
     inout.copyTo(samples);
-    samples.scale(0.2);
+    samples.multiply(0.2);
 
   }
 };
