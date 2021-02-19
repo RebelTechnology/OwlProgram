@@ -2,6 +2,8 @@
 #define __SimpleArray_h__
 
 #include <cstddef>
+#include <string.h> /* for memcpy and memmov */
+#include "message.h"
 
 /**
  * SimpleArray holds a pointer to an array and the array size, and is designed to 
@@ -64,6 +66,62 @@ public:
         return false;
     }
     return true;
+  }
+  
+  /**
+   * Copies the content of the array to another array.
+   * @param[out] destination the destination array
+   */
+  void copyTo(SimpleArray<T> destination){
+    ASSERT(destination.size >= size, "Array too small");
+    memcpy((void*)destination.data, (void*)data, size*sizeof(T));
+  }
+
+  /**
+   * Copies the content of an array into another array.
+   * @param[in] source the source array
+   */
+  void copyFrom(SimpleArray<T> source){
+    ASSERT(source.size >= size, "Array too small");
+    memcpy((void*)data, (void*)source.data, size*sizeof(T));
+  }
+
+  /**
+   * Copies the content of an array into a subset of the array.
+   * Copies **len** elements from **source** to **destinationOffset** in the current array.
+   * @param[in] source the source array
+   * @param[in] destinationOffset the offset into the destination array 
+   * @param[in] len the number of samples to copy
+   *
+  */
+  void insert(SimpleArray<T> source, int destinationOffset, size_t len){
+    insert(source, 0, destinationOffset, len);
+  }
+
+  /**
+   * Copies the content of an array into a subset of the array.
+   * Copies **samples** elements starting from **sourceOffset** of **source** to **destinationOffset** in the current array.
+   * @param[in] source the source array
+   * @param[in] sourceOffset the offset into the source array
+   * @param[in] destinationOffset the offset into the destination array
+   * @param[in] samples the number of samples to copy
+  */
+  void insert(SimpleArray<T> source, int sourceOffset, int destinationOffset, size_t len){
+    ASSERT(size >= destinationOffset+len, "Array too small");
+    ASSERT(source.size >= sourceOffset+len, "Array too small");
+    memcpy((void*)(data+destinationOffset), (void*)(source.data+sourceOffset), len*sizeof(T));
+  }
+
+  /**
+   * Copies values within an array.
+   * Copies **length** values starting from index **fromIndex** to locations starting with index **toIndex**
+   * @param[in] fromIndex the first element to copy
+   * @param[in] toIndex the destination of the first element
+   * @param[in] len the number of elements to copy
+   */
+  void move(int fromIndex, int toIndex, size_t len){
+    ASSERT(size >= toIndex+len, "Array too small");
+    memmove((void*)(data+toIndex), (void*)(data+fromIndex), len*sizeof(T));
   }
 
   /**

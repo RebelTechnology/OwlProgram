@@ -583,20 +583,14 @@ void ShortArray::shift(int shiftValue){
 #ifdef ARM_CORTEX
     arm_shift_q15(data, shiftValue, data, size);
 #else
-    for(size_t n = 0; n < getSize(); ++n){
-      int16_t value = data[n];
-      if(shiftValue > 0){
-        int32_t v = (int32_t)value << shiftValue;
-        if(v < SHRT_MIN)
-          v = SHRT_MIN;
-        else if (v > SHRT_MAX)
-          v = SHRT_MAX;
-        value = (int16_t)v;
-      } else {
-        value = value >> -shiftValue;
-      }
-      data[n] = value;
-    } 
+    if(shiftValue >= 0){
+      for(size_t n=0; n<size; n++)
+	data[n] = data[n] << shiftValue;
+    }else{
+      shiftValue = -shiftValue;
+      for(size_t n=0; n<size; n++)
+	data[n] = data[n] >> shiftValue;
+    }
 #endif
   }
 

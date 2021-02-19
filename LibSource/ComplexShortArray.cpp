@@ -49,7 +49,7 @@ void ComplexShortArray::getMagnitudeValues(ShortArray destination){
   // function above returns 2.14, so we shift it back to 1.15
   destination.shift(1);
 #else
-  for(int i=0; i<size; i++){
+  for(size_t i=0; i<size; i++){
     destination[i]=mag(i);
   }
 #endif
@@ -80,7 +80,7 @@ void ComplexShortArray::getMagnitudeSquaredValues(ShortArray destination){
   arm_shift_q15((int16_t*)destination, 2, (int16_t*)destination,
     destination.getSize());
 #else
-  for(int i=0; i<size; i++){
+  for(size_t i=0; i<size; i++){
     destination[i]=mag2(i);
   }
 #endif  
@@ -96,7 +96,7 @@ void ComplexShortArray::complexDotProduct(ComplexShortArray operand2, ComplexSho
   int16_t *pSrcB=(int16_t*)operand2;
   int16_t realResult=0;    
   int16_t imagResult=0;    
-  for(int n=0; n<size; n++) {    
+  for(size_t n=0; n<size; n++) {    
       realResult += pSrcA[(2*n)+0]*pSrcB[(2*n)+0] - pSrcA[(2*n)+1]*pSrcB[(2*n)+1];    
       imagResult += pSrcA[(2*n)+0]*pSrcB[(2*n)+1] + pSrcA[(2*n)+1]*pSrcB[(2*n)+0];    
   }
@@ -115,7 +115,7 @@ void ComplexShortArray::complexByComplexMultiplication(ComplexShortArray operand
   int16_t* pSrcA = (int16_t*)data;
   int16_t* pSrcB = (int16_t*)operand2.getData();
   int16_t* pDst = (int16_t*)result.getData();
-  for(int n=0; n<size; n++) {
+  for(size_t n=0; n<size; n++) {
     pDst[(2*n)+0] = Q15_MUL_Q15(pSrcA[(2*n)+0], pSrcB[(2*n)+0]) -
                     Q15_MUL_Q15(pSrcA[(2*n)+1], pSrcB[(2*n)+1]);
     pDst[(2*n)+1] = Q15_MUL_Q15(pSrcA[(2*n)+0], pSrcB[(2*n)+1]) +
@@ -145,7 +145,7 @@ void ComplexShortArray::setAll(int16_t value){
 }
 
 void ComplexShortArray::setAll(ComplexShort value){
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     data[n].re=value.re;
     data[n].im=value.im;
   }
@@ -162,7 +162,7 @@ void ComplexShortArray::add(ComplexShortArray operand2, ComplexShortArray destin
 #ifdef ARM_CORTEX
   arm_add_q15((int16_t*)data, (int16_t*)operand2.data, (int16_t*)destination.data, size*2);
 #else
-  for(int n=0; n<size; n++){
+  for(size_t n=0; n<size; n++){
     destination[n].re = data[n].re + operand2[n].re;
     destination[n].im = data[n].im + operand2[n].im;
   }
@@ -173,7 +173,7 @@ void ComplexShortArray::copyFrom(ComplexShortArray operand2){
 #ifdef ARM_CORTEX
   arm_copy_q15((int16_t*)operand2.getData(), (int16_t*)data, size * 2);
 #else
-  for(int n = 0; n < size; ++n){
+  for(size_t n = 0; n < size; ++n){
     data[n].re = operand2[n].re;
     data[n].im = operand2[n].im ;
   }
@@ -184,7 +184,7 @@ void ComplexShortArray::copyTo(ComplexShortArray operand2){
 #ifdef ARM_CORTEX
   arm_copy_q15((int16_t*)data, (int16_t*)operand2.getData(), size * 2);
 #else
-  for(int n = 0; n < size; ++n){
+  for(size_t n = 0; n < size; ++n){
     data[n].re = (int16_t)operand2[n].re;
     data[n].im = (int16_t)operand2[n].im ;
   }

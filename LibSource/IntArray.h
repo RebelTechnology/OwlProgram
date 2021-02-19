@@ -66,14 +66,6 @@ public:
    * Allows to index the array using array-style brackets.
    * @param index the index of the element
    * @return the value of the **index** element of the array
-   * Example usage:
-   * @code
-   * int size=1000;
-   * int32_t content[size]; 
-   * IntArray int32_tArray(content, size);
-   * for(int n=0; n<size; n++)
-   *   content[n]==int32_tArray[n]; //now the IntArray can be indexed as if it was an array
-   * @endcode
   */
   int32_t& operator [](const int index){
     return data[index];
@@ -112,7 +104,7 @@ public:
   #ifdef ARM_CORTEX
     arm_fill_q31(value, data, size);
   #else
-    for(int n=0; n<size; n++){
+    for(size_t n=0; n<size; n++){
       data[n]=value;
     }
   #endif /* ARM_CORTEX */
@@ -138,7 +130,7 @@ public:
   #ifdef ARM_CORTEX
     arm_add_q31(data, operand2.data, destination.data, size);
   #else
-    for(int n=0; n<size; n++){
+    for(size_t n=0; n<size; n++){
       destination[n]=data[n]+operand2[n];
     }
   #endif /* ARM_CORTEX */
@@ -186,9 +178,14 @@ public:
 #ifdef ARM_CORTEX
     arm_shift_q31(data, shiftValue, data, size);
 #else
-    #warning TODO
-    
-    //ASSERT(false, "TODO");
+    if(shiftValue >= 0){
+      for(size_t n=0; n<size; n++)
+	data[n] = data[n] << shiftValue;
+    }else{
+      shiftValue = -shiftValue;
+      for(size_t n=0; n<size; n++)
+	data[n] = data[n] >> shiftValue;
+    }
 #endif
   }
 };

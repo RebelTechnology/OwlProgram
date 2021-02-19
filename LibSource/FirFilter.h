@@ -96,22 +96,22 @@ public:
   }
 
   FloatArray getState(){
-    return state;
+    return states;
   };
 
   /**
    * Sets state to point to a different set of values
    */
   void setState(FloatArray newState){
-    state = newState;
+    states = newState;
   }
   
   /**
    * Copies state values from an array.
    */
   void copyState(FloatArray newState){
-    ASSERT(state.getSize()==newState.getSize(), "wrong size");
-    state.copyFrom(newState);
+    ASSERT(states.getSize()==newState.getSize(), "wrong size");
+    states.copyFrom(newState);
   }
   
   static FirFilter* create(size_t taps, size_t blocksize){

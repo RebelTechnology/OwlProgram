@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-// #define USE_TEMPLATE
+#define USE_TEMPLATE
 
 /**
  * This class contains useful methods for manipulating arrays of floats.
@@ -17,6 +17,22 @@ public:
   FloatArray(){}
   FloatArray(float* data, size_t size) :
     SimpleArray(data, size) {}
+
+#ifdef ARM_CORTEX // shadow methods with optimised implementations
+  /**
+   * Copies the content of the array to another array.
+   * @param[out] destination the destination array
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  */
+  void copyTo(FloatArray destination);
+
+  /**
+   * Copies the content of an array into another array.
+   * @param[in] source the source array
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  */
+  void copyFrom(FloatArray source);
+#endif
 
 #else
 class FloatArray {
@@ -109,7 +125,71 @@ public:
     }
     return true;
   }
+  
+  /**
+   * Copies the content of the array to another array.
+   * @param[out] destination the destination array
+  */
+  void copyTo(FloatArray destination);
+
+  /**
+   * Copies the content of the array to a location in memory.
+   * @param[out] destination a pointer to the beginning of the memory location to copy to.
+   * The **length***sizeof(float) bytes of memory starting at this location must have been allocated before calling this method.
+   * @param[in] length number of samples to copy
+  */
+  void copyTo(float* destination, size_t length);
+
+  /**
+   * Copies the content of an array into another array.
+   * @param[in] source the source array
+  */
+  void copyFrom(FloatArray source);
+  
+  /**
+   * Copies an array of float into the array.
+   * @param[in] source a pointer to the beginning of the portion of memory to read from.
+   * @param[in] length number of samples to copy.
+  */
+  void copyFrom(float* source, size_t length);
+  
+  /**
+   * Copies the content of an array into a subset of the array.
+   * Copies **samples** elements from **source** to **destinationOffset** in the current array.
+   * @param[in] source the source array
+   * @param[in] destinationOffset the offset into the destination array 
+   * @param[in] samples the number of samples to copy
+   *
+  */
+  void insert(FloatArray source, int destinationOffset, size_t samples);
+
+  /**
+   * Copies the content of an array into a subset of the array.
+   * Copies **samples** elements starting from **sourceOffset** of **source** to **destinationOffset** in the current array.
+   * @param[in] source the source array
+   * @param[in] sourceOffset the offset into the source array
+   * @param[in] destinationOffset the offset into the destination array
+   * @param[in] samples the number of samples to copy
+  */
+  void insert(FloatArray source, int sourceOffset, int destinationOffset, size_t samples);
+  
+  /**
+   * Copies values within an array.
+   * Copies **length** values starting from index **fromIndex** to locations starting with index **toIndex**
+   * @param[in] fromIndex the first element to copy
+   * @param[in] toIndex the destination of the first element
+   * @param[in] length the number of elements to copy
+   * @remarks this method uses *memmove()* so that the source memory and the destination memory can overlap. As a consequence it might have slow performances.
+  */
+  void move(int fromIndex, int toIndex, size_t length);  
 #endif
+
+  /**
+   * Set all the values in the array.
+   * Sets all the elements of the array to **value**.
+   * @param[in] value all the elements are set to this value.
+  */
+  void setAll(float value);
 
   /**
    * Clear the array.
@@ -413,13 +493,6 @@ public:
    * -6dB = 0.5, 0dB = 1.0, +6dB = 2.0
    */  
   void decibelToGain(FloatArray destination);
-
-  /**
-   * Set all the values in the array.
-   * Sets all the elements of the array to **value**.
-   * @param[in] value all the elements are set to this value.
-  */
-  void setAll(float value);
   
   /**
    * A subset of the array.
@@ -433,64 +506,6 @@ public:
    * @remarks Calling FloatArray::destroy() on a FloatArray instance created with this method might cause an exception.
   */
   FloatArray subArray(int offset, size_t length);
-  
-  /**
-   * Copies the content of the array to another array.
-   * @param[out] destination the destination array
-  */
-  void copyTo(FloatArray destination);
-
-  /**
-   * Copies the content of the array to a location in memory.
-   * @param[out] destination a pointer to the beginning of the memory location to copy to.
-   * The **length***sizeof(float) bytes of memory starting at this location must have been allocated before calling this method.
-   * @param[in] length number of samples to copy
-  */
-  void copyTo(float* destination, size_t length);
-
-  /**
-   * Copies the content of an array into another array.
-   * @param[in] source the source array
-  */
-  void copyFrom(FloatArray source);
-  
-  /**
-   * Copies an array of float into the array.
-   * @param[in] source a pointer to the beginning of the portion of memory to read from.
-   * @param[in] length number of samples to copy.
-  */
-  void copyFrom(float* source, size_t length);
-  
-  /**
-   * Copies the content of an array into a subset of the array.
-   * Copies **samples** elements from **source** to **destinationOffset** in the current array.
-   * @param[in] source the source array
-   * @param[in] destinationOffset the offset into the destination array 
-   * @param[in] samples the number of samples to copy
-   *
-  */
-  void insert(FloatArray source, int destinationOffset, size_t samples);
-
-  /**
-   * Copies the content of an array into a subset of the array.
-   * Copies **samples** elements starting from **sourceOffset** of **source** to **destinationOffset** in the current array.
-   * @param[in] source the source array
-   * @param[in] sourceOffset the offset into the source array
-   * @param[in] destinationOffset the offset into the destination array
-   * @param[in] samples the number of samples to copy
-  */
-  void insert(FloatArray source, int sourceOffset, int destinationOffset, size_t samples);
-  
-  /**
-   * Copies values within an array.
-   * Copies **length** values starting from index **fromIndex** to locations starting with index **toIndex**
-   * @param[in] fromIndex the first element to copy
-   * @param[in] toIndex the destination of the first element
-   * @param[in] length the number of elements to copy
-   * @remarks this method uses *memmove()* so that the source memory and the destination memory can overlap. As a consequence it might have slow performances.
-  */
-  void move(int fromIndex, int toIndex, size_t length);
-  
   /**
    * Create a linear ramp from one value to another.
    * Interpolates all samples in the FloatArray between the endpoints @param from to @param to.
