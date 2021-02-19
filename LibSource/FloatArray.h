@@ -34,13 +34,6 @@ public:
   size_t getSize(){
     return size;
   }
-  /**
-   * Casting operator to float*
-   * @return a float* pointer to the data stored in the FloatArray
-   */
-  operator float*(){
-    return data;
-  }
   
   /**
    * Get the data stored in the FloatArray.
@@ -63,6 +56,58 @@ public:
    */
   void setElement(int index, float value){
     data[index] = value;
+  }
+
+  /**
+   * Casting operator to float*
+   * @return a float* pointer to the data stored in the FloatArray
+   */
+  operator float*(){
+    return data;
+  }
+  
+  /**
+   * Allows to index the array using array-style brackets.
+   * @param index the index of the element
+   * @return the value of the **index** element of the array
+   * Example usage:
+   * @code
+   * int size=1000;
+   * float content[size]; 
+   * FloatArray floatArray(content, size);
+   * for(int n=0; n<size; n++)
+   *   content[n]==floatArray[n]; //now the FloatArray can be indexed as if it was an array
+   * @endcode
+  */
+  float& operator [](const int index){
+    return data[index];
+  }
+  
+  /**
+   * Allows to index the array using array-style brackets.
+   * **const** version of operator[]
+  */
+  const float& operator [](const int index) const{
+    return data[index];
+  }
+  
+  /**
+   * Compares two arrays.
+   * Performs an element-wise comparison of the values contained in the arrays.
+   * @param other the array to compare against.
+   * @return **true** if the arrays have the same size and the value of each of the elements of the one 
+   * match the value of the corresponding element of the other, or **false** otherwise.
+  */
+  bool equals(const FloatArray& other) const {
+    if(size!=other.size){
+      return false;
+    }
+    for(size_t n=0; n<size; n++){
+      if(data[n]!=other.data[n]){
+        return false;
+      }
+    }
+    return true;
   }
 #endif
 
@@ -445,50 +490,6 @@ public:
    * @remarks this method uses *memmove()* so that the source memory and the destination memory can overlap. As a consequence it might have slow performances.
   */
   void move(int fromIndex, int toIndex, size_t length);
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * @param index the index of the element
-   * @return the value of the **index** element of the array
-   * Example usage:
-   * @code
-   * int size=1000;
-   * float content[size]; 
-   * FloatArray floatArray(content, size);
-   * for(int n=0; n<size; n++)
-   *   content[n]==floatArray[n]; //now the FloatArray can be indexed as if it was an array
-   * @endcode
-  */
-  float& operator [](const int index){
-    return data[index];
-  }
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * **const** version of operator[]
-  */
-  float& operator [](const int index) const{
-    return data[index];
-  }
-  
-  /**
-   * Compares two arrays.
-   * Performs an element-wise comparison of the values contained in the arrays.
-   * @param other the array to compare against.
-   * @return **true** if the arrays have the same size and the value of each of the elements of the one 
-   * match the value of the corresponding element of the other, or **false** otherwise.
-  */
-  bool equals(const FloatArray& other) const{
-    if(size!=other.getSize()){
-      return false;
-    }
-    for(size_t n=0; n<size; n++){
-      if(data[n]!=other[n]){
-        return false;
-      }
-    }
-    return true;
-  }
   
   /**
    * Create a linear ramp from one value to another.

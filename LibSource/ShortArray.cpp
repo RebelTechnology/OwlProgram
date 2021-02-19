@@ -14,10 +14,6 @@ static int16_t saturateTo16(int64_t value){
 }
 #endif
 
-ShortArray::ShortArray() {}
-
-ShortArray::ShortArray(int16_t* d, size_t s) : AbstractArray(d, s){}
-
 void ShortArray::getMin(int16_t* value, int* index){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX

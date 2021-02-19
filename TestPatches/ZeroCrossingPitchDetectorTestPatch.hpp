@@ -50,7 +50,7 @@ public:
     float frequency=zcc.getFrequency();
     float envelope=fa.getRms();
     fa.multiply(1-mix);
-    for(int n=0;n<fa.getSize(); n++){
+    for(size_t n=0;n<fa.getSize(); n++){
       static float phase=0;
       static float pastEnvelope=0;
       phase += 2.0 * M_PI * frequency/getSampleRate();

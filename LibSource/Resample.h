@@ -54,7 +54,7 @@ public:
     ASSERT(input.getSize()==output.getSize()*factor, "wrong size");
     downfilter->process(input, input);
     float* p = (float*)input;
-    for(int i=0; i<input.getSize(); ++i){
+    for(size_t i=0; i<input.getSize(); ++i){
       output[i] = *p;
       p += 4;
     }
@@ -62,7 +62,7 @@ public:
   void upsample(FloatArray input, FloatArray output){
     ASSERT(input.getSize()*factor==output.getSize(), "wrong size");
     float* p = output;
-    for(int i=0; i<input.getSize(); ++i){
+    for(size_t i=0; i<input.getSize(); ++i){
       *p++ = input[i];
       *p++ = 0;
       *p++ = 0;
@@ -102,7 +102,7 @@ public:
     ASSERT(input.getSize()*factor==output.getSize(), "wrong size");
     float* p = output;
     output.clear();
-    for(int i=0; i<input.getSize(); i+= factor)
+    for(size_t i=0; i<input.getSize(); i+= factor)
       *p++ = input[i];
     filter->process(output, output);
   }
@@ -136,7 +136,7 @@ public:
     ASSERT(input.getSize()==output.getSize()*factor, "wrong size");
     filter->process(input, input);
     float* p = (float*)input;
-    for(int i=0; i<input.getSize(); ++i){
+    for(size_t i=0; i<input.getSize(); ++i){
       output[i] = *p;
       p += factor;
     }
