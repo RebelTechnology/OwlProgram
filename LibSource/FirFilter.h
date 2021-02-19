@@ -79,13 +79,39 @@ public:
   FloatArray getCoefficients(){
     return coefficients;
   };
+
+  /**
+   * Sets coefficients to point to a different set of values
+   */
+  void setCoefficients(FloatArray newCoefficients){
+    coefficients = newCoefficients;
+  }
   
   /**
-    Copies coefficients value from an array.
-  */
-  void setCoefficients(FloatArray newCoefficients){
+   * Copies coefficient values from an array.
+   */
+  void copyCoefficients(FloatArray newCoefficients){
     ASSERT(coefficients.getSize()==newCoefficients.getSize(), "wrong size");
     coefficients.copyFrom(newCoefficients);
+  }
+
+  FloatArray getState(){
+    return state;
+  };
+
+  /**
+   * Sets state to point to a different set of values
+   */
+  void setState(FloatArray newState){
+    state = newState;
+  }
+  
+  /**
+   * Copies state values from an array.
+   */
+  void copyState(FloatArray newState){
+    ASSERT(state.getSize()==newState.getSize(), "wrong size");
+    state.copyFrom(newState);
   }
   
   static FirFilter* create(size_t taps, size_t blocksize){

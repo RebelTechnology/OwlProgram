@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-#define USE_TEMPLATE
+// #define USE_TEMPLATE
 
 /**
  * This class contains useful methods for manipulating arrays of floats.
