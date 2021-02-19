@@ -68,11 +68,11 @@ struct ComplexShort {
 };
 
 #ifdef USE_TEMPLATE
-class ComplexShortArray : public AbstractArray<ComplexShort> {
+class ComplexShortArray : public SimpleArray<ComplexShort> {
 public:
   ComplexShortArray(){}
   ComplexShortArray(ComplexShort* data, size_t size) :
-    AbstractArray(data, size) {}
+    SimpleArray(data, size) {}
 #else
 class ComplexShortArray {
 private:

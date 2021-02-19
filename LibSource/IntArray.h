@@ -2,15 +2,15 @@
 #define __IntArray_h__
 
 #include <stdint.h>
-#include "AbstractArray.h"
+#include "SimpleArray.h"
 #include "FloatArray.h"
 
 #ifdef USE_TEMPLATE
-class IntArray : public AbstractArray<int32_t> {
+class IntArray : public SimpleArray<int32_t> {
 public:
   IntArray(){}
   IntArray(int32_t* data, size_t size) :
-    AbstractArray(data, size) {}
+    SimpleArray(data, size) {}
 
 #else
 class IntArray {

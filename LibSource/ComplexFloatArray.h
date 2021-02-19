@@ -77,11 +77,11 @@ struct ComplexFloat {
 };
 
 #ifdef USE_TEMPLATE
-class ComplexFloatArray : public AbstractArray<ComplexFloat> {
+class ComplexFloatArray : public SimpleArray<ComplexFloat> {
 public:
   ComplexFloatArray(){}
   ComplexFloatArray(ComplexFloat* data, size_t size) :
-    AbstractArray(data, size) {}
+    SimpleArray(data, size) {}
 #else
 class ComplexFloatArray {
 private:

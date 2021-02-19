@@ -10,11 +10,11 @@
  * ShortArray objects can be passed by value without copying the contents of the array.
  */
 #ifdef USE_TEMPLATE
-class ShortArray : public AbstractArray<int16_t> {
+class ShortArray : public SimpleArray<int16_t> {
 public:
   ShortArray(){}
   ShortArray(int16_t* data, size_t size) :
-    AbstractArray(data, size) {}
+    SimpleArray(data, size) {}
 
 #else
 class ShortArray {

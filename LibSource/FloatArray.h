@@ -11,12 +11,12 @@
  * FloatArray objects can be passed by value without copying the contents of the array.
  */
 #ifdef USE_TEMPLATE
-#include "AbstractArray.h"
-class FloatArray : public AbstractArray<float> {
+#include "SimpleArray.h"
+class FloatArray : public SimpleArray<float> {
 public:
   FloatArray(){}
   FloatArray(float* data, size_t size) :
-    AbstractArray(data, size) {}
+    SimpleArray(data, size) {}
 
 #else
 class FloatArray {

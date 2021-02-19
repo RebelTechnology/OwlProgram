@@ -1,22 +1,22 @@
-#ifndef __AbstractArray_h__
-#define __AbstractArray_h__
+#ifndef __SimpleArray_h__
+#define __SimpleArray_h__
 
 #include <cstddef>
 
 /**
- * AbstractArray holds a pointer to an array and the array size, and is designed to 
+ * SimpleArray holds a pointer to an array and the array size, and is designed to 
  * be passed by value. It does not define any virtual methods to prevent overheads 
  * in its subclasses.
  */
 template<typename T>
-class AbstractArray {
+class SimpleArray {
 protected:
   T* data;
   size_t size;
 public:
-  AbstractArray() : data(NULL), size(0){}
-  AbstractArray(T* data, size_t size) : data(data), size(size){}
-  /* virtual ~AbstractArray(){} No virtual destructor to prevent adding a vtable to the object size */
+  SimpleArray() : data(NULL), size(0){}
+  SimpleArray(T* data, size_t size) : data(data), size(size){}
+  /* virtual ~SimpleArray(){} No virtual destructor to prevent adding a vtable to the object size */
   
   /**
    * Get the data stored in the Array.
@@ -56,7 +56,7 @@ public:
    * @return **true** if the arrays have the same size and the value of each of the elements of the one 
    * match the value of the corresponding element of the other, or **false** otherwise.
   */
-  bool equals(const AbstractArray<T>& other) const {
+  bool equals(const SimpleArray<T>& other) const {
     if(size != other.size)
       return false;
     for(size_t n=0; n<size; n++){
@@ -94,4 +94,4 @@ public:
 };
 
 
-#endif // __AbstractArray_h__
+#endif // __SimpleArray_h__
