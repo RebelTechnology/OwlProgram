@@ -12,25 +12,25 @@ private:
 #ifdef ARM_CORTEX
   arm_fir_instance_f32 instance;
 #else
-  size_t pointer = 0;
-#endif /* ARM_CORTEX */
   size_t index = 0;
+#endif /* ARM_CORTEX */
 
-  void processBlock(float* source, float* destination, int size){
+  void processBlock(float* source, float* destination, size_t size){
 #ifdef ARM_CORTEX
     arm_fir_f32(&instance, source, destination, size);
 #else
-    for(int n = 0; n < size; n++){
-      states[pointer] = source[n];
-      int tempPointer = pointer;
+    for(size_t n = 0; n < size; n++){
+      states[index] = source[n];
+      size_t tempIndex = index;
       float y = 0;
-      for(int k = 0; k < coefficients.getSize(); k++){
-        y += coefficients[k] * states[tempPointer];
-        tempPointer = (tempPointer == states.getSize()) ? 0 : tempPointer+1;
+      for(size_t k = 0; k < coefficients.getSize(); k++){
+        y += coefficients[k] * states[tempIndex];
+        tempIndex = (tempIndex == states.getSize()) ? 0 : tempIndex+1;
       }
       destination[n] = y;
       //  destination[n] = 0;
-      pointer = (pointer == states.getSize()) ? 0 : pointer+1;
+      if(++index == states.getSize())
+	index = 0;
     }
 #endif /* ARM_CORTEX */
   }
@@ -43,7 +43,7 @@ public:
 #ifdef ARM_CORTEX
     arm_fir_init_f32(&instance, coefficients.getSize(), coefficients.getData(), states.getData(), blockSize);
 #else
-    pointer = 0;
+    index = 0;
 #endif /* ARM_CORTEX */
   }
   
@@ -79,13 +79,39 @@ public:
   FloatArray getCoefficients(){
     return coefficients;
   };
+
+  /**
+   * Sets coefficients to point to a different set of values
+   */
+  void setCoefficients(FloatArray newCoefficients){
+    coefficients = newCoefficients;
+  }
   
   /**
-    Copies coefficients value from an array.
-  */
-  void setCoefficients(FloatArray newCoefficients){
+   * Copies coefficient values from an array.
+   */
+  void copyCoefficients(FloatArray newCoefficients){
     ASSERT(coefficients.getSize()==newCoefficients.getSize(), "wrong size");
     coefficients.copyFrom(newCoefficients);
+  }
+
+  FloatArray getState(){
+    return state;
+  };
+
+  /**
+   * Sets state to point to a different set of values
+   */
+  void setState(FloatArray newState){
+    state = newState;
+  }
+  
+  /**
+   * Copies state values from an array.
+   */
+  void copyState(FloatArray newState){
+    ASSERT(state.getSize()==newState.getSize(), "wrong size");
+    state.copyFrom(newState);
   }
   
   static FirFilter* create(size_t taps, size_t blocksize){

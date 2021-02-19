@@ -22,11 +22,11 @@ public:
   }
   void fft(ComplexFloatArray inout){
     ASSERT(inout.getSize() >= getSize(), "Input array too small");
-    arm_cfft_f32(&instance, (float*)inout, 0, 1); //forward
+    arm_cfft_f32(&instance, (float*)inout.getData(), 0, 1); //forward
   }
   void ifft(ComplexFloatArray inout){
     ASSERT(inout.getSize() >= getSize(), "Input array too small");
-   arm_cfft_f32(&instance, (float*)inout, 1, 1); //inverse
+   arm_cfft_f32(&instance, (float*)inout.getData(), 1, 1); //inverse
   }
   int getSize(){
     return instance.fftLen;
@@ -62,7 +62,7 @@ public:
   }
   void ifft(ComplexFloatArray inout){
     ASSERT(inout.getSize() >= getSize(), "Input array too small");
-    kiss_fft(cfgifft, (kiss_fft_cpx*)(float*)inout, (kiss_fft_cpx*)(float*)temp.getData());
+    kiss_fft(cfgifft, (kiss_fft_cpx*)(float*)inout.getData(), (kiss_fft_cpx*)(float*)temp.getData());
     temp.scale(1.0f/getSize());
     inout.copyFrom(temp);
   }

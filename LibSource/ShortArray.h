@@ -2,7 +2,6 @@
 #define __ShortArray_h__
 
 #include <stdint.h>
-#include "basicmaths.h"
 #include "FloatArray.h"
 
 /**
@@ -10,13 +9,23 @@
  * It also provides a convenient handle to the array pointer and the size of the array.
  * ShortArray objects can be passed by value without copying the contents of the array.
  */
+#ifdef USE_TEMPLATE
+class ShortArray : public SimpleArray<int16_t> {
+public:
+  ShortArray(){}
+  ShortArray(int16_t* data, size_t size) :
+    SimpleArray(data, size) {}
+
+#else
 class ShortArray {
 private:
   int16_t* data;
   size_t size;
 public:
-  ShortArray();
-  ShortArray(int16_t* data, size_t size);
+  ShortArray() :
+    data(NULL), size(0) {}
+  ShortArray(int16_t* data, size_t size) :
+    data(data), size(size) {}
 
   size_t getSize() const{
     return size;
@@ -25,6 +34,82 @@ public:
   size_t getSize(){
     return size;
   }
+
+  /**
+   * Casting operator to int16_t*
+   * @return a int16_t* pointer to the data stored in the ShortArray
+   */
+  operator int16_t*(){
+    return data;
+  }
+
+  /**
+   * Get the data stored in the ShortArray.
+   * @return a int16_t* pointer to the data stored in the ShortArray
+   */
+  int16_t* getData(){
+    return data;
+  }
+
+  /**
+   * Get a single int16_t stored in the ShortArray.
+   * @return the int16_t stored at index @param index
+   */
+  int16_t getElement(int index){
+    return data[index];
+  }
+
+  /**
+   * Set a single int16_t in the ShortArray.
+   */
+  void setElement(int index, int16_t value){
+    data[index] = value;
+  }
+  
+  /**
+   * Allows to index the array using array-style brackets.
+   * @param index the index of the element
+   * @return the value of the **index** element of the array
+   * Example usage:
+   * @code
+   * int size=1000;
+   * int16_t content[size]; 
+   * ShortArray int16_tArray(content, size);
+   * for(int n=0; n<size; n++)
+   *   content[n]==int16_tArray[n]; //now the ShortArray can be indexed as if it was an array
+   * @endcode
+  */
+  int16_t& operator [](const int index){
+    return data[index];
+  }
+  
+  /**
+   * Allows to index the array using array-style brackets.
+   * **const** version of operator[]
+  */
+  const int16_t& operator [](const int index) const {
+    return data[index];
+  }
+  
+  /**
+   * Compares two arrays.
+   * Performs an element-wise comparison of the values contained in the arrays.
+   * @param other the array to compare against.
+   * @return **true** if the arrays have the same size and the value of each of the elements of the one 
+   * match the value of the corresponding element of the other, or **false** otherwise.
+  */
+  bool equals(const ShortArray& other) const{
+    if(size!=other.getSize()){
+      return false;
+    }
+    for(size_t n=0; n<size; n++){
+      if(data[n]!=other[n]){
+        return false;
+      }
+    }
+    return true;
+  }
+#endif
 
   /**
    * Clear the array.
@@ -394,66 +479,6 @@ public:
    * @remarks this method uses *memmove()* so that the source memory and the destination memory can overlap. As a consequence it might have slow performances.
   */
   void move(int fromIndex, int toIndex, size_t length);
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * @param index the index of the element
-   * @return the value of the **index** element of the array
-   * Example usage:
-   * @code
-   * int size=1000;
-   * int16_t content[size]; 
-   * ShortArray int16_tArray(content, size);
-   * for(int n=0; n<size; n++)
-   *   content[n]==int16_tArray[n]; //now the ShortArray can be indexed as if it was an array
-   * @endcode
-  */
-  int16_t& operator [](const int index){
-    return data[index];
-  }
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * **const** version of operator[]
-  */
-  int16_t& operator [](const int index) const{
-    return data[index];
-  }
-  
-  /**
-   * Compares two arrays.
-   * Performs an element-wise comparison of the values contained in the arrays.
-   * @param other the array to compare against.
-   * @return **true** if the arrays have the same size and the value of each of the elements of the one 
-   * match the value of the corresponding element of the other, or **false** otherwise.
-  */
-  bool equals(const ShortArray& other) const{
-    if(size!=other.getSize()){
-      return false;
-    }
-    for(size_t n=0; n<size; n++){
-      if(data[n]!=other[n]){
-        return false;
-      }
-    }
-    return true;
-  }
-  
-  /**
-   * Casting operator to int16_t*
-   * @return a int16_t* pointer to the data stored in the ShortArray
-  */
-  operator int16_t*(){
-    return data;
-  }
-  
-  /**
-   * Get the data stored in the ShortArray.
-   * @return a int16_t* pointer to the data stored in the ShortArray
-  */
-  int16_t* getData(){
-    return data;
-  }
   
   /**
    * Bitshift the array values, saturating.

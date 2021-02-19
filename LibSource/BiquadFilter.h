@@ -193,9 +193,8 @@ protected:
     // arm_biquad_cascade_df1_init_f32(&df1, stages, coefficients, state);
     arm_biquad_cascade_df2T_init_f32(&df2, stages, coefficients, state);
 #else
-    for(size_t n=0; n<stages*BIQUAD_STATE_VARIABLES_PER_STAGE; n++){
-      state[n]=0;
-    }
+    if(state)
+      memset(state, 0, stages*BIQUAD_STATE_VARIABLES_PER_STAGE*sizeof(float));
 #endif /* ARM_CORTEX */
   }
 public:
@@ -214,6 +213,7 @@ public:
   size_t getStages(){
     return stages;
   }
+
   void setStages(size_t newStages){
     stages = newStages;
   }
@@ -226,13 +226,24 @@ public:
     return FloatArray(coefficients, BIQUAD_COEFFICIENTS_PER_STAGE*stages);
   }
 
-  void setState(FloatArray newState){
-    ASSERT(BIQUAD_STATE_VARIABLES_PER_STAGE*stages == newState.getSize(), "wrong size");
-    state = newState;
-  }
-
   FloatArray getState(){
     return FloatArray(state, BIQUAD_STATE_VARIABLES_PER_STAGE*stages);
+  }
+
+  /**
+   * Sets state to point to a different set of values
+   */
+  void setState(FloatArray newState){
+    ASSERT(BIQUAD_STATE_VARIABLES_PER_STAGE*stages == newState.getSize(), "wrong size");
+    state = newState.getData();
+  }
+  
+  /**
+   * Copies state values from an array.
+   */
+  void copyState(FloatArray newState){
+    ASSERT(newState.getSize() == stages*BIQUAD_STATE_VARIABLES_PER_STAGE, "wrong size");
+    getState().copyFrom(newState);
   }
 
   FilterStage getFilterStage(size_t stage){
@@ -320,20 +331,22 @@ public:
     copyCoefficients();
   }
 
-  void setCoefficientsPointer(FloatArray newCoefficients){ //sets coefficients to point to a given pointer
+  /**
+   * Sets coefficients to point to a different set of values
+   */
+  void setCoefficients(FloatArray newCoefficients){
     ASSERT(BIQUAD_COEFFICIENTS_PER_STAGE*stages==newCoefficients.getSize(), "wrong size");
-    coefficients = newCoefficients;
+    coefficients = newCoefficients.getData();
     init();
   }
 
+  /**
+   * Copies coefficient values from an array.
+   */
   void copyCoefficients(FloatArray newCoefficients){
     ASSERT(newCoefficients.getSize()==BIQUAD_COEFFICIENTS_PER_STAGE, "wrong size");
     getFilterStage(0).copyCoefficients(newCoefficients);
     copyCoefficients(); //set all the other stages
-  }
-  [[deprecated("use copyCoefficients() instead.")]]
-  void setCoefficients(FloatArray newCoefficients){ // copies coefficients to all stages
-    copyCoefficients(newCoefficients);
   }
 
   static BiquadFilter* create(float sr, size_t stages=1){
@@ -356,21 +369,22 @@ public:
   MultiBiquadFilter(){}
   MultiBiquadFilter(float sr, float* coefs, float* states, size_t stages) :
     BiquadFilter(sr, coefs, states, stages) {
+    FloatArray coefficients(coefs, stages*BIQUAD_COEFFICIENTS_PER_STAGE);
     for(size_t ch=1; ch<channels; ++ch){
       states += stages*BIQUAD_STATE_VARIABLES_PER_STAGE;
       filters[ch-1].setSampleRate(sr);
       filters[ch-1].setStages(stages);
-      filters[ch-1].setCoefficientsPointer(FloatArray(coefs, stages*BIQUAD_COEFFICIENTS_PER_STAGE)); // shared coefficients
       filters[ch-1].setState(FloatArray(states, stages*BIQUAD_STATE_VARIABLES_PER_STAGE));
+      filters[ch-1].setCoefficients(coefficients); // shared coefficients
     }
   }
   static MultiBiquadFilter<channels>* create(float sr, size_t stages=1){
     return new MultiBiquadFilter<channels>(sr, new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE], new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE*channels], stages);
   }  
-  static void destroy(MultiBiquadFilter<channels>* obj){
-    for(size_t ch=1; ch<channels; ++ch)
-      FloatArray::destroy(obj->filters[ch-1].getState());
-    BiquadFilter::destroy(obj);
+  static void destroy(MultiBiquadFilter<channels>* filter){
+    delete[] filter->coefficients;
+    delete[] filter->state;
+    delete filter;
   }
   BiquadFilter* getFilter(size_t channel){
     if(channel == 0)

@@ -18,7 +18,7 @@ private:
   ComplexFloatArray fd;
   FloatArray magnitudes;
   FloatArray timeDomain;
-  int writePointer;
+  size_t writePointer;
   Window window;
 public:
   FourierPitchDetector(){
@@ -44,7 +44,7 @@ public:
     timeDomain=FloatArray::create(fftSize);
     window=Window::create(Window::HannWindow, fftSize);
   }
-  int getSize(){
+  size_t getSize(){
     return fft.getSize();
   }
   void setSamplingRate(float asamplingRate){
@@ -64,7 +64,7 @@ public:
       return 1;
     }
     // otherwise keep filling the input buffer TODO: could multiply by the window while copying
-    int samplesToCopy=min(input.getSize(),timeDomain.getSize()-writePointer);
+    size_t samplesToCopy=min(input.getSize(),timeDomain.getSize()-writePointer);
     timeDomain.insert(input, 0, writePointer, samplesToCopy);
     writePointer+=samplesToCopy;
     if(writePointer==fft.getSize()){ // if it is full, reset pointer and do fft 
@@ -80,7 +80,7 @@ public:
     ComplexFloatArray fdsub=fd.subArray((int)minBin, (int)maxBin-(int)minBin);
     FloatArray magnitudesSub=magnitudes.subArray((int)minBin, (int)maxBin-(int)minBin);
     fdsub.getMagnitudeSquaredValues(magnitudesSub);
-    int maxIndex=magnitudesSub.getMaxIndex();
+    size_t maxIndex=magnitudesSub.getMaxIndex();
     //do quadratic interpolation https://ccrma.stanford.edu/~jos/sasp/Quadratic_Interpolation_Spectral_Peaks.html
     //this single iteration method gives the following accuracy using as input a sinewave in the range 100Hz-200Hz
     //fftSize=512; max(abs(error))=15Hz well, with this fftSize, the binsize is 93.75 Hz, with a 100Hz input
@@ -112,12 +112,12 @@ public:
 
 class ZeroCrossingPitchDetector{
 private:
-  BiquadFilter *filter;
+  float samplingRate;
   int numLowPassStages;
   int numHighPassStages;
+  BiquadFilter *filter;
   FloatArray counts;
   FloatArray filterOutput;
-  float samplingRate;
   const static int POINTS_AVERAGE = 10;
 public:
   ZeroCrossingPitchDetector(float aSamplingRate, int blocksize, int aNumLowPassStages=1, int aNumHighPassStages=1) :
@@ -152,12 +152,11 @@ public:
   void process(FloatArray input){
     ASSERT(input.getSize()<=filterOutput.getSize(), "wrong size");
     static float lastValue=0;
-    static int countsPointer=0;
-    static float period=0;
+    static size_t countsPointer=0;
     static float count;
     filter->process(input, filterOutput);
     // filterOutput.copyTo(input);
-    for(int n=0; n<input.getSize(); n++){
+    for(size_t n=0; n<input.getSize(); n++){
       float currentValue=filterOutput[n];
       if(currentValue>0 && lastValue<=0){
         /*
