@@ -33,7 +33,7 @@ void wavread(WavHeader *header, const char *file_name, int16_t **samples)
         errx(1, "Error opening file");
     if (!header)
         header = (WavHeader*)malloc(sizeof(WavHeader));
-    if (read(fd, header, sizeof(WavHeader)) < sizeof(WavHeader))
+    if (read(fd, header, sizeof(WavHeader)) < (int)sizeof(WavHeader))
         errx(1, "File broken: header");
     if (strncmp(header->chunk_id, "RIFF", 4) ||
         strncmp(header->format, "WAVE", 4))
@@ -59,7 +59,7 @@ void wavwrite(WavHeader *header, const char *file_name, int16_t *samples)
         errx(1, "Samples buffer not specified");
     if ((fd = creat(file_name, 0666)) < 1)
         errx(1, "Error creating file");
-    if (write(fd, header, sizeof(WavHeader)) < sizeof(WavHeader))
+    if (write(fd, header, sizeof(WavHeader)) < (int)sizeof(WavHeader))
         errx(1, "Error writing header");
     if (write(fd, samples, header->datachunk_size) < header->datachunk_size)
         errx(1, "Error writing samples");

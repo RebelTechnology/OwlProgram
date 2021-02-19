@@ -82,8 +82,6 @@ public:
     // or:
     env.process(fa, fa);
     fa.multiply(0.2);
-    
-    static float maxValue = 0;
   }
 };
 

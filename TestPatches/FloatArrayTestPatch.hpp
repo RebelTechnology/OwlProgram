@@ -15,7 +15,7 @@
 class FloatArrayTestPatch : public TestPatch {
 public:
   FloatArrayTestPatch(){
-    size_t size=101;
+    size_t size=606;
     float data[size];
     float backupData[size];
     for(size_t n=0; n<size; n++){

@@ -33,28 +33,28 @@ public:
     success = false;
     failed++;
   }
-  // template<typename T>
-  // void check_equal(T a, T b, int line){
-  void check_equal(float a, float b, int line){
+  bool check_equal(float a, float b, int line){
     if(a != b){
       debugMessage("CHECK_EQUAL", a, b);
       debugMessage(errormessage, line);
       success = false;
       failed++;
+      return false;
     }else{
       pass();
+      return true;
     }
   }
-  // template<typename T>
-  // void check_close(T a, T b, T c, int line){
-  void check_close(float a, float b, float c, int line){
+  bool check_close(float a, float b, float c, int line){
     if(abs((a)-(b))>(c)){
       debugMessage("CHECK_CLOSE", a, b, c);
       debugMessage(errormessage, line);
       success = false;
       failed++;
+      return false;
     }else{
       pass();
+      return true;
     }
   }
   TestPatch(): success(true), passed(0), failed(0), errormessage((char*)DEFAULT_MESSAGE){
@@ -74,7 +74,8 @@ public:
       for(int n=0; n<getBlockSize(); n++){
         sig[n]+=0.2*rand()/(float)RAND_MAX;
       }
-      error(PROGRAM_ERROR_STATUS, "Tests failed");
+      debugMessage("Tests failed");
+      // error(PROGRAM_ERROR_STATUS, "Tests failed");
     }
   }
 };
