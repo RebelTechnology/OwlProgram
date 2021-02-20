@@ -18,12 +18,14 @@ public:
       int errs = 0;
       int tests = 0;
       for(int n = 10; n <= 10000; n++){
-        float x = randf() * n;
+        float x = rand()/(float)RAND_MAX * n;
+	// float x = randf() * n;
         float approx = fast_logf(x);
         float exact = logf(x);
         float err = fabsf(approx - exact);
         float perc = err/exact * 100;
 	CHECK(perc<threshold);
+        // maxPerc = maxPerc > x ? maxPerc : x;
         maxPerc = maxPerc > perc ? maxPerc : perc;
         if(fabsf(perc) > threshold)
 	  errs++;
