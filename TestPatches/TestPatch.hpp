@@ -63,19 +63,19 @@ public:
   void processAudio(AudioBuffer &buffer){
     FloatArray sig = buffer.getSamples(LEFT_CHANNEL);
     if(success){
-      static float phase=0;
-      float inc=2*M_PI/200.0f;
+      static float phase = 0;
+      float inc = 2*M_PI/200.0f;
       for(int n=0; n<getBlockSize(); n++){
-        sig[n]+=0.4*sinf(phase);
-        phase+=inc;
-        phase= phase>2*M_PI ? phase-2*M_PI : phase;
+        sig[n] = 0.4*sinf(phase);
+        phase += inc;
+        phase = phase>2*M_PI ? phase-2*M_PI : phase;
       }
     }else{
       for(int n=0; n<getBlockSize(); n++){
-        sig[n]+=0.2*rand()/(float)RAND_MAX;
+        sig[n] += 0.2*randf();
       }
-      debugMessage("Tests failed");
-      // error(PROGRAM_ERROR_STATUS, "Tests failed");
+      // debugMessage("Tests failed");
+      error(PROGRAM_ERROR_STATUS, "Tests failed");
     }
   }
 };

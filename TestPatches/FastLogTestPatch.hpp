@@ -13,7 +13,7 @@ public:
 #ifdef ARM_CORTEX
       float threshold = 0.025;
 #else
-      float threshold = 0.8283; // maximum relative error accepted: 0.00025 for big tables, 0.8283 for small
+      float threshold = 0.8283; // maximum relative error accepted: 0.025 for big tables, 0.8283 for small
 #endif      
       int errs = 0;
       int tests = 0;
