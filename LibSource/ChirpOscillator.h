@@ -44,6 +44,9 @@ public:
   float getPhase(){
     return phase;
   }
+  void setPhase(float phase){
+    this->phase = phase;
+  }
   float generate(){
     float sample = sinf(phase);
     phase += incr;

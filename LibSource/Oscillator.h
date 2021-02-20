@@ -34,6 +34,11 @@ public:
     return 0.0f;
   }
   /**
+   * Set current oscillator phase in radians
+   * @param phase a value between 0 and 2*pi
+   */
+  virtual void setPhase(float phase) = 0;
+  /**
    * Get current oscillator phase in radians
    * @return a value between 0 and 2*pi
    */

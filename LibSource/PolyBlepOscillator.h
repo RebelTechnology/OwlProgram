@@ -19,8 +19,11 @@ public:
   float getFrequency();
   /** set waveform shape: 0.0 for saw, 1.0 for square wave */
   void setShape(float value);
+  float getShape();
   /** set square wave pulse width: 0.0 to 1.0 for 0% to 100% */
   void setPulseWidth(float value);
+  float getPulseWidth();
+  void setPhase(float phase);
   float getPhase();
   float generate();
   float generate(float fm);

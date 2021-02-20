@@ -31,6 +31,10 @@ float WavetableOscillator::getSample(float phase){
   return wave[index];
 }
 
+void WavetableOscillator::setPhase(float phase){
+  acc = phase/(2*M_PI);
+}
+
 float WavetableOscillator::getPhase(){
   return acc*2*M_PI;
 }

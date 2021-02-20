@@ -37,12 +37,24 @@ void PolyBlepOscillator::setShape(float value){
   shape = value;
 }
 
+float PolyBlepOscillator::getShape(){
+  return shape;
+}
+
 void PolyBlepOscillator::setPulseWidth(float value){
   pw = value;
 }
 
+float PolyBlepOscillator::getPulseWidth(){
+  return pw;
+}
+
 float PolyBlepOscillator::getPhase(){
   return osc.getMasterPhase()*2*M_PI;
+}
+
+void PolyBlepOscillator::setPhase(float phase){
+  osc.setMasterPhase(phase/(2*M_PI));
 }
 
 float PolyBlepOscillator::generate(){
