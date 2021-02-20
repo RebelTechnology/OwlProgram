@@ -125,6 +125,10 @@ class Oscillator {
     return master_phase_;
   }
 
+  void setMasterPhase(float value){
+    master_phase_ = value;
+  }
+
   template<bool interpolate_parameters>
   void Render(
       float* frequency,
