@@ -1,7 +1,9 @@
 #ifndef __BiquadFilter_h__
 #define __BiquadFilter_h__
 
+#include <string.h> // for memcpy
 #include "FloatArray.h"
+#include "SignalProcessor.h"
 
 class FilterStage {
 public:
@@ -13,32 +15,32 @@ public:
 
   FilterStage(FloatArray co, FloatArray st) : coefficients(co), state(st){}
 
-  void setLowPass(float fc, float q){
-    setLowPass(coefficients, fc, q);
+  void setLowPass(float fc, float q, float sr){
+    setLowPass(coefficients, fc*M_PI/sr, q);
   }
 
-  void setHighPass(float fc, float q){
-    setHighPass(coefficients, fc, q);
+  void setHighPass(float fc, float q, float sr){
+    setHighPass(coefficients, fc*M_PI/sr, q);
   }
   
-  void setBandPass(float fc, float q){
-    setBandPass(coefficients, fc, q);
+  void setBandPass(float fc, float q, float sr){
+    setBandPass(coefficients, fc*M_PI/sr, q);
   }
   
-  void setNotch(float fc, float q){
-    setNotch(coefficients, fc, q);
+  void setNotch(float fc, float q, float sr){
+    setNotch(coefficients, fc*M_PI/sr, q);
   }
   
-  void setPeak(float fc, float q, float gain){
-    setPeak(coefficients, fc, q, gain);
+  void setPeak(float fc, float q, float gain, float sr){
+    setPeak(coefficients, fc*M_PI/sr, q, gain);
   }
-  void setLowShelf(float fc, float gain){
-    setLowShelf(coefficients, fc, gain);
+  void setLowShelf(float fc, float gain, float sr){
+    setLowShelf(coefficients, fc*M_PI/sr, gain);
   }
-  void setHighShelf(float fc, float gain){
-    setHighShelf(coefficients, fc, gain);
+  void setHighShelf(float fc, float gain, float sr){
+    setHighShelf(coefficients, fc*M_PI/sr, gain);
   }
-  void setCoefficients(FloatArray newCoefficients){
+  void copyCoefficients(FloatArray newCoefficients){
     ASSERT(coefficients.getSize()==newCoefficients.getSize(), "wrong size");
     coefficients.copyFrom(newCoefficients);
   }  
@@ -50,8 +52,7 @@ public:
     return state;
   }
 
-  static void setLowPass(float* coefficients, float fc, float q){
-    float omega = M_PI*fc/2;
+  static void setLowPass(float* coefficients, float omega, float q){
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
     coefficients[0] = K * K * norm;
@@ -61,8 +62,7 @@ public:
     coefficients[4] = - (1 - K / q + K * K) * norm;
   }
 
-  static void setHighPass(float* coefficients, float fc, float q){
-    float omega = M_PI*fc/2;
+  static void setHighPass(float* coefficients, float omega, float q){
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
     coefficients[0] = 1 * norm;
@@ -72,8 +72,7 @@ public:
     coefficients[4] = - (1 - K / q + K * K) * norm;
   }
 
-  static void setBandPass(float* coefficients, float fc, float q){
-    float omega = M_PI*fc/2;
+  static void setBandPass(float* coefficients, float omega, float q){
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
     coefficients[0] = K / q * norm;
@@ -83,8 +82,7 @@ public:
     coefficients[4] = - (1 - K / q + K * K) * norm;
   }
 
-  static void setNotch(float* coefficients, float fc, float q){
-    float omega = M_PI*fc/2;
+  static void setNotch(float* coefficients, float omega, float q){
     float K = tanf(omega);
     float norm = 1 / (1 + K / q + K * K);
     coefficients[0] = (1 + K * K) * norm;
@@ -94,8 +92,7 @@ public:
     coefficients[4] = - (1 - K / q + K * K) * norm;
   }
 
-  static void setPeak(float* coefficients, float fc, float q, float gain){
-    float omega = M_PI*fc/2;
+  static void setPeak(float* coefficients, float omega, float q, float gain){
     float K = tanf(omega);
     float V = fabs(gain-0.5)*60 + 1; // Gain
     float norm;
@@ -117,8 +114,7 @@ public:
     }
   }
 
-  static void setLowShelf(float* coefficients, float fc, float gain){
-    float omega = M_PI*fc/2;
+  static void setLowShelf(float* coefficients, float omega, float gain){
     float K = tanf(omega);
     float V = fabs(gain-0.5)*60 + 1; // Gain
     float norm;
@@ -139,8 +135,7 @@ public:
     }
   }
 
-  static void setHighShelf(float* coefficients, float fc, float gain){
-    float omega = M_PI*fc/2;
+  static void setHighShelf(float* coefficients, float omega, float gain){
     float K = tanf(omega);
     float V = fabs(gain-0.5)*60 + 1; // Gain
     float norm;
@@ -160,7 +155,6 @@ public:
       coefficients[4] = - (V - sqrtf(2*V) * K + K * K) * norm;
     }
   }
-
 };
 
 /** 
@@ -169,9 +163,10 @@ public:
  * Each cascaded stage implements a second order filter.
  */
 #define BIQUAD_COEFFICIENTS_PER_STAGE    5
-#define BIQUAD_STATE_VARIABLES_PER_STAGE 2
-class BiquadFilter {
+#define BIQUAD_STATE_VARIABLES_PER_STAGE 2 // 4 for df1, 2 for df2
+class BiquadFilter : public SignalProcessor {
 private:
+  float pioversr;
 #ifdef ARM_CORTEX
   // arm_biquad_casd_df1_inst_f32 df1;
   arm_biquad_cascade_df2T_instance_f32 df2;
@@ -179,7 +174,7 @@ private:
 protected:
   float* coefficients; // stages*5
   float* state; // stages*4 for df1, stages*2 for df2
-  int stages;
+  size_t stages;
   /*
    * The coefficients are stored in the array <code>coefficients</code> in the following order:
    * <pre>
@@ -190,38 +185,40 @@ protected:
    * and so on.  The <code>coeffs</code> array must contain a total of <code>5*stages</code> values.   
    */
   void copyCoefficients(){
-    for(int i=1; i<stages; ++i){
-      coefficients[0+i*5] = coefficients[0];
-      coefficients[1+i*5] = coefficients[1];
-      coefficients[2+i*5] = coefficients[2];
-      coefficients[3+i*5] = coefficients[3];
-      coefficients[4+i*5] = coefficients[4];
-    }
+    for(size_t i=1; i<stages; ++i)
+      memcpy(coefficients+i*BIQUAD_COEFFICIENTS_PER_STAGE, coefficients, BIQUAD_COEFFICIENTS_PER_STAGE*sizeof(float));
   }
   void init(){
 #ifdef ARM_CORTEX
     // arm_biquad_cascade_df1_init_f32(&df1, stages, coefficients, state);
     arm_biquad_cascade_df2T_init_f32(&df2, stages, coefficients, state);
 #else
-    for(int n=0; n<stages*BIQUAD_STATE_VARIABLES_PER_STAGE; n++){
-      state[n]=0;
-    }
+    if(state)
+      memset(state, 0, stages*BIQUAD_STATE_VARIABLES_PER_STAGE*sizeof(float));
 #endif /* ARM_CORTEX */
   }
 public:
   BiquadFilter()
-    : coefficients(NULL), state(NULL), stages(0) {}
+    : pioversr(0), coefficients(NULL), state(NULL), stages(0) {}
 
-  BiquadFilter(float* coefs, float* ste, int sgs) :
-    coefficients(coefs), state(ste), stages(sgs) {
+  BiquadFilter(float sr, float* coefs, float* ste, size_t sgs) :
+    pioversr(M_PI/sr), coefficients(coefs), state(ste), stages(sgs) {
     init();
   }
 
-  int getStages(){
+  void setSampleRate(float sr){
+    pioversr = M_PI/sr;
+  }
+
+  size_t getStages(){
     return stages;
   }
 
-  static int getCoefficientsPerStage(){
+  void setStages(size_t newStages){
+    stages = newStages;
+  }
+
+  static size_t getCoefficientsPerStage(){
     return BIQUAD_COEFFICIENTS_PER_STAGE;
   }
 
@@ -233,7 +230,23 @@ public:
     return FloatArray(state, BIQUAD_STATE_VARIABLES_PER_STAGE*stages);
   }
 
-  FilterStage getFilterStage(int stage){
+  /**
+   * Sets state to point to a different set of values
+   */
+  void setState(FloatArray newState){
+    ASSERT(BIQUAD_STATE_VARIABLES_PER_STAGE*stages == newState.getSize(), "wrong size");
+    state = newState.getData();
+  }
+  
+  /**
+   * Copies state values from an array.
+   */
+  void copyState(FloatArray newState){
+    ASSERT(newState.getSize() == stages*BIQUAD_STATE_VARIABLES_PER_STAGE, "wrong size");
+    getState().copyFrom(newState);
+  }
+
+  FilterStage getFilterStage(size_t stage){
     ASSERT(stage < stages, "Invalid filter stage index");
     FloatArray c(coefficients+BIQUAD_COEFFICIENTS_PER_STAGE*stage, BIQUAD_COEFFICIENTS_PER_STAGE);
     FloatArray s(state+BIQUAD_STATE_VARIABLES_PER_STAGE*stage, BIQUAD_STATE_VARIABLES_PER_STAGE);
@@ -241,12 +254,12 @@ public:
   }
 
   /* process into output, leaving input intact */
-  void process(float* input, float* output, int size){
+  void process(float* input, float* output, size_t size){
 #ifdef ARM_CORTEX
     // arm_biquad_cascade_df1_f32(&df1, input, output, size);
     arm_biquad_cascade_df2T_f32(&df2, input, output, size);
 #else
-    for(int k=0; k<stages; k++){
+    for(size_t k=0; k<stages; k++){
       float b0=getFilterStage(k).getCoefficients()[0];
       float b1=getFilterStage(k).getCoefficients()[1];
       float b2=getFilterStage(k).getCoefficients()[2];
@@ -254,7 +267,7 @@ public:
       float a2=getFilterStage(k).getCoefficients()[4];
       float d1=state[k*BIQUAD_STATE_VARIABLES_PER_STAGE];
       float d2=state[k*BIQUAD_STATE_VARIABLES_PER_STAGE+1];
-      for(int n=0; n<size; n++){ //manually apply filter, one stage
+      for(size_t n=0; n<size; n++){ //manually apply filter, one stage
         float out=b0 * input[n] + d1; 
         d1 = b1 * input[n] + a1 * out + d2;
         d2 = b2 * input[n] + a2 * out;
@@ -267,10 +280,6 @@ public:
   }
 
   /* perform in-place processing */
-  void process(float* buf, int size){
-    process(buf, buf, size);
-  }
-
   void process(FloatArray in){
     process(in, in, in.getSize());
   }
@@ -288,89 +297,109 @@ public:
   }
 
   void setLowPass(float fc, float q){
-    FilterStage::setLowPass(coefficients, fc, q);
+    FilterStage::setLowPass(coefficients, fc*pioversr, q);
     copyCoefficients();
   }
 
   void setHighPass(float fc, float q){
-    FilterStage::setHighPass(coefficients, fc, q);
+    FilterStage::setHighPass(coefficients, fc*pioversr, q);
     copyCoefficients();
   }
 
   void setBandPass(float fc, float q){
-    FilterStage::setBandPass(coefficients, fc, q);
-    copyCoefficients();
-  }
-  void setNotch(float fc, float q){
-    FilterStage::setNotch(coefficients, fc, q);
-    copyCoefficients();
-  }
-  void setPeak(float fc, float q, float gain){
-    FilterStage::setPeak(coefficients, fc, q, gain);
-    copyCoefficients();
-  }
-  void setLowShelf(float fc, float gain){
-    FilterStage::setLowShelf(coefficients, fc, gain);
-    copyCoefficients();
-  }
-  void setHighShelf(float fc, float gain){
-    FilterStage::setHighShelf(coefficients, fc, gain);
+    FilterStage::setBandPass(coefficients, fc*pioversr, q);
     copyCoefficients();
   }
 
-  void setCoefficientsPointer(FloatArray newCoefficients){ //sets coefficients to point to a given pointer
+  void setNotch(float fc, float q){
+    FilterStage::setNotch(coefficients, fc*pioversr, q);
+    copyCoefficients();
+  }
+
+  void setPeak(float fc, float q, float gain){
+    FilterStage::setPeak(coefficients, fc*pioversr, q, gain);
+    copyCoefficients();
+  }
+
+  void setLowShelf(float fc, float gain){
+    FilterStage::setLowShelf(coefficients, fc*pioversr, gain);
+    copyCoefficients();
+  }
+
+  void setHighShelf(float fc, float gain){
+    FilterStage::setHighShelf(coefficients, fc*pioversr, gain);
+    copyCoefficients();
+  }
+
+  /**
+   * Sets coefficients to point to a different set of values
+   */
+  void setCoefficients(FloatArray newCoefficients){
     ASSERT(BIQUAD_COEFFICIENTS_PER_STAGE*stages==newCoefficients.getSize(), "wrong size");
-    coefficients = newCoefficients;
+    coefficients = newCoefficients.getData();
     init();
   }
 
-  void setCoefficients(FloatArray newCoefficients){//copies coefficients to all stages
+  /**
+   * Copies coefficient values from an array.
+   */
+  void copyCoefficients(FloatArray newCoefficients){
     ASSERT(newCoefficients.getSize()==BIQUAD_COEFFICIENTS_PER_STAGE, "wrong size");
-    getFilterStage(0).setCoefficients(newCoefficients);
+    getFilterStage(0).copyCoefficients(newCoefficients);
     copyCoefficients(); //set all the other stages
   }
 
-  static BiquadFilter* create(int stages){
-    return new BiquadFilter(new float[stages*5], new float[stages*2], stages);
-    // for df1: state requires stages*4
-    // return new BiquadFilter(new float[stages*5], new float[stages*4], stages);
+  static BiquadFilter* create(float sr, size_t stages=1){
+    return new BiquadFilter(sr, new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE], new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE], stages);
   }
 
   static void destroy(BiquadFilter* filter){
-    delete filter->coefficients;
-    delete filter->state;
+    delete[] filter->coefficients;
+    delete[] filter->state;
     delete filter;
   }
 };
 
-class StereoBiquadFilter : public BiquadFilter {
+class MultiBiquadFilter : public BiquadFilter, public MultiSignalProcessor {
 private:
-  BiquadFilter right;
+  size_t channels;
+  BiquadFilter* filters;
+protected:
 public:
-  StereoBiquadFilter(float* coefs, float* lstate, float* rstate, int sgs) : 
-    BiquadFilter(coefs, lstate, sgs), 
-    right(coefs, rstate, sgs) {}
-
-  BiquadFilter* getLeftFilter(){
-    return this;
+  MultiBiquadFilter(){}
+  MultiBiquadFilter(float sr, size_t channels, float* coefs, float* states, size_t stages) :
+    BiquadFilter(sr, coefs, states, stages), channels(channels) {
+    filters = new BiquadFilter[channels-1];
+    FloatArray coefficients(coefs, stages*BIQUAD_COEFFICIENTS_PER_STAGE);
+    for(size_t ch=1; ch<channels; ++ch){
+      states += stages*BIQUAD_STATE_VARIABLES_PER_STAGE;
+      filters[ch-1].setSampleRate(sr);
+      filters[ch-1].setStages(stages);
+      filters[ch-1].setState(FloatArray(states, stages*BIQUAD_STATE_VARIABLES_PER_STAGE));
+      filters[ch-1].setCoefficients(coefficients); // shared coefficients
+    }
   }
-
-  BiquadFilter* getRightFilter(){
-    return &right;
+  static MultiBiquadFilter* create(float sr, size_t channels, size_t stages=1){
+    return new MultiBiquadFilter(sr, channels, new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE], new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE*channels], stages);
+  }  
+  static void destroy(MultiBiquadFilter* filter){
+    delete[] filter->coefficients;
+    delete[] filter->state;
+    delete[] filter->filters;
+    delete filter;
   }
-
-  void process(AudioBuffer &buffer){
-    BiquadFilter::process(buffer.getSamples(LEFT_CHANNEL));
-    right.process(buffer.getSamples(RIGHT_CHANNEL));
+  BiquadFilter* getFilter(size_t channel){
+    if(channel == 0)
+      return this;
+    if(channel < channels)
+      return &filters[channel-1];
+    return NULL;
   }
-
-  static StereoBiquadFilter* create(int stages){
-    return new StereoBiquadFilter(new float[stages*5], new float[stages*2], new float[stages*2], stages);
-  }
-
-  static void destroy(StereoBiquadFilter* filter){
-    FloatArray::destroy(filter->right.getState());
-    BiquadFilter::destroy(filter);
+  void process(AudioBuffer &input, AudioBuffer &output){
+    size_t len = min(channels, min(input.getChannels(), output.getChannels()));
+    BiquadFilter::process(input.getSamples(0), output.getSamples(0));
+    for(size_t ch=1; ch<len; ++ch)
+      filters[ch-1].process(input.getSamples(ch), output.getSamples(ch));
   }
 };
 

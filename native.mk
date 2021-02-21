@@ -1,5 +1,6 @@
 BUILDROOT   ?= .
 BUILD       ?= $(BUILDROOT)/Build
+PATCHSOURCE ?= $(BUILDROOT)/PatchSource
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
 BUILDSOURCE  = $(BUILD)/Source
@@ -40,6 +41,11 @@ include $(BUILDROOT)/sources.mk
 C_SRC   += Libraries/KissFFT/kiss_fft.c
 C_SRC   += $(wildcard $(BUILDSOURCE)/*.c)
 CPP_SRC += $(wildcard $(BUILDSOURCE)/*.cpp)
+C_SRC   += $(wildcard $(PATCHSOURCE)/*.c)
+CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
+ifdef MAXIMILIAN
+CPP_SRC := $(filter-out $(PATCHSOURCE)/$(MAXIMILIAN).cpp, $(CPP_SRC))
+endif
 
 # Set up search path
 OBJS = $(addprefix $(BUILD)/Test/,$(notdir $(C_SRC:.c=.o)))
@@ -54,7 +60,7 @@ vpath %.c $(SOURCE) $(LIBSOURCE) $(BUILDSOURCE)
 
 native: $(TESTPATCHES)/PatchRun.cpp $(DEPS) $(OBJS)
 	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTPATCHES)/PatchRun.cpp -I$(BUILD) $(OBJS) -o $(BUILD)/Test/patch
-	@echo Built $(PATCHNAME) native executable in $(BUILD)/Test/patch
+	echo Built $(PATCHNAME) native executable in $(BUILD)/Test/patch
 
 run: native
 	@$(BUILD)/Test/patch

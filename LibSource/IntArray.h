@@ -1,26 +1,22 @@
-class IntArray
-{
-private:
-  int32_t* data;
-  int size;
+#ifndef __IntArray_h__
+#define __IntArray_h__
+
+#include <stdint.h>
+#include "SimpleArray.h"
+#include "FloatArray.h"
+
+class IntArray : public SimpleArray<int32_t> {
 public:
-  IntArray();
-  IntArray(int32_t* data, int size);
-
-  int getSize() const{
-    return size;
-  }
-
-  int getSize(){
-    return size;
-  }
+  IntArray(){}
+  IntArray(int32_t* data, size_t size) :
+    SimpleArray(data, size) {}
 
   void setAll(int32_t value){
   /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   #ifdef ARM_CORTEX
     arm_fill_q31(value, data, size);
   #else
-    for(int n=0; n<size; n++){
+    for(size_t n=0; n<size; n++){
       data[n]=value;
     }
   #endif /* ARM_CORTEX */
@@ -46,7 +42,7 @@ public:
   #ifdef ARM_CORTEX
     arm_add_q31(data, operand2.data, destination.data, size);
   #else
-    for(int n=0; n<size; n++){
+    for(size_t n=0; n<size; n++){
       destination[n]=data[n]+operand2[n];
     }
   #endif /* ARM_CORTEX */
@@ -61,67 +57,7 @@ public:
   /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
     add(operand2, *this);
   } //in-place
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * @param index the index of the element
-   * @return the value of the **index** element of the array
-   * Example usage:
-   * @code
-   * int size=1000;
-   * int32_t content[size]; 
-   * IntArray intArray(content, size);
-   * for(int n=0; n<size; n++)
-   *   content[n]==intArray[n]; //now the IntArray can be indexed as if it was an array
-   * @endcode
-  */
-  int32_t& operator [](const int index){
-    return data[index];
-  }
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * **const** version of operator[]
-  */
-  int32_t& operator [](const int index) const{
-    return data[index];
-  }
-  
-  /**
-   * Compares two arrays.
-   * Performs an element-wise comparison of the values contained in the arrays.
-   * @param other the array to compare against.
-   * @return **true** if the arrays have the same size and the value of each of the elements of the one 
-   * match the value of the corresponding element of the other, or **false** otherwise.
-  */
-  bool equals(const IntArray& other) const{
-    if(size!=other.getSize()){
-      return false;
-    }
-    for(int n=0; n<size; n++){
-      if(data[n]!=other[n]){
-        return false;
-      }
-    }
-    return true;
-  }
-  
-  /**
-   * Casting operator to int32_t*
-   * @return a int32_t* pointer to the data stored in the IntArray
-  */
-  operator int32_t*(){
-    return data;
-  }
-  
-  /**
-   * Get the data stored in the IntArray.
-   * @return a int32_t* pointer to the data stored in the IntArray
-  */
-  int32_t* getData(){
-    return data;
-  }
-  
+
   /**
    * Creates a new IntArray.
    * Allocates size*sizeof(int32_t) bytes of memory and returns a IntArray that points to it.
@@ -154,9 +90,16 @@ public:
 #ifdef ARM_CORTEX
     arm_shift_q31(data, shiftValue, data, size);
 #else
-    #warning TODO
-    
-    //ASSERT(false, "TODO");
+    if(shiftValue >= 0){
+      for(size_t n=0; n<size; n++)
+	data[n] = data[n] << shiftValue;
+    }else{
+      shiftValue = -shiftValue;
+      for(size_t n=0; n<size; n++)
+	data[n] = data[n] >> shiftValue;
+    }
 #endif
   }
 };
+
+#endif // __IntArray_h__

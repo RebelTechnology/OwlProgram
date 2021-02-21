@@ -2,8 +2,6 @@
 #define __ComplexShortArray_h__
 
 #include "ShortArray.h"
-#include "basicmaths.h"
-class ComplexIntArray;
 
 /**
 * A structure defining a fixed point complex number as two members of type int16_t.
@@ -31,14 +29,14 @@ struct ComplexShort {
   Computes and returns the phase of the complex number.
   @return The phase of the complex number.
   */  
-  float getPhase();
+  int16_t getPhase();
   
   /**
   Set the phase of the complex number.
   Set the phase of the complex number, keeping the magnitude unaltered.
   @param phase The new phase of the complex number
   */
-  void setPhase(float phase){
+  void setPhase(int16_t phase){
     int16_t magnitude = getMagnitude();
     setPolar(magnitude, phase);
   }
@@ -49,7 +47,7 @@ struct ComplexShort {
   @param magnitude The new magnitude of the complex number
   */
   void setMagnitude(int16_t magnitude){
-    float phase = getPhase();
+    int16_t phase = getPhase();
     setPolar(magnitude, phase);
   }
   
@@ -58,30 +56,23 @@ struct ComplexShort {
   @param magnitude The new magnitude of the complex number
   @param phase The new phase of the complex number
   */
-  void setPolar(int16_t magnitude, float phase);
+  void setPolar(int16_t magnitude, int16_t phase);
+
+  bool operator==(const ComplexShort& other) const {
+    return re == other.re && im == other.im;
+  }
+  
+  bool operator!=(const ComplexShort& other) const {
+    return re != other.re || im != other.im;
+  }
 };
 
-class ComplexShortArray {
-private:
-  ComplexShort* data;
-  unsigned int size;
+class ComplexShortArray : public SimpleArray<ComplexShort> {
 public:
-  /**Constructor
+  ComplexShortArray(){}
+  ComplexShortArray(ComplexShort* data, size_t size) :
+    SimpleArray(data, size) {}
 
-    Initializes size to 0.
-  */
-  ComplexShortArray() :
-    data(NULL), size(0) {}
-  
-  /**
-    Constructor.
-      
-    @param array A pointer to an array of ComplexShort
-    @param size The length of the rray
-  */
-  ComplexShortArray(ComplexShort* array, unsigned int size) :
-    data(array), size(size) {}
-      
   /** 
     The real part of an element of the array.
       
@@ -187,10 +178,6 @@ public:
    * @param operand2 second operand for the sum
   */
   void subtract(ComplexShortArray operand2);
-
-  unsigned int getSize() const{
-    return size;
-  }
   
   /**
     The value of the element with the maximum magnitude in the array.
@@ -231,68 +218,6 @@ public:
    * @param factor The value by which all the elements of the array are multiplied.
    */
   void scale(int16_t factor);
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * @param index The index of the element
-   * @return the Value of the <code>index</code> element of the array
-   * Example usage:
-   * @code
-   * int size=1000;
-   * int16_t content[size]; 
-   * ComplexShortArray complexShortArray(content, size);
-   * for(int n=0; n<size; n+=2){//now the ComplexShortArray can be indexed as if it was an array
-   *   content[n]==complexShortArray[n/2].re; 
-   *   content[n+1]==complexShortArray[n/2].im;
-   * }
-   * @endcode
-  */
-  ComplexShort& operator [](const int index){
-    return data[index];
-  }
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * 
-   * <code>const</code> version of operator[]
-  */
-  ComplexShort& operator [](const int i) const{
-    return data[i];
-  }
-
-  /*
-   * Casting operator to ComplexShort*
-   * @return A ComplexShort* pointer to the data stored in the ComplexShortArray
-  */  
-  operator ComplexShort*() {
-    return data;
-  }
-  /**
-   * Get the data stored in the ComplexShortArray.
-   * @return a ComplexShort* pointer to the data stored in the ComplexShortArray
-  */
-  ComplexShort* getData(){
-    return data;
-  }
-
-  /**
-   * Compares two arrays.
-   * Performs an element-wise comparison of the values contained in the arrays.
-   * @param other the array to compare against.
-   * @return <code>true</code> if the arrays have the same size and the value of each of the elements of the one 
-   * match the value of the corresponding element of the other, or <code>false</code> otherwise.
-  */
-  bool equals(const ComplexShortArray other) const{
-    if(size!=other.getSize()){
-      return false;
-    }
-    for(int n=0; n<size; ++n){
-      if(data[n].re!=other[n].re || data[n].im!=other[n].im){
-        return false;
-      }
-    }
-    return true;
-  }
   
   /**
    * Creates a new ComplexShortArray.
@@ -453,114 +378,5 @@ public:
    * @param[out] destination The destination array.
   */
   void setMagnitude(ShortArray magnitude, int offset, int count, ComplexShortArray destination);
-};
-
-/**
-* A structure defining a fixed point complex number as two members of type int32_t.
-*/
-struct ComplexInt {
-  /**
-  The real part of the complex number.
-  */
-  int32_t re;
-  
-  /**
-  The imaginary part of the complex number.
-  */
-  int32_t im;
-  
-  /**
-  Get the magnitude of the complex number.
-  Computes and returns the magnitude of the complex number.
-  @return The magnitude of the complex number.
-  */
-};
-
-class ComplexIntArray {
-private:
-  ComplexInt* data;
-  unsigned int size;
-public:
-  /**Constructor
-
-    Initializes size to 0.
-  */
-  ComplexIntArray() :
-    data(NULL), size(0) {}
-  
-  /**
-    Constructor.
-      
-    @param array A pointer to an array of ComplexShort
-    @param size The length of the rray
-  */
-  ComplexIntArray(ComplexInt* array, unsigned int size) :
-    data(array), size(size) {}
-
-  static ComplexIntArray create(unsigned int size){
-    return ComplexIntArray(new ComplexInt[size], size);
-  }
-
-  static void destroy(ComplexIntArray array){
-    delete array.data;
-  }
-
-  ComplexInt& operator [](const int index){
-    return data[index];
-  }
-  
-  ComplexInt& operator [](const int i) const{
-    return data[i];
-  }
-
-  void add(ComplexIntArray operand2, ComplexIntArray destination){
-    //ASSERT(operand2.size == size && destination.size >= size, "Arrays size mismatch");
-#ifdef ARM_CORTEX
-    arm_add_q31((int32_t*)data, (int32_t*)operand2.getData(), (int32_t*)destination.getData(), size*2);
-#else
-    for(int n=0; n<size; n++){
-      destination[n].re = data[n].re + operand2[n].re;
-      destination[n].im = data[n].im + operand2[n].im;
-    }
-#endif /* ARM_CORTEX */  
-  }
-
-  void add(ComplexIntArray operand2){
-    add(operand2, *this);
-  }
-  
-  void copyFrom(ComplexShortArray operand2){
-#ifdef ARM_CORTEX
-    arm_q15_to_q31((int16_t*)operand2.getData(), (int32_t*)data, size * 2);
-#else
-    for(int n = 0; n < size; ++n){
-      data[n].re = operand2[n].re;
-      data[n].im = operand2[n].im ;
-    }
-#endif
-  }
-  
-  void copyTo(ComplexShortArray operand2){
-#ifdef ARM_CORTEX
-    arm_q31_to_q15((int32_t*)data, (int16_t*)operand2.getData(), size * 2);
-#else
-    for(int n = 0; n < size; ++n){
-      data[n].re = (int16_t)operand2[n].re;
-      data[n].im = (int16_t)operand2[n].im ;
-    }
-#endif
-  }
-  
-  operator ComplexInt*() {
-    return data;
-  }
-
-  ComplexInt* getData(){
-    return data;
-  }
-
-  unsigned int getSize(){
-    return size;
-  }
 };
 #endif // __ComplexShortArray_h__

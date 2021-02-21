@@ -14,12 +14,6 @@ static int16_t saturateTo16(int64_t value){
 }
 #endif
 
-ShortArray::ShortArray() :
- data(NULL), size(0) {}
-
-ShortArray::ShortArray(int16_t* d, size_t s) :
- data(d), size(s) {}
-
 void ShortArray::getMin(int16_t* value, int* index){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -589,20 +583,14 @@ void ShortArray::shift(int shiftValue){
 #ifdef ARM_CORTEX
     arm_shift_q15(data, shiftValue, data, size);
 #else
-    for(size_t n = 0; n < getSize(); ++n){
-      int16_t value = data[n];
-      if(shiftValue > 0){
-        int32_t v = (int32_t)value << shiftValue;
-        if(v < SHRT_MIN)
-          v = SHRT_MIN;
-        else if (v > SHRT_MAX)
-          v = SHRT_MAX;
-        value = (int16_t)v;
-      } else {
-        value = value >> -shiftValue;
-      }
-      data[n] = value;
-    } 
+    if(shiftValue >= 0){
+      for(size_t n=0; n<size; n++)
+	data[n] = data[n] << shiftValue;
+    }else{
+      shiftValue = -shiftValue;
+      for(size_t n=0; n<size; n++)
+	data[n] = data[n] >> shiftValue;
+    }
 #endif
   }
 

@@ -3,12 +3,6 @@
 #include "message.h"
 #include <string.h>
 
- FloatArray::FloatArray() :
-   data(NULL), size(0) {}
-
- FloatArray::FloatArray(float* d, size_t s) :
-   data(d), size(s) {}
-
 void FloatArray::getMin(float* value, int* index){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -92,11 +86,6 @@ void FloatArray::rectify(FloatArray& destination){ //this is actually "copy data
 #endif  
 }
 
-void FloatArray::rectify(){//in place
-  /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  rectify(*this);
-}
-
 void FloatArray::reverse(FloatArray& destination){ //this is actually "copy data with reverse"
   if(destination==*this){ //make sure it is not called "in-place"
     reverse();
@@ -119,10 +108,6 @@ void FloatArray::reciprocal(FloatArray& destination){
   float* data = getData();
   for(size_t n=0; n<getSize(); n++)
     destination[n] = 1.0f/data[n];
-}
-
-void FloatArray::reciprocal(){//in place
-  reciprocal(*this);
 }
 
 float FloatArray::getRms(){
@@ -232,56 +217,17 @@ FloatArray FloatArray::subArray(int offset, size_t length){
   return FloatArray(data+offset, length);
 }
 
+#if defined ARM_CORTEX
 void FloatArray::copyTo(FloatArray destination){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  copyTo(destination, min(size, destination.getSize()));
+  ASSERT(destination.size >= size, "Array too small");
+  arm_copy_f32(data, destination.data, size);
 }
 
 void FloatArray::copyFrom(FloatArray source){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  copyFrom(source, min(size, source.getSize()));
+  ASSERT(source.size >= size, "Array too small");
+  arm_copy_f32(source.data, data, size);
 }
-
-void FloatArray::copyTo(float* other, size_t length){
-  ASSERT(size >= length, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_f32(data, other, length);
-#else
-  memcpy((void *)other, (void *)getData(), length*sizeof(float));
-#endif /* ARM_CORTEX */
-}
-
-void FloatArray::copyFrom(float* other, size_t length){
-  ASSERT(size >= length, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_f32(other, data, length);
-#else
-  memcpy((void *)getData(), (void *)other, length*sizeof(float));
-#endif /* ARM_CORTEX */
-}
-
-void FloatArray::insert(FloatArray source, int sourceOffset, int destinationOffset, size_t samples){
-  ASSERT(size >= destinationOffset+samples, "Array too small");
-  ASSERT(source.size >= sourceOffset+samples, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_f32(source.data+sourceOffset, data+destinationOffset, samples);  
-#else
-  memcpy((void*)(getData()+destinationOffset), (void*)(source.getData()+sourceOffset), samples*sizeof(float));
-#endif /* ARM_CORTEX */
-}
-
-void FloatArray::insert(FloatArray source, int destinationOffset, size_t samples){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  insert(source, 0, destinationOffset, samples);
-}
-
-void FloatArray::move(int fromIndex, int toIndex, size_t samples){
-  ASSERT(size >= toIndex+samples, "Array too small");
-  memmove(data+toIndex, data+fromIndex, samples*sizeof(float)); //TODO: evaluate if it is appropriate to use arm_copy_f32 for this method
-}
+#endif
 
 void FloatArray::setAll(float value){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
@@ -389,18 +335,13 @@ void FloatArray::multiply(float scalar, FloatArray destination){
 }
 
 void FloatArray::negate(FloatArray& destination){//allows in-place
-  /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_negate_f32(data, destination.getData(), size); 
-  #else
+#else
   for(size_t n=0; n<size; n++){
     destination[n]=-data[n];
   }
-  #endif /* ARM_CORTEX */
-}
-void FloatArray::negate(){
-  /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  negate(*this);
+#endif /* ARM_CORTEX */
 }
 
 void FloatArray::noise(){
@@ -417,17 +358,16 @@ void FloatArray::noise(float min, float max){
 
 void FloatArray::convolve(FloatArray operand2, FloatArray destination){
   ASSERT(destination.size >= size + operand2.size -1, "Destination array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
   arm_conv_f32(data, size, operand2.data, operand2.size, destination);
 #else
-  size_t size2=operand2.getSize();
-  for (size_t n=0; n<size+size2-1; n++){
-    int n1=n;
-    destination[n] =0;
+  size_t size2 = operand2.getSize();
+  for(size_t n=0; n<size+size2-1; n++){
+    size_t n1 = n;
+    destination[n] = 0;
     for(size_t k=0; k<size2; k++){
       if(n1>=0 && n1<size)
-        destination[n]+=data[n1]*operand2[k];
+        destination[n] += data[n1]*operand2[k];
       n1--;
     }
   }
@@ -451,7 +391,7 @@ void FloatArray::convolve(FloatArray operand2, FloatArray destination, int offse
   */
   size_t size2=operand2.getSize();
   for (size_t n=offset; n<offset+samples; n++){
-    int n1=n;
+    size_t n1=n;
     destination[n] =0; //this should be [n-offset]
     for(size_t k=0; k<size2; k++){
       if(n1>=0 && n1<size)
@@ -467,6 +407,7 @@ void FloatArray::correlate(FloatArray operand2, FloatArray destination){
   /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   correlateInitialized(operand2, destination);
 }
+
 void FloatArray::correlateInitialized(FloatArray operand2, FloatArray destination){
   ASSERT(destination.size >= size+operand2.size-1, "Destination array too small"); //TODO: change CMSIS docs, which state a different size
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
@@ -497,20 +438,23 @@ void FloatArray::decibelToGain(FloatArray destination){
 
 void FloatArray::ramp(float from, float to){
   float step = (to-from)/size;
-  float value = from;
   for(size_t i=0; i<size; i++){
     data[i] = from;
     from += step;
   }
 }
 
+void FloatArray::scale(float from, float to, FloatArray destination){
+  float step = (to-from)/size;
+  for(size_t i=0; i<size; i++){
+    data[i] *= from;
+    from += step;
+  }  
+}
+
 void FloatArray::tanh(FloatArray destination){
   for(size_t i=0; i<size; i++)
     destination[i] = tanhf(data[i]);  
-}
-
-void FloatArray::tanh(){
-  tanh(*this);
 }
 
 FloatArray FloatArray::create(int size){
@@ -520,5 +464,5 @@ FloatArray FloatArray::create(int size){
 }
 
 void FloatArray::destroy(FloatArray array){
-  delete array.data;
+  delete[] array.data;
 }

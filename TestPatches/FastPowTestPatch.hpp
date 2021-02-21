@@ -18,7 +18,7 @@ public:
       int errs = 0;
       int tests = 0;
       for(int n = -1000; n < 1000; n++){
-        float base = rand()/(float)RAND_MAX * 10;
+        float base = randf() * 10;
         float exponent = n*10/1000.f;
         float approx = fast_powf(base, exponent);
         float exact = powf(base, exponent);

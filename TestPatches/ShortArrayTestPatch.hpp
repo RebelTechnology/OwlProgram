@@ -1,11 +1,14 @@
 #include "TestPatch.hpp"
 #include "ShortArray.h"
 #include <limits.h>
-#include <stdio.h>
 
 class ShortArrayTestPatch : public TestPatch {
 public:
   ShortArrayTestPatch(){
+    {
+      TEST("sizeof");
+      CHECK(sizeof(ShortArray) == sizeof(int16_t*)+sizeof(size_t));
+    }
     {
       TEST("Default ctor");
       ShortArray empty;
@@ -404,10 +407,6 @@ public:
           int16_t value = ar[n];
           if(shiftValue > 0){
             int32_t v = (int32_t)value << shiftValue;
-            if(v < SHRT_MIN)
-              v = SHRT_MIN;
-            else if (v > SHRT_MAX)
-              v = SHRT_MAX;
             value = (int16_t)v;
           } else {
             value = value >> -shiftValue;

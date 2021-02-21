@@ -77,11 +77,11 @@ public:
     //  }
     //  lastButton = button;
     
-    env.getEnvelope(envBuffer);
-    fa.multiply(envBuffer);
+    // env.generate(envBuffer);
+    // fa.multiply(envBuffer);
+    // or:
+    env.process(fa, fa);
     fa.multiply(0.2);
-    
-    static float maxValue = 0;
   }
 };
 

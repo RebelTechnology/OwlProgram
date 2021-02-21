@@ -5,39 +5,60 @@
 
 class ChirpOscillator : public Oscillator {
 private:
-  const float fs;
+  float sr;
   float phase;
   float incr;
-public:
+  float basefreq;
   float rate;
-  ChirpOscillator(float sr)
-    : fs(sr), phase(0.0f), incr(1.0f){}
+public:
+  ChirpOscillator(float sr=48000)
+    : sr(sr), phase(0), incr(0), basefreq(0), rate(0) {}
   void setFrequency(float freq){
-    incr = freq*2*M_PI/fs;
+    incr = freq*2*M_PI/sr;
+    basefreq = freq;
   }
-  void setRate(float r){
-    // should be: rate 0: 1 (constant), rate -1: 1-0.5/sr (halved in a second), rate 1: 1+1/sr (doubled in a second)
-    if(r < 0)
-      rate = 1.0f - 10*(1/(1-r))/fs;
-    else
-      rate = 1.0f + 10*(1/(1+r))/fs;
+  float getFrequency(){
+    return basefreq;
+  }
+  void setSampleRate(float sample_rate){
+    sr = sample_rate;
+  }
+  float getSampleRate(){
+    return sr;
   }
   /**
-   * Set expontential decay rate.
+   * Set rate of change: positive for ascending chirp, negative for descending.
+   * +1 doubles frequency in one second
+   * -1 halves frequency in one second
    */
-  void setDecay(float d){
-    setRate(-(d+1/fs));
+  void setRate(float r){
+    rate = 1 + r/sr;
   }
   void trigger(){
+    incr = basefreq*2*M_PI/sr;
+    reset();
+  }
+  void reset(){
     phase = 0.0f;
   }
-  float getNextSample(){
+  float getPhase(){
+    return phase;
+  }
+  void setPhase(float phase){
+    this->phase = phase;
+  }
+  float generate(){
     float sample = sinf(phase);
     phase += incr;
     incr *= rate;
-    // phase %= 2*M_PI;
-    // if(phase >= 2*M_PI)
-    //   phase -= 2*M_PI;
+    if(phase >= 2*M_PI)
+      phase -= 2*M_PI;
+    return sample;
+  }
+  float generate(float fm){
+    float sample = sinf(phase);
+    phase += incr + fm;
+    incr *= rate;
     return sample;
   }
   static ChirpOscillator* create(float sr){

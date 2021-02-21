@@ -6,30 +6,24 @@
 
 class WavetableOscillator : public Oscillator {
 private:
-  float multiplier;
+  float mul;
   FloatArray wave;
   float acc;
   float inc;
 public:
   WavetableOscillator(float sr, const FloatArray wavetable);
-  void setSampleRate(float value);
+  void setSampleRate(float sr);
+  float getSampleRate();
   void setFrequency(float freq);
+  float getFrequency();
   float getSample(float phase);
-  float getNextSample();
-  void getSamples(FloatArray samples);
+  void setPhase(float phase);
+  float getPhase();
+  float generate();
+  float generate(float fm);
+  void generate(FloatArray samples);
   static WavetableOscillator* create(float sr, size_t size);
   static void destroy(WavetableOscillator* osc);
-};
-
-class BandPassWavetableOscillator : public Oscillator {
-public:
-  BandPassWavetableOscillator(float sr, const FloatArray wavetable);
-  void setSampleRate(float value);
-  void setFrequency(float freq);
-  float getSample(float phase);
-  float getNextSample();
-  void getSamples(FloatArray samples);
-
 };
 
 #endif /* __WavetableOscillator_h__ */

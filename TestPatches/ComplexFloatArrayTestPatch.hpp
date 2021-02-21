@@ -67,7 +67,7 @@ public:
       assertr(cfa[n].re==data[n].re,"ComplexFloat& operator []");
       assertr(cfa[n].im==data[n].im,"ComplexFloat& operator []");
       assertr((ComplexFloat*)cfa==data,"(ComplexFloat*)cfa==data");
-      assertr((float*)cfa==(float *)data,"(ComplexFloat*)cfa==data");
+      assertr((float*)cfa.getData()==(float *)data,"(ComplexFloat*)cfa==data");
       assertr(&cfa[n]==&data[n],"cfa[n]==data[n]");
       
       //check that indexing works properly overlaying struct and float

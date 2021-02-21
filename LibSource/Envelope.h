@@ -2,9 +2,12 @@
 #define ENVELOPE_HPP
 
 #include "FloatArray.h"
+#include "SignalGenerator.h"
+#include "SignalProcessor.h"
 
-class Envelope {
+class Envelope : public SignalGenerator, SignalProcessor {
 public:
+  using SignalGenerator::generate;
   virtual void trigger(){
     trigger(true, 0);
   }
@@ -16,6 +19,16 @@ public:
     gate(state, 0);
   }
   virtual void gate(bool state, int gateDelay){}
+  virtual float process(float input){
+    return input*generate();
+  }
+  /**
+   * Attenuate samples in @param input by envelope and place results in @param output
+   */
+  virtual void process(FloatArray input, FloatArray output){
+    for(size_t n = 0; n < output.getSize(); n++)
+      output[n] = input[n]*generate();
+  }
 };
 
 /**
@@ -27,14 +40,14 @@ private:
   enum EnvelopeTrigger { kGate, kTrigger };
 
 public:
-  AdsrEnvelope(float newSampleRate);
+  AdsrEnvelope(float sampleRate=48000);
   virtual ~AdsrEnvelope();
-  void setSampleRate(float sampleRate){
-    samplePeriod = 1.0/sampleRate;
-  }
+  using Envelope::process;
+  using SignalGenerator::generate;
+  void setSampleRate(float sampleRate);
   void setAttack(float newAttack);
   void setDecay(float newDecay);
-  void setRelease(float newRelase);
+  void setRelease(float newRelease);
   void setSustain(float newSustain);
   void trigger();
   void trigger(bool state);
@@ -44,17 +57,37 @@ public:
   void gate(bool state, int gateDelay);
   float getLevel();
   void setLevel(float newLevel);
-  float getNextSample(); // increments envelope one step
-  void getEnvelope(FloatArray output); // increments envelope by output buffer length
-  void attenuate(FloatArray buf); // increments envelope by buffer length
-  static AdsrEnvelope* create(float sr){
-    return new AdsrEnvelope(sr);
+  /**
+   * Produce the next envelope sample.
+   */
+  float generate();
+  [[deprecated("use generate() instead.")]]
+  float getNextSample(){
+    return generate(); // increments envelope one step
+  }  
+  [[deprecated("use generate() instead.")]]
+  void getEnvelope(FloatArray output){
+    generate(output); // increments envelope by output buffer length
+  }
+  [[deprecated("use process() instead.")]]
+  void attenuate(FloatArray buf){
+    process(buf, buf); // increments envelope by buffer length
+  }
+  static AdsrEnvelope* create(float sampleRate){
+    return new AdsrEnvelope(sampleRate);
+  }
+  static AdsrEnvelope* create(float a, float d, float s, float r, float sampleRate){
+     AdsrEnvelope* env = new AdsrEnvelope(sampleRate);
+     env->setAttack(a);
+     env->setDecay(d);
+     env->setSustain(s);
+     env->setRelease(r);
+     return env;
   }
   static void destroy(AdsrEnvelope* env){
     delete env;
   }
 private:
-  static const float minTime;
   float samplePeriod;
   EnvelopeStage stage;
   EnvelopeTrigger trig;
