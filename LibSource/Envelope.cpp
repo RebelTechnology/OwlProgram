@@ -9,9 +9,7 @@ void EnvelopeGenerator::calculateMultiplier(double startLevel,
 }
 */
 
-const float AdsrEnvelope::minTime = 0.001;
-
-AdsrEnvelope::AdsrEnvelope(float sampleRate) : 
+AdsrEnvelope::AdsrEnvelope(float sampleRate) :
   samplePeriod(1.0/sampleRate),
   stage(kIdle),
   trig(kGate),
@@ -27,24 +25,33 @@ AdsrEnvelope::AdsrEnvelope(float sampleRate) :
 
 AdsrEnvelope::~AdsrEnvelope(){}
 
+void AdsrEnvelope::setSampleRate(float sampleRate){
+  samplePeriod = 1.0/sampleRate;
+}
+
 void AdsrEnvelope::setAttack(float newAttack){
-  newAttack = newAttack > minTime ? newAttack : minTime;
-  attackIncrement = samplePeriod / newAttack;
+  if(newAttack > 0)
+    attackIncrement = samplePeriod / newAttack;
+  else
+    attackIncrement = 1;
 }
 
 void AdsrEnvelope::setDecay(float newDecay){
-  newDecay = newDecay > minTime ? newDecay : minTime;
-  decayIncrement = - samplePeriod / newDecay;
+  if(newDecay > 0)
+    decayIncrement = - samplePeriod / newDecay;
+  else
+    decayIncrement = - 1;
 }
 
 void AdsrEnvelope::setRelease(float newRelease){
-  newRelease = newRelease > minTime ? newRelease : minTime;
-  releaseIncrement = - samplePeriod / newRelease;
+  if(newRelease > 0)
+    releaseIncrement = - samplePeriod / newRelease;
+  else
+    releaseIncrement = -1;
 }
 
 void AdsrEnvelope::setSustain(float newSustain){
   sustain = newSustain;
- // TODO: in the real world, you would probably glide to the new sustain level at a rate determined by either decay or attack
 }
 
 void AdsrEnvelope::setRetrigger(bool state){
@@ -84,17 +91,7 @@ void AdsrEnvelope::setLevel(float newLevel){
   level = newLevel;
 }
 
-void AdsrEnvelope::attenuate(FloatArray output){
-  for(size_t n = 0; n < output.getSize(); n++)
-    output[n] *= getNextSample();
-}
-
-void AdsrEnvelope::getEnvelope(FloatArray output){
-  for(size_t n = 0; n < output.getSize(); n++)
-    output[n] = getNextSample();
-}
-
-float AdsrEnvelope::getNextSample(){
+float AdsrEnvelope::generate(){
   if(gateTime == 0){
     stage = kAttack;
     if(trig == kTrigger){

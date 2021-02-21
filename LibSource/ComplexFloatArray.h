@@ -65,27 +65,23 @@ struct ComplexFloat {
     re = magnitude*cosf(phase);
     im = magnitude*sinf(phase);
   }
+
+  bool operator==(const ComplexFloat& other) const {
+    return re == other.re && im == other.im;
+  }
+  
+  bool operator!=(const ComplexFloat& other) const {
+    return re != other.re || im != other.im;
+  }
+
 };
 
-class ComplexFloatArray {
-private:
-  ComplexFloat* data;
-  size_t size;
+class ComplexFloatArray : public SimpleArray<ComplexFloat> {
 public:
-  /**Constructor
-    Initializes size to 0.
-  */
-  ComplexFloatArray() :
-    data(NULL), size(0) {}
-  
-  /**
-    Constructor.      
-    @param array A pointer to an array of ComplexFloat
-    @param size The length of the rray
-  */
-  ComplexFloatArray(ComplexFloat* array, size_t size) :
-    data(array), size(size) {}
-      
+  ComplexFloatArray(){}
+  ComplexFloatArray(ComplexFloat* data, size_t size) :
+    SimpleArray(data, size) {}
+    
   /** 
     The real part of an element of the array.      
     @param i The index of the element
@@ -190,10 +186,6 @@ public:
    * @param operand2 second operand for the sum
   */
   void subtract(ComplexFloatArray operand2);
-
-  size_t getSize() const{
-    return size;
-  }
   
   /**
     The value of the element with the maximum magnitude in the array.
@@ -234,77 +226,6 @@ public:
    * @param factor The value by which all the elements of the array are multiplied.
    */
   void scale(float factor);
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * @param index The index of the element
-   * @return the Value of the <code>index</code> element of the array
-   * Example usage:
-   * @code
-   * int size=1000;
-   * float content[size]; 
-   * ComplexFloatArray complexFloatArray(content, size);
-   * for(size_t n=0; n<size; n+=2){//now the ComplexFloatArray can be indexed as if it was an array
-   *   content[n]==complexFloatArray[n/2].re; 
-   *   content[n+1]==complexFloatArray[n/2].im;
-   * }
-   * @endcode
-  */
-  ComplexFloat& operator [](const int index){
-    return data[index];
-  }
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * 
-   * <code>const</code> version of operator[]
-  */
-  ComplexFloat& operator [](const int i) const{
-    return data[i];
-  }
-
-  /**
-   * Casting operator to ComplexFloat*
-   * @return A ComplexFloat* pointer to the data stored in the ComplexFloatArray
-  */  
-  operator ComplexFloat*() {
-    return data;
-  }
-  
-  /**
-   * Casting operator to float*
-   * @return A float* pointer to the data stored in the ComplexFloatArray
-  */ 
-  operator float*() {
-    return (float *)data;
-  }
-  
-  /**
-   * Get the data stored in the ComplexFloatArray.
-   * @return a ComplexFloat* pointer to the data stored in the ComplexFloatArray
-  */
-  ComplexFloat* getData(){
-    return data;
-  }
-
-  /**
-   * Compares two arrays.
-   * Performs an element-wise comparison of the values contained in the arrays.
-   * @param other the array to compare against.
-   * @return <code>true</code> if the arrays have the same size and the value of each of the elements of the one 
-   * match the value of the corresponding element of the other, or <code>false</code> otherwise.
-  */
-  bool equals(const ComplexFloatArray other) const{
-    if(size!=other.getSize()){
-      return false;
-    }
-    for(size_t n=0; n<size; n++){
-      if(data[n].re!=other[n].re || data[n].im!=other[n].im){
-        return false;
-      }
-    }
-    return true;
-  }
   
   /**
    * Creates a new ComplexFloatArray.

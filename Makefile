@@ -76,6 +76,10 @@ LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
 FIRMWARESENDER ?= Tools/FirmwareSender
 
+# set up tests
+TEST_FILES = $(notdir $(wildcard $(BUILDROOT)/TestPatches/*TestPatch.hpp))
+TESTS = $(filter-out ShortFastFourierTest, $(TEST_FILES:%Patch.hpp=%))
+
 export BUILD BUILDROOT TARGET
 export PATCHNAME PATCHCLASS PATCHSOURCE 
 export PATCHFILE PATCHIN PATCHOUT
@@ -184,13 +188,10 @@ test: $(DEPS) ## test patch locally
 run: $(DEPS) ## run patch locally
 	@$(MAKE) -s -f native.mk run
 
-check: ## run tests
-	@$(MAKE) -s TEST=ComplexFourierTransformTest test
-	@$(MAKE) -s TEST=FloatArrayTest test
-	@$(MAKE) -s TEST=ShortArrayTest test
-	@$(MAKE) -s TEST=FastExpTest test
-	@$(MAKE) -s TEST=FastLogTest test
-	@$(MAKE) -s TEST=FastPowTest test
+check:
+	@for nm in $(TESTS) ; do \
+		$(MAKE) -s TEST=$$nm test || exit;\
+	done
 
 help: ## show this help
 	@echo 'Usage: make [target] ...'

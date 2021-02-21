@@ -7,24 +7,35 @@
 
 class PolyBlepOscillator : public Oscillator {
 private:
-  float multiplier;
+  float mul;
   stmlib::Oscillator osc;
-  float frequency, shape, pw;
+  float nfreq, shape, pw;
 public:
-  PolyBlepOscillator(float sr=48000.0);
-  void setSampleRate(float value);
-  void setFrequency(float value);
+  PolyBlepOscillator(float sr=48000);
+  PolyBlepOscillator(float freq, float sr);
+  void setSampleRate(float sr);
+  float getSampleRate();
+  void setFrequency(float freq);
+  float getFrequency();
   /** set waveform shape: 0.0 for saw, 1.0 for square wave */
   void setShape(float value);
+  float getShape();
   /** set square wave pulse width: 0.0 to 1.0 for 0% to 100% */
   void setPulseWidth(float value);
-  float getNextSample();
+  float getPulseWidth();
+  void setPhase(float phase);
+  float getPhase();
+  float generate();
+  float generate(float fm);
   /* put a block of output samples into @param output */
-  void getSamples(FloatArray output);
+  void generate(FloatArray output);
+  /* put a block of output samples into @param output, frequency modulated by @param fm */
+  void generate(FloatArray output, FloatArray fm);
   /* put a block of output samples into @param samples, 
      with frequency determined by samples in @param frequency */
-  void getSamples(FloatArray output, FloatArray frequency);
+  void getSamples(FloatArray output, FloatArray freq);
   static PolyBlepOscillator* create(float sr);
+  static PolyBlepOscillator* create(float freq, float sr);
   static void destroy(PolyBlepOscillator* osc);
 };
 

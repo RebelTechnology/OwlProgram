@@ -18,7 +18,7 @@ public:
   }
   void processAudio(AudioBuffer &buffer){
     FloatArray left = buffer.getSamples(LEFT_CHANNEL);
-    filter->processBlock(left);
+    filter->process(left, left);
   }
 };
 

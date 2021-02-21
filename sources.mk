@@ -1,10 +1,12 @@
 C_SRC   += Source/font.c
-C_SRC   += LibSource/fastpow.c LibSource/fastlog.c
+C_SRC   += LibSource/fastpow.c
+C_SRC   += LibSource/fastlog.c
 C_SRC   += LibSource/basicmaths.c
 CPP_SRC += LibSource/FloatArray.cpp
 CPP_SRC += LibSource/ComplexFloatArray.cpp
 CPP_SRC += LibSource/FastFourierTransform.cpp
 CPP_SRC += LibSource/ShortArray.cpp
+CPP_SRC += LibSource/ComplexShortArray.cpp
 CPP_SRC += LibSource/Envelope.cpp
 CPP_SRC += LibSource/VoltsPerOctave.cpp
 CPP_SRC += LibSource/Window.cpp

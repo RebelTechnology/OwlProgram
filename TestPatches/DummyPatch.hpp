@@ -195,6 +195,9 @@ void Patch::registerParameter(PatchParameterId pid, const char* name){
   printf("Register parameter %c: %s\n", 'A'+pid, name);
 }  
 
+float Patch::getElapsedBlockTime(){ return 0; }
+int Patch::getElapsedCycles(){ return 0; }
+
 void Patch::processMidi(MidiMessage msg){}
 
 void Patch::sendMidi(MidiMessage msg){

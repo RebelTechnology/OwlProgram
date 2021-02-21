@@ -2,27 +2,41 @@
 #define __FloatArray_h__
 
 #include <cstddef>
+#include "SimpleArray.h"
 
 /**
  * This class contains useful methods for manipulating arrays of floats.
  * It also provides a convenient handle to the array pointer and the size of the array.
  * FloatArray objects can be passed by value without copying the contents of the array.
  */
-class FloatArray {
-private:
-  float* data;
-  size_t size;
+class FloatArray : public SimpleArray<float> {
 public:
-  FloatArray();
-  FloatArray(float* data, size_t size);
+  FloatArray(){}
+  FloatArray(float* data, size_t size) :
+    SimpleArray(data, size) {}
 
-  size_t getSize() const{
-    return size;
-  }
+#ifdef ARM_CORTEX // shadow methods with optimised implementations
+  /**
+   * Copies the content of the array to another array.
+   * @param[out] destination the destination array
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  */
+  void copyTo(FloatArray destination);
 
-  size_t getSize(){
-    return size;
-  }
+  /**
+   * Copies the content of an array into another array.
+   * @param[in] source the source array
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+  */
+  void copyFrom(FloatArray source);
+#endif
+
+  /**
+   * Set all the values in the array.
+   * Sets all the elements of the array to **value**.
+   * @param[in] value all the elements are set to this value.
+  */
+  void setAll(float value);
 
   /**
    * Clear the array.
@@ -81,10 +95,12 @@ public:
   void rectify(FloatArray& destination);
   
   /**
-   * Absolute value of the array.
+   * Absolute value of the array, in-place version.
    * Sets each element in the array to its absolute value.
-  */
-  void rectify(); //in place
+   */
+  void rectify(){
+    rectify(*this);
+  }
   
   /**
    * Reverse the array
@@ -107,23 +123,28 @@ public:
   void reciprocal(FloatArray& destination);
   
   /**
-   * Reciprocal of the array.
+   * Reciprocal of the array, in-place version.
    * Sets each element in the array to its reciprocal.
   */
-  void reciprocal(); 
+  void reciprocal(){
+    reciprocal(*this);
+  }
   
   /**
    * Negate the array.
    * Stores the opposite of the elements in the array into destination.
    * @param[out] destination the destination array.
-  */
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+   */
   void negate(FloatArray& destination);
   
   /**
    * Negate the array.
    * Sets each element in the array to its opposite.
   */
-  void negate(); 
+  void negate(){
+    negate(*this);
+  }
   
   /**
    * Random values
@@ -268,12 +289,13 @@ public:
   */
   void multiply(float scalar, FloatArray destination);
 
-/**
+  /**
    * Convolution between arrays.
    * Sets **destination** to the result of the convolution between the array and **operand2**
    * @param[in] operand2 the second operand for the convolution
    * @param[out] destination array. It must have a minimum size of this+other-1.
-  */
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+   */
   void convolve(FloatArray operand2, FloatArray destination);
   
   /** 
@@ -285,6 +307,7 @@ public:
    * @param[in] samples number of samples to compute
    * @remarks **destination[n]** is left unchanged for n<offset and the result is stored from destination[offset] onwards
    * that is, in the same position where they would be if a full convolution was performed.
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   */
   void convolve(FloatArray operand2, FloatArray destination, int offset, size_t samples);
   
@@ -293,6 +316,7 @@ public:
    * Sets **destination** to the correlation of the array and **operand2**.
    * @param[in] operand2 the second operand for the correlation
    * @param[out] destination the destination array. It must have a minimum size of 2*max(srcALen, srcBLen)-1
+   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   */
   void correlate(FloatArray operand2, FloatArray destination);
   
@@ -316,13 +340,6 @@ public:
    * -6dB = 0.5, 0dB = 1.0, +6dB = 2.0
    */  
   void decibelToGain(FloatArray destination);
-
-  /**
-   * Set all the values in the array.
-   * Sets all the elements of the array to **value**.
-   * @param[in] value all the elements are set to this value.
-  */
-  void setAll(float value);
   
   /**
    * A subset of the array.
@@ -336,144 +353,24 @@ public:
    * @remarks Calling FloatArray::destroy() on a FloatArray instance created with this method might cause an exception.
   */
   FloatArray subArray(int offset, size_t length);
-  
   /**
-   * Copies the content of the array to another array.
-   * @param[out] destination the destination array
-  */
-  void copyTo(FloatArray destination);
-
-  /**
-   * Copies the content of the array to a location in memory.
-   * @param[out] destination a pointer to the beginning of the memory location to copy to.
-   * The **length***sizeof(float) bytes of memory starting at this location must have been allocated before calling this method.
-   * @param[in] length number of samples to copy
-  */
-  void copyTo(float* destination, size_t length);
-
-  /**
-   * Copies the content of an array into another array.
-   * @param[in] source the source array
-  */
-  void copyFrom(FloatArray source);
-  
-  /**
-   * Copies an array of float into the array.
-   * @param[in] source a pointer to the beginning of the portion of memory to read from.
-   * @param[in] length number of samples to copy.
-  */
-  void copyFrom(float* source, size_t length);
-  
-  /**
-   * Copies the content of an array into a subset of the array.
-   * Copies **samples** elements from **source** to **destinationOffset** in the current array.
-   * @param[in] source the source array
-   * @param[in] destinationOffset the offset into the destination array 
-   * @param[in] samples the number of samples to copy
-   *
-  */
-  void insert(FloatArray source, int destinationOffset, size_t samples);
-
-  /**
-   * Copies the content of an array into a subset of the array.
-   * Copies **samples** elements starting from **sourceOffset** of **source** to **destinationOffset** in the current array.
-   * @param[in] source the source array
-   * @param[in] sourceOffset the offset into the source array
-   * @param[in] destinationOffset the offset into the destination array
-   * @param[in] samples the number of samples to copy
-  */
-  void insert(FloatArray source, int sourceOffset, int destinationOffset, size_t samples);
-  
-  /**
-   * Copies values within an array.
-   * Copies **length** values starting from index **fromIndex** to locations starting with index **toIndex**
-   * @param[in] fromIndex the first element to copy
-   * @param[in] toIndex the destination of the first element
-   * @param[in] length the number of elements to copy
-   * @remarks this method uses *memmove()* so that the source memory and the destination memory can overlap. As a consequence it might have slow performances.
-  */
-  void move(int fromIndex, int toIndex, size_t length);
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * @param index the index of the element
-   * @return the value of the **index** element of the array
-   * Example usage:
-   * @code
-   * int size=1000;
-   * float content[size]; 
-   * FloatArray floatArray(content, size);
-   * for(int n=0; n<size; n++)
-   *   content[n]==floatArray[n]; //now the FloatArray can be indexed as if it was an array
-   * @endcode
-  */
-  float& operator [](const int index){
-    return data[index];
-  }
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * **const** version of operator[]
-  */
-  float& operator [](const int index) const{
-    return data[index];
-  }
-  
-  /**
-   * Compares two arrays.
-   * Performs an element-wise comparison of the values contained in the arrays.
-   * @param other the array to compare against.
-   * @return **true** if the arrays have the same size and the value of each of the elements of the one 
-   * match the value of the corresponding element of the other, or **false** otherwise.
-  */
-  bool equals(const FloatArray& other) const{
-    if(size!=other.getSize()){
-      return false;
-    }
-    for(size_t n=0; n<size; n++){
-      if(data[n]!=other[n]){
-        return false;
-      }
-    }
-    return true;
-  }
-  
-  /**
-   * Casting operator to float*
-   * @return a float* pointer to the data stored in the FloatArray
-  */
-  operator float*(){
-    return data;
-  }
-  
-  /**
-   * Get the data stored in the FloatArray.
-   * @return a float* pointer to the data stored in the FloatArray
-  */
-  float* getData(){
-    return data;
-  }
-
-  /**
-   * Get a single float stored in the FloatArray.
-   * @return the float stored at index @param index
-  */
-  float getElement(int index){
-    return data[index];
-  }
-
-  /**
-   * Set a single float in the FloatArray.
-  */
-  void setElement(int index, float value){
-    data[index] = value;
-  }
-  
-  /**
-   * Create a linear ramp from one value to another across all values in the Float
+   * Create a linear ramp from one value to another.
+   * Interpolates all samples in the FloatArray between the endpoints @param from to @param to.
    */
   void ramp(float from, float to);
-  
+
+  /**
+   * Scale all values along a linear ramp from one value to another.
+   */  
+  void scale(float from, float to, FloatArray destination);
+
+  /**
+   * In-place scale.
+   */  
+  void scale(float from, float to){
+    scale(from, to, *this);
+  }
+
   /**
    * Apply tanh to each element in the array
    */
@@ -482,7 +379,9 @@ public:
   /**
    * In-place tanh
    */
-  void tanh();
+  void tanh(){
+    tanh(*this);
+  }
 
   /**
    * Creates a new FloatArray.
