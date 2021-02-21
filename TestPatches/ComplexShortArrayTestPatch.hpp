@@ -6,6 +6,10 @@ class ComplexShortArrayTestPatch : public TestPatch {
 public:
   ComplexShortArrayTestPatch(){
     {
+      TEST("sizeof");
+      CHECK(sizeof(ComplexShortArray) == sizeof(ComplexShort*)+sizeof(size_t));
+    }
+    {
       TEST("Default ctor");
       ComplexShortArray empty;
       CHECK_EQUAL(empty.getSize(), 0);

@@ -5,8 +5,8 @@
 
 /*
  * Status: The first few tests have been converted to the new TestPatch format.
- *         Most of the tests still need to be converted to use e.g. CHECK_EQUAL() 
- *         and CHECK_CLOSE() as defined in TestPatch.hpp
+ *         Most of the tests still need to be converted to use CHECK(), CHECK_EQUAL() 
+ *         or CHECK_CLOSE() as defined in TestPatch.hpp
  */
 
 #define TESTCHECK(x, y) TEST(y); CHECK(x)
@@ -20,15 +20,23 @@ public:
     float backupData[size];
     for(size_t n=0; n<size; n++){
       data[n]=rand()/(float)RAND_MAX *2 -1;
-      backupData[n]=data[n];
+      backupData[n] = data[n];
     }
-    TEST("constructor");
     FloatArray fa(data, size);
-    CHECK(size == fa.getSize());
-    CHECK(data == fa.getData());
     FloatArray tempFa1=FloatArray::create(size);
     FloatArray tempFa2=FloatArray::create(size);
     FloatArray tempFa3=FloatArray::create(size);
+
+    {
+      TEST("sizeof");
+      CHECK(sizeof(FloatArray) == sizeof(float*)+sizeof(size_t));
+    }
+
+    {
+      TEST("constructor");
+      CHECK(size == fa.getSize());
+      CHECK(data == fa.getData());
+    }
 
     {
       //test create method, called above
@@ -44,7 +52,7 @@ public:
       TEST("operator overrides");
       CHECK(fa.getSize()==size);
       CHECK(&fa[0]==data);
-      CHECK((float *)fa==data);
+      CHECK((float*)fa==data);
     }
     
     //test equals

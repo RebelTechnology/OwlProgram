@@ -6,6 +6,10 @@ class ShortArrayTestPatch : public TestPatch {
 public:
   ShortArrayTestPatch(){
     {
+      TEST("sizeof");
+      CHECK(sizeof(ShortArray) == sizeof(int16_t*)+sizeof(size_t));
+    }
+    {
       TEST("Default ctor");
       ShortArray empty;
       CHECK_EQUAL((int)empty.getSize(), 0);
