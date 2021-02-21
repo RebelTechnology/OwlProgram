@@ -25,7 +25,6 @@ public:
         float err = fabsf(approx - exact);
         float perc = err/exact * 100;
 	CHECK(perc<threshold);
-        // maxPerc = maxPerc > x ? maxPerc : x;
         maxPerc = maxPerc > perc ? maxPerc : perc;
         if(fabsf(perc) > threshold)
 	  errs++;
