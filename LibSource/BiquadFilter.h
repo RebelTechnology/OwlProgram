@@ -360,15 +360,16 @@ public:
   }
 };
 
-template<size_t channels>
 class MultiBiquadFilter : public BiquadFilter, public MultiSignalProcessor {
 private:
-  BiquadFilter filters[channels-1];
+  size_t channels;
+  BiquadFilter* filters;
 protected:
 public:
   MultiBiquadFilter(){}
-  MultiBiquadFilter(float sr, float* coefs, float* states, size_t stages) :
-    BiquadFilter(sr, coefs, states, stages) {
+  MultiBiquadFilter(float sr, size_t channels, float* coefs, float* states, size_t stages) :
+    BiquadFilter(sr, coefs, states, stages), channels(channels) {
+    filters = new BiquadFilter[channels-1];
     FloatArray coefficients(coefs, stages*BIQUAD_COEFFICIENTS_PER_STAGE);
     for(size_t ch=1; ch<channels; ++ch){
       states += stages*BIQUAD_STATE_VARIABLES_PER_STAGE;
@@ -378,12 +379,13 @@ public:
       filters[ch-1].setCoefficients(coefficients); // shared coefficients
     }
   }
-  static MultiBiquadFilter<channels>* create(float sr, size_t stages=1){
-    return new MultiBiquadFilter<channels>(sr, new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE], new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE*channels], stages);
+  static MultiBiquadFilter* create(float sr, size_t channels, size_t stages=1){
+    return new MultiBiquadFilter(sr, channels, new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE], new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE*channels], stages);
   }  
-  static void destroy(MultiBiquadFilter<channels>* filter){
+  static void destroy(MultiBiquadFilter* filter){
     delete[] filter->coefficients;
     delete[] filter->state;
+    delete[] filter->filters;
     delete filter;
   }
   BiquadFilter* getFilter(size_t channel){
@@ -393,7 +395,6 @@ public:
       return &filters[channel-1];
     return NULL;
   }
-  
   void process(AudioBuffer &input, AudioBuffer &output){
     size_t len = min(channels, min(input.getChannels(), output.getChannels()));
     BiquadFilter::process(input.getSamples(0), output.getSamples(0));
@@ -401,8 +402,6 @@ public:
       filters[ch-1].process(input.getSamples(ch), output.getSamples(ch));
   }
 };
-
-typedef MultiBiquadFilter<2> StereoBiquadFilter;
 
 const float FilterStage::BESSEL_Q = 1/sqrtf(3); // 1/sqrt(3)
 const float FilterStage::SALLEN_KEY_Q = 0.5f; // 1/2
