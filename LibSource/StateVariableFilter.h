@@ -172,10 +172,25 @@ private:
   float mIc2eq = 0.;
 };
 
-template<size_t channels>
 class MultiStateVariableFilter : public AbstractStateVariableFilter, MultiSignalProcessor {
+private:
+  size_t channels;
+  // state
+  float* mV1;
+  float* mV2;
+  float* mV3;
+  float* mIc1eq;
+  float* mIc2eq;
 public:
-  MultiStateVariableFilter(float sr): AbstractStateVariableFilter(sr) {}
+  MultiStateVariableFilter(float sr) :
+    AbstractStateVariableFilter(sr),
+    channels(0), mV1(NULL), mV2(NULL), mV3(NULL), mIc1eq(NULL), mIc2eq(NULL) {}
+
+  MultiStateVariableFilter(float sr, size_t channels,
+			   float* mV1, float* mV2, float* mV3,
+			   float* mIc1eq, float* mIc2eq) :
+    AbstractStateVariableFilter(sr),
+    channels(channels), mV1(mV1), mV2(mV2), mV3(mV3), mIc1eq(mIc1eq), mIc2eq(mIc2eq) {}
 
   void process(AudioBuffer &input, AudioBuffer &output){
     size_t len = min(channels, min(input.getChannels(), output.getChannels()));
@@ -205,24 +220,19 @@ public:
     }
   }
 
-  static MultiStateVariableFilter<channels>* create(float sr){
-    return new MultiStateVariableFilter<channels>(sr);
+  static MultiStateVariableFilter* create(float sr, size_t channels){
+    return new MultiStateVariableFilter(sr, channels, new float[channels], new float[channels],
+					new float[channels], new float[channels], new float[channels]);
   }
 
-  static void destroy(MultiStateVariableFilter<channels>* svf){
+  static void destroy(MultiStateVariableFilter* svf){
+    delete[] svf->mV1;
+    delete[] svf->mV2;
+    delete[] svf->mV3;
+    delete[] svf->mIc1eq;
+    delete[] svf->mIc2eq;
     delete svf;
   }
-  
-private:
-  // state
-  float mV1[channels] = {};
-  float mV2[channels] = {};
-  float mV3[channels] = {};
-  float mIc1eq[channels] = {};
-  float mIc2eq[channels] = {};
 };
-
-
-typedef MultiStateVariableFilter<2> StereoStateVariableFilter;
 
 #endif // __StateVariableFilter_h__
