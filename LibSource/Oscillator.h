@@ -30,7 +30,7 @@ public:
   /**
    * Get oscillator frequency in Hertz
    */
-  virtual float getFrequency(float value){
+  virtual float getFrequency(){
     return 0.0f;
   }
   /**
