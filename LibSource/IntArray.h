@@ -5,99 +5,11 @@
 #include "SimpleArray.h"
 #include "FloatArray.h"
 
-#ifdef USE_TEMPLATE
 class IntArray : public SimpleArray<int32_t> {
 public:
   IntArray(){}
   IntArray(int32_t* data, size_t size) :
     SimpleArray(data, size) {}
-
-#else
-class IntArray {
-private:
-  int32_t* data;
-  size_t size;
-public:
-  IntArray() :
-    data(NULL), size(0) {}
-  IntArray(int32_t* data, size_t size) :
-    data(data), size(size) {}
-
-  size_t getSize() const{
-    return size;
-  }
-
-  size_t getSize(){
-    return size;
-  }
-
-  /**
-   * Casting operator to int32_t*
-   * @return a int32_t* pointer to the data stored in the IntArray
-   */
-  operator int32_t*(){
-    return data;
-  }
-
-  /**
-   * Get the data stored in the IntArray.
-   * @return a int32_t* pointer to the data stored in the IntArray
-   */
-  int32_t* getData(){
-    return data;
-  }
-
-  /**
-   * Get a single int32_t stored in the IntArray.
-   * @return the int32_t stored at index @param index
-   */
-  int32_t getElement(int index){
-    return data[index];
-  }
-
-  /**
-   * Set a single int32_t in the IntArray.
-   */
-  void setElement(int index, int32_t value){
-    data[index] = value;
-  }
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * @param index the index of the element
-   * @return the value of the **index** element of the array
-  */
-  int32_t& operator [](const int index){
-    return data[index];
-  }
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * **const** version of operator[]
-  */
-  const int32_t& operator [](const int index) const {
-    return data[index];
-  }
-  
-  /**
-   * Compares two arrays.
-   * Performs an element-wise comparison of the values contained in the arrays.
-   * @param other the array to compare against.
-   * @return **true** if the arrays have the same size and the value of each of the elements of the one 
-   * match the value of the corresponding element of the other, or **false** otherwise.
-  */
-  bool equals(const IntArray& other) const{
-    if(size!=other.getSize()){
-      return false;
-    }
-    for(size_t n=0; n<size; n++){
-      if(data[n]!=other[n]){
-        return false;
-      }
-    }
-    return true;
-  }
-#endif
 
   void setAll(int32_t value){
   /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>

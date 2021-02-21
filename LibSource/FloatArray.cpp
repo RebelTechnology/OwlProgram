@@ -217,7 +217,7 @@ FloatArray FloatArray::subArray(int offset, size_t length){
   return FloatArray(data+offset, length);
 }
 
-#if defined USE_TEMPLATE && defined ARM_CORTEX
+#if defined ARM_CORTEX
 void FloatArray::copyTo(FloatArray destination){
   ASSERT(destination.size >= size, "Array too small");
   arm_copy_f32(data, destination.data, size);
@@ -226,60 +226,6 @@ void FloatArray::copyTo(FloatArray destination){
 void FloatArray::copyFrom(FloatArray source){
   ASSERT(source.size >= size, "Array too small");
   arm_copy_f32(source.data, data, size);
-}
-#endif
-
-#ifndef USE_TEMPLATE
-
-void FloatArray::copyTo(FloatArray destination){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  copyTo(destination, min(size, destination.getSize()));
-}
-
-void FloatArray::copyFrom(FloatArray source){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  copyFrom(source, min(size, source.getSize()));
-}
-
-void FloatArray::copyTo(float* other, size_t length){
-  ASSERT(size >= length, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_f32(data, other, length);
-#else
-  memcpy((void *)other, (void *)getData(), length*sizeof(float));
-#endif /* ARM_CORTEX */
-}
-
-void FloatArray::copyFrom(float* other, size_t length){
-  ASSERT(size >= length, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_f32(other, data, length);
-#else
-  memcpy((void *)getData(), (void *)other, length*sizeof(float));
-#endif /* ARM_CORTEX */
-}
-
-void FloatArray::insert(FloatArray source, int sourceOffset, int destinationOffset, size_t samples){
-  ASSERT(size >= destinationOffset+samples, "Array too small");
-  ASSERT(source.size >= sourceOffset+samples, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_f32(source.data+sourceOffset, data+destinationOffset, samples);  
-#else
-  memcpy((void*)(getData()+destinationOffset), (void*)(source.getData()+sourceOffset), samples*sizeof(float));
-#endif /* ARM_CORTEX */
-}
-
-void FloatArray::insert(FloatArray source, int destinationOffset, size_t samples){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  insert(source, 0, destinationOffset, samples);
-}
-
-void FloatArray::move(int fromIndex, int toIndex, size_t samples){
-  ASSERT(size >= toIndex+samples, "Array too small");
-  memmove(data+toIndex, data+fromIndex, samples*sizeof(float)); //TODO: evaluate if it is appropriate to use arm_copy_f32 for this method
 }
 #endif
 
