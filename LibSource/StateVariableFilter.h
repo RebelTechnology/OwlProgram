@@ -174,63 +174,54 @@ private:
 
 class MultiStateVariableFilter : public AbstractStateVariableFilter, MultiSignalProcessor {
 private:
-  size_t channels;
+  size_t mChannels;
   // state
-  float* mV1;
-  float* mV2;
-  float* mV3;
-  float* mIc1eq;
-  float* mIc2eq;
+  float* mState;
+  static constexpr size_t STATE_VARIABLES_PER_CHANNEL = 5;
 public:
   MultiStateVariableFilter(float sr) :
-    AbstractStateVariableFilter(sr),
-    channels(0), mV1(NULL), mV2(NULL), mV3(NULL), mIc1eq(NULL), mIc2eq(NULL) {}
+    AbstractStateVariableFilter(sr), 
+    mChannels(0), mState(NULL) {}
 
   MultiStateVariableFilter(float sr, size_t channels,
-			   float* mV1, float* mV2, float* mV3,
-			   float* mIc1eq, float* mIc2eq) :
+			   float* state) :
     AbstractStateVariableFilter(sr),
-    channels(channels), mV1(mV1), mV2(mV2), mV3(mV3), mIc1eq(mIc1eq), mIc2eq(mIc2eq) {}
+    mChannels(channels), mState(state) {}
 
   void process(AudioBuffer &input, AudioBuffer &output){
-    size_t len = min(channels, min(input.getChannels(), output.getChannels()));
-    for(int ch=0; ch<len; ++ch){
+    size_t len = min((int)mChannels, min(input.getChannels(), output.getChannels()));
+    float* state = mState;
+    for(size_t ch=0; ch<len; ++ch){
       FloatArray in = input.getSamples(ch);
       FloatArray out = output.getSamples(ch);
       size_t nFrames = in.getSize();
+      float mV1 = *state++;
+      float mV2 = *state++;
+      float mV3 = *state++;
+      float mIc1eq = *state++;
+      float mIc2eq = *state++;
       for(size_t s = 0; s < nFrames; s++){
-	const float v0 = in[s];
-	mV3[ch] = v0 - mIc2eq[ch];
-	mV1[ch] = m_a1 * mIc1eq[ch] + m_a2*mV3[ch];
-	mV2[ch] = mIc2eq[ch] + m_a2 * mIc1eq[ch] + m_a3 * mV3[ch];
-	mIc1eq[ch] = 2. * mV1[ch] - mIc1eq[ch];
-	mIc2eq[ch] = 2. * mV2[ch] - mIc2eq[ch];
-	out[s] = m_m0 * v0 + m_m1 * mV1[ch] + m_m2 * mV2[ch];
+	float v0 = in[s];
+	mV3 = v0 - mIc2eq;
+	mV1 = m_a1 * mIc1eq + m_a2*mV3;
+	mV2 = mIc2eq + m_a2 * mIc1eq + m_a3 * mV3;
+	mIc1eq = 2. * mV1 - mIc1eq;
+	mIc2eq = 2. * mV2 - mIc2eq;
+	out[s] = m_m0 * v0 + m_m1 * mV1 + m_m2 * mV2;
       }
     }
   }
 
   void reset() {
-    for(int ch=0; ch<channels; ++ch){
-      mV1[ch] = 0.;
-      mV2[ch] = 0.;
-      mV3[ch] = 0.;
-      mIc1eq[ch] = 0.;
-      mIc2eq[ch] = 0.;
-    }
+    memset(mState, 0, mChannels*STATE_VARIABLES_PER_CHANNEL*sizeof(float));
   }
 
   static MultiStateVariableFilter* create(float sr, size_t channels){
-    return new MultiStateVariableFilter(sr, channels, new float[channels], new float[channels],
-					new float[channels], new float[channels], new float[channels]);
+    return new MultiStateVariableFilter(sr, channels, new float[STATE_VARIABLES_PER_CHANNEL]);
   }
 
   static void destroy(MultiStateVariableFilter* svf){
-    delete[] svf->mV1;
-    delete[] svf->mV2;
-    delete[] svf->mV3;
-    delete[] svf->mIc1eq;
-    delete[] svf->mIc2eq;
+    delete[] svf->mState;
     delete svf;
   }
 };
