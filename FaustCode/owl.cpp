@@ -577,7 +577,7 @@ class OwlUI : public UI {
     int fSampleRate;
     //std::map<std::string, Soundfile*> fSoundfileMap;    // Map to share loaded soundfiles
     OwlParameterBase* fParameterTable[MAXOWLPARAMETERS];
-    OwlResourceReader* fSoundReader;
+    OwlResourceReader* fSoundReader = NULL;
     Soundfile* fSoundfiles[MAX_SOUNDFILES];
     PatchButtonId fButton;
     // check if the widget is an Owl parameter and, if so, add the corresponding OwlParameter
