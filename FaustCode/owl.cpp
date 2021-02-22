@@ -663,8 +663,6 @@ public:
         , fParameterIndex(0)
         , fSoundfileIndex(0)
         , fButton(NO_BUTTON) {
-        fSoundReader = new OwlResourceReader();
-        fSoundReader->setSampleRate(fPatch->getSampleRate());
     }
 
     virtual ~OwlUI() {
