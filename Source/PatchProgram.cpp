@@ -75,7 +75,7 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
   processor.setPatch(patch, name);
 }
 
-static SampleBuffer* samples;
+static SampleBuffer* samples = NULL;
 void setup(ProgramVector* pv){
   setSystemTables(pv);
 #ifdef USE_MIDI_CALLBACK
@@ -87,78 +87,20 @@ void setup(ProgramVector* pv){
   getProgramVector()->serviceCall(OWL_SERVICE_REQUEST_CALLBACK, midiTxArgs, 2);
 
 #endif /* USE_MIDI_CALLBACK */
-  switch(pv->audio_format){
-  case AUDIO_FORMAT_24B16_2X:
-    samples = new SampleBuffer(2, pv->audio_blocksize);
-    break;
-  case AUDIO_FORMAT_24B32_4X:
-    samples = new SampleBuffer(4, pv->audio_blocksize);
-    break;
-  case AUDIO_FORMAT_24B32_7X:
-    samples = new SampleBuffer(7, pv->audio_blocksize);
-    break;
-  case AUDIO_FORMAT_24B32_8X:
-    samples = new SampleBuffer(8, pv->audio_blocksize);
-    break;
-  default:
+  if(samples != NULL)
+    SampleBuffer::destroy(samples);
+  samples = SampleBuffer::create(pv->audio_format, pv->audio_blocksize);
+  if(samples == NULL)
     error(CONFIGURATION_ERROR_STATUS, "Unsupported audio format");
-    break;
-  }
 #include "registerpatch.cpp"
 }
 
 void run(ProgramVector* pv){
-  switch(pv->audio_format){
-  case 0:
-    for(;;){
-      pv->programReady();
-      memcpy(pv->audio_output, pv->audio_input, pv->audio_blocksize*2*sizeof(int32_t));
-    }
-    break;
-  case AUDIO_FORMAT_24B16_2X:
-    for(;;){
-      pv->programReady();
-      samples->split16(pv->audio_input, pv->audio_blocksize);
-      processor.setParameterValues(pv->parameters);
-      processor.patch->processAudio(*samples);
-      samples->comb16(pv->audio_output);
-    }
-    break;
-  case AUDIO_FORMAT_24B24_2X:
-    for(;;){   
-      pv->programReady();
-      samples->split24(pv->audio_input, pv->audio_blocksize);
-      processor.setParameterValues(pv->parameters);
-      processor.patch->processAudio(*samples);
-      samples->comb24(pv->audio_output);
-    }
-    break;
-  case AUDIO_FORMAT_24B32_2X:
-  case AUDIO_FORMAT_24B32_4X:
-  case AUDIO_FORMAT_24B32_7X:
-  case AUDIO_FORMAT_24B32_8X:
-    for(;;){
-      pv->programReady();
-      samples->split32(pv->audio_input, pv->audio_blocksize);
-      processor.setParameterValues(pv->parameters);
-      processor.patch->processAudio(*samples);
-      samples->comb32(pv->audio_output);
-    }
-    break;
-  default:
-    break;
+  for(;;){
+    pv->programReady();
+    samples->split(pv->audio_input);
+    processor.setParameterValues(pv->parameters);
+    processor.patch->processAudio(*samples);
+    samples->comb(pv->audio_output);
   }
 }
-
-#if 0
-      static int32_t value = 0;
-      static int32_t step = 32;
-      ProgramVector* pv = getProgramVector();
-      for(int i=0; i < pv->audio_blocksize; ++i){
-	pv->audio_output[i*2] = value;
-	pv->audio_output[i*2+1] = value; // swap(value);
-	value += step;
-	if(value >= INT32_MAX)
-	  value = INT32_MIN;
-      }
-#endif
