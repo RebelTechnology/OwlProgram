@@ -64,10 +64,10 @@ class SampleBuffer32 : public SampleBuffer {
 public:
   SampleBuffer32(size_t channels, size_t blocksize) : SampleBuffer(channels, blocksize){}
   void split(int32_t* input){
-    const float mul = 1.0f/MULTIPLIER_23B;
+    const float mul = 1.0f/MULTIPLIER_31B;
     for(size_t i=0; i<blocksize; ++i){
       for(size_t j=0; j<channels; ++j)
-	buffers[j][i] = *input++ * mul;
+	buffers[j][i] = (*input++ << 8) * mul;
     }
   }
   void comb(int32_t* output){
@@ -166,12 +166,16 @@ public:
 
 SampleBuffer* SampleBuffer::create(uint8_t format, size_t blocksize){
   if(format == AUDIO_FORMAT_24B16_2X){
+    debugMessage("16x2", 2, blocksize);
     return new SampleBuffer16(2, blocksize);
-  }else if(format == AUDIO_FORMAT_24B24_2X){
-    return new SampleBuffer24(2, blocksize);
+  // }else if(format == AUDIO_FORMAT_24B24_2X){
+  //   debugMessage("24x2", 2, blocksize);
+  //   return new SampleBuffer24(2, blocksize);
   }else if(format == AUDIO_FORMAT_24B32){
+    debugMessage("32x2", 2, blocksize);
     return new SampleBuffer32(2, blocksize);
   }else if((format & 0xf0) == AUDIO_FORMAT_24B32){
+    debugMessage("32xN", format & 0x0f, blocksize);
     return new SampleBuffer32(format & 0x0f, blocksize);
   }else{
     return NULL; // unrecognised audio format
