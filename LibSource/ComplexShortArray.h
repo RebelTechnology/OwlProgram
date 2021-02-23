@@ -237,47 +237,6 @@ public:
   static void destroy(ComplexShortArray);
 
   /**
-   * Copies the content of an array into another array.
-   * @param[in] source The source array
-  */
-  void copyFrom(ShortArray source);
-
-  /**
-   * Copies the content of a ShortArray into the ComplexShortArray.
-   * @param[in] source The source array
-   * @remarks The size of the ShortArray must be twice the size of the ComplexShortArray.
-  */
-  void copyFrom(ComplexShortArray source);
-  
-  /**
-   * Copies an array of ComplexShort into the array.
-   * @param[in] source A pointer to the beginning of the portion of memory to read from.
-   * @param[in] length Number of samples to copy.
-  */
-  void copyFrom(ComplexShort* source, unsigned int length);
-  
-  /**
-   * Copies the content of the ComplexShortArray into a ShortArray.
-   * @param[out] destination The destination array
-   * @remarks The size of the ShortArray must be twice the size of the ComplexShortArray.
-  */
-  void copyTo(ShortArray destination);
-
-  /**
-   * Copies the content of the array to another array.
-   * @param[out] destination The destination array
-  */
-  void copyTo(ComplexShortArray destination);
-  
-  /**
-   * Copies an array of ComplexShort into the array.
-   * @param[in] destination A pointer to the beginning of the portion of memory to write to.
-   * @param[in] length Number of samples to copy.
-  */
-  void copyTo(ComplexShort* destination, int length);
-
-
-  /**
    * Set all the elements in the array.
    * @param[in] value All the elements are set to this value.
   */

@@ -217,18 +217,6 @@ FloatArray FloatArray::subArray(int offset, size_t length){
   return FloatArray(data+offset, length);
 }
 
-#if defined ARM_CORTEX
-void FloatArray::copyTo(FloatArray destination){
-  ASSERT(destination.size >= size, "Array too small");
-  arm_copy_f32(data, destination.data, size);
-}
-
-void FloatArray::copyFrom(FloatArray source){
-  ASSERT(source.size >= size, "Array too small");
-  arm_copy_f32(source.data, data, size);
-}
-#endif
-
 void FloatArray::setAll(float value){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX

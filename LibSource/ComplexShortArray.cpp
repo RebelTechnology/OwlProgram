@@ -124,14 +124,6 @@ void ComplexShortArray::complexByComplexMultiplication(ComplexShortArray operand
 #endif  
 }
 
-ComplexShortArray ComplexShortArray::create(unsigned int size){
-  return ComplexShortArray(new ComplexShort[size], size);
-}
-
-void ComplexShortArray::destroy(ComplexShortArray array){
-  delete array.data;
-}
-
 void ComplexShortArray::setAll(int16_t value){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -156,7 +148,6 @@ void ComplexShortArray::setAll(int16_t valueRe, int16_t valueIm){
   setAll(value);
 }
 
-
 void ComplexShortArray::add(ComplexShortArray operand2, ComplexShortArray destination){
   //ASSERT(operand2.size == size && destination.size >= size, "Arrays size mismatch");
 #ifdef ARM_CORTEX
@@ -169,25 +160,12 @@ void ComplexShortArray::add(ComplexShortArray operand2, ComplexShortArray destin
 #endif /* ARM_CORTEX */  
 }
 
-void ComplexShortArray::copyFrom(ComplexShortArray operand2){
-#ifdef ARM_CORTEX
-  arm_copy_q15((int16_t*)operand2.getData(), (int16_t*)data, size * 2);
-#else
-  for(size_t n = 0; n < size; ++n){
-    data[n].re = operand2[n].re;
-    data[n].im = operand2[n].im ;
-  }
-#endif
-}
-  
-void ComplexShortArray::copyTo(ComplexShortArray operand2){
-#ifdef ARM_CORTEX
-  arm_copy_q15((int16_t*)data, (int16_t*)operand2.getData(), size * 2);
-#else
-  for(size_t n = 0; n < size; ++n){
-    data[n].re = (int16_t)operand2[n].re;
-    data[n].im = (int16_t)operand2[n].im ;
-  }
-#endif
+ComplexShortArray ComplexShortArray::create(unsigned int size){
+  ComplexShortArray obj(new ComplexShort[size], size);
+  obj.clear();
+  return obj;
 }
 
+void ComplexShortArray::destroy(ComplexShortArray array){
+  delete[] array.data;
+}

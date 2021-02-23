@@ -296,47 +296,23 @@ public:
    * @remarks Calling ShortArray::destroy() on a ShortArray instance created with this method might cause an exception.
   */
   ShortArray subArray(int offset, size_t length);
+
+  using SimpleArray<int16_t>::copyTo;
+  using SimpleArray<int16_t>::copyFrom;
   
-  /**
-   * Copies the content of the array to another array.
-   * @param[out] destination the destination array
-  */
-  void copyTo(ShortArray destination);
-
-  /**
-   * Copies the content of the array to a location in memory.
-   * @param[out] destination a pointer to the beginning of the memory location to copy to.
-   * The **length***sizeof(int16_t) bytes of memory starting at this location must have been allocated before calling this method.
-   * @param[in] length number of samples to copy
-  */
-  void copyTo(int16_t* destination, size_t length);
-
   /**
    * Copies the content of the array to a FloatArray, interpreting the content
    * of the ShortArray as 1.15.
    * @param[out] destination the destination array
   */
-  void copyTo(FloatArray destination);
+  void toFloat(FloatArray destination);
 
-  /**
-   * Copies the content of an array into another array.
-   * @param[in] source the source array
-  */
-  void copyFrom(ShortArray source);
-  
-  /**
-   * Copies an array of int16_t into the array.
-   * @param[in] source a pointer to the beginning of the portion of memory to read from.
-   * @param[in] length number of samples to copy.
-  */
-  void copyFrom(int16_t* source, size_t length);
-  
   /**
    * Copies the content of a FloatArray into a ShortArray, converting
    * the float elements to fixed-point 1.15.
    * @param[in] source the source array
   */
-  void copyFrom(FloatArray source);
+  void fromFloat(FloatArray source);
 
   /**
    * Converts a float to int16 and stores it.

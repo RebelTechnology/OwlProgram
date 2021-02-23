@@ -59,6 +59,26 @@ public:
   } //in-place
 
   /**
+   * Bitshift the array values, saturating.
+   *
+   * @param shiftValue number of positions to shift. A positive value will shift left, a negative value will shift right.
+   */
+  void shift(int shiftValue){
+#ifdef ARM_CORTEX
+    arm_shift_q31(data, shiftValue, data, size);
+#else
+    if(shiftValue >= 0){
+      for(size_t n=0; n<size; n++)
+	data[n] = data[n] << shiftValue;
+    }else{
+      shiftValue = -shiftValue;
+      for(size_t n=0; n<size; n++)
+	data[n] = data[n] >> shiftValue;
+    }
+#endif
+  }
+
+  /**
    * Creates a new IntArray.
    * Allocates size*sizeof(int32_t) bytes of memory and returns a IntArray that points to it.
    * @param size the size of the new IntArray.
@@ -78,27 +98,7 @@ public:
    * @remarks a IntArray object that has not been created by the IntArray::create() method might cause an exception if passed as an argument to this method.
   */
   static void destroy(IntArray array){
-    delete array.data;
-  }
-
-  /**
-   * Bitshift the array values, saturating.
-   *
-   * @param shiftValue number of positions to shift. A positive value will shift left, a negative value will shift right.
-   */
-  void shift(int shiftValue){
-#ifdef ARM_CORTEX
-    arm_shift_q31(data, shiftValue, data, size);
-#else
-    if(shiftValue >= 0){
-      for(size_t n=0; n<size; n++)
-	data[n] = data[n] << shiftValue;
-    }else{
-      shiftValue = -shiftValue;
-      for(size_t n=0; n<size; n++)
-	data[n] = data[n] >> shiftValue;
-    }
-#endif
+    delete[] array.data;
   }
 };
 
