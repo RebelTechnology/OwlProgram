@@ -396,7 +396,7 @@ public:
     return NULL;
   }
   void process(AudioBuffer &input, AudioBuffer &output){
-    size_t len = min(channels, min(input.getChannels(), output.getChannels()));
+    size_t len = min((int)channels, min(input.getChannels(), output.getChannels()));
     BiquadFilter::process(input.getSamples(0), output.getSamples(0));
     for(size_t ch=1; ch<len; ++ch)
       filters[ch-1].process(input.getSamples(ch), output.getSamples(ch));
