@@ -123,6 +123,30 @@ public:
     ASSERT(size >= toIndex+len, "Array too small");
     memmove((void*)(data+toIndex), (void*)(data+fromIndex), len*sizeof(T));
   }
+    
+  /**
+   * Optimised array copy for datatype T.
+   * Copy four at a time to minimise loop overheads and allow SIMD optimisations.
+   * This performs well on external RAM but is slower on internal memory compared to memcpy.
+   */
+  static void copy(T* dst, T* src, size_t len){
+    size_t blocks = len >> 2u;
+    T a, b, c, d;
+    while(blocks--){
+      a = *src++;
+      b = *src++;
+      c = *src++;
+      d = *src++;
+      *dst++ = a;
+      *dst++ = b;
+      *dst++ = c;
+      *dst++ = d;
+    }
+    blocks = len & 0x3;
+    while(blocks--){
+      *dst++ = *src++;
+    }
+  }
 
   /**
    * Casting operator to T*
@@ -131,7 +155,7 @@ public:
   operator T*(){
     return data;
   }
-    
+
   // /**
   //  * Allows to index the array using array-style brackets.
   //  * @param index the index of the element

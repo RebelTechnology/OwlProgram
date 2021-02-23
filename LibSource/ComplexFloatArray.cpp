@@ -215,64 +215,22 @@ void ComplexFloatArray::scale(float factor){
 #endif
 }
 
-ComplexFloatArray ComplexFloatArray::create(size_t size){
-  return ComplexFloatArray(new ComplexFloat[size], size);
-}
-
-void ComplexFloatArray::destroy(ComplexFloatArray array){
-  delete array.data;
-}
-
-/* Copies real values from a FloatArray, sets imaginary values to 0
- */
-void ComplexFloatArray::copyFrom(FloatArray source){
-  for(size_t n=0; n<min(size,source.getSize()); n++){
-    data[n].re=source[n];
-    data[n].im=0;
+void ComplexFloatArray::fromFloat(FloatArray source){
+  ASSERT(source.getSize() >= size, "Array too small");
+  for(size_t n=0; n<size; n++){
+    data[n].re = source[n];
+    data[n].im = 0;
   }
 }
 
 /* Copies real part to a FloatArray */
-void ComplexFloatArray::copyTo(FloatArray destination){
-  for(size_t n=0; n<min(size,destination.getSize()); n++){
-    destination[n]=data[n].re;
+void ComplexFloatArray::toFloat(FloatArray destination){
+  ASSERT(destination.getSize() >= size, "Array too small");
+  for(size_t n=0; n<size; n++){
+    destination[n] = data[n].re;
   }
 }
 
-/*BEGIN -- methods copied and adapted from ComplexFloatArray.cpp*/
-void ComplexFloatArray::copyTo(ComplexFloatArray destination){
-  copyTo(destination, min(size, destination.getSize()));
-}
-
-void ComplexFloatArray::copyFrom(ComplexFloatArray source){
-  copyFrom(source, min(size, source.getSize()));
-}
-
-void ComplexFloatArray::copyTo(ComplexFloat* other, size_t length){
-  ASSERT(size >= length, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_f32((float *)data, (float *)other, length*sizeof(ComplexFloat)/sizeof(float));
-#else
-  for(size_t n=0; n<length; n++){
-    other[n].re=data[n].re;
-    other[n].im=data[n].im;
-  }
-#endif /* ARM_CORTEX */
-}
-
-void ComplexFloatArray::copyFrom(ComplexFloat* other, size_t length){
-  ASSERT(size >= length, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_f32((float *)other, (float *)data, length*sizeof(ComplexFloat)/sizeof(float));  //note the *2 multiplier which accounts for real and imaginary parts
-#else
-  for(size_t n=0; n<length; n++){
-    data[n].re=other[n].re;
-    data[n].im=other[n].im;
-  }
-#endif /* ARM_CORTEX */
-}
 
 void ComplexFloatArray::setAll(float value){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
@@ -285,7 +243,6 @@ void ComplexFloatArray::setAll(float value){
   setAll(val);
 #endif /* ARM_CORTEX */
 }
-/*END -- methods copied and adapted from ComplexFloatArray.cpp*/
 
 void ComplexFloatArray::setAll(ComplexFloat value){
   for(size_t n=0; n<size; n++){
@@ -344,4 +301,14 @@ void ComplexFloatArray::setMagnitude(FloatArray magnitude, int offset, size_t co
   for(size_t n=offset; n<count+offset; n++){
     destination.getData()[n].setPolar(magnitude[n], getData()[n].getPhase());
   }
+}
+
+ComplexFloatArray ComplexFloatArray::create(size_t size){
+  ComplexFloatArray obj(new ComplexFloat[size], size);
+  obj.clear();
+  return obj;
+}
+
+void ComplexFloatArray::destroy(ComplexFloatArray array){
+  delete[] array.data;
 }

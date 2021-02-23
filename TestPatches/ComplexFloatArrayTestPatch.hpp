@@ -45,6 +45,8 @@ public:
     passed=0;
     failed=0;
     size_t size=100;
+    assertr(sizeof(ComplexFloat) == sizeof(float)*2, "sizeof ComplexFloat");
+    assertr(sizeof(ComplexFloatArray) == sizeof(ComplexFloat*)+sizeof(size_t), "sizeof ComplexFloat");
     ComplexFloat data[size];
     ComplexFloat backupData[size];
     for(size_t n=0; n<size; n++){ //initialize array
@@ -181,12 +183,11 @@ public:
       }
     }
     
-    //test copyFrom
-    //test copyFrom(FloatArray)
+    //test fromFloat(FloatArray)
     tempc.setAll(0);
-    tempc.copyFrom(tempf);
+    tempc.fromFloat(tempf);
     for(size_t n=0; n<size; n++){
-      assertr(tempf[n]==tempc[n].re, "copyFrom(FloatArray)");
+      assertr(tempf[n]==tempc[n].re, "fromFloat(FloatArray)");
     }
     //test copyFrom(ComplexFloatArray)
     tempc.setAll(0);
@@ -194,13 +195,6 @@ public:
     for(size_t n=0; n<size; n++){
       assertr(cfa[n].re==tempc[n].re, "copyFrom(ComplexFloatArray), real");
       assertr(cfa[n].im==tempc[n].im, "copyFrom(ComplexFloatArray), imag");
-    }
-    //test copyFrom(ComplexFloat *, int)
-    tempc.setAll(0);
-    tempc.copyFrom(cfa.getData(), cfa.getSize());
-    for(size_t n=0; n<size; n++){
-      assertr(cfa[n].re==tempc[n].re, "copyFrom(ComplexFloat*, int), real");
-      assertr(cfa[n].im==tempc[n].im, "copyFrom(ComplexFloat*, int), imag");
     }
     
       //test ComplexFloat methods

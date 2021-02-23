@@ -15,22 +15,6 @@ public:
   FloatArray(float* data, size_t size) :
     SimpleArray(data, size) {}
 
-#ifdef ARM_CORTEX // shadow methods with optimised implementations
-  /**
-   * Copies the content of the array to another array.
-   * @param[out] destination the destination array
-   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  */
-  void copyTo(FloatArray destination);
-
-  /**
-   * Copies the content of an array into another array.
-   * @param[in] source the source array
-   * @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  */
-  void copyFrom(FloatArray source);
-#endif
-
   /**
    * Set all the values in the array.
    * Sets all the elements of the array to **value**.
@@ -84,8 +68,6 @@ public:
    * @return the maximum value contained in the array
    */
   int getMaxIndex();
-  
-  float getDb(); //TODO: not implemented
   
   /**
    * Absolute value of the array.

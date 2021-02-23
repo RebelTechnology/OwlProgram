@@ -53,7 +53,7 @@ public:
     ASSERT(len==32 || len ==64 || len==128 || len==256 || len==512 || len==1024 || len==2048 || len==4096, "Unsupported FFT size");
     cfgfft = kiss_fft_alloc(len, 0 , 0, 0);
     cfgifft = kiss_fft_alloc(len, 1,0, 0);
-    temp = ComplexFloatArray::create(getSize());
+    temp = ComplexFloatArray::create(len);
   }
   void fft(ComplexFloatArray inout){
     ASSERT(inout.getSize() >= getSize(), "Input array too small");

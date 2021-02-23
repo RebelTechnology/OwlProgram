@@ -432,12 +432,12 @@ public:
         CHECK_CLOSE(ar.getFloatValue(n), value, 0.0004f);
       }
       fa.noise();
-      ar.copyFrom(fa);
+      ar.fromFloat(fa);
       for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK_CLOSE(ar.getFloatValue(n), fa[n], 0.0004f);
       }
       fa.clear();
-      ar.copyTo(fa);
+      ar.toFloat(fa);
       for(size_t n = 0; n < ar.getSize(); ++n){
         CHECK_CLOSE(ar.getFloatValue(n), fa[n], 0.0004f);
       }

@@ -91,6 +91,15 @@ public:
     for(size_t n=0; n<size; n++){
       TESTCHECK(tempFa1[n]==fa[n], "copyFrom()");
     }
+
+    {
+      TEST("copy");
+      //test copy
+      tempFa1.clear();
+      FloatArray::copy(tempFa1, fa, tempFa1.getSize());
+      for(size_t n=0; n<size; n++)
+	CHECK_EQUAL(tempFa1[n], fa[n]);
+    }
     
     //test rectify
     fa.rectify(tempFa1);
