@@ -297,9 +297,6 @@ public:
   */
   ShortArray subArray(int offset, size_t length);
 
-  using SimpleArray<int16_t>::copyTo;
-  using SimpleArray<int16_t>::copyFrom;
-  
   /**
    * Copies the content of the array to a FloatArray, interpreting the content
    * of the ShortArray as 1.15.
