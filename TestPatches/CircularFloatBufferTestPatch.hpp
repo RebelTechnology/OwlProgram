@@ -31,6 +31,19 @@ public:
 	CHECK_EQUAL(buffer->readAt(i), 0);
       CircularFloatBuffer::destroy(buffer);
     }
+    {
+      TEST("delay");
+      CircularFloatBuffer* buffer = CircularFloatBuffer::create(60);
+      FloatArray input = FloatArray::create(25);
+      FloatArray delay = FloatArray::create(25);
+      input.noise();
+      CHECK(!input.equals(delay));
+      buffer->delay(input, delay, input.getSize(), 10);
+      CHECK(input.subArray(0, 15).equals(delay.subArray(10, 15)));
+      CircularFloatBuffer::destroy(buffer);
+      FloatArray::destroy(input);
+      FloatArray::destroy(delay);
+    }
   }
 };
 
