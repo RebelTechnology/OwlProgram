@@ -75,12 +75,12 @@ public:
   T read(){
     size_t idx = (size_t)readpos;
     T current = data[idx];
-    T delta = delta[idx];
+    T diff = delta[idx];
     float fraction = readpos-idx;
     readpos += 1;
     if(readpos >= size)
       readpos -= size;
-    return current + fraction*delta;
+    return current + fraction*diff;
   }
 
   void read(T* dst, size_t len){
@@ -147,10 +147,17 @@ public:
   }
 
   /**
-   * Set the read pos @param samples behind the write position.
+   * Set the read index @param samples behind the write index.
    */
   void setDelay(float samples){
     setReadIndex(writepos-samples);
+  }
+  
+  /**
+   * Get the read index expressed as delay behind the write index.
+   */
+  float getDelay(){
+    return fmodf(writepos-readpos+size, size);
   }
 
   /**
@@ -159,7 +166,7 @@ public:
   void delay(T* in, T* out, size_t len, float delay){
     setDelay(delay);
     write(in, len);
-    read(in, len);
+    read(out, len);
   }
   
   /**
@@ -168,19 +175,19 @@ public:
    */
   void delay(T* in, T* out, size_t len, float beginDelay, float endDelay){
     setDelay(beginDelay);
-    float pos = readPos;
+    float pos = readpos;
     float incr = (endDelay-beginDelay)/len + 1;
     T previous = readAt(writepos-1);
     size_t rem = size-writepos;
     if(len > rem){
       for(size_t i=writepos; i<size; ++i){
-	previous = update(previous, *src++, i);
+	previous = update(previous, *in++, i);
 	*out++ = readAt(pos);
 	pos += incr;
       }
       writepos = len-rem;
       for(size_t i=0; i<writepos; ++i){
-	previous = update(previous, *src++, i);
+	previous = update(previous, *in++, i);
 	*out++ = readAt(pos);
 	pos += incr;
       }
@@ -188,7 +195,7 @@ public:
       size_t i = writepos;
       writepos += len;
       for(; i<writepos; ++i){
-	previous = update(previous, *src++, i);
+	previous = update(previous, *in++, i);
 	*out++ = readAt(pos);
 	pos += incr;
       }

@@ -34,7 +34,7 @@ public:
   }
 
   void write(T* source, size_t len){
-    ASSERT(getWriteCapacity() < len, "CircularBuffer overflow");
+    ASSERT(getWriteCapacity() >= len, "overflow");
     T* dest = getWriteHead();
     size_t rem = size-writepos;
     if(len > rem){
@@ -72,7 +72,7 @@ public:
   }
 
   void read(T* dst, size_t len){
-    ASSERT(getReadCapacity() < len, "CircularBuffer underflow");
+    ASSERT(getReadCapacity() >= len, "underflow");
     T* src = getReadHead();
     size_t rem = size-readpos;
     if(len > rem){
@@ -132,7 +132,7 @@ public:
   }
 
   void incrementWriteHead(size_t len){
-    ASSERT(getWriteCapacity() < len, "CircularBuffer overflow");
+    ASSERT(getWriteCapacity() < len, "overflow");
     writepos += len;
     if(writepos >= size)
       writepos -= size;
@@ -151,17 +151,24 @@ public:
   }
 
   void incrementReadHead(size_t len){
-    ASSERT(getReadCapacity() < len, "CircularBuffer underflow");
+    ASSERT(getReadCapacity() < len, "underflow");
     readpos += len;
     if(readpos >= size)
       readpos -= size;
   }
 
   /**
-   * Set the read pos @param samples behind the write position.
+   * Set the read index @param samples behind the write index.
    */
   void setDelay(int samples){
-    readpos = (writepos-samples) % size;
+    readpos = (writepos-samples+size) % size;
+  }
+
+  /**
+   * Get the read index expressed as delay behind the write index.
+   */
+  int getDelay(){
+    return (writepos-readpos+size) % size;
   }
 
   /**
@@ -170,7 +177,7 @@ public:
   void delay(T* in, T* out, size_t len, int delay){
     setDelay(delay);
     write(in, len);
-    read(in, len);
+    read(out, len);
   }
 
   size_t getReadCapacity(){
