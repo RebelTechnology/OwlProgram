@@ -4,6 +4,7 @@
 #include "AcBlockingFilter.h"
 #include "BiquadFilter.h"
 #include "ChirpOscillator.h"
+#include "CircularBuffer.h"
 #include "ComplexFloatArray.h"
 #include "ComplexFourierTransform.h"
 #include "ComplexShortArray.h"
