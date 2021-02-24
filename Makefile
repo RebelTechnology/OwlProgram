@@ -1,7 +1,11 @@
 BUILDROOT ?= .
 
 ifndef CONFIG
+ifdef TEST
+  CONFIG=Debug
+else
   CONFIG=Release
+endif
 endif
 
 ifndef PLATFORM
