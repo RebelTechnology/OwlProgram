@@ -5,6 +5,7 @@
 
 /**
  * Circular buffer that keeps a delta table of differences for faster fractional delay lines.
+ * Note that this class requires twice as much buffer space as @class CircularBuffer.
  */
 template<typename T = float>
 class FractionalCircularBuffer {
@@ -45,14 +46,14 @@ public:
   }
 
   void write(T value){
-    T previous = readAt(writepos-1);
-    update(previous, value, writepos);
+    size_t pos = (writepos-1+size) % size;
+    update(data[pos], value, writepos);
     if(++writepos >= size)
       writepos = 0;
   }
 
   void write(T* src, size_t len){
-    T previous = readAt(writepos-1);
+    T previous = data[(writepos-1+size) % size];
     size_t rem = size-writepos;
     if(len > rem){
       for(size_t i=writepos; i<size; ++i)
@@ -69,7 +70,8 @@ public:
   }
     
   void writeAt(size_t index, T value){
-    update(readAt(index-1), value, index);
+    size_t pos = (index-1+size) % size;
+    update(data[pos], value, index);
   }
 
   T read(){
@@ -84,8 +86,12 @@ public:
   }
 
   void read(T* dst, size_t len){
+    // size_t idx = (size_t)readpos;
+    // float fraction = readpos-idx;
     size_t idx = (size_t)readpos;
-    float fraction = readpos-idx;
+    float fraction = 1 - (readpos-idx);
+    idx = (idx+1) % size;
+
     size_t rem = size-idx;
     T* pdata = data+idx;
     T* pdelta = delta+idx;
@@ -105,8 +111,8 @@ public:
   
   T readAt(float index){
     size_t idx = (size_t)index;
-    float fraction = index-idx;
-    idx %= size;
+    float fraction = 1 - (index-idx);
+    idx = (idx+1) % size;
     return data[idx] + fraction*delta[idx];
   }
 
@@ -122,8 +128,8 @@ public:
     return data+writepos;
   }
 
-  void incrementWriteHead(int len){
-    writepos += len;
+  void moveWriteHead(int samples){
+    writepos += samples;
     if(writepos >= size)
       writepos -= size;
   }
@@ -142,8 +148,8 @@ public:
     return data+(size_t)readpos;
   }
 
-  void incrementReadHead(float len){
-    setReadIndex(readpos+len);
+  void moveReadHead(float samples){
+    setReadIndex(readpos+samples);
   }
 
   /**
@@ -176,8 +182,8 @@ public:
   void delay(T* in, T* out, size_t len, float beginDelay, float endDelay){
     setDelay(beginDelay);
     float pos = readpos;
-    float incr = (endDelay-beginDelay)/len + 1;
-    T previous = readAt(writepos-1);
+    float incr = (len+endDelay-beginDelay)/len;
+    T previous = data[(writepos-1+size) % size];
     size_t rem = size-writepos;
     if(len > rem){
       for(size_t i=writepos; i<size; ++i){

@@ -88,7 +88,7 @@ public:
   T readAt(size_t index){
     return data[index % size];
   }
-  
+
   /**
    * Interpolated read at sub-sample index.
    * @return a value linearly interpolated at a fractional index
@@ -131,9 +131,9 @@ public:
     return data+writepos;
   }
 
-  void incrementWriteHead(size_t len){
-    ASSERT(getWriteCapacity() < len, "overflow");
-    writepos += len;
+  void moveWriteHead(size_t samples){
+    ASSERT(getWriteCapacity() < samples, "overflow");
+    writepos += samples;
     if(writepos >= size)
       writepos -= size;
   }
@@ -150,9 +150,9 @@ public:
     return data+readpos;
   }
 
-  void incrementReadHead(size_t len){
-    ASSERT(getReadCapacity() < len, "underflow");
-    readpos += len;
+  void moveReadHead(size_t samples){
+    ASSERT(getReadCapacity() < samples, "underflow");
+    readpos += samples;
     if(readpos >= size)
       readpos -= size;
   }
@@ -178,6 +178,22 @@ public:
     setDelay(delay);
     write(in, len);
     read(out, len);
+  }
+  
+  /**
+   * Write to buffer and read with a delay that ramps up or down
+   * from @param beginDelay to @param endDelay
+   */
+  void interpolatedDelay(T* in, T* out, size_t len, float beginDelay, float endDelay){
+    setDelay(beginDelay);
+    write(in, len);
+    float pos = readpos;
+    float incr = (len+endDelay-beginDelay)/len;
+    while(len--){
+      *out++ = interpolatedReadAt(pos);
+      pos += incr;
+    }
+    setDelay(endDelay);
   }
 
   size_t getReadCapacity(){
