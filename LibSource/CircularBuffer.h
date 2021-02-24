@@ -38,11 +38,11 @@ public:
     T* dest = getWriteHead();
     size_t rem = size-writepos;
     if(len > rem){
-      memcpy(dest, source, rem);
+      memcpy(dest, source, rem*sizeof(T));
       writepos = len-rem;
-      memcpy(data, source+rem, writepos);
+      memcpy(data, source+rem, writepos*sizeof(T));
     }else{
-      memcpy(dest, source, len);
+      memcpy(dest, source, len*sizeof(T));
       writepos += len;
     }
   }
@@ -76,11 +76,11 @@ public:
     T* src = getReadHead();
     size_t rem = size-readpos;
     if(len > rem){
-      memcpy(dst, src, rem);
+      memcpy(dst, src, rem*sizeof(T));
       readpos = len-rem;
-      memcpy(dst+rem, data, readpos);
+      memcpy(dst+rem, data, readpos*sizeof(T));
     }else{
-      memcpy(dst, src, len);
+      memcpy(dst, src, len*sizeof(T));
       readpos += len;
     }
   }
