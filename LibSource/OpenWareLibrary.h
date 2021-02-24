@@ -14,7 +14,7 @@
 #include "Envelope.h"
 #include "ExponentialDecayEnvelope.h"
 #include "FastFourierTransform.h"
-#include "FastInterpolatedCircularBuffer.h"
+#include "FractionalCircularBuffer.h"
 #include "FastLogTable.h"
 #include "FastPowTable.h"
 #include "FirFilter.h"

@@ -1,5 +1,5 @@
-#ifndef _FastInterpolatedCircularBuffer_hpp_
-#define _FastInterpolatedCircularBuffer_hpp_
+#ifndef _FractionalCircularBuffer_hpp_
+#define _FractionalCircularBuffer_hpp_
 
 #include <stdint.h>
 
@@ -7,7 +7,7 @@
  * Circular buffer that keeps a delta table of differences for faster fractional delay lines.
  */
 template<typename T = float>
-class FastInterpolatedCircularBuffer {
+class FractionalCircularBuffer {
 private:
   T* data;
   T* delta;
@@ -25,8 +25,8 @@ protected:
     return current;
   }
 public:
-  FastInterpolatedCircularBuffer(): data(NULL), delta(NULL), size(0){}
-  FastInterpolatedCircularBuffer(T* data, T* delta, size_t size) : data(data), delta(delta), size(size){}
+  FractionalCircularBuffer(): data(NULL), delta(NULL), size(0){}
+  FractionalCircularBuffer(T* data, T* delta, size_t size) : data(data), delta(delta), size(size){}
 
   size_t getSize() const {
     return size;
@@ -240,21 +240,21 @@ public:
     setAll(0);
   }
 
-  static FastInterpolatedCircularBuffer<T>* create(size_t len){
-    FastInterpolatedCircularBuffer<T>* obj = new FastInterpolatedCircularBuffer<T>(new T[len], new T[len], len);
+  static FractionalCircularBuffer<T>* create(size_t len){
+    FractionalCircularBuffer<T>* obj = new FractionalCircularBuffer<T>(new T[len], new T[len], len);
     obj->clear();
     return obj;
   }
 
-  static void destroy(FastInterpolatedCircularBuffer<T>* obj){
+  static void destroy(FractionalCircularBuffer<T>* obj){
     delete[] obj->data;
     delete[] obj->delta;
     delete obj;
   }
 };
 
-typedef FastInterpolatedCircularBuffer<float> FastInterpolatedCircularFloatBuffer;
-typedef FastInterpolatedCircularBuffer<int16_t> FastInterpolatedCircularShortBuffer;
-typedef FastInterpolatedCircularBuffer<int32_t> FastInterpolatedCircularIntBuffer;
+typedef FractionalCircularBuffer<float> FractionalCircularFloatBuffer;
+typedef FractionalCircularBuffer<int16_t> FractionalCircularShortBuffer;
+typedef FractionalCircularBuffer<int32_t> FractionalCircularIntBuffer;
 
-#endif /* _FastInterpolatedCircularBuffer_hpp_ */
+#endif /* _FractionalCircularBuffer_hpp_ */

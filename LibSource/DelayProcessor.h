@@ -3,7 +3,7 @@
 
 #include "CircularBuffer.h"
 #include "SignalProcessor.h"
-#include "FastInterpolatedCircularBuffer.h"
+#include "FractionalCircularBuffer.h"
 
 /**
  * Delay line signal processor implemented with a circular buffer
@@ -46,7 +46,7 @@ public:
  */
 class FractionalDelayProcessor : public SignalProcessor {
 protected:
-  FastInterpolatedCircularFloatBuffer buffer;
+  FractionalCircularFloatBuffer buffer;
   float delay;
 public:
   FractionalDelayProcessor() : delay(0) {}
