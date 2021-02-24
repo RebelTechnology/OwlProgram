@@ -9,14 +9,18 @@ class CircularBuffer {
 private:
   T* data;
   size_t size;
-  volatile size_t writepos = 0;
-  volatile size_t readpos = 0;
+  size_t writepos = 0;
+  size_t readpos = 0;
 public:
   CircularBuffer(): data(NULL), size(0){}
   CircularBuffer(T* data, size_t size): data(data), size(size){}
 
   size_t getSize() const {
     return size;
+  }
+
+  T* getData() {
+    return data;
   }
   
   bool isEmpty() const {
@@ -29,17 +33,16 @@ public:
       writepos = 0;
   }
 
-  void write(T* data, size_t len){
+  void write(T* source, size_t len){
     ASSERT(getWriteCapacity() < len, "CircularBuffer overflow");
     T* dest = getWriteHead();
     size_t rem = size-writepos;
-    if(len >= rem){
-      memcpy(dest, data, rem);
-      // note that len-rem may be zero
-      memcpy(data, data+rem, len-rem);
+    if(len > rem){
+      memcpy(dest, source, rem);
       writepos = len-rem;
+      memcpy(data, source+rem, writepos);
     }else{
-      memcpy(dest, data, len);
+      memcpy(dest, source, len);
       writepos += len;
     }
   }
@@ -68,17 +71,16 @@ public:
     return c;
   }
 
-  void read(T* data, size_t len){
+  void read(T* dst, size_t len){
     ASSERT(getReadCapacity() < len, "CircularBuffer underflow");
     T* src = getReadHead();
     size_t rem = size-readpos;
-    if(len >= rem){
-      memcpy(data, src, rem);
-      // note that len-rem may be zero
-      memcpy(data+rem, data, len-rem);
+    if(len > rem){
+      memcpy(dst, src, rem);
       readpos = len-rem;
+      memcpy(dst+rem, data, readpos);
     }else{
-      memcpy(data, src, len);
+      memcpy(dst, src, len);
       readpos += len;
     }
   }
@@ -160,6 +162,15 @@ public:
    */
   void setDelay(int samples){
     readpos = (writepos-samples) % size;
+  }
+
+  /**
+   * Write to buffer and read with a delay
+   */
+  void delay(T* in, T* out, size_t len, int delay){
+    setDelay(delay);
+    write(in, len);
+    read(in, len);
   }
 
   size_t getReadCapacity(){
