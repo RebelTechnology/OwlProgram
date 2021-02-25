@@ -8,7 +8,7 @@ template<typename T = float>
 class CircularBuffer {
 private:
   T* data;
-  size_t size;
+  const size_t size;
   size_t writepos = 0;
   size_t readpos = 0;
 public:

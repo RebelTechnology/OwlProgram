@@ -12,7 +12,7 @@ class FractionalCircularBuffer {
 private:
   T* data;
   T* delta;
-  size_t size;
+  const size_t size;
   size_t writepos = 0;
   float readpos = 0;
 
@@ -86,8 +86,6 @@ public:
   }
 
   void read(T* dst, size_t len){
-    // size_t idx = (size_t)readpos;
-    // float fraction = readpos-idx;
     size_t idx = (size_t)readpos;
     float fraction = 1 - (readpos-idx);
     idx = (idx+1) % size;
@@ -139,9 +137,7 @@ public:
   }
 
   void setReadIndex(float pos){
-    while(pos >= size)
-      pos -= size;
-    readpos = pos;
+    readpos = fmodf(pos+size, size);
   }
 
   T* getReadHead(){
