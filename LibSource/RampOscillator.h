@@ -36,14 +36,14 @@ public:
     float sample = phase;
     phase += incr;
     if(phase >= 1.0f)
-      phase -= 1.0f;
+      phase -= 2.0f;
     return sample;
   }
   float getNextSample(float fm){
     float sample = phase;
     phase += incr + fm;
     if(phase >= 1.0f)
-      phase -= 1.0f;
+      phase -= 2.0f;
     return sample;
   }  
   static RampOscillator* create(float sr){

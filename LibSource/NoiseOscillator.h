@@ -24,7 +24,7 @@ class WhiteNoiseOscillator : public Oscillator {
     // https://en.wikipedia.org/wiki/Single-precision_floating-point_format
     return x.f;
 #else
-    return (rand()/(RAND_MAX+1.0f)) * 2 - 1;
+    return (rand()/(float)RAND_MAX) * 2 - 1;
 #endif
   }
 

@@ -40,10 +40,25 @@ PATCHNAME   ?= $(GEN)
 PATCHCLASS  ?= GenPatch
 PATCHFILE   ?= GenPatch.hpp
 DEPS        += gen
+else ifdef MAXIMILIAN
+# options for Maximilian compilation
+PATCHNAME   ?= $(MAXIMILIAN)
+PATCHCLASS  ?= MaximilianPatch
+PATCHFILE   ?= MaximilianPatch.hpp
+DEPS        += maximilian
 else ifdef TEST
 PATCHNAME   ?= $(TEST)
 PATCHCLASS  ?= $(PATCHNAME)Patch
 PATCHFILE   ?= $(PATCHNAME)Patch.hpp
+else ifdef SOUL
+# options for SOUL patch compilation
+PATCHNAME   ?= $(SOUL)
+PATCHCLASS  ?= SoulPatch
+PATCHFILE   ?= SoulPatch.hpp
+SOULCLASS   ?= $(SOUL)
+SOULFILE    ?= $(SOUL).soulpatch
+SOULHPP     ?= $(SOUL).hpp
+DEPS        += soul
 else
 # options for C++ compilation
 PATCHNAME   ?= "Template"
@@ -65,17 +80,17 @@ export BUILD BUILDROOT TARGET
 export PATCHNAME PATCHCLASS PATCHSOURCE 
 export PATCHFILE PATCHIN PATCHOUT
 export HEAVYTOKEN HEAVYSERVICETOKEN  HEAVY
+export SOUL SOULCLASS SOULFILE SOULHPP
 export LDSCRIPT CPPFLAGS EMCCFLAGS ASFLAGS
 export CONFIG PLATFORM
 
 DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
 
-all: patch
+all: libs patch
 
-.PHONY: .FORCE clean realclean run store docs help
+.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as test check tables resource size clean realclean sysex run store docs help
 
 .FORCE:
-	@echo Building patch $(PATCHNAME)
 	@mkdir -p $(BUILD)/Source
 	@mkdir -p $(BUILD)/web
 
@@ -83,6 +98,7 @@ $(BUILD)/registerpatch.cpp: .FORCE
 	@echo "REGISTER_PATCH($(PATCHCLASS), \"$(PATCHNAME)\", $(PATCHIN), $(PATCHOUT));" > $@
 
 $(BUILD)/registerpatch.h: .FORCE
+	@echo Building patch $(PATCHNAME)
 	@echo "#include \"$(PATCHFILE)\"" > $@
 
 $(BUILD)/Source/startup.s: .FORCE
@@ -93,6 +109,10 @@ $(BUILD)/%.syx: $(BUILD)/%.bin
 
 patch: $(DEPS) ## build patch binary
 	@$(MAKE) -s -f compile.mk compile
+
+libs: .FORCE ## build patch libraries
+	@$(MAKE) -s -f compile.mk libs
+	@$(MAKE) -s -f web.mk libs
 
 web: $(DEPS) ## build Javascript patch
 	@$(MAKE) -s -f web.mk web
@@ -110,6 +130,12 @@ heavy: .FORCE
 gen: .FORCE
 	@$(MAKE) -s -f gen.mk gen
 
+maximilian: .FORCE
+	@$(MAKE) -s -f maximilian.mk maximilian
+
+soul: .FORCE
+	@$(MAKE) -s -f soul.mk soul
+
 sysex: patch $(BUILD)/$(TARGET).syx ## package patch binary as MIDI sysex
 	@echo Built sysex $(PATCHNAME) in $(BUILD)/$(TARGET).syx
 
@@ -121,6 +147,10 @@ store: patch ## upload and save patch to attached OWL
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to store in slot $(SLOT)
 	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out "$(OWLDEVICE)" -store $(SLOT)
 
+resource: $(RESOURCE) ## upload and save resource to attached OWL
+	@echo Sending resource $(RESOURCE) to $(OWLDEVICE) to store in slot $(SLOT)
+	@$(FIRMWARESENDER) -q -in $(RESOURCE) -out "$(OWLDEVICE)" -store $(SLOT)
+
 docs: ## generate HTML documentation
 	@doxygen Doxyfile
 
@@ -131,7 +161,7 @@ clean: ## remove generated patch files
 	@rm -rf $(BUILD)/*
 
 realclean: clean ## remove all library object files
-	@find Libraries/ -name '*.o' -delete
+	@find Libraries/ -name '*.[a|o]' -delete
 
 size: patch ## show binary size metrics and large object summary
 	@$(MAKE) -s -f common.mk size
@@ -146,6 +176,8 @@ as: patch ## build assembly file (Build/patch.s)
 
 test: $(DEPS) ## run test patch
 	@$(MAKE) -s -f test.mk test
+
+check: patch ## run tests (compile dummy patch)
 
 help: ## show this help
 	@echo 'Usage: make [target] ...'

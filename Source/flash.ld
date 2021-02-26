@@ -134,8 +134,8 @@ SECTIONS
     PROVIDE ( _eprogram = . );
     PROVIDE ( _stack = . );
   } >PATCHRAM
-  _eram = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM);
-  _estack = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM);
+  _eram = ORIGIN(PATCHRAM) + 80k;    /* Limit to 80k for OwlWare compatiblity */
+  _estack = ORIGIN(PATCHRAM) + 80k;
 
   .fastheap (NOLOAD) :
   {

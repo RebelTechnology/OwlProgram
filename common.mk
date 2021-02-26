@@ -2,14 +2,14 @@
 DSPLIB=Libraries/CMSIS/DSP_Lib/Source
 
 # Tool path
-TOOLROOT ?= Tools/gcc-arm-none-eabi-9-2020-q2-update/bin/
+# TOOLROOT ?= Tools/gcc-arm-none-eabi-9-2020-q2-update/bin/
 
 CMSIS ?= Libraries/CMSIS/Include/
 
 # Tools
 CC=$(TOOLROOT)arm-none-eabi-gcc
 LD=$(TOOLROOT)arm-none-eabi-gcc
-AR=$(TOOLROOT)arm-none-eabi-ar
+AR=$(TOOLROOT)arm-none-eabi-gcc-ar
 AS=$(TOOLROOT)arm-none-eabi-as
 NM=$(TOOLROOT)arm-none-eabi-nm
 CXX=$(TOOLROOT)arm-none-eabi-g++
@@ -24,7 +24,7 @@ ARCH_FLAGS = -fsingle-precision-constant -mthumb
 ARCH_FLAGS += -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # ARCH_FLAGS += -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-sp-d16
 # ARCH_FLAGS += -mcpu=cortex-m0 -mfloat-abi=soft -msoft-float
-DEF_FLAGS = -DSTM32F4XX -DARM_MATH_CM4 -D__FPU_PRESENT -D__FPU_USED=1
+DEF_FLAGS = -DSTM32F4XX -DARM_MATH_CM4 -D__FPU_PRESENT -D__FPU_USED=1 -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
 # DEF_FLAGS = -DSTM32F745xx -DARM_MATH_CM7 -D__FPU_PRESENT -D__FPU_USED=1
 
 INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(DEVICE) -I$(CMSIS) -I$(PERIPH_FILE)/inc -I$(SOURCE)
@@ -33,7 +33,7 @@ INC_FLAGS += -I$(USB_DEVICE_FILE)/Core/inc -I$(USB_DEVICE_FILE)/Class/cdc/inc
 INC_FLAGS += -I$(USB_OTG_FILE)/inc
 CPPFLAGS += $(ARCH_FLAGS) $(INC_FLAGS) $(DEF_FLAGS)
 CFLAGS += -std=gnu11
-CXXFLAGS += -std=gnu++11
+CXXFLAGS += -std=gnu++14
 LDFLAGS += -T$(LDSCRIPT) $(ARCH_FLAGS)
 
 # compile and generate dependency info

@@ -2,19 +2,10 @@
 #define __ScreenBuffer_h__
 
 #include <stdint.h>
+#include <string.h>
 #include "device.h"
 #include "message.h"
 
-#define swap(a, b) { int16_t t = a; a = b; b = t; }
-#ifndef min
-#define min(a,b) ((a)<(b)?(a):(b))
-#endif
-#ifndef max
-#define max(a,b) ((a)>(b)?(a):(b))
-#endif
-#ifndef abs
-#define abs(x) ((x)>0?(x):-(x))
-#endif
 
 template<typename Colour, Colour BLACK, Colour WHITE>
 class ScreenBuffer {
@@ -28,6 +19,9 @@ private:
   uint16_t textcolor;
   uint16_t textbgcolor;
   bool wrap;
+
+  inline void swap(int& a, int& b) { int t = a; a = b; b = t; };
+
 public:
 ScreenBuffer(uint16_t w, uint16_t h) : 
   width(w), height(h), pixels(NULL),

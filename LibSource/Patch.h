@@ -3,6 +3,7 @@
 
 #include "device.h"
 #include "basicmaths.h"
+#include "Resource.h"
 #include "FloatArray.h"
 #include "PatchParameter.h"
 #include "SmoothValue.h"
@@ -57,6 +58,7 @@ public:
   int getSamplesSinceButtonPressed(PatchButtonId bid);
   void setButton(PatchButtonId bid, uint16_t value, uint16_t samples=0);
   int getBlockSize();
+  int getNumberOfChannels();
   float getSampleRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
   float getElapsedBlockTime();
@@ -69,6 +71,12 @@ public:
   virtual void processMidi(MidiMessage msg);
   virtual void sendMidi(MidiMessage msg);
 #endif /* USE_MIDI_CALLBACK */
+  /**
+   * Get a resource (such as a stored FloatArray) from the firmware.
+   * If the resource does not exist, this raises an error.
+   * If the resource exists but is not memory mapped, this will allocate new memory.
+   */
+  Resource* getResource(const char* name);
 };
 
 #endif // __Patch_h__

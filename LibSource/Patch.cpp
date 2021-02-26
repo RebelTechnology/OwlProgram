@@ -6,6 +6,7 @@
 #include "PatchProcessor.h"
 #include "basicmaths.h"
 #include "main.h"
+#include "message.h"
 
 AudioBuffer::~AudioBuffer(){}
 
@@ -26,6 +27,13 @@ float Patch::getSampleRate(){
 
 int Patch::getBlockSize(){
   return getProgramVector()->audio_blocksize;
+}
+
+int Patch::getNumberOfChannels(){
+  uint8_t format = getProgramVector()->audio_format;
+  if((format & 0xf0) == AUDIO_FORMAT_24B32 && (format & 0x0f) > 0)
+    return format & 0x0f;
+  return 2;
 }
 
 float Patch::getParameterValue(PatchParameterId pid){
@@ -83,6 +91,13 @@ void Patch::sendMidi(MidiMessage msg){
 }
 
 #endif /* USE_MIDI_CALLBACK */
+
+Resource* Patch::getResource(const char* name){
+  Resource* resource = Resource::load(name);
+  if(resource == NULL)
+    error(CONFIGURATION_ERROR_STATUS, "Missing Resource");
+  return resource;
+}
 
 #include "MemoryBuffer.hpp"
 AudioBuffer* AudioBuffer::create(int channels, int samples){
