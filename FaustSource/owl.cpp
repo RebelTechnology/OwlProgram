@@ -38,8 +38,10 @@
 
 #include "Patch.h"
 #include "VoltsPerOctave.h"
+#ifdef SOUNDFILE
 #include "Resource.h"
 #include "WaveReader.h"
+#endif
 
 // We have to undefine min/max from OWL's basicmaths.h, otherwise they cause
 // errors when Faust calls functions with the same names in std:: namespace
@@ -373,6 +375,7 @@ public:
 
 #define EMPTY_BUFFER_SIZE 0
 
+#ifdef SOUNDFILE
 class OwlResourceReader {
 public:
     virtual ~OwlResourceReader() {}
@@ -546,6 +549,7 @@ protected:
         offset += soundfile->fLength[part];
     }
 };
+#endif /* SOUNDFILE */
 
 
 /**************************************************************************************
@@ -577,7 +581,9 @@ class OwlUI : public UI {
     int fSampleRate;
     //std::map<std::string, Soundfile*> fSoundfileMap;    // Map to share loaded soundfiles
     OwlParameterBase* fParameterTable[MAXOWLPARAMETERS];
+#ifdef SOUNDFILE
     OwlResourceReader* fSoundReader = NULL;
+#endif
     Soundfile* fSoundfiles[MAX_SOUNDFILES];
     PatchButtonId fButton;
     // check if the widget is an Owl parameter and, if so, add the corresponding OwlParameter
@@ -641,7 +647,7 @@ class OwlUI : public UI {
         fParameter = NO_PARAMETER;
         fButton = NO_BUTTON; // clear current button ID
     }
-
+#ifdef SOUNDFILE
     void addOwlResources(const char** resource_names, int names_size, Soundfile** sf_zone){
         if (fSoundfileIndex < MAX_SOUNDFILES){
             Soundfile* sound_file = fSoundReader->createSoundfile(resource_names, names_size, MAX_CHAN);
@@ -654,7 +660,7 @@ class OwlUI : public UI {
         // If failure, use 'defaultsound'
         *sf_zone = defaultsound;
     }
-
+#endif /* SOUNDFILE */
 public:
     MetaData meta;
     OwlUI(Patch* pp)
@@ -672,9 +678,11 @@ public:
             delete fVOctInput;
         if (meta.vOctOutput)
             delete fVOctOutput;
+#ifdef SOUNDFILE
         if (fSoundReader != NULL) {
             delete fSoundReader;
         }
+#endif
         for (int i = 0; i < fSoundfileIndex; i++){
             delete fSoundfiles[i];
         }
@@ -732,6 +740,7 @@ public:
     }
     // -- soundfiles
     virtual void addSoundfile(const char* label, const char* url, Soundfile** sf_zone) {
+#ifdef SOUNDFILE
         if (fSoundReader == NULL){
             fSoundReader = new OwlResourceReader();
             fSoundReader->setSampleRate(fPatch->getSampleRate());
@@ -783,6 +792,10 @@ public:
                 delete[] paths[i];
             }
         }
+#else
+        fParameter = NO_PARAMETER; // clear current parameter ID
+        fButton = NO_BUTTON;
+#endif /* SOUNDFILE */
     }
 
     // -- metadata declarations
