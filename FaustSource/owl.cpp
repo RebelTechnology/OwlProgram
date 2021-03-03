@@ -706,7 +706,9 @@ public:
         : fPatch(pp)
         , fParameter(NO_PARAMETER)
         , fParameterIndex(0)
+#ifdef SOUNDFILE
         , fSoundfileIndex(0)
+#endif
         , fButton(NO_BUTTON) {
     }
 
