@@ -358,15 +358,8 @@ public:
         , fButton(button) {}
     void update() {
         bool isHigh = fPatch->isButtonPressed(fButton);
-        if (isHigh  && !wasHigh) {
-            // Rising edge detected
-            state = !state;
-            wasHigh = true;
-        }
-        else if (!isHigh && wasHigh) {
-            // Falling edge detected
-            wasHigh = false;
-        }
+        state ^= isHigh && !wasHigh;
+        wasHigh = isHigh;
         fPatch->setButton(fButton, state,  0);
         *fZone = state;
     }
