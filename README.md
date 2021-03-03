@@ -113,6 +113,8 @@ To compile and load a FAUST patch
 Note: assign OWL parameters with slider metadata: `[OWL:A]`, `[OWL:B]` et c. For example:
 ```gain = vslider("gain[OWL:C]", 1,0,1,0.1);```. Assign push button with e.g. ```gate = button("gate[OWL:Push]");```
 
+Use `make FAUSTOPTS=soundfile` to build patch with soundfiles support. This allows loading WAV files from OWL's flash storage.
+
 ## Building Pure Data patches
 
 * put your PD patch file (e.g. `Foo.pd`) into `PatchSource`
