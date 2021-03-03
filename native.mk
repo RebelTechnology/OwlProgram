@@ -1,3 +1,12 @@
+
+ifeq ($(CONFIG),Debug)
+CPPFLAGS    ?= -g -O0 -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
+endif
+
+ifeq ($(CONFIG),Release)
+CPPFLAGS    ?= -Os -ffast-math
+endif
+
 BUILDROOT   ?= .
 BUILD       ?= $(BUILDROOT)/Build
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
@@ -6,7 +15,6 @@ LIBSOURCE    = $(BUILDROOT)/LibSource
 BUILDSOURCE  = $(BUILD)/Source
 TESTPATCHES  = $(BUILDROOT)/TestPatches
 DSPLIB       = Libraries/CMSIS/DSP_Lib/Source
-CPPFLAGS     = -g -Wall
 CPPFLAGS    += -I$(SOURCE)
 CPPFLAGS    += -I$(PATCHSOURCE)
 CPPFLAGS    += -I$(LIBSOURCE)

@@ -1,6 +1,15 @@
 BUILDROOT   ?= .
 BUILD       ?= $(BUILDROOT)/Build
 
+ifeq ($(CONFIG),Debug)
+CPPFLAGS    ?= -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
+ASFLAGS      = -g
+endif
+
+ifeq ($(CONFIG),Release)
+CPPFLAGS    ?= -Os -specs=nano.specs -ffast-math
+endif
+
 # Code Paths
 SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
@@ -9,6 +18,7 @@ TESTPATCHES  = $(BUILDROOT)/TestPatches
 DAISYSP      = $(BUILDROOT)/Libraries/DaisySP/Source
 CMSIS        = $(BUILDROOT)/Libraries/CMSIS/Include/
 DSPLIB       = $(BUILDROOT)/Libraries/CMSIS/DSP_Lib/Source
+LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
 
 # Tool path
 # TOOLROOT ?= Tools/gcc-arm-none-eabi-9-2020-q2-update/bin/

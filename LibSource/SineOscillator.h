@@ -49,8 +49,7 @@ public:
       output[i] = sinf(phase);
       phase += incr; // allow phase to overrun
     }
-    while(phase >= 2*M_PI)
-      phase -= 2*M_PI;
+    phase = fmodf(phase, 2*M_PI);
   }
   float generate(float fm){
     float sample = sinf(phase);

@@ -15,17 +15,6 @@ endif
 DEPS = .FORCE
 TARGET ?= patch
 
-ifeq ($(CONFIG),Debug)
-CPPFLAGS    ?= -g -Wall -Wcpp -Wunused-function -DDEBUG -DUSE_FULL_ASSERT
-EMCCFLAGS   ?= -g
-ASFLAGS      = -g
-endif
-
-ifeq ($(CONFIG),Release)
-CPPFLAGS    ?= -Os -specs=nano.specs -ffast-math
-EMCCFLAGS   ?= -Oz # optimise for size
-endif
-
 ifdef FAUST
 # options for FAUST compilation
 PATCHNAME   ?= $(FAUST)
@@ -75,8 +64,6 @@ PATCHOUT    ?= 2
 SLOT        ?= 0
 OWLDEVICE   ?= OWL-*
 BUILD       ?= $(BUILDROOT)/Build
-LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
-# LDSCRIPT    ?= $(BUILDROOT)/Source/STM32F746ZGTx_FLASH.ld
 PATCHSOURCE ?= $(BUILDROOT)/PatchSource
 FIRMWARESENDER ?= Tools/FirmwareSender
 
@@ -89,7 +76,6 @@ export PATCHNAME PATCHCLASS PATCHSOURCE
 export PATCHFILE PATCHIN PATCHOUT
 export HEAVYTOKEN HEAVYSERVICETOKEN  HEAVY
 export SOUL SOULCLASS SOULFILE SOULHPP
-export LDSCRIPT CPPFLAGS EMCCFLAGS ASFLAGS
 export CONFIG PLATFORM
 
 DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 

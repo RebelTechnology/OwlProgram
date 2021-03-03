@@ -1,3 +1,11 @@
+ifeq ($(CONFIG),Debug)
+EMCCFLAGS   ?= -g
+endif
+
+ifeq ($(CONFIG),Release)
+EMCCFLAGS   ?= -Oz # optimise for size
+endif
+
 LIBSOURCE    = $(BUILDROOT)/LibSource
 SOURCE       = $(BUILDROOT)/Source
 BUILDSOURCE    = $(BUILD)/Source
