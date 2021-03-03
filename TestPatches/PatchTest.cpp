@@ -31,6 +31,10 @@ PatchProcessor* getInitialisingPatchProcessor(){
 }
 
 extern "C"{
+  int serviceCall(int service, void** params, int len){
+    printf("Service call (todo) : %d\n", service);
+    return -1;
+  }
   void error(int8_t code, const char* reason){
     printf("%s\n", reason);
     errorcode = -1;
@@ -45,6 +49,7 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
 
 int main(int argc, char** argv){
   errorcode = 0;
+  programVector.serviceCall = serviceCall;
 #include "registerpatch.cpp"
   ASSERT(getInitialisingPatchProcessor()->patch != NULL, "Missing test patch");    
   AudioBuffer* samples = AudioBuffer::create(CHANNELS, BLOCKSIZE);
