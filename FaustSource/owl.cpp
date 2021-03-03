@@ -360,6 +360,24 @@ public:
   }
 };
 
+class OwlCheckbox : public OwlParameterBase {
+protected:
+    PatchButtonId fButton; // OWL button id : PUSHBUTTON, ...
+    bool wasHigh = false; // Flag for edge detection
+    bool state = false;   // Current state
+public:
+    OwlCheckbox(Patch* pp, PatchButtonId button, FAUSTFLOAT* z, const char* l)
+        : OwlParameterBase(pp, z, false)
+        , fButton(button) {}
+    void update() {
+        bool isHigh = fPatch->isButtonPressed(fButton);
+        state ^= isHigh && !wasHigh;
+        wasHigh = isHigh;
+        fPatch->setButton(fButton, state,  0);
+        *fZone = state;
+    }
+};
+
 /**************************************************************************************
  *
  * OwlResourceReader: Reads resources from flash storage and returns Soundfile objects.
@@ -655,6 +673,27 @@ class OwlUI : public UI {
         *sf_zone = defaultsound;
     }
 
+    void addOwlCheckbox(const char* label, FAUSTFLOAT* zone) {
+        if (fParameterIndex < MAXOWLPARAMETERS) {
+            if (meta.midiOn && strcasecmp(label, "gate") == 0) {
+                fParameterTable[fParameterIndex++] =
+                    new OwlVariable(fPatch, &fGate, zone, label, 0.0f, 0.0f, 1.0f);
+            }
+            else if (fButton != NO_BUTTON) {
+                fParameterTable[fParameterIndex++] =
+                    new OwlCheckbox(fPatch, fButton, zone, label);
+            }
+        }
+        fParameter = NO_PARAMETER;
+        fButton = NO_BUTTON; // clear current button ID
+    }
+
+    // we dont want to create a widget but we clear the current parameter ID just in case
+    void skip() {
+        fParameter = NO_PARAMETER; // clear current parameter ID
+        fButton = NO_BUTTON;
+    }
+
 public:
     MetaData meta;
     OwlUI(Patch* pp)
@@ -705,7 +744,7 @@ public:
         addOwlButton(label, zone);
     }
     virtual void addCheckButton(const char* label, FAUSTFLOAT* zone) {
-        addOwlButton(label, zone);
+        addOwlCheckbox(label, zone);
     }
     virtual void addVerticalSlider(const char* label, FAUSTFLOAT* zone,
         FAUSTFLOAT init, FAUSTFLOAT lo, FAUSTFLOAT hi, FAUSTFLOAT step) {
