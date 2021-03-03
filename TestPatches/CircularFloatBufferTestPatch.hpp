@@ -32,6 +32,28 @@ public:
       CircularFloatBuffer::destroy(buffer);
     }
     {
+      TEST("write/read");
+      CircularFloatBuffer* buffer = CircularFloatBuffer::create(10);
+      FloatArray input = FloatArray::create(5);
+      input.ramp(0, 5);
+      buffer->write(input, input.getSize());
+      for(size_t j=0; j<5; ++j)
+	CHECK_CLOSE(buffer->read(), j, DEFAULT_TOLERANCE);
+      CircularFloatBuffer::destroy(buffer);
+      FloatArray::destroy(input);
+    }
+    {
+      TEST("readAt");
+      CircularFloatBuffer* buffer = CircularFloatBuffer::create(7);
+      FloatArray input = FloatArray::create(5);
+      input.ramp(0, 5);
+      buffer->write(input, input.getSize());
+      for(size_t j=0; j<5; ++j)
+	CHECK_CLOSE(buffer->readAt(j), j, DEFAULT_TOLERANCE);
+      CircularFloatBuffer::destroy(buffer);
+      FloatArray::destroy(input);
+    }
+    {
       TEST("delay");
       CircularFloatBuffer* buffer = CircularFloatBuffer::create(60);
       FloatArray input = FloatArray::create(25);
