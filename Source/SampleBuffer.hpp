@@ -1,10 +1,7 @@
 #ifndef __SAMPLEBUFFER_H__
 #define __SAMPLEBUFFER_H__
 
-// https://stackoverflow.com/questions/41675438/fastest-way-to-swap-alternate-bytes-on-arm-cortex-m4-using-gcc
-
 #include <stdint.h>
-#include <string.h>
 #include "Patch.h"
 #include "device.h"
 #ifdef ARM_CORTEX
@@ -37,7 +34,6 @@ public:
   }
   virtual void split(int32_t* input) = 0;
   virtual void comb(int32_t* output) = 0;
-  
   void clear(){
     for(size_t i=0; i<channels; ++i)
       buffers[i].clear();
@@ -166,16 +162,12 @@ public:
 
 SampleBuffer* SampleBuffer::create(uint8_t format, size_t blocksize){
   if(format == AUDIO_FORMAT_24B16_2X){
-    debugMessage("16x2", 2, blocksize);
     return new SampleBuffer16(2, blocksize);
   // }else if(format == AUDIO_FORMAT_24B24_2X){
-  //   debugMessage("24x2", 2, blocksize);
   //   return new SampleBuffer24(2, blocksize);
   }else if(format == AUDIO_FORMAT_24B32){
-    debugMessage("32x2", 2, blocksize);
     return new SampleBuffer32(2, blocksize);
   }else if((format & 0xf0) == AUDIO_FORMAT_24B32){
-    debugMessage("32xN", format & 0x0f, blocksize);
     return new SampleBuffer32(format & 0x0f, blocksize);
   }else{
     return NULL; // unrecognised audio format
