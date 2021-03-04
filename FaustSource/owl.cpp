@@ -48,15 +48,6 @@
 #undef min
 #undef max
 
-// Parent soundfile object uses exceptions in one of its method.
-// This is probably the easiest may to make GCC happy about it when we compile
-// with exceptions disabled.
-#define try if(true)
-#define catch(x) if(false)
-
-#define MAX_SOUNDFILES 32
-// This is just value for upper limit - actual memory used depends only on number of files loaded
-
 #include <string.h>
 #include <strings.h>
 
@@ -66,8 +57,17 @@
 #include "faust/dsp/dsp.h"
 #include "faust/gui/UI.h"
 #include "faust/gui/meta.h"
+#ifdef SOUNDFILE
+// Parent soundfile object uses exceptions in one of its method.
+// This is probably the easiest may to make GCC happy about it when we compile
+// with exceptions disabled.
+#define try if(true)
+#define catch(x) if(false)
 #include "faust/gui/Soundfile.h"
 
+#define MAX_SOUNDFILES 32
+// This is just value for upper limit - actual memory used depends only on number of files loaded
+#endif
 
 static float fKey, fFreq, fGain, fGate;
 static float fBend = 1.0f;
