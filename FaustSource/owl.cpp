@@ -38,11 +38,22 @@
 
 #include "Patch.h"
 #include "VoltsPerOctave.h"
+#include "Resource.h"
+#include "WaveReader.h"
 
 // We have to undefine min/max from OWL's basicmaths.h, otherwise they cause
 // errors when Faust calls functions with the same names in std:: namespace
 #undef min
 #undef max
+
+// Parent soundfile object uses exceptions in one of its method.
+// This is probably the easiest may to make GCC happy about it when we compile
+// with exceptions disabled.
+#define try if(true)
+#define catch(x) if(false)
+
+#define MAX_SOUNDFILES 32
+// This is just value for upper limit - actual memory used depends only on number of files loaded
 
 #include <string.h>
 #include <strings.h>
@@ -53,6 +64,8 @@
 #include "faust/dsp/dsp.h"
 #include "faust/gui/UI.h"
 #include "faust/gui/meta.h"
+#include "faust/gui/Soundfile.h"
+
 
 static float fKey, fFreq, fGain, fGate;
 static float fBend = 1.0f;
@@ -347,6 +360,212 @@ public:
   }
 };
 
+class OwlCheckbox : public OwlParameterBase {
+protected:
+    PatchButtonId fButton; // OWL button id : PUSHBUTTON, ...
+    bool wasHigh = false; // Flag for edge detection
+    bool state = false;   // Current state
+public:
+    OwlCheckbox(Patch* pp, PatchButtonId button, FAUSTFLOAT* z, const char* l)
+        : OwlParameterBase(pp, z, false)
+        , fButton(button) {}
+    void update() {
+        bool isHigh = fPatch->isButtonPressed(fButton);
+        state ^= isHigh && !wasHigh;
+        wasHigh = isHigh;
+        fPatch->setButton(fButton, state,  0);
+        *fZone = state;
+    }
+};
+
+/**************************************************************************************
+ *
+ * OwlResourceReader: Reads resources from flash storage and returns Soundfile objects.
+ *
+ * This is based on SoundfileReader in faust/gui/Soundfile.h with some changes:
+ * - no allocation of excessive amounts of RAM for empty buffers
+ * - no stdlib usage of vectors, maps,
+ * - exception handling removed
+ *
+ ***************************************************************************************/
+
+#define EMPTY_BUFFER_SIZE 0
+
+class OwlResourceReader {
+public:
+    virtual ~OwlResourceReader() {}
+
+    void setSampleRate(int sample_rate) { fDriverSR = sample_rate; }
+
+    Soundfile* createSoundfile(const char** path_name_list, int path_name_size, int max_chan) {
+        Soundfile *soundfile = NULL;
+        int cur_chan = 1; // At least one channel
+        int total_length = 1; // At least one byte - otherwise we can't allocate empty channels
+
+        // Compute total length and channels max of all files
+        for (int i = 0; i < path_name_size; i++) {
+            int chan, length;
+            if (strcmp(path_name_list[i], "__empty_sound__") == 0) {
+                length = EMPTY_BUFFER_SIZE;
+                chan = 1;
+            } else {
+                getParamsFile(path_name_list[i], chan, length);
+            }
+            cur_chan = std::max<int>(cur_chan, chan);
+            total_length += length;
+        }
+
+        // Complete with empty parts
+        total_length += (MAX_SOUNDFILE_PARTS - path_name_size) * EMPTY_BUFFER_SIZE;
+
+        // Create the soundfile
+        soundfile = createSoundfile(cur_chan, total_length, max_chan);
+
+        // Init offset
+        int offset = 0;
+
+        // Read all files
+        for (int i = 0; i < path_name_size; i++) {
+            if (strcmp(path_name_list[i], "__empty_sound__") == 0){
+                emptyFile(soundfile, i, offset);
+            } else {
+                readFile(soundfile, path_name_list[i], i, offset, max_chan);
+            }
+        }
+
+        // Complete with empty parts
+        for (int i = path_name_size; i < MAX_SOUNDFILE_PARTS; i++) {
+            emptyFile(soundfile, i, offset);
+        }
+
+        // Share the same buffers for all other channels so that we have max_chan channels available
+        for (int chan = cur_chan; chan < max_chan; chan++) {
+            soundfile->fBuffers[chan] = soundfile->fBuffers[chan % cur_chan];
+        }
+        return soundfile;
+    }
+
+    /**
+     * Check the availability of a sound resource.
+     *
+     * @param resource_name - the name of the file, or sound resource identified this way
+     *
+     * @return true if the sound resource is available, false otherwise.
+     */
+    bool checkFile(const char* resource_name) {
+        Resource* resource = Resource::open(resource_name);
+        bool result = resource != NULL;
+        Resource::destroy(resource);
+        if (!result){
+            debugMessage("Resource not found");
+        }
+        return result;
+    }
+
+protected:
+    int fDriverSR;
+
+    void emptyFile(Soundfile* soundfile, int part, int& offset) {
+        soundfile->fLength[part] = EMPTY_BUFFER_SIZE;
+        soundfile->fSR[part] = SAMPLE_RATE;
+        soundfile->fOffset[part] = offset;
+        // Update offset
+        offset += soundfile->fLength[part];
+    }
+
+    Soundfile* createSoundfile(int cur_chan, int length, int max_chan) {
+        Soundfile* soundfile = new Soundfile();
+        soundfile->fBuffers = new FAUSTFLOAT*[max_chan];
+
+        for (int chan = 0; chan < cur_chan; chan++) {
+            soundfile->fBuffers[chan] = new FAUSTFLOAT[length];
+            memset(soundfile->fBuffers[chan], 0, sizeof(FAUSTFLOAT) * length);
+        }
+
+        soundfile->fChannels = cur_chan;
+        return soundfile;
+    }
+
+    void getBuffersOffset(Soundfile* soundfile, FAUSTFLOAT** buffers, int offset) {
+        for (int chan = 0; chan < soundfile->fChannels; chan++) {
+            buffers[chan] = &soundfile->fBuffers[chan][offset];
+        }
+    }
+
+    /**
+     * Get the channels and length values of the given sound resource.
+     *
+     * @param path_name - the name of the file, or sound resource identified this way
+     * @param channels - the channels value to be filled with the sound resource number of channels
+     * @param length - the length value to be filled with the sound resource length in frames
+     *
+     */
+    void getParamsFile(const char* path_name, int& channels, int& length) {
+        WaveResourceReader reader(path_name);
+        channels = 1;
+        length = 0;
+
+        if (reader.loadWaveHeader()){
+            channels = reader.fWave->num_channels;
+            length = (reader.fWave->subchunk_2_size * 8) / (reader.fWave->num_channels * reader.fWave->bits_per_sample);
+        }
+    }
+
+    /**
+     * Read one sound resource and fill the 'soundfile' structure accordingly
+     *
+     * @param soundfile - the soundfile to be filled
+     * @param path_name - the name of the file, or sound resource identified this way
+     * @param part - the part number to be filled in the soundfile
+     * @param offset - the offset value to be incremented with the actual sound resource length in frames
+     * @param max_chan - the maximum number of mono channels to fill
+     *
+     */
+    void readFile(Soundfile* soundfile, const char* path_name, int part, int& offset, int max_chan) {
+        WaveResourceReader reader(path_name);
+        if (!reader.loadWaveHeader()){
+            return;
+        }
+        reader.loadWave();
+
+        soundfile->fLength[part] = (reader.fWave->subchunk_2_size * 8) / (reader.fWave->num_channels * reader.fWave->bits_per_sample);
+        soundfile->fSR[part] = reader.fWave->sample_rate;
+        soundfile->fOffset[part] = offset;
+
+        // Audio frames have to be written for each chan
+        switch (reader.fWave->bits_per_sample){
+        case 16:
+            // 16 bit samples are signed ints
+            for (int sample = 0; sample < soundfile->fLength[part]; sample++) {
+                float factor = 1.f/32767.f;
+                int16_t* frame = (int16_t*)&reader.fWave->data[reader.fWave->block_align * sample];
+                for (int chan = 0; chan < reader.fWave->num_channels; chan++) {
+                    soundfile->fBuffers[chan][offset + sample] = frame[chan] * factor;
+                }
+            }
+            break;
+        case 8:
+            // 8 bit samples are unsigned ints
+            for (int sample = 0; sample < soundfile->fLength[part]; sample++) {
+                float factor = 1.f/255.f;
+                uint8_t* frame = (uint8_t*)&reader.fWave->data[reader.fWave->block_align * sample];
+                for (int chan = 0; chan < reader.fWave->num_channels; chan++) {
+                    soundfile->fBuffers[chan][offset + sample] = frame[chan] * factor - 0.5f;
+                }
+            }
+            break;
+        default:
+            debugMessage("Unsupported format");
+            return;
+        }
+
+        //
+        // Update offset
+        offset += soundfile->fLength[part];
+    }
+};
+
+
 /**************************************************************************************
  *
  * OwlUI : Faust User Interface builder. Passed to buildUserInterface OwlU
@@ -359,18 +578,25 @@ public:
 
 // The maximun number of mappings between owl parameters and faust widgets
 #define MAXOWLPARAMETERS 20
-#define NO_PARAMETER ((PatchParameterId)-1)
-#define NO_BUTTON ((PatchButtonId)-1)
+#define NO_PARAMETER     ((PatchParameterId)-1)
+#define NO_BUTTON        ((PatchButtonId)-1)
+#define PATH_LEN         24
 
 MonoVoiceAllocator allocator(fKey, fFreq, fGain, fGate, fBend);
 VoltsPerOctave* fVOctInput;
 VoltsPerOctave* fVOctOutput;
+Soundfile* defaultsound;
 
 class OwlUI : public UI {
     Patch* fPatch;
     PatchParameterId fParameter; // current parameter ID, value NO_PARAMETER means not set
-    int fParameterIndex = 0; // number of OwlParameters collected so far
+    int fParameterIndex;         // number of OwlParameters collected so far
+    int fSoundfileIndex;
+    int fSampleRate;
+    //std::map<std::string, Soundfile*> fSoundfileMap;    // Map to share loaded soundfiles
     OwlParameterBase* fParameterTable[MAXOWLPARAMETERS];
+    OwlResourceReader* fSoundReader = NULL;
+    Soundfile* fSoundfiles[MAX_SOUNDFILES];
     PatchButtonId fButton;
     // check if the widget is an Owl parameter and, if so, add the corresponding OwlParameter
     void addInputOwlParameter(const char* label, FAUSTFLOAT* zone,
@@ -398,7 +624,7 @@ class OwlUI : public UI {
             }
         }
         fParameter = NO_PARAMETER; // clear current parameter ID
-	fButton = NO_BUTTON;
+	    fButton = NO_BUTTON;
     }
 
     void addOutputOwlParameter(
@@ -434,6 +660,34 @@ class OwlUI : public UI {
         fButton = NO_BUTTON; // clear current button ID
     }
 
+    void addOwlResources(const char** resource_names, int names_size, Soundfile** sf_zone){
+        if (fSoundfileIndex < MAX_SOUNDFILES){
+            Soundfile* sound_file = fSoundReader->createSoundfile(resource_names, names_size, MAX_CHAN);
+            fSoundfiles[fSoundfileIndex++] = sound_file;
+            if (sound_file != NULL) {
+                *sf_zone = sound_file;
+                return;
+            }
+        }
+        // If failure, use 'defaultsound'
+        *sf_zone = defaultsound;
+    }
+
+    void addOwlCheckbox(const char* label, FAUSTFLOAT* zone) {
+        if (fParameterIndex < MAXOWLPARAMETERS) {
+            if (meta.midiOn && strcasecmp(label, "gate") == 0) {
+                fParameterTable[fParameterIndex++] =
+                    new OwlVariable(fPatch, &fGate, zone, label, 0.0f, 0.0f, 1.0f);
+            }
+            else if (fButton != NO_BUTTON) {
+                fParameterTable[fParameterIndex++] =
+                    new OwlCheckbox(fPatch, fButton, zone, label);
+            }
+        }
+        fParameter = NO_PARAMETER;
+        fButton = NO_BUTTON; // clear current button ID
+    }
+
     // we dont want to create a widget but we clear the current parameter ID just in case
     void skip() {
         fParameter = NO_PARAMETER; // clear current parameter ID
@@ -446,6 +700,7 @@ public:
         : fPatch(pp)
         , fParameter(NO_PARAMETER)
         , fParameterIndex(0)
+        , fSoundfileIndex(0)
         , fButton(NO_BUTTON) {
     }
 
@@ -456,6 +711,12 @@ public:
             delete fVOctInput;
         if (meta.vOctOutput)
             delete fVOctOutput;
+        if (fSoundReader != NULL) {
+            delete fSoundReader;
+        }
+        for (int i = 0; i < fSoundfileIndex; i++){
+            delete fSoundfiles[i];
+        }
     }
 
     // should be called before compute() to update widget's zones registered as OWL parameters
@@ -483,7 +744,7 @@ public:
         addOwlButton(label, zone);
     }
     virtual void addCheckButton(const char* label, FAUSTFLOAT* zone) {
-        addOwlButton(label, zone);
+        addOwlCheckbox(label, zone);
     }
     virtual void addVerticalSlider(const char* label, FAUSTFLOAT* zone,
         FAUSTFLOAT init, FAUSTFLOAT lo, FAUSTFLOAT hi, FAUSTFLOAT step) {
@@ -509,9 +770,58 @@ public:
         addOutputOwlParameter(label, zone, lo, hi);
     }
     // -- soundfiles
-    virtual void addSoundfile(
-        const char* label, const char* filename, Soundfile** sf_zone) {
-        skip();
+    virtual void addSoundfile(const char* label, const char* url, Soundfile** sf_zone) {
+        if (fSoundReader == NULL){
+            fSoundReader = new OwlResourceReader();
+            fSoundReader->setSampleRate(fPatch->getSampleRate());
+            defaultsound = fSoundReader->createSoundfile(nullptr, 0, 1);
+        }
+
+        if (url[0] == '{'){
+            char* paths[MAX_SOUNDFILE_PARTS];
+            int total_paths = 0;
+            bool reading_path = false;
+            const char* c = url;
+            const char* start_path;
+            while (c){
+                if (reading_path){
+                    if (*c++ == '\''){
+                        // Closing quote
+                        reading_path = false;
+                        uint32_t path_len = std::min<uint32_t>(c - start_path, PATH_LEN - 1);
+                        paths[total_paths] = new char[path_len];
+                        strncpy(paths[total_paths], start_path, path_len - 1);
+                        paths[total_paths][path_len -1] = 0;
+                        if (fSoundReader->checkFile(paths[total_paths]))
+                            total_paths++;
+                        else {
+                            delete[] paths[total_paths];
+                        }
+                    }
+                }
+                else {
+                    switch (*c){
+                    case '\'':
+                        // Opening quote
+                        start_path = ++c;
+                        reading_path = true;
+                        break;
+                    case '}':
+                        c = 0; // Done!
+                        break;
+                    default:
+                        // Path separator will end here
+                        c++;
+                        break;
+                    }
+                }
+            }
+            addOwlResources((const char**)paths, total_paths, sf_zone);
+            // Parsed path names are not used after loading resources
+            for (int i = 0; i < total_paths; i++){
+                delete[] paths[i];
+            }
+        }
     }
 
     // -- metadata declarations

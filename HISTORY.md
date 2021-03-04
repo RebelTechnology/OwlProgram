@@ -1,9 +1,28 @@
+v22.0
+-----
+
+* FAUST Checkbutton support
+* FAUST Soundfile support
+* Added CircularBuffer and DelayProcessor classes
+* Added AcBlockingFilter and DcBlockingFilter classes
+* Improved BiquadFilter and StateVariableFilter
+* SimpleArray templated base class
+* Updated unit tests
+* Improvements to ComplexFloat/ComplexShort classes
+* Envelope implements SignalProcessor and SignalGenerator
+* NoiseOscillator renamed NoiseGenerator
+* Oscillator inherits SignalGenerator
+* Window inherits SignalProcessor
+* Resampler split into Upsampler and Downsampler SignalProcessors
+* ShortArray and IntArray conversion methods renamed toFloat() and fromFloat()
+* New SignalGenerator and SignalProcessor abstract base classes
+* Refactored makefiles
+
 v21.2
 -----
 
 * Fixed 'test' make target
 * Allow patches to be compiled and run natively
-
 
 v21.1
 -----
