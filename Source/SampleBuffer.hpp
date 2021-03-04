@@ -161,15 +161,15 @@ public:
 };
 
 SampleBuffer* SampleBuffer::create(uint8_t format, size_t blocksize){
-  if(format == AUDIO_FORMAT_24B16_2X){
-    return new SampleBuffer16(2, blocksize);
-  // }else if(format == AUDIO_FORMAT_24B24_2X){
-  //   return new SampleBuffer24(2, blocksize);
-  }else if(format == AUDIO_FORMAT_24B32){
-    return new SampleBuffer32(2, blocksize);
-  }else if((format & 0xf0) == AUDIO_FORMAT_24B32){
-    return new SampleBuffer32(format & 0x0f, blocksize);
-  }else{
+  size_t channels = format & AUDIO_FORMAT_CHANNELS_MASK;
+  if(channels = 0)
+    channels = 2;
+  switch(format & AUDIO_FORMAT_FORMAT_MASK){
+  case AUDIO_FORMAT_24B16:
+    return new SampleBuffer16(channels, blocksize);
+  case AUDIO_FORMAT_24B32:
+    return new SampleBuffer32(channels, blocksize);
+  default:
     return NULL; // unrecognised audio format
   }
 }
