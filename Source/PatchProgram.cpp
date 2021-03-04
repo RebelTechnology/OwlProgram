@@ -75,7 +75,7 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
   processor.setPatch(patch, name);
 }
 
-static SampleBuffer* samples;
+static SampleBuffer* samples = NULL;
 void setup(ProgramVector* pv){
   setSystemTables(pv);
 #ifdef USE_MIDI_CALLBACK
@@ -87,56 +87,20 @@ void setup(ProgramVector* pv){
   getProgramVector()->serviceCall(OWL_SERVICE_REQUEST_CALLBACK, midiTxArgs, 2);
 
 #endif /* USE_MIDI_CALLBACK */
-  samples = new SampleBuffer(pv->audio_blocksize);
+  if(samples != NULL)
+    SampleBuffer::destroy(samples);
+  samples = SampleBuffer::create(pv->audio_format, pv->audio_blocksize);
+  if(samples == NULL)
+    error(CONFIGURATION_ERROR_STATUS, "Unsupported audio format");
 #include "registerpatch.cpp"
 }
 
 void run(ProgramVector* pv){
-#if 0
   for(;;){
     pv->programReady();
-    memcpy(pv->audio_output, pv->audio_input, pv->audio_blocksize*2*sizeof(uint32_t));
-  }
-#else
-  if(pv->audio_format == AUDIO_FORMAT_24B32){
-    for(;;){
-      pv->programReady();
-      samples->split32(pv->audio_input, pv->audio_blocksize);
-      processor.setParameterValues(pv->parameters);
-      processor.patch->processAudio(*samples);
-      samples->comb32(pv->audio_output);
-    }
-#if 0
-  }else if(pv->audio_format == AUDIO_FORMAT_24B24){
-    for(;;){
-      pv->programReady();
-      samples->split24(pv->audio_input, pv->audio_blocksize);
-      processor.setParameterValues(pv->parameters);
-      processor.patch->processAudio(*samples);
-      samples->comb24(pv->audio_output);
-    }
-#endif
-  }else{
-    for(;;){
-      pv->programReady();
-      samples->split16(pv->audio_input, pv->audio_blocksize);
-      processor.setParameterValues(pv->parameters);
-      processor.patch->processAudio(*samples);
-      samples->comb16(pv->audio_output);
-    }
-#endif
+    samples->split(pv->audio_input);
+    processor.setParameterValues(pv->parameters);
+    processor.patch->processAudio(*samples);
+    samples->comb(pv->audio_output);
   }
 }
-
-#if 0
-      static int32_t value = 0;
-      static int32_t step = 32;
-      ProgramVector* pv = getProgramVector();
-      for(int i=0; i < pv->audio_blocksize; ++i){
-	pv->audio_output[i*2] = value;
-	pv->audio_output[i*2+1] = value; // swap(value);
-	value += step;
-	if(value >= INT32_MAX)
-	  value = INT32_MIN;
-      }
-#endif

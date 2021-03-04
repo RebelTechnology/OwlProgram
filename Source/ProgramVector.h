@@ -22,8 +22,17 @@
 #define CONFIGURATION_ERROR_STATUS   -30
 
 #define AUDIO_FORMAT_24B16          0x10
-#define AUDIO_FORMAT_24B24          0x18
+#define AUDIO_FORMAT_24B16_2X       0x12
+#define AUDIO_FORMAT_24B16_4X       0x14
+#define AUDIO_FORMAT_24B16_6X       0x16
+#define AUDIO_FORMAT_24B16_8X       0x18
 #define AUDIO_FORMAT_24B32          0x20
+#define AUDIO_FORMAT_24B32_2X       0x22
+#define AUDIO_FORMAT_24B32_4X       0x24
+#define AUDIO_FORMAT_24B32_6X       0x26
+#define AUDIO_FORMAT_24B32_8X       0x28
+#define AUDIO_FORMAT_FORMAT_MASK    0xf0
+#define AUDIO_FORMAT_CHANNEL_MASK   0x0f
 
   typedef enum { 
     AUDIO_IDLE_STATUS = 0, 
