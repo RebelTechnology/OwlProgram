@@ -47,6 +47,11 @@ CXXFLAGS += -fno-exceptions
 ifdef HEAVY
 CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
 endif
+ifdef FAUST
+ifneq (,$(findstring soundfile,$(FAUSTOPTS)))
+CPPFLAGS    += -DSOUNDFILE
+endif
+endif
 ARCH_FLAGS = -fsingle-precision-constant -mthumb
 ARCH_FLAGS += -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # ARCH_FLAGS += -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-sp-d16
