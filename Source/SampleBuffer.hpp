@@ -162,7 +162,7 @@ public:
 
 SampleBuffer* SampleBuffer::create(uint8_t format, size_t blocksize){
   size_t channels = format & AUDIO_FORMAT_CHANNEL_MASK;
-  if(channels = 0)
+  if(channels == 0)
     channels = 2;
   switch(format & AUDIO_FORMAT_FORMAT_MASK){
   case AUDIO_FORMAT_24B16:
