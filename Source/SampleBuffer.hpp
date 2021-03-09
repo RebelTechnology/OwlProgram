@@ -17,9 +17,9 @@
 
 class SampleBuffer : public AudioBuffer {
 protected:
+  const size_t channels;
+  const size_t blocksize;
   FloatArray* buffers;
-  size_t blocksize;
-  size_t channels;
 public:
   SampleBuffer(size_t channels, size_t blocksize)
     :channels(channels), blocksize(blocksize) {
@@ -61,20 +61,29 @@ public:
   SampleBuffer32(size_t channels, size_t blocksize) : SampleBuffer(channels, blocksize){}
   void split(int32_t* input){
     const float mul = 1.0f/MULTIPLIER_31B;
-    for(size_t i=0; i<blocksize; ++i){
-      for(size_t j=0; j<channels; ++j)
-	buffers[j][i] = (*input++ << 8) * mul;
+    for(size_t j=0; j<channels; ++j){
+      float* dst = buffers[j];
+      int32_t* src = input+j;
+      size_t len = blocksize;
+      while(len--){
+	*dst++ = (*src << 8) * mul;
+	src += channels;
+      }
     }
   }
   void comb(int32_t* output){
-    int32_t* dest = output;
-    for(size_t i=0; i<blocksize; ++i){
-      for(size_t j=0; j<channels; ++j){
+    const float mul = MULTIPLIER_23B;
+    for(size_t j=0; j<channels; ++j){
+      float* src = buffers[j];
+      int32_t* dst = output+j;
+      size_t len = blocksize;
+      while(len--){
 #ifdef AUDIO_SATURATE_SAMPLES
-	*dest++ = __SSAT((q31_t)(buffers[j][i] * MULTIPLIER_23B), 24);
+	*dst = __SSAT((q31_t)(*src++ * mul), 24);
 #else
-	*dest++ = ((int32_t)(buffers[j][i] * MULTIPLIER_23B));
+	*dst = ((int32_t)(*src++ * mul));
 #endif
+	dst += channels;
       }
     }
   }
