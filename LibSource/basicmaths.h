@@ -66,9 +66,8 @@
    float fast_logf(float x);
    float fast_log2f(float x);
    float fast_log10f(float x);
-   void fast_log_set_table(const float* table, int size);
-
    uint32_t fast_log2i(uint32_t x);
+   void fast_log_set_table(const float* table, int size);
 
    // fast approximations
    float fast_atan2f(float a, float b);
@@ -76,10 +75,7 @@
    /** generate a random number between 0 and 1 */
    float randf();
 
-   static inline uint32_t log2i(const uint32_t x){
-     return (31 - __builtin_clz (x));
-   }
-
+   float fast_fmodf(float x, float y);
 
 #define malloc(x) pvPortMalloc(x)
 #define calloc(x, y) pvPortCalloc(x, y)

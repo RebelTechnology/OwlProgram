@@ -125,14 +125,19 @@ float fast_log2f(float x){
 
 void fast_pow_set_table(const uint32_t* table, int size){
   pow_table = table;
-  pow_precision = log2i(size);
+  pow_precision = fast_log2i(size);
 }
 
 void fast_log_set_table(const float* table, int size){
   log_table = table;
-  log_precision = log2i(size);
+  log_precision = fast_log2i(size);
+}
+
+float fast_fmodf(float x, float y) {
+  float a = x/y;
+  return (a-(int)a)*y;
 }
 
 uint32_t fast_log2i(uint32_t x){
-  return x == 0 ? 0 : 31 - __builtin_clz (x); /* clz returns the number of leading 0's */
+  return 31 - __builtin_clz (x); /* clz returns the number of leading 0's */
 }
