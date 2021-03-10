@@ -109,6 +109,9 @@ public:
       min = gen::getparametermin(context, index);
       max = gen::getparametermax(context, index);
     }    
+    float defaultvalue;
+    gen::getparameter(context, index, &defaultvalue);
+    patch->setParameterValue(id, defaultvalue);
   }
   void update(Patch* patch, CommonState *context){
     float value = patch->getParameterValue(pid);
@@ -198,7 +201,6 @@ public:
     }
     buffers = new float*[gen::num_outputs()];
     size_t channels = getNumberOfChannels();
-    debugMessage("SR/CH/BS", (int)getSampleRate(), getNumberOfChannels(), getBlockSize());
     char name[] = "Out0>";
     for(int ch=channels; ch<gen::num_outputs(); ++ch){
       buffers[ch] = new float[getBlockSize()];
