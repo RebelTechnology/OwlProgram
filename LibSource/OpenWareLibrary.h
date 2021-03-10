@@ -15,8 +15,6 @@
 #include "ExponentialDecayEnvelope.h"
 #include "FastFourierTransform.h"
 #include "FractionalCircularBuffer.h"
-#include "FastLogTable.h"
-#include "FastPowTable.h"
 #include "FirFilter.h"
 #include "FloatArray.h"
 #include "FloatMatrix.h"
