@@ -65,13 +65,16 @@ void doMidiSend(uint8_t port, uint8_t d0, uint8_t d1, uint8_t d2){
 }
 #endif /* USE_MIDI_CALLBACK */
 
-#define REGISTER_PATCH(T, STR, IN, OUT) registerPatch(STR, IN, OUT, new T)
+#define REGISTER_PATCH(T, STR, IN, OUT) do { registerPatch(STR, IN, OUT); setPatch(STR, new T); }while(0)
 
-void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){
-  if(patch == NULL)
-    error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
+void registerPatch(const char* name, uint8_t inputs, uint8_t outputs){
   if(getProgramVector()->registerPatch != NULL)
     getProgramVector()->registerPatch(name, inputs, outputs);
+}
+
+void setPatch(const char* name, Patch* patch){
+  if(patch == NULL)
+    error(OUT_OF_MEMORY_ERROR_STATUS, "Out of memory");
   processor.setPatch(patch, name);
 }
 
