@@ -61,6 +61,7 @@ public:
   int getBlockSize();
   int getNumberOfChannels();
   float getSampleRate();
+  float getBlockRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
   float getElapsedBlockTime();
   int getElapsedCycles();

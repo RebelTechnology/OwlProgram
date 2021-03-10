@@ -25,6 +25,10 @@ float Patch::getSampleRate(){
   return getProgramVector()->audio_samplingrate;
 }
 
+float Patch::getBlockRate(){
+  return getSampleRate()/getBlockSize();
+}
+
 int Patch::getBlockSize(){
   return getProgramVector()->audio_blocksize;
 }
