@@ -195,7 +195,7 @@ public:
 	params[param_count++] = new GenParameter(this, context, name, (PatchParameterId)index, i);
       }else if(strlen(name) == 2 && name[0] >= 'A' && name[0] <= 'H'
 	                         && name[1] >= 'A' && name[1] <= 'H'){
-	uint8_t index = PARAMETER_H*(name[0]-'A') + name[1]-'A';
+	uint8_t index = PARAMETER_AA*(1+name[0]-'A') + name[1]-'A';
 	params[param_count++] = new GenParameter(this, context, name, (PatchParameterId)index, i);
       }
     }
