@@ -168,7 +168,7 @@ private:
 };
 
 class MultiStateVariableFilter : public AbstractStateVariableFilter, MultiSignalProcessor {
-private:
+protected:
   size_t mChannels;
   float* mState;
   static constexpr size_t STATE_VARIABLES_PER_CHANNEL = 2;
@@ -224,7 +224,7 @@ class StereoStateVariableFilter : public MultiStateVariableFilter {
 public:
   StereoStateVariableFilter(float sr, float* state) :
     MultiStateVariableFilter(sr, 2, state) {}
-  static StereoStateVariableFilter* create(float sr, size_t channels){
+  static StereoStateVariableFilter* create(float sr){
     return new StereoStateVariableFilter(sr, new float[STATE_VARIABLES_PER_CHANNEL]);
   }
 
