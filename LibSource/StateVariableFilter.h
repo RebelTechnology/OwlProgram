@@ -219,4 +219,19 @@ public:
   }
 };
 
+
+class StereoStateVariableFilter : public MultiStateVariableFilter {
+public:
+  StereoStateVariableFilter(float sr, float* state) :
+    MultiStateVariableFilter(sr, 2, state) {}
+  static StereoStateVariableFilter* create(float sr, size_t channels){
+    return new StereoStateVariableFilter(sr, new float[STATE_VARIABLES_PER_CHANNEL]);
+  }
+
+  static void destroy(StereoStateVariableFilter* svf){
+    MultiStateVariableFilter::destroy(svf);
+  }
+
+};
+
 #endif // __StateVariableFilter_h__
