@@ -1,5 +1,5 @@
-#ifndef __AcBlockingFilter_h__
-#define __AcBlockingFilter_h__
+#ifndef __SmoothingFilter_h__
+#define __SmoothingFilter_h__
 
 #include "FloatArray.h"
 #include "SignalProcessor.h"
@@ -7,12 +7,12 @@
 /**
  * AC Blocking IIR filter, the Leaky Integrator. Used for signal smoothing.
  */
-class AcBlockingFilter : public SignalProcessor {
+class SmoothingFilter : public SignalProcessor {
 private:
   const float lambda;
   float y;
 public:
-  AcBlockingFilter(float lambda = 0.995): lambda(lambda), y(0) {}
+  SmoothingFilter(float lambda = 0.995): lambda(lambda), y(0) {}
 
   /* process a single sample and return the result */
   float process(float x){
@@ -43,32 +43,32 @@ public:
     process(in, out, in.getSize());
   }
 
-  static AcBlockingFilter* create(float lambda){
-    return new AcBlockingFilter(lambda);
+  static SmoothingFilter* create(float lambda){
+    return new SmoothingFilter(lambda);
   }
 
-  static void destroy(AcBlockingFilter* obj){
+  static void destroy(SmoothingFilter* obj){
     delete obj;
   }
 };
 
-class StereoAcBlockingFilter : public MultiSignalProcessor {
+class StereoSmoothingFilter : public MultiSignalProcessor {
 private:
-  AcBlockingFilter left, right;
+  SmoothingFilter left, right;
 public:
-  StereoAcBlockingFilter(float lambda = 0.995): left(lambda), right(lambda) {}
+  StereoSmoothingFilter(float lambda = 0.995): left(lambda), right(lambda) {}
   void process(AudioBuffer& input, AudioBuffer& output){
     left.process(input.getSamples(LEFT_CHANNEL), output.getSamples(LEFT_CHANNEL));
     right.process(input.getSamples(RIGHT_CHANNEL), output.getSamples(RIGHT_CHANNEL));
   }
 
-  static StereoAcBlockingFilter* create(float lambda){
-    return new StereoAcBlockingFilter(lambda);
+  static StereoSmoothingFilter* create(float lambda){
+    return new StereoSmoothingFilter(lambda);
   }
 
-  static void destroy(StereoAcBlockingFilter* obj){
+  static void destroy(StereoSmoothingFilter* obj){
     delete obj;
   }
 };
 
-#endif // __AcBlockingFilter_h__
+#endif // __SmoothingFilter_h__

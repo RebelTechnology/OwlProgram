@@ -1,7 +1,6 @@
 #ifndef __OpenWareLibrary_h__
 #define __OpenWareLibrary_h__
 
-#include "AcBlockingFilter.h"
 #include "BiquadFilter.h"
 #include "ChirpOscillator.h"
 #include "CircularBuffer.h"
@@ -35,6 +34,7 @@
 #include "SignalProcessor.h"
 #include "SineOscillator.h"
 #include "SmoothValue.h"
+#include "SmoothingFilter.h"
 #include "StateVariableFilter.h"
 #include "VoltsPerOctave.h"
 #include "WavetableOscillator.h"

@@ -4,7 +4,7 @@ v22.0
 * FAUST Checkbutton support
 * FAUST Soundfile support
 * Added CircularBuffer and DelayProcessor classes
-* Added AcBlockingFilter and DcBlockingFilter classes
+* Added SmoothingFilter and DcBlockingFilter classes
 * Improved BiquadFilter and StateVariableFilter
 * SimpleArray templated base class
 * Updated unit tests
