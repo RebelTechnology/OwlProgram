@@ -403,6 +403,18 @@ public:
   }
 };
 
+class StereoBiquadFilter : public MultiBiquadFilter {
+public:
+  StereoBiquadFilter(float sr, float* coefs, float* states, size_t stages) :
+    MultiBiquadFilter(sr, 2, coefs, states, stages) {}
+  static StereoBiquadFilter* create(float sr, size_t stages=1){
+    return new StereoBiquadFilter(sr, new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE], new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE*2], stages);
+  }
+  static void destroy(StereoBiquadFilter* filter){
+    MultiBiquadFilter::destroy(filter);
+  }
+};
+
 const float FilterStage::BESSEL_Q = 1/sqrtf(3); // 1/sqrt(3)
 const float FilterStage::SALLEN_KEY_Q = 0.5f; // 1/2
 const float FilterStage::BUTTERWORTH_Q = 1/sqrtf(2); // 1/sqrt(2)
