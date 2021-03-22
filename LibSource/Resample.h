@@ -54,7 +54,7 @@ public:
     ASSERT(input.getSize()==output.getSize()*factor, "wrong size");
     downfilter->process(input, input);
     float* p = (float*)input;
-    for(size_t i=0; i<input.getSize(); ++i){
+    for(size_t i=0; i<output.getSize(); ++i){
       output[i] = *p;
       p += 4;
     }
@@ -136,7 +136,7 @@ public:
     ASSERT(input.getSize()==output.getSize()*factor, "wrong size");
     filter->process(input, input);
     float* p = (float*)input;
-    for(size_t i=0; i<input.getSize(); ++i){
+    for(size_t i=0; i<output.getSize(); ++i){
       output[i] = *p;
       p += factor;
     }
