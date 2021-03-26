@@ -148,6 +148,27 @@ public:
     }
   }
 
+  void processLowPass(FloatArray in, FloatArray fc, float q, FloatArray out){
+    for(size_t i = 0; i < in.getSize(); i++){
+      setLowPass(fc[i], q);
+      out[i] = process(in[i]);
+    }
+  }
+
+  void processHighPass(FloatArray in, FloatArray fc, float q, FloatArray out){
+    for(size_t i = 0; i < in.getSize(); i++){
+      setHighPass(fc[i], q);
+      out[i] = process(in[i]);
+    }
+  }
+
+  void processBandPass(FloatArray in, FloatArray fc, float q, FloatArray out){
+    for(size_t i = 0; i < in.getSize(); i++){
+      setBandPass(fc[i], q);
+      out[i] = process(in[i]);
+    }
+  }
+
   void reset() {
     mIc1eq = 0.;
     mIc2eq = 0.;

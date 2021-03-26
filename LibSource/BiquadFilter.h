@@ -289,6 +289,27 @@ public:
     process(in, out, in.getSize());
   }
 
+  void processLowPass(FloatArray in, FloatArray fc, float q, FloatArray out){
+    for(size_t i = 0; i < in.getSize(); i++){
+      setLowPass(fc[i], q);
+      out[i] = process(in[i]);
+    }
+  }
+
+  void processHighPass(FloatArray in, FloatArray fc, float q, FloatArray out){
+    for(size_t i = 0; i < in.getSize(); i++){
+      setHighPass(fc[i], q);
+      out[i] = process(in[i]);
+    }
+  }
+
+  void processBandPass(FloatArray in, FloatArray fc, float q, FloatArray out){
+    for(size_t i = 0; i < in.getSize(); i++){
+      setBandPass(fc[i], q);
+      out[i] = process(in[i]);
+    }
+  }
+
   /* process a single sample and return the result */
   float process(float input){
     float output;
