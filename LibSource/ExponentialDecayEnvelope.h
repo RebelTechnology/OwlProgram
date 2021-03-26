@@ -10,6 +10,8 @@ private:
   float incr;
 public:
   ExponentialDecayEnvelope(float sr=48000): sr(sr), value(0), incr(0){}
+  using Envelope::gate;
+  using Envelope::trigger;
   using Envelope::process;
   using SignalGenerator::generate;
   void setSampleRate(float sampleRate){
@@ -24,8 +26,12 @@ public:
   void setDecay(float d){
     setRate(-(d+1/sr));
   }
-  void trigger(){
-    value = 1.0;
+  void trigger(bool state, int triggerDelay){
+    if(state)
+      value = 1;
+  }
+  void gate(bool state, int triggerDelay){
+    value = state;
   }
   /**
    * Produce the next envelope sample.

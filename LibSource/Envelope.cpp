@@ -58,14 +58,6 @@ void AdsrEnvelope::setRetrigger(bool state){
   retrigger = state;
 }
 
-void AdsrEnvelope::trigger(){
-  trigger(true, 0);
-}
-
-void AdsrEnvelope::trigger(bool state){
-  trigger(state, 0);
-}
-
 void AdsrEnvelope::trigger(bool state, int delay){
   gate(state, delay);
   trig = kTrigger;

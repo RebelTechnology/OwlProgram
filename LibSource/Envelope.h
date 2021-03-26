@@ -14,7 +14,7 @@ public:
   virtual void trigger(bool state){
     trigger(state, 0);
   }
-  virtual void trigger(bool state, int triggerDelay){}
+  virtual void trigger(bool state, int triggerDelay) = 0;
   virtual void gate(bool state){
     gate(state, 0);
   }
@@ -43,14 +43,13 @@ public:
   AdsrEnvelope(float sampleRate=48000);
   virtual ~AdsrEnvelope();
   using Envelope::process;
+  using Envelope::trigger;
   using SignalGenerator::generate;
   void setSampleRate(float sampleRate);
   void setAttack(float newAttack);
   void setDecay(float newDecay);
   void setRelease(float newRelease);
   void setSustain(float newSustain);
-  void trigger();
-  void trigger(bool state);
   void trigger(bool state, int triggerDelay);
   void setRetrigger(bool on);
   void gate(bool state);
