@@ -26,21 +26,10 @@ void vPortFree( void *pv ){
 
 static PatchProcessor processor;
 ProgramVector programVector;
-static int errorcode = 0;
+extern int errorcode;
 
 PatchProcessor* getInitialisingPatchProcessor(){
   return &processor;
-}
-
-extern "C"{
-  int serviceCall(int service, void** params, int len){
-    printf("Service call (todo) : %d\n", service);
-    return -1;
-  }
-  void error(int8_t code, const char* reason){
-    printf("%s\n", reason);
-    errorcode = -1;
-  }
 }
 
 void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* patch){
