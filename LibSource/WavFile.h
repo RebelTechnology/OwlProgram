@@ -53,6 +53,9 @@ public:
   size_t getNumberOfSamples(){
     return header->datachunk_size/(header->bps/8);    
   }
+  size_t getBitsPerSample(){
+    return header->bps;
+  }
   void* getData(){
     // if(header->fmtchunk_size == 16)
     return ((uint8_t*)header) + sizeof(WavHeader);
