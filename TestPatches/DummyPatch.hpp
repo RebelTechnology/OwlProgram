@@ -8,6 +8,24 @@ static uint32_t button_values = 0;
 int errorcode = 0;
 
 extern "C"{
+  size_t fileread(const char *file_name, uint8_t** data, size_t size){
+    FILE* fd;
+    if(!file_name)
+      errx(1, "Filename not specified");
+    if((fd = fopen(file_name, "rb")) == NULL)
+      errx(1, "Error opening file");
+    if(*data){
+      if(fread(*data, 1, size, fd) < size)
+	errx(1, "File read failed");
+    }else{
+      fseek(fd, 0L, SEEK_END);
+      size = ftell(fd);
+      rewind(fd);
+    }
+    fclose(fd);
+    return size;
+  }
+
   int serviceCall(int service, void** params, int len){
     int ret = -1;
     switch(service){
@@ -18,8 +36,7 @@ extern "C"{
 	uint32_t offset = *(uint32_t*)params[2];
 	uint32_t* max_size = (uint32_t*)params[3];
 	printf("Service call (LOAD RESOURCE) : %s [%u:%u]\n", name, offset, *max_size);
-	if(*buffer == NULL)
-	  *max_size = 16384*4;
+	*max_size = fileread(name, buffer, *max_size);
 	ret = OWL_SERVICE_OK;
       }else{
 	printf("Service call (LOAD RESOURCE) Invalid");

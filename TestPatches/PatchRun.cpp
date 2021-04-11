@@ -16,6 +16,7 @@ void vPortFree( void *pv ){
 #include "PatchProcessor.h"
 #include "MemoryBuffer.hpp"
 #include "registerpatch.h"
+#include "WavFile.h"
 #include "wav.h"
 
 #define SAMPLE_RATE 48000
