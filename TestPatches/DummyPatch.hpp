@@ -2,30 +2,13 @@
 #include "FastPowTable.h"
 #include "FastLogTable.h"
 #include "basicmaths.h"
+#include "fileio.h"
 
 static float parameter_values[40] = {};
 static uint32_t button_values = 0;
 int errorcode = 0;
 
 extern "C"{
-  size_t fileread(const char *file_name, uint8_t** data, size_t size){
-    FILE* fd;
-    if(!file_name)
-      errx(1, "Filename not specified");
-    if((fd = fopen(file_name, "rb")) == NULL)
-      errx(1, "Error opening file");
-    if(*data){
-      if(fread(*data, 1, size, fd) < size)
-	errx(1, "File read failed");
-    }else{
-      fseek(fd, 0L, SEEK_END);
-      size = ftell(fd);
-      rewind(fd);
-    }
-    fclose(fd);
-    return size;
-  }
-
   int serviceCall(int service, void** params, int len){
     int ret = -1;
     switch(service){
@@ -131,7 +114,7 @@ void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t
 
 extern "C"{
   void doSetButton(uint8_t bid, uint16_t value, uint16_t samples){
-    printf("Set button %c: %d\n", 'A'+bid, value);
+    printf("Set button %c: %d\n", 'A'+bid-4, value);
     if(value)
       button_values |= (1<<bid);
     else
