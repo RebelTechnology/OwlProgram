@@ -45,6 +45,8 @@ FastFourierTransform::FastFourierTransform(size_t aSize){
 }
 
 FastFourierTransform::~FastFourierTransform(){
+  free(cfgfft);
+  free(cfgifft);
   ComplexFloatArray::destroy(temp);
 }
 
@@ -52,7 +54,7 @@ void FastFourierTransform::init(size_t aSize){
   ASSERT(aSize==32 || aSize ==64 || aSize==128 || aSize==256 || aSize==512 || aSize==1024 || aSize==2048 || aSize==4096, "Unsupported FFT size");
   cfgfft = kiss_fft_alloc(aSize, 0 , 0, 0);
   cfgifft = kiss_fft_alloc(aSize, 1,0, 0);
-  temp = ComplexFloatArray::create(getSize());
+  temp = ComplexFloatArray::create(aSize);
 }
 
 void FastFourierTransform::fft(FloatArray input, ComplexFloatArray output){

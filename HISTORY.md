@@ -3,7 +3,7 @@ v22.1
 
 * Added methods for sample-rate cutoff frequency modulation in StateVariableFilter and BiquadFilter
 * Added VelocityCurve, MidiProcessor, AbstractSynth
-* New templates for polyphonic and monophonic MIDI voicing: PolyphonicSynth and MonophonicSynth
+* New templates for MIDI voicing: PolyphonicSynth and MonophonicSynth
 * Added WavFile for reading wav resources and converting to FloatArray
 
 v22.0

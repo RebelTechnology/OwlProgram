@@ -36,15 +36,18 @@ Resource* Resource::open(const char* name){
 Resource* Resource::load(const char* name){
   Resource* resource = Resource::open(name);
   if(resource && !resource->hasData()){
-    uint8_t* data = new uint8_t[resource->size];
     size_t offset = 0;
+    size_t size = resource->size;
+    uint8_t* data = new uint8_t[size];
     void* args[] = {
-		    (void*)name, (void*)&data, (void*)&offset, (void*)&resource->size
+      (void*)name, (void*)&data, (void*)&offset, (void*)&size
     };
     if (getProgramVector()->serviceCall(OWL_SERVICE_LOAD_RESOURCE, args, 4) == OWL_SERVICE_OK){
       resource->data = data;
+      resource->size = size;
       resource->allocated = true;
     }else{
+      resource->size = 0;
       delete[] data;
     }
   }
