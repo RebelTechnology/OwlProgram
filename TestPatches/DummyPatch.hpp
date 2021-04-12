@@ -253,6 +253,10 @@ int Patch::getBlockSize(){
   return BLOCKSIZE;
 }
 
+float Patch::getBlockRate(){
+  return SAMPLE_RATE/BLOCKSIZE;
+}
+
 int Patch::getNumberOfChannels(){
   return CHANNELS;
 }
