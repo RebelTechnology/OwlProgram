@@ -1,6 +1,7 @@
 #ifndef __AbstractSynth_h__
 #define __AbstractSynth_h__
 
+#include <climits>
 #include "Synth.h"
 #include "MidiProcessor.h"
 #include "VelocityCurve.h"
