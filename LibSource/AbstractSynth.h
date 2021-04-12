@@ -8,7 +8,7 @@
 
 class AbstractSynth : public Synth, public MidiProcessor, public VelocityCurve {
 protected:
-  uint8_t note = 69;
+  uint8_t note = 60; // C4
   float pb = 0;
   float pb_range = 2;
 public:
@@ -54,7 +54,7 @@ public:
   }  
   // MIDI handlers
   virtual void noteOn(MidiMessage msg){
-    note = msg.getNote();
+    setNote(msg.getNote());
     setFrequency(noteToFrequency(note+pb));
     setGain(velocityToGain(msg.getVelocity()));
     gate(true);
