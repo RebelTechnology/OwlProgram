@@ -1,18 +1,17 @@
 #ifndef __AbstractSynth_h__
 #define __AbstractSynth_h__
 
-#include "SignalGenerator.h"
+#include "Synth.h"
 #include "MidiProcessor.h"
 #include "VelocityCurve.h"
 
-class AbstractSynth : public MidiProcessor, public SignalGenerator, public VelocityCurve {
+class AbstractSynth : public Synth, public MidiProcessor, public VelocityCurve {
 protected:
   uint8_t note = 69;
   float pb = 0;
   float pb_range = 2;
 public:
   virtual ~AbstractSynth(){}
-  // getters and setters
   /**
    * Set note in whole semitones
    */
@@ -39,19 +38,19 @@ public:
     this->pb = pb;
     setFrequency(noteToFrequency(note+pb));
   }
+  /**
+   * Get pitch bend range in semitones
+   */
   float getPitchBendRange(){
     return pb_range;
   }
+  /**
+   * Set pitch bend range in semitones.
+   * Does not update the frequency; effective from next pitch bend change
+   */
   void setPitchBendRange(float range){
     this->pb_range = range;
   }  
-  float getFrequency(){
-    return noteToFrequency(note+pb);
-  }
-  // pure abstract methods that must be implemented by a derived class
-  virtual void setFrequency(float freq) = 0;
-  virtual void setGain(float gain) = 0;
-  virtual void gate(bool state) = 0;
   // MIDI handlers
   virtual void noteOn(MidiMessage msg){
     note = msg.getNote();
@@ -82,7 +81,7 @@ public:
 };
   
 template<class SynthVoice, int VOICES>
-class PolyphonicSynth : public AbstractSynth {
+class PolyphonicProcessor : public MidiProcessor {
 private:
   static const uint16_t TAKEN = 0xffff;
   SynthVoice* voice[VOICES];
@@ -93,7 +92,7 @@ private:
 protected:
   void take(uint8_t ch, MidiMessage msg){
     release(ch);
-    notes[ch] = note;
+    notes[ch] = msg.getNote();
     allocation[ch] = TAKEN;
     voice[ch]->noteOn(msg);
   }
@@ -103,7 +102,7 @@ protected:
     voice[ch]->setGate(false);
   }
 public:
-  PolyphonicSynth(float sr, int bs) : allocated(0) {
+  PolyphonicProcessor(float sr, int bs) : allocated(0) {
     for(int i=0; i<VOICES; ++i){
       voice[i] = SynthVoice::create(sr);
       notes[i] = 69; // middle A, 440Hz
@@ -111,7 +110,7 @@ public:
     }
     buffer = FloatArray::create(bs);
   }
-  ~PolyphonicSynth(){
+  ~PolyphonicProcessor(){
     for(int i=0; i<VOICES; ++i)
       SynthVoice::destroy(voice[i]);
     FloatArray::destroy(buffer);
@@ -153,21 +152,13 @@ public:
       output.add(buffer);
     }
   }
-  void setFrequency(float freq){
-    for(int i=0; i<VOICES; ++i)
-      voice[i]->setFrequency(freq);
+ void controlChange(MidiMessage msg){
+    if(msg.getControllerNumber() == MIDI_ALL_NOTES_OFF)
+      allNotesOff();
   }
-  void setGain(float gain){
+  void pitchbend(MidiMessage msg){
     for(int i=0; i<VOICES; ++i)
-      voice[i]->setGain(gain);
-  }
-  void gate(bool state){
-    for(int i=0; i<VOICES; ++i)
-      voice[i]->gate(state);
-  }
-  void setPitchBend(float pb){
-    for(int i=0; i<VOICES; ++i)
-      voice[i]->setPitchBend(pb);
+      pitchbend(msg);
   }
   SynthVoice* getVoice(size_t index){
     if(index < VOICES)
@@ -177,13 +168,13 @@ public:
 };
 
 template<class SynthVoice>
-class MonophonicSynth : public AbstractSynth {
+class MonophonicProcessor : public MidiProcessor {
 private:
   SynthVoice* voice;
   uint8_t notes[16];
   uint8_t lastNote = 0;
 public:
-  MonophonicSynth(SynthVoice* voice) : voice(voice) {}
+  MonophonicProcessor(SynthVoice* voice) : voice(voice) {}
   virtual void noteOn(MidiMessage msg){
     if(lastNote < 16)
       notes[lastNote++] = msg.getNote();
@@ -218,22 +209,13 @@ public:
   void generate(FloatArray output){
     voice->generate(output);
   }
-  void setFrequency(float freq){
-    voice->setFrequency(freq);
+ void controlChange(MidiMessage msg){
+    if(msg.getControllerNumber() == MIDI_ALL_NOTES_OFF)
+      allNotesOff();
   }
-  void setGain(float gain){
-    voice->setGain(gain);
+  void pitchbend(MidiMessage msg){
+    voice->pitchbend(msg);
   }
-  void gate(bool state){
-    voice->gate(state);
-  }
-  void setPitchBend(float pb){
-    voice->setPitchBend(pb);
-    debugMessage("pb", pb);
-  }
-  // void pitchbend(MidiMessage msg){
-  //   voice->pitchbend(msg);
-  // }
   SynthVoice* getVoice(){
     return voice;
   }
