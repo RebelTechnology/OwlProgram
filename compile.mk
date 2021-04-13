@@ -7,7 +7,7 @@ ASFLAGS      = -g
 endif
 
 ifeq ($(CONFIG),Release)
-CPPFLAGS    ?= -Os -specs=nano.specs -ffast-math
+CPPFLAGS    ?= -Os -specs=nano.specs -ffast-math -DNDEBUG
 endif
 
 # Code Paths
