@@ -26,6 +26,7 @@ public:
   virtual int getSize() = 0;
   virtual void clear() = 0;
   static AudioBuffer* create(int channels, int samples);
+  static void destroy(AudioBuffer* buffer);
 };
 
 class Patch {

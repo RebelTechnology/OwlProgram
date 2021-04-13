@@ -108,6 +108,10 @@ AudioBuffer* AudioBuffer::create(int channels, int samples){
   return new ManagedMemoryBuffer(channels, samples);
 }
 
+void AudioBuffer::destroy(AudioBuffer* buffer){
+  delete buffer;
+}
+
 FloatParameter Patch::getParameter(const char* name, float defaultValue){
   return getFloatParameter(name, 0.0f, 1.0f, defaultValue, 0.0f, 0.0f, LIN);
 }
