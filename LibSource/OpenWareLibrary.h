@@ -1,6 +1,7 @@
 #ifndef __OpenWareLibrary_h__
 #define __OpenWareLibrary_h__
 
+#include "AbstractSynth.h"
 #include "BiquadFilter.h"
 #include "ChirpOscillator.h"
 #include "CircularBuffer.h"
@@ -18,6 +19,7 @@
 #include "FloatArray.h"
 #include "FloatMatrix.h"
 #include "IntArray.h"
+#include "MidiProcessor.h"
 #include "NoiseGenerator.h"
 #include "OpenWareMidiControl.h"
 #include "Oscillator.h"
@@ -36,7 +38,9 @@
 #include "SmoothValue.h"
 #include "SmoothingFilter.h"
 #include "StateVariableFilter.h"
+#include "Synth.h"
 #include "VoltsPerOctave.h"
+#include "VelocityCurve.h"
 #include "WavetableOscillator.h"
 #include "Window.h"
 

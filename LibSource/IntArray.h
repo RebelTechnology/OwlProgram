@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "SimpleArray.h"
 #include "FloatArray.h"
+#include <limits.h>
 
 class IntArray : public SimpleArray<int32_t> {
 public:
@@ -76,6 +77,76 @@ public:
 	data[n] = data[n] >> shiftValue;
     }
 #endif
+  }
+
+    /**
+   * A subset of the array.
+   * Returns a array that points to subset of the memory used by the original array.
+   * @param[in] offset the first element of the subset.
+   * @param[in] length the number of elments in the new IntArray.
+   * @return the newly created IntArray.
+   * @remarks no memory is allocated by this method. The memory is still shared with the original array.
+   * The memory should not be de-allocated elsewhere (e.g.: by calling IntArray::destroy() on the original IntArray) 
+   * as long as the IntArray returned by this method is still in use.
+   * @remarks Calling IntArray::destroy() on a IntArray instance created with this method might cause an exception.
+  */
+  IntArray subArray(int offset, size_t length){
+    ASSERT(size >= offset+length, "Array too small");
+    return IntArray(data+offset, length);
+  }
+
+
+  /**
+   * Copies the content of the array to a FloatArray, interpreting the content
+   * of the IntArray as 1.31.
+   * @param[out] destination the destination array
+   */
+  void toFloat(FloatArray destination){
+    ASSERT(destination.getSize() == size, "Size does not match");
+#ifdef ARM_CORTEX
+    /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+    arm_q31_to_float(data, destination.getData(), size);
+#else
+    for(size_t n = 0; n < size; ++n)
+      destination[n] = getFloatValue(n);
+#endif
+  }
+
+  /**
+   * Copies the content of a FloatArray into a IntArray, converting
+   * the float elements to fixed-point 1.31.
+   * @param[in] source the source array
+   */
+  void fromFloat(FloatArray source){
+    ASSERT(source.getSize() == size, "Size does not match");
+#ifdef ARM_CORTEX
+    /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+    arm_float_to_q31(source.getData(), data, size);
+#else
+    for(size_t n = 0; n < size; ++n){
+      setFloatValue(n, source[n]);
+    }
+#endif
+  }
+
+  /**
+   * Converts a float to int16 and stores it.
+   *
+   * @param n the array element to write to.
+   * @value the value to write
+   */
+  void setFloatValue(uint32_t n, float value){
+    data[n] = (int32_t)(value * -(float)INT_MIN);
+  }
+
+  /**
+   * Returns an element of the array converted to float.
+   *
+   * @param n the array element to read.
+   * @return the floating point representation of the element.
+   */
+  float getFloatValue(uint32_t n){
+    return data[n] / -(float)INT_MIN;
   }
 
   /**

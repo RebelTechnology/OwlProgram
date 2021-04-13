@@ -1,9 +1,42 @@
+#include "ServiceCall.h"
 #include "FastPowTable.h"
 #include "FastLogTable.h"
 #include "basicmaths.h"
+#include "fileio.h"
 
 static float parameter_values[40] = {};
 static uint32_t button_values = 0;
+int errorcode = 0;
+
+extern "C"{
+  int serviceCall(int service, void** params, int len){
+    int ret = -1;
+    switch(service){
+    case OWL_SERVICE_LOAD_RESOURCE:
+      if(len == 4){
+	const char* name = (const char*)params[0];
+	uint8_t** buffer = (uint8_t**)params[1];
+	uint32_t offset = *(uint32_t*)params[2];
+	uint32_t* max_size = (uint32_t*)params[3];
+	printf("Service call (LOAD RESOURCE) : %s [%u:%u]\n", name, offset, *max_size);
+	*max_size = fileread(name, buffer, *max_size);
+	ret = OWL_SERVICE_OK;
+      }else{
+	printf("Service call (LOAD RESOURCE) Invalid");
+      }	
+      break;
+    default:
+      printf("Service call (todo) : %d\n", service);
+      break;
+    }
+    return ret;
+  }
+  void error(int8_t code, const char* reason){
+    printf("%s\n", reason);
+    errorcode = -1;
+    exit(errorcode);
+  }
+}
 
 class SampleBuffer : public AudioBuffer {
 protected:
@@ -81,7 +114,7 @@ void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t
 
 extern "C"{
   void doSetButton(uint8_t bid, uint16_t value, uint16_t samples){
-    printf("Set button %c: %d\n", 'A'+bid, value);
+    printf("Set button %c: %d\n", 'A'+bid-4, value);
     if(value)
       button_values |= (1<<bid);
     else
@@ -191,6 +224,14 @@ void PatchProcessor::setPatchParameter(int pid, IntParameter* param){
     parameter_values[pid] = param->getValue()/4096.0f;
 }
 
+Resource* Patch::getResource(char const* name){
+  printf("Get resource %s\n", name);
+  Resource* resource = Resource::load(name);
+  if(resource == NULL)
+    error(CONFIGURATION_ERROR_STATUS, "Missing Resource");
+  return resource;
+}
+
 void Patch::registerParameter(PatchParameterId pid, const char* name){
   printf("Register parameter %c: %s\n", 'A'+pid, name);
 }  
@@ -210,6 +251,10 @@ float Patch::getSampleRate(){
 
 int Patch::getBlockSize(){
   return BLOCKSIZE;
+}
+
+float Patch::getBlockRate(){
+  return SAMPLE_RATE/BLOCKSIZE;
 }
 
 int Patch::getNumberOfChannels(){
