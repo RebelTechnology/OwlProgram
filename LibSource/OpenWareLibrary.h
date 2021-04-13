@@ -41,6 +41,7 @@
 #include "Synth.h"
 #include "VoltsPerOctave.h"
 #include "VelocityCurve.h"
+#include "WavFile.h"
 #include "WavetableOscillator.h"
 #include "Window.h"
 
