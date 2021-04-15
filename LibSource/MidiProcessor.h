@@ -4,7 +4,7 @@
 #include "MidiMessage.h"
 
 /**
- * Base class for midi processors such as Synths
+ * Base class for MIDI processors such as @class AbstractSynth.
  * Derived classes can overload the specific message handlers,
  * and/or the entry-point: @method process(MidiMessage msg)
  */

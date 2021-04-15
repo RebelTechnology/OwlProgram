@@ -51,7 +51,7 @@ int main(int argc, char** argv){
     size_t len = fileread(input_filename, &data, 0);
     data = (uint8_t*)malloc(len);
     fileread(input_filename, &data, len);
-    WavFile wav = WavFile::create(data);
+    WavFile wav(data);
     const int channels = wav.getNumberOfChannels();
     // ASSERT(wav.getSampleRate() == SAMPLE_RATE, "Incorrect sample rate in input file");
     ASSERT(channels == CHANNELS, "Incorrect number of channels in input file");

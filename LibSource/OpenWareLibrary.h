@@ -20,6 +20,7 @@
 #include "FloatMatrix.h"
 #include "IntArray.h"
 #include "MidiProcessor.h"
+#include "MidiStatus.h"
 #include "NoiseGenerator.h"
 #include "OpenWareMidiControl.h"
 #include "Oscillator.h"
@@ -44,5 +45,10 @@
 #include "WavFile.h"
 #include "WavetableOscillator.h"
 #include "Window.h"
+
+#include "PolyphonicProcessor.h"
+#include "MonophonicProcessor.h"
+#include "AudioBuffer.h"
+
 
 #endif	/* __OpenWareLibrary_h__ */

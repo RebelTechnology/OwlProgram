@@ -18,6 +18,10 @@ public:
     ASSERT(channel < channels, "Invalid channel");
     return FloatArray(buffer+channel*size, size);
   }
+  void add(AudioBuffer& other){
+    for(size_t i=0; i<size; ++i)
+      getSamples(i).add(other.getSamples(i));
+  }
   int getChannels(){
     return channels;
   }

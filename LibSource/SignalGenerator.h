@@ -2,6 +2,7 @@
 #define __SignalGenerator_h__
 
 #include "FloatArray.h"
+#include "AudioBuffer.h"
 
 /**
  * Base class for signal generators such as Oscillators.
@@ -24,7 +25,6 @@ public:
   }
 };
 
-class AudioBuffer;
 class MultiSignalGenerator {
 public:
   virtual ~MultiSignalGenerator(){}

@@ -27,7 +27,7 @@ typedef struct {
 class WavFile {
   WavHeader* header;
 public:
-  WavFile(WavHeader* header) : header(header){}
+  WavFile(void* data) : header((WavHeader*)data){}
   WavHeader* getHeader(){
     return header;
   }
@@ -80,9 +80,6 @@ public:
     //   return result;
     }
     return FloatArray();
-  }
-  static WavFile create(void* data){
-    return WavFile((WavHeader*)data);
   }
 };
 
