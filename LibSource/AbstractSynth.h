@@ -98,28 +98,19 @@ protected:
     voice[ch]->noteOn(msg);
   }
   void release(uint8_t ch){
-    // notes[ch] = EMPTY;
     allocation[ch] = ++allocated;
-    voice[ch]->setGate(false);
+    voice[ch]->gate(false);
   }
 public:
-  PolyphonicProcessor(float sr, int bs) : allocated(0) {
-    for(int i=0; i<VOICES; ++i){
-      voice[i] = SynthVoice::create(sr);
-      notes[i] = 69; // middle A, 440Hz
-      allocation[i] = 0;
-    }
-    buffer = FloatArray::create(bs);
+  PolyphonicProcessor(FloatArray buffer) : allocated(0), buffer(buffer) {}
+  virtual ~PolyphonicProcessor(){};
+  static PolyphonicProcessor<SynthVoice, VOICES>* create(size_t blocksize){
+    FloatArray buffer = FloatArray::create(blocksize);    
+    return new PolyphonicProcessor<SynthVoice, VOICES>(buffer);
   }
-  ~PolyphonicProcessor(){
-    for(int i=0; i<VOICES; ++i)
-      SynthVoice::destroy(voice[i]);
-    FloatArray::destroy(buffer);
-  }
-  void allNotesOff(){
-    for(int i=0; i<VOICES; ++i)
-      release(i, 0);
-    allocated = 0;
+  static void destroy(PolyphonicProcessor<SynthVoice, VOICES>* obj){
+    delete obj->buffer;
+    delete obj;
   }
   void noteOn(MidiMessage msg){
     uint8_t note = msg.getNote();
@@ -138,7 +129,6 @@ public:
     }
     // take oldest voice
     take(minidx, msg);
-    // debugMessage("idx/note/vel", minidx, note, velocity);
   }
   void noteOff(MidiMessage msg){
     uint8_t note = msg.getNote();
@@ -146,10 +136,16 @@ public:
       if(notes[i] == note)
 	release(i);
   }
+  float generate(){
+    float sample = 0.0f;
+    for(int i=0; i<VOICES; ++i)
+      sample += voice[i]->generate();
+    return sample;
+  }
   void generate(FloatArray output){
-    voice[0]->getSamples(output);
+    voice[0]->generate(output);
     for(int i=1; i<VOICES; ++i){
-      voice[i]->getSamples(buffer);
+      voice[i]->generate(buffer);
       output.add(buffer);
     }
   }
@@ -159,7 +155,19 @@ public:
   }
   void pitchbend(MidiMessage msg){
     for(int i=0; i<VOICES; ++i)
-      pitchbend(msg);
+      voice[i]->pitchbend(msg);
+  }
+  void allNotesOn() {
+    for(int i=0; i<VOICES; ++i)
+      voice[i]->gate(true);      
+  }
+  void allNotesOff() {
+    for(int i=0; i<VOICES; ++i)
+      voice[i]->gate(false);      
+  }
+  void setVoice(size_t index, SynthVoice* obj){
+    if(index < VOICES)
+      voice[index] = obj;
   }
   SynthVoice* getVoice(size_t index){
     if(index < VOICES)
