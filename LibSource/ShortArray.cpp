@@ -455,7 +455,6 @@ void ShortArray::noise(){
 void ShortArray::noise(int16_t min, int16_t max){
   uint16_t amplitude = abs((int32_t)max-(int32_t)min);
   int16_t offset = min;
-  //debugMessage("amp off", amplitude,offset);
   for(size_t n=0; n<size; n++){
     data[n]=(rand()/((float)RAND_MAX)) * amplitude + offset;
   }

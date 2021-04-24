@@ -10,7 +10,7 @@ public:
   virtual int getChannels() = 0;
   virtual int getSize() = 0;
   virtual void clear() = 0;
-  virtual void add(AudioBuffer& buffer){}
+  virtual void add(AudioBuffer& buffer) = 0;
   static AudioBuffer* create(int channels, int samples);
   static void destroy(AudioBuffer* buffer);
 };

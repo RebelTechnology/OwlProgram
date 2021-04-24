@@ -48,7 +48,7 @@ public:
     process(in, out, in.getSize());
   }
 
-  static DcBlockingFilter* create(float lambda){
+  static DcBlockingFilter* create(float lambda=0.995){
     return new DcBlockingFilter(lambda);
   }
 

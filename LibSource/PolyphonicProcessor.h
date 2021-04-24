@@ -4,6 +4,9 @@
 #include "MidiProcessor.h"
 #include "SignalGenerator.h"
 
+/**
+ * Supports both Polyphonic Key Pressure and Channel Pressure Aftertouch.
+ */
 template<class SynthVoice, int VOICES>
 class PolyphonicMidiProcessor : public MidiProcessor {
 protected:
@@ -26,6 +29,14 @@ protected:
 public:
   PolyphonicMidiProcessor() : allocated(0) {}
   virtual ~PolyphonicMidiProcessor(){};
+  size_t getNumberOfTakenVoices(){
+    size_t active = 0;
+    for(int i=0; i<VOICES; ++i){
+      if(allocation[i] == TAKEN)
+	active++;
+    }
+    return active;
+  }
   void noteOn(MidiMessage msg){
     uint8_t note = msg.getNote();
     uint16_t minval = USHRT_MAX;
@@ -50,19 +61,25 @@ public:
       if(notes[i] == note)
 	release(i);
   }
- void controlChange(MidiMessage msg){
-   if(msg.getControllerNumber() == MIDI_CC_MODULATION)
-     setParameter(1, msg.getControllerValue()/127.0f);
-   else if(msg.getControllerNumber() == MIDI_ALL_NOTES_OFF)
+  void controlChange(MidiMessage msg){
+    if(msg.getControllerNumber() == MIDI_CC_MODULATION)
+      modulate(msg);
+    else if(msg.getControllerNumber() == MIDI_ALL_NOTES_OFF)
       allNotesOff();
   }
   void pitchbend(MidiMessage msg){
     for(int i=0; i<VOICES; ++i)
       voice[i]->pitchbend(msg);
   }
+  void modulate(MidiMessage msg){
+    float value = msg.getControllerValue()/127.0f;
+    for(int i=0; i<VOICES; ++i)
+      voice[i]->setModulation(value);
+  }
+  // todo: unison note on/off
   void allNotesOn() {
     for(int i=0; i<VOICES; ++i)
-      voice[i]->gate(true);      
+      voice[i]->gate(true);
   }
   void allNotesOff() {
     for(int i=0; i<VOICES; ++i)
@@ -77,6 +94,18 @@ public:
       return voice[index];
     return NULL;
   }
+  void channelPressure(MidiMessage msg){
+    // route channel pressure to all voices
+    for(int i=0; i<VOICES; ++i)
+      voice[i]->setPressure(msg.getChannelPressure()/127.0f);
+  }
+  void polyKeyPressure(MidiMessage msg){
+    // route poly key pressure to the right voice
+    uint8_t note = msg.getNote();
+    for(int i=0; i<VOICES; ++i)
+      if(notes[i] == note)
+	voice[i]->setPressure(msg.getPolyKeyPressure()/127.0f);
+  }
   void setParameter(uint8_t parameter_id, float value){
     for(int i=0; i<VOICES; ++i)
       voice[i]->setParameter(parameter_id, value);
@@ -90,14 +119,6 @@ private:
 public:
   PolyphonicSignalGenerator(FloatArray buffer) : buffer(buffer) {}
   virtual ~PolyphonicSignalGenerator(){};
-  static PolyphonicSignalGenerator<SynthVoice, VOICES>* create(size_t blocksize){
-    FloatArray buffer = FloatArray::create(blocksize);    
-    return new PolyphonicSignalGenerator<SynthVoice, VOICES>(buffer);
-  }
-  static void destroy(PolyphonicSignalGenerator<SynthVoice, VOICES>* obj){
-    FloatArray::destroy(obj->buffer);
-    delete obj;
-  }
   float generate(){
     float sample = this->voice[0]->generate();
     for(int i=1; i<VOICES; ++i)
@@ -110,6 +131,14 @@ public:
       this->voice[i]->generate(buffer);
       output.add(buffer);
     }
+  }
+  static PolyphonicSignalGenerator<SynthVoice, VOICES>* create(size_t blocksize){
+    FloatArray buffer = FloatArray::create(blocksize);    
+    return new PolyphonicSignalGenerator<SynthVoice, VOICES>(buffer);
+  }
+  static void destroy(PolyphonicSignalGenerator<SynthVoice, VOICES>* obj){
+    FloatArray::destroy(obj->buffer);
+    delete obj;
   }
 };
 
@@ -125,7 +154,7 @@ public:
     return new PolyphonicMultiSignalGenerator<SynthVoice, VOICES>(buffer);
   }
   static void destroy(PolyphonicMultiSignalGenerator<SynthVoice, VOICES>* obj){
-    // AudioBuffer::destroy(obj->buffer);
+    AudioBuffer::destroy(obj->buffer);
     delete obj;
   }
   void generate(AudioBuffer& output){
@@ -137,4 +166,4 @@ public:
   }  
 };
 
-#endif // __PolyphonicProcessor_h__
+#endif /* __PolyphonicProcessor_h__ */

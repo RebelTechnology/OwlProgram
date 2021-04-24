@@ -1,5 +1,5 @@
-#ifndef OSCILLATOR_HPP
-#define OSCILLATOR_HPP
+#ifndef __Oscillator_h
+#define __Oscillator_h
 
 #include "FloatArray.h"
 #include "SignalGenerator.h"
@@ -18,21 +18,13 @@ public:
    */
   virtual void setSampleRate(float value){}
   /**
-   * Get oscillator sample rate
-   */
-  virtual float getSampleRate(){
-    return 0.0f;
-  }
-  /**
    * Set oscillator frequency in Hertz
    */
-  virtual void setFrequency(float value){}
+  virtual void setFrequency(float value) = 0;
   /**
    * Get oscillator frequency in Hertz
    */
-  virtual float getFrequency(){
-    return 0.0f;
-  }
+  virtual float getFrequency() = 0;
   /**
    * Set current oscillator phase in radians
    * @param phase a value between 0 and 2*pi
@@ -72,4 +64,4 @@ public:
   }
 };
 
-#endif /* OSCILLATOR_HPP */
+#endif /* __Oscillator_h */

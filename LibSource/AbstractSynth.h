@@ -22,7 +22,7 @@ public:
   /**
    * Set note in whole semitones and update frequency
    */
-  void setNote(uint8_t note){
+  virtual void setNote(uint8_t note){
     this->note = note;
     setFrequency(noteToFrequency(note+pb));
   }
@@ -35,7 +35,7 @@ public:
   /**
    * Set pitch bend amount in semitones and update frequency
    */
-  void setPitchBend(float pb){
+  virtual void setPitchBend(float pb){
     this->pb = pb;
     setFrequency(noteToFrequency(note+pb));
   }
@@ -53,26 +53,34 @@ public:
     this->pb_range = range;
   }  
   // MIDI handlers
-  virtual void noteOn(MidiMessage msg){
+  virtual void noteOn(MidiMessage msg) override {
     setNote(msg.getNote());
     setFrequency(noteToFrequency(note+pb));
     setGain(velocityToGain(msg.getVelocity()));
     gate(true);
   }
-  virtual void noteOff(MidiMessage msg){
+  virtual void noteOff(MidiMessage msg) override {
     gate(false);
   }
-  virtual void controlChange(MidiMessage msg){
+  virtual void controlChange(MidiMessage msg) override {
     if(msg.getControllerNumber() == MIDI_CC_MODULATION)
-      setParameter(1, msg.getControllerValue()/127.0f);
+      setModulation(msg.getControllerValue()/127.0f);
     else if(msg.getControllerNumber() == MIDI_ALL_NOTES_OFF)
       allNotesOff();
   }
+  virtual void channelPressure(MidiMessage msg){
+    setPressure(msg.getChannelPressure()/127.0f);
+  }
+  virtual void polyKeyPressure(MidiMessage msg){
+    setPressure(msg.getPolyKeyPressure()/127.0f);
+  }
+  virtual void setModulation(float modulation){} // default implementation does nothing
+  virtual void setPressure(float pressure){}
+  virtual void pitchbend(MidiMessage msg) override {
+    setPitchBend(pb_range*msg.getPitchBend()/8192.0f);
+  }
   virtual void allNotesOff(){
     gate(false);
-  }
-  virtual void pitchbend(MidiMessage msg){
-    setPitchBend(pb_range*msg.getPitchBend()/8192.0f);
   }
   // static utility methods
   static inline float frequencyToNote(float freq){

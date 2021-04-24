@@ -69,7 +69,8 @@ public:
   }
   
   /**
-   * Copies the content of the array to another array.
+   * Copies the content of this array to another array.
+   * The other array needs to be at least as big as this array.
    * @param[out] destination the destination array
    */
   void copyTo(SimpleArray<T> destination){
@@ -78,12 +79,13 @@ public:
   }
 
   /**
-   * Copies the content of an array into another array.
+   * Copies the content of another array into this array.
+   * This array needs to be at least as big as the other array.
    * @param[in] source the source array
    */
   void copyFrom(SimpleArray<T> source){
-    ASSERT(source.size >= size, "Array too small");
-    memcpy((void*)data, (void*)source.data, size*sizeof(T));
+    ASSERT(size >= source.size, "Array too small");
+    memcpy((void*)data, (void*)source.data, source.size*sizeof(T));
   }
 
   /**

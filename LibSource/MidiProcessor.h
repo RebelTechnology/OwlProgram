@@ -16,6 +16,7 @@ public:
   virtual void pitchbend(MidiMessage msg){}
   virtual void controlChange(MidiMessage msg){}
   virtual void channelPressure(MidiMessage msg){}
+  virtual void polyKeyPressure(MidiMessage msg){}
   virtual void process(MidiMessage msg) {
     if(msg.isNoteOn()) {
       if(msg.getVelocity())
@@ -30,6 +31,10 @@ public:
       controlChange(msg);
     }else if(msg.isChannelPressure()) {
       channelPressure(msg);
+    }else if(msg.isChannelPressure()) {
+      channelPressure(msg);
+    }else if(msg.isPolyKeyPressure()) {
+      polyKeyPressure(msg);
     }
   }  
 };

@@ -11,8 +11,7 @@ public:
   virtual void gate(bool state) = 0;
   virtual void trigger() = 0;
   /**
-   * Set a Synth parameter. The definition of parameter is up to the Synth,
-   * but parameter 1 is dedicated to modulation
+   * Set a Synth parameter. The definition of each parameter is determined by the Synth.
    */
   virtual void setParameter(uint8_t parameter_id, float value){}
 };

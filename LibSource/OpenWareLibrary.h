@@ -2,6 +2,7 @@
 #define __OpenWareLibrary_h__
 
 #include "AbstractSynth.h"
+#include "AudioBuffer.h"
 #include "BiquadFilter.h"
 #include "ChirpOscillator.h"
 #include "CircularBuffer.h"
@@ -20,7 +21,9 @@
 #include "FloatMatrix.h"
 #include "IntArray.h"
 #include "MidiProcessor.h"
+#include "MidiPolyphonicExpressionProcessor.h"
 #include "MidiStatus.h"
+#include "MonophonicProcessor.h"
 #include "NoiseGenerator.h"
 #include "OpenWareMidiControl.h"
 #include "Oscillator.h"
@@ -28,6 +31,7 @@
 #include "PatchParameter.h"
 #include "PitchDetector.h"
 #include "PolyBlepOscillator.h"
+#include "PolyphonicProcessor.h"
 #include "RampOscillator.h"
 #include "Resample.h"
 #include "Resource.h"
@@ -42,13 +46,9 @@
 #include "Synth.h"
 #include "VoltsPerOctave.h"
 #include "VelocityCurve.h"
+#include "VosimOscillator.h"
 #include "WavFile.h"
 #include "WavetableOscillator.h"
 #include "Window.h"
-
-#include "PolyphonicProcessor.h"
-#include "MonophonicProcessor.h"
-#include "AudioBuffer.h"
-
 
 #endif	/* __OpenWareLibrary_h__ */

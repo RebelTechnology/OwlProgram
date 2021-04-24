@@ -1,6 +1,8 @@
 #ifndef __VelocityCurve_h__
 #define __VelocityCurve_h__
 
+#include "basicmaths.h"
+
 /**
  * General MIDI DLS Level 1 Specification:
  * The MIDI Note Velocity value is converted to attenuation in dB by the Concave Transform
