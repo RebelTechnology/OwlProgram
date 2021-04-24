@@ -44,7 +44,7 @@ int main(int argc, char** argv){
   programVector.serviceCall = serviceCall;
 #include "registerpatch.cpp"
   ASSERT(processor.patch != NULL, "Missing test patch");    
-  SampleBuffer* samples = new SampleBuffer(BLOCKSIZE);
+  StereoSampleBuffer* samples = new StereoSampleBuffer(BLOCKSIZE);
   if(argc > 1){
     const char* input_filename = argv[1];
     uint8_t* data = NULL;
