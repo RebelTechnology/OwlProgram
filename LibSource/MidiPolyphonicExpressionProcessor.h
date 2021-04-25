@@ -62,17 +62,17 @@ public:
       }
       break;
     }
-    case 100: // RPN MSB
+    case 101: // RPN MSB
       rpn = msg.getControllerValue()<<7;
       break;
-    case 101: // RPN LSB
+    case 100: // RPN LSB
       rpn |= msg.getControllerValue();
       if(rpn == (127<<7)|127)
 	rpn = 0;
       break;
     case 6: // Data Entry MSB
       if(rpn == 0){ // Pitch Bend Sensitivity
-	float semitones = msg.getControllerValue();
+	uint8_t semitones = msg.getControllerValue();
 	if(isMasterChannel(msg)){
 	  zone_pitchbend_range = semitones;
 	}else{
