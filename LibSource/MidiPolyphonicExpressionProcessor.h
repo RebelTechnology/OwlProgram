@@ -89,9 +89,9 @@ public:
 	// compatibility with other equipment.
 	float cents = msg.getControllerValue()/100.0f;
 	if(isMasterChannel(msg)){
-	  zone_pitchbend_range += cents;
+	  zone_pitchbend_range = ((int)zone_pitchbend_range) + cents;
 	}else{
-	  note_pitchbend_range += cents;
+	  note_pitchbend_range = ((int)note_pitchbend_range) + cents;
 	}
       }
       break;
