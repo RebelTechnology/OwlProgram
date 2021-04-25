@@ -25,6 +25,7 @@ protected:
   float zone_modulation = 0;
   float note_pitchbend_range = 48;
   float zone_pitchbend_range = 2;
+  uint16_t rpn = 0;
 public:
   MidiPolyphonicExpressionProcessor() {}
   virtual ~MidiPolyphonicExpressionProcessor(){};
@@ -61,6 +62,39 @@ public:
       }
       break;
     }
+    case 100: // RPN MSB
+      rpn = msg.getControllerValue()<<7;
+      break;
+    case 101: // RPN LSB
+      rpn |= msg.getControllerValue();
+      if(rpn == (127<<7)|127)
+	rpn = 0;
+      break;
+    case 6: // Data Entry MSB
+      if(rpn == 0){ // Pitch Bend Sensitivity
+	float semitones = msg.getControllerValue();
+	if(isMasterChannel(msg)){
+	  zone_pitchbend_range = semitones;
+	}else{
+	  note_pitchbend_range = semitones;
+	}
+      }
+      break;
+    case 38: // Data Entry LSB
+      if(rpn == 0){ // Pitch Bend Sensitivity
+	// It is recommended that MPE devices use an integer number of semitones
+	// for the range and either transmit the LSB as zero, or not transmit it
+	// at all so that the receiver infers zero. MPE devices can still choose
+	// to respond to 14-bit Pitch Bend Sensitivity messages for
+	// compatibility with other equipment.
+	float cents = msg.getControllerValue()/100.0f;
+	if(isMasterChannel(msg)){
+	  zone_pitchbend_range += cents;
+	}else{
+	  note_pitchbend_range += cents;
+	}
+      }
+      break;
     case MIDI_ALL_NOTES_OFF:
       allNotesOff();
       break;
