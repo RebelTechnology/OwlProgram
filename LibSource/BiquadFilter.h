@@ -94,9 +94,9 @@ public:
 
   static void setPeak(float* coefficients, float omega, float q, float gain){
     float K = tanf(omega);
-    float V = fabs(gain-0.5)*60 + 1; // Gain
+    float V = exp10f(fabsf(gain)/20);
     float norm;
-    if (gain >= 0.5) {
+    if (gain >= 0) {
       norm = 1 / (1 + 1/q * K + K * K);
       coefficients[0] = (1 + V/q * K + K * K) * norm;
       coefficients[1] = 2 * (K * K - 1) * norm;
@@ -116,9 +116,9 @@ public:
 
   static void setLowShelf(float* coefficients, float omega, float gain){
     float K = tanf(omega);
-    float V = fabs(gain-0.5)*60 + 1; // Gain
+    float V = exp10f(fabsf(gain)/20);
     float norm;
-    if(gain >= 0.5) {
+    if(gain >= 0) {
       norm = 1 / (1 + M_SQRT2 * K + K * K);
       coefficients[0] = (1 + sqrtf(2*V) * K + V * K * K) * norm;
       coefficients[1] = 2 * (V * K * K - 1) * norm;
@@ -137,9 +137,9 @@ public:
 
   static void setHighShelf(float* coefficients, float omega, float gain){
     float K = tanf(omega);
-    float V = fabs(gain-0.5)*60 + 1; // Gain
+    float V = exp10f(fabsf(gain)/20);
     float norm;
-    if(gain >= 0.5) {
+    if(gain >= 0) {
       norm = 1 / (1 + M_SQRT2 * K + K * K);
       coefficients[0] = (V + sqrtf(2*V) * K + K * K) * norm;
       coefficients[1] = 2 * (K * K - V) * norm;
@@ -337,16 +337,28 @@ public:
     copyCoefficients();
   }
 
+  /**
+   * Configure a peaking filter with resonance and variable gain.
+   * @param gain in dB
+   */
   void setPeak(float fc, float q, float gain){
     FilterStage::setPeak(coefficients, fc*pioversr, q, gain);
     copyCoefficients();
   }
 
+  /**
+   * Configure a low shelf filter with variable gain.
+   * @param gain in dB
+   */
   void setLowShelf(float fc, float gain){
     FilterStage::setLowShelf(coefficients, fc*pioversr, gain);
     copyCoefficients();
   }
 
+  /**
+   * Configure a low shelf filter with variable gain.
+   * @param gain in dB
+   */
   void setHighShelf(float fc, float gain){
     FilterStage::setHighShelf(coefficients, fc*pioversr, gain);
     copyCoefficients();
