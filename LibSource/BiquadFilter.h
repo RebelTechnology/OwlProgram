@@ -356,7 +356,7 @@ public:
   }
 
   /**
-   * Configure a low shelf filter with variable gain.
+   * Configure a high shelf filter with variable gain.
    * @param gain in dB
    */
   void setHighShelf(float fc, float gain){
