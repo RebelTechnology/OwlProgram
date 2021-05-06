@@ -29,6 +29,15 @@ protected:
 public:
   MidiPolyphonicExpressionProcessor() {}
   virtual ~MidiPolyphonicExpressionProcessor(){};
+  // class RpnMessage {
+  // uint8_t ch;
+  // uint16_t rpn;
+  // uint16_t value;
+  // };
+  // RpnMessage getMCM(){
+  // returns the MPE Configuration Message
+  // ch0 cc 100:06 101:00 06:VOICES
+  // }
   void noteOn(MidiMessage msg){
     uint8_t ch = getNoteChannel(msg);
     if(ch < VOICES)
@@ -62,22 +71,36 @@ public:
       }
       break;
     }
-    case 101: // RPN MSB
-      rpn = msg.getControllerValue()<<7;
+    case 100: // RPN LSB comes first
+      rpn = msg.getControllerValue();
       break;
-    case 100: // RPN LSB
-      rpn |= msg.getControllerValue();
-      if(rpn == (127<<7)|127)
+    case 101: // RPN MSB
+      rpn |= msg.getControllerValue()<<7;
+      if(rpn == MIDI_RPN_RESET) // RPN reset
 	rpn = 0;
       break;
     case 6: // Data Entry MSB
-      if(rpn == 0){ // Pitch Bend Sensitivity
+      if(rpn == MIDI_RPN_PITCH_BEND_RANGE){
 	uint8_t semitones = msg.getControllerValue();
 	if(isMasterChannel(msg)){
 	  zone_pitchbend_range = semitones;
 	}else{
 	  note_pitchbend_range = semitones;
 	}
+      }else if(rpn == MIDI_RPN_MPE_CONFIGURATION){
+	uint8_t n = msg.getChannel();
+	uint8_t mm = msg.getControllerValue();
+	// mm=0: MPE is Off (No Channels)
+	// mm=1 to F: Assigns that number of MIDI Channels to the Zone
+	if(mm != 0){
+	  if(n == 0x0) // n=0: Lower Zone Master Channel
+	    master_channel = 1;
+	  else if(n == 0xf) // n=F: Upper Zone Master Channel
+	    master_channel = 0xf;
+	  // All other channel values are invalid and should be ignored
+	}
+	// Each Zone is activated with its own message, which can be sent in either order.
+	// Sending an MCM with the number of Member Channels set to zero deactivates that Zone.
       }
       break;
     case 38: // Data Entry LSB
@@ -104,9 +127,14 @@ public:
     return msg.getChannel()+1 == master_channel;
   }
   uint8_t getNoteChannel(MidiMessage msg){
+    // The Lower Zone is controlled by Master Channel 1,
+    // with Member Channels assigned sequentially from Channel 2 upwards.
     if(master_channel == 1)
       return (msg.getChannel()-1) % VOICES;
-    return msg.getChannel() % VOICES;
+    else
+      return (14-msg.getChannel()) % VOICES;
+    // The Upper Zone is controlled by Master Channel 16,
+    // with Member Channels assigned sequentially from Channel 15 downwards.
   }
   void pitchbend(MidiMessage msg){
     // Pitch Bend is both a Zone Message and a Note Level Message. If an MPE synthesizer receives Pitch Bend (for example) on both a Master and a Member Channel, it must combine the data meaningfully. The same is true for Channel Pressure. 
