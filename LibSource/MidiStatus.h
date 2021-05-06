@@ -79,4 +79,10 @@ enum OwlProtocol {
   OWL_COMMAND_RESET               = 0xf0,
 };
 
+enum MidiRPN {
+  MIDI_RPN_PITCH_BEND_RANGE       = 0x0000,
+  MIDI_RPN_MPE_CONFIGURATION      = 0x0006,
+  MIDI_RPN_RESET                  = 0x3fff,
+};
+
 #endif /* _MidiStatus_h_ */
