@@ -1,8 +1,11 @@
-#ifndef RAMPOSCILLATOR_H
-#define RAMPOSCILLATOR_H
+#ifndef __RampOscillator_h
+#define __RampOscillator_h
 
 #include "Oscillator.h"
 
+/**
+ * Ramp oscillator generates rising output values from -1 to 1.
+ */
 class RampOscillator : public Oscillator {
 private:
   float mul;
@@ -16,12 +19,12 @@ public:
     setFrequency(freq);
   }
   void reset(){
-    phase = 0.0f;
+    phase = -1;
   }
   void setSampleRate(float sr){
     mul = 2.0f/sr;
   }
-  float getS2ampleRate(){
+  float getSampleRate(){
     return 2.0f/mul;
   }
   void setFrequency(float freq){
@@ -80,4 +83,4 @@ public:
   }
 };
 
-#endif /* RAMPOSCILLATOR_H */
+#endif /* __RampOscillator_h */

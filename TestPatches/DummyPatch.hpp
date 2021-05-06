@@ -38,18 +38,18 @@ extern "C"{
   }
 }
 
-class SampleBuffer : public AudioBuffer {
+class StereoSampleBuffer : public AudioBuffer {
 protected:
   FloatArray left;
   FloatArray right;
   uint16_t size;
   const float mul = 1/2147483648.0f;
 public:
-  SampleBuffer(int blocksize){
+  StereoSampleBuffer(int blocksize){
     left = FloatArray::create(blocksize);
     right = FloatArray::create(blocksize);
   }
-  ~SampleBuffer(){
+  ~StereoSampleBuffer(){
     FloatArray::destroy(left);
     FloatArray::destroy(right);
   }
@@ -80,6 +80,10 @@ public:
   }
   inline int getSize(){
     return size;
+  }
+  void add(AudioBuffer& other){
+    getSamples(0).add(other.getSamples(0));
+    getSamples(1).add(other.getSamples(1));
   }
 };
 
@@ -198,6 +202,9 @@ AudioBuffer* AudioBuffer::create(int channels, int samples){
   return new ManagedMemoryBuffer(channels, samples);
 }
 AudioBuffer::~AudioBuffer(){}
+void AudioBuffer::destroy(AudioBuffer* buffer){
+  delete buffer;
+}
 
 Patch::Patch(){}
 Patch::~Patch(){}

@@ -1,10 +1,16 @@
 v22.1
 -----
 
+* Added Sample oscillator
+* Added Agnesi curve oscillator
+* Added MPE processor
+* Added VOSIM oscillator
 * Added methods for sample-rate cutoff frequency modulation in StateVariableFilter and BiquadFilter
 * Added VelocityCurve, MidiProcessor, Synth and AbstractSynth
 * New templates for MIDI voicing: PolyphonicProcessor and MonophonicProcessor
 * Added WavFile for reading wav resources and converting to FloatArray
+* Changed enum for BUTTON_A, B, C to BUTTON_1, 2, 3 et c.
+* Fix FloatMatrix compilation
 
 v22.0
 -----

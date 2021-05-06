@@ -7,6 +7,7 @@
 #include "FloatArray.h"
 #include "PatchParameter.h"
 #include "SmoothValue.h"
+#include "AudioBuffer.h"
 #include "OpenWareMidiControl.h"
 
 #ifdef USE_MIDI_CALLBACK
@@ -16,17 +17,6 @@
 enum PatchChannelId {
   LEFT_CHANNEL = 0,
   RIGHT_CHANNEL = 1
-};
-
-class AudioBuffer {
-public:
-  virtual ~AudioBuffer();
-  virtual FloatArray getSamples(int channel) = 0;
-  virtual int getChannels() = 0;
-  virtual int getSize() = 0;
-  virtual void clear() = 0;
-  static AudioBuffer* create(int channels, int samples);
-  static void destroy(AudioBuffer* buffer);
 };
 
 class Patch {

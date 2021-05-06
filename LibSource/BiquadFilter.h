@@ -94,9 +94,9 @@ public:
 
   static void setPeak(float* coefficients, float omega, float q, float gain){
     float K = tanf(omega);
-    float V = fabs(gain-0.5)*60 + 1; // Gain
+    float V = exp10f(fabsf(gain)/20);
     float norm;
-    if (gain >= 0.5) {
+    if (gain >= 0) {
       norm = 1 / (1 + 1/q * K + K * K);
       coefficients[0] = (1 + V/q * K + K * K) * norm;
       coefficients[1] = 2 * (K * K - 1) * norm;
@@ -116,9 +116,9 @@ public:
 
   static void setLowShelf(float* coefficients, float omega, float gain){
     float K = tanf(omega);
-    float V = fabs(gain-0.5)*60 + 1; // Gain
+    float V = exp10f(fabsf(gain)/20);
     float norm;
-    if(gain >= 0.5) {
+    if(gain >= 0) {
       norm = 1 / (1 + M_SQRT2 * K + K * K);
       coefficients[0] = (1 + sqrtf(2*V) * K + V * K * K) * norm;
       coefficients[1] = 2 * (V * K * K - 1) * norm;
@@ -137,9 +137,9 @@ public:
 
   static void setHighShelf(float* coefficients, float omega, float gain){
     float K = tanf(omega);
-    float V = fabs(gain-0.5)*60 + 1; // Gain
+    float V = exp10f(fabsf(gain)/20);
     float norm;
-    if(gain >= 0.5) {
+    if(gain >= 0) {
       norm = 1 / (1 + M_SQRT2 * K + K * K);
       coefficients[0] = (V + sqrtf(2*V) * K + K * K) * norm;
       coefficients[1] = 2 * (K * K - V) * norm;
@@ -205,7 +205,7 @@ public:
     pioversr(M_PI/sr), coefficients(coefs), state(ste), stages(sgs) {
     init();
   }
-
+  virtual ~BiquadFilter(){}
   void setSampleRate(float sr){
     pioversr = M_PI/sr;
   }
@@ -337,16 +337,28 @@ public:
     copyCoefficients();
   }
 
+  /**
+   * Configure a peaking filter with resonance and variable gain.
+   * @param gain in dB
+   */
   void setPeak(float fc, float q, float gain){
     FilterStage::setPeak(coefficients, fc*pioversr, q, gain);
     copyCoefficients();
   }
 
+  /**
+   * Configure a low shelf filter with variable gain.
+   * @param gain in dB
+   */
   void setLowShelf(float fc, float gain){
     FilterStage::setLowShelf(coefficients, fc*pioversr, gain);
     copyCoefficients();
   }
 
+  /**
+   * Configure a high shelf filter with variable gain.
+   * @param gain in dB
+   */
   void setHighShelf(float fc, float gain){
     FilterStage::setHighShelf(coefficients, fc*pioversr, gain);
     copyCoefficients();
@@ -383,15 +395,19 @@ public:
 
 class MultiBiquadFilter : public BiquadFilter, public MultiSignalProcessor {
 private:
-  size_t channels;
   BiquadFilter* filters;
+  size_t channels;
 protected:
 public:
-  MultiBiquadFilter(){}
-  MultiBiquadFilter(float sr, size_t channels, float* coefs, float* states, size_t stages) :
-    BiquadFilter(sr, coefs, states, stages), channels(channels) {
-    filters = new BiquadFilter[channels-1];
+  MultiBiquadFilter(float sr, float* coefs, float* states, size_t stages, BiquadFilter* filters, size_t len) :
+    BiquadFilter(sr, coefs, states, stages), filters(filters), channels(len){}
+  virtual ~MultiBiquadFilter(){}
+  static MultiBiquadFilter* create(float sr, size_t channels, size_t stages=1){
+    BiquadFilter* filters = new BiquadFilter[channels-1];
+    float* coefs = new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE];
+    float* states = new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE*channels];
     FloatArray coefficients(coefs, stages*BIQUAD_COEFFICIENTS_PER_STAGE);
+    float* mystate = states;
     for(size_t ch=1; ch<channels; ++ch){
       states += stages*BIQUAD_STATE_VARIABLES_PER_STAGE;
       filters[ch-1].setSampleRate(sr);
@@ -399,9 +415,7 @@ public:
       filters[ch-1].setState(FloatArray(states, stages*BIQUAD_STATE_VARIABLES_PER_STAGE));
       filters[ch-1].setCoefficients(coefficients); // shared coefficients
     }
-  }
-  static MultiBiquadFilter* create(float sr, size_t channels, size_t stages=1){
-    return new MultiBiquadFilter(sr, channels, new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE], new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE*channels], stages);
+    return new MultiBiquadFilter(sr, coefs, mystate, stages, filters, channels);
   }  
   static void destroy(MultiBiquadFilter* filter){
     delete[] filter->coefficients;
@@ -426,10 +440,23 @@ public:
 
 class StereoBiquadFilter : public MultiBiquadFilter {
 public:
-  StereoBiquadFilter(float sr, float* coefs, float* states, size_t stages) :
-    MultiBiquadFilter(sr, 2, coefs, states, stages) {}
+  StereoBiquadFilter(float sr, float* coefs, float* states, size_t stages, BiquadFilter* filters) :
+    MultiBiquadFilter(sr, coefs, states, stages, filters, 2) {}
   static StereoBiquadFilter* create(float sr, size_t stages=1){
-    return new StereoBiquadFilter(sr, new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE], new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE*2], stages);
+    size_t channels = 2;
+    BiquadFilter* filters = new BiquadFilter[channels-1];
+    float* coefs = new float[stages*BIQUAD_COEFFICIENTS_PER_STAGE];
+    float* states = new float[stages*BIQUAD_STATE_VARIABLES_PER_STAGE*channels];
+    FloatArray coefficients(coefs, stages*BIQUAD_COEFFICIENTS_PER_STAGE);
+    float* mystate = states;
+    for(size_t ch=1; ch<channels; ++ch){
+      states += stages*BIQUAD_STATE_VARIABLES_PER_STAGE;
+      filters[ch-1].setSampleRate(sr);
+      filters[ch-1].setStages(stages);
+      filters[ch-1].setState(FloatArray(states, stages*BIQUAD_STATE_VARIABLES_PER_STAGE));
+      filters[ch-1].setCoefficients(coefficients); // shared coefficients
+    }
+    return new StereoBiquadFilter(sr, coefs, mystate, stages, filters);
   }
   static void destroy(StereoBiquadFilter* filter){
     MultiBiquadFilter::destroy(filter);

@@ -36,11 +36,8 @@ EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_getP
 EMCCFLAGS += -s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']"
 
 include $(BUILDROOT)/sources.mk
-CPP_SRC += LibSource/Patch.cpp
-# CPP_SRC += LibSource/ComplexShortArray.cpp
-# CPP_SRC += LibSource/ShortFastFourierTransform.cpp 
+CPP_SRC += Source/Patch.cpp
 CPP_SRC += Source/PatchProcessor.cpp
-# CPP_SRC += Source/main.cpp Source/operators.cpp
 CPP_SRC += Source/message.cpp
 CPP_SRC += WebSource/web.cpp
 C_SRC   += Libraries/KissFFT/kiss_fft.c

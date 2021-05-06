@@ -65,7 +65,7 @@ public:
       TESTCHECK(tempFa1.equals(tempFa2), "equals");
       tempFa2[size-1]-=1;
       TESTCHECK(!tempFa1.equals(tempFa2), "not equals, one value is different");
-      FloatArray temp=FloatArray::create(size-1);
+      FloatArray temp=FloatArray::create(size+1);
       temp.copyFrom(tempFa2);
       TESTCHECK(!temp.equals(tempFa2), "not equals, size is different");
       FloatArray::destroy(temp);

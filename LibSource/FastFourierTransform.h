@@ -71,6 +71,9 @@ public:
    * @return The size of the FFT
   */
   size_t getSize();
+
+  static FastFourierTransform* create(size_t blocksize);
+  static void destroy(FastFourierTransform* obj);
 };
 
 #endif // __FastFourierTransform_h__

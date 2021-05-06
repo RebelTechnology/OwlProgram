@@ -82,3 +82,11 @@ size_t FastFourierTransform::getSize(){
 }
 
 #endif /* ifndef ARM_CORTEX */
+
+FastFourierTransform* FastFourierTransform::create(size_t blocksize){
+  return new FastFourierTransform(blocksize);
+}
+
+void FastFourierTransform::destroy(FastFourierTransform* obj){
+  delete obj;
+}
