@@ -42,6 +42,10 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
 int main(int argc, char** argv){
   errorcode = 0;
   programVector.serviceCall = serviceCall;
+  size_t parameters_size = 40;
+  int16_t parameters[parameters_size] = {};
+  programVector.parameters_size = parameters_size;
+  programVector.parameters = parameters;
 #include "registerpatch.cpp"
   ASSERT(processor.patch != NULL, "Missing test patch");    
   StereoSampleBuffer* samples = new StereoSampleBuffer(BLOCKSIZE);
@@ -51,7 +55,7 @@ int main(int argc, char** argv){
     size_t len = fileread(input_filename, &data, 0);
     data = (uint8_t*)malloc(len);
     fileread(input_filename, &data, len);
-    WavFile wav(data);
+    WavFile wav(data, len);
     const int channels = wav.getNumberOfChannels();
     // ASSERT(wav.getSampleRate() == SAMPLE_RATE, "Incorrect sample rate in input file");
     ASSERT(channels == CHANNELS, "Incorrect number of channels in input file");
