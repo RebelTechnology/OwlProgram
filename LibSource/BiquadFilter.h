@@ -395,8 +395,8 @@ public:
 
 class MultiBiquadFilter : public BiquadFilter, public MultiSignalProcessor {
 private:
-  size_t channels;
   BiquadFilter* filters;
+  size_t channels;
 protected:
 public:
   MultiBiquadFilter(float sr, float* coefs, float* states, size_t stages, BiquadFilter* filters, size_t len) :
