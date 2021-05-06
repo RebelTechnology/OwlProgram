@@ -1,6 +1,8 @@
 v22.1
 -----
 
+* Added Sample oscillator
+* Added Agnesi curve oscillator
 * Added MPE processor
 * Added VOSIM oscillator
 * Added methods for sample-rate cutoff frequency modulation in StateVariableFilter and BiquadFilter
