@@ -17,7 +17,7 @@ protected:
   uint8_t notes[VOICES];
   float pressure[VOICES];
   float modulation[VOICES];
-  const uint8_t master_channel = 1;
+  uint8_t master_channel = 1;
   // One channel (usually Channel 1) is used for global messages
   // The global channel is set by the "MPE Zone." When the MPE Zone is the Lower Zone, Channel 1 is used for global messages. When the MPE Zone is Upper Zone is, Channel 16 is used for global messages.
   float zone_pitchbend = 0;
