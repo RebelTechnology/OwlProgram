@@ -15,6 +15,10 @@ private:
 public:
   DcBlockingFilter(float lambda = 0.995): lambda(lambda), x1(0), y1(0) {}
 
+  void reset(){
+    x1 = y1 = 0;
+  }
+
   /* process a single sample and return the result */
   float process(float x){
     y1 = x - x1 + lambda*y1;
