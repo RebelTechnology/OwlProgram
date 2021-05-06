@@ -82,6 +82,9 @@ class MidiMessage {
     int16_t pb = (data[2] | (data[3]<<7)) - 8192;
     return pb;
   }
+  bool isNote(){
+    return isNoteOn() || isNoteOff();
+  }
   bool isNoteOn(){
     return ((data[1] & MIDI_STATUS_MASK) == NOTE_ON) && getVelocity() != 0;
   }
