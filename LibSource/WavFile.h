@@ -75,38 +75,41 @@ public:
   void* getData(){
     return datachunk->id + sizeof(WavDataChunk);
   }
-  FloatArray createFloatArray(size_t channel){
+  void read(size_t channel, FloatArray output){
     size_t channels = getNumberOfChannels();
-    size_t len = getNumberOfSamples();
+    size_t len = min(output.getSize(), getNumberOfSamples());
     size_t pos = channel % channels;
-    FloatArray result = FloatArray::create(len);
     if(header->audio_format == 1 && header->bps == 8){ // WAVE_FORMAT_PCM 8-bit
       int8_t* data = (int8_t*)getData();      
       for(size_t i=0; i<len; ++i){
-	result[i] = (float)data[pos] / 128.0f;
+	output[i] = (float)data[pos] / 128.0f;
 	pos += channels;
       }
     }else if(header->audio_format == 1 && header->bps == 16){ // WAVE_FORMAT_PCM 16-bit
       int16_t* data = (int16_t*)getData();      
       for(size_t i=0; i<len; ++i){
-	result[i] = (float)data[pos] / 32768.0f;
+	output[i] = (float)data[pos] / 32768.0f;
 	pos += channels;
       }
       // todo: 24-bit data needs decoding
     // }else if(header->audio_format == 1 && header->bps == 24){ // WAVE_FORMAT_PCM 24-bit
     //   int32_t* data = (int32_t*)getData();      
     //   for(size_t i=0; i<len; ++i){
-    // 	result[i] = (float)data[pos] / 8388608.0f;
+    // 	output[i] = (float)data[pos] / 8388608.0f;
     // 	pos += channels;
     //   }
     }else if(header->audio_format == 3 && header->bps == 32){ // WAVE_FORMAT_IEEE_FLOAT
       float* data = (float*)getData();
       for(size_t i=0; i<len; ++i){
-	result[i] = data[pos];
+	output[i] = data[pos];
 	pos += channels;
       }
     }
-    return result;
+  }
+  FloatArray createFloatArray(size_t channel){
+    FloatArray output = FloatArray::create(getNumberOfSamples());
+    read(channel, output);
+    return output;
   }
 };
 
