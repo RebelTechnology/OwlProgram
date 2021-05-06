@@ -30,10 +30,10 @@ public:
     return incr*sr/(2*N);
   }
   void setPhase(float phase){
-    x = N*phase/M_PI;
+    x = N*(phase-M_PI)/M_PI;
   }
   float getPhase(){
-    return x*M_PI/N;
+    return M_PI*x/N+M_PI;
   }
   /**
    * Normalise offset and gain so that signal is between 0 and 1
