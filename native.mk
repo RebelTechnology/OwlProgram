@@ -73,6 +73,9 @@ native: $(TESTPATCHES)/PatchRun.cpp $(DEPS) $(OBJS)
 run: native
 	@$(BUILD)/Test/patch
 
+grind: native
+	valgrind --leak-check=full $(BUILD)/Test/patch
+
 test: $(TESTPATCHES)/PatchTest.cpp $(DEPS) $(OBJS)
 	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTPATCHES)/PatchTest.cpp -I$(BUILD) $(OBJS) -o $(BUILD)/Test/$@
 	@$(BUILD)/Test/$@

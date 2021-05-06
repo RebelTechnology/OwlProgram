@@ -178,6 +178,9 @@ test: $(DEPS) ## test patch locally
 run: $(DEPS) ## run patch locally
 	@$(MAKE) -s -f native.mk run
 
+grind: $(DEPS) ## run valgrind on patch locally
+	@$(MAKE) -s -f native.mk grind
+
 check:
 	@for nm in $(TESTS) ; do \
 		$(MAKE) -s TEST=$$nm test || exit;\
