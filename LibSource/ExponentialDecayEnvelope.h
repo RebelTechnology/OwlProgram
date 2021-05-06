@@ -41,6 +41,12 @@ public:
     value *= incr;
     return sample;
   }
+  float getLevel(){
+    return value;
+  }
+  void setLevel(float level){
+    value = level;
+  }
   [[deprecated("use generate() instead.")]]
   float getNextSample(){
     return generate(); // increments envelope one step
