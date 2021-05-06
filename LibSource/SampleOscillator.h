@@ -84,11 +84,49 @@ public:
     pos += rate;
     return sample;
   }
-  using Oscillator::generate;
-  // void generate(FloatArray out){
-  //   // todo: unwind interpolation
-  //   // use circular buffer to retrieve blocks of samples
-  // }
+  void generate(FloatArray output){
+    size_t len = output.getSize();
+    float* dest = output;
+    if(rate > 0){
+      while(pos + rate*len > size){
+	float remain = size - pos;
+	size_t steps = (size_t)(remain/rate);
+	for(size_t i=0; i<steps; ++i){
+	  *dest++ = interpolate(pos, buffer);
+	  pos += rate;
+	}
+	len -= steps;
+	if(repeat_mode == REPEAT_FORWARD){
+	  pos -= size;
+	}else if(repeat_mode == REPEAT_REVERSE){
+	  rate *= -1;
+	  pos = size;
+	}else{
+	  return;
+	}
+      }
+    }else{
+      while(pos + rate*len < 0){
+	float remain = pos;
+	size_t steps = (size_t)(remain/rate);
+	for(size_t i=0; i<steps; ++i){
+	  *dest++ = interpolate(pos, buffer);
+	  pos += rate;
+	}
+	len -= steps;
+	if(repeat_mode == REPEAT_REVERSE){
+	  rate *= -1;
+	  pos = 0;
+	}else{
+	  return;
+	}
+      }
+    }
+    for(size_t i=0; i<len; ++i){
+      *dest++ = interpolate(pos, buffer);
+      pos += rate;
+    }
+  }
   size_t findZeroCrossing(size_t index) {
     size_t len = buffer.getSize()-1;
     size_t i = min(index, len);
