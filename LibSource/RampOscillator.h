@@ -1,10 +1,10 @@
-#ifndef RAMPOSCILLATOR_H
-#define RAMPOSCILLATOR_H
+#ifndef __RampOscillator_h
+#define __RampOscillator_h
 
 #include "Oscillator.h"
 
 /**
- * Ramp oscillator generates output values from -1 to 1.
+ * Ramp oscillator generates rising output values from -1 to 1.
  */
 class RampOscillator : public Oscillator {
 private:
@@ -83,4 +83,4 @@ public:
   }
 };
 
-#endif /* RAMPOSCILLATOR_H */
+#endif /* __RampOscillator_h */
