@@ -1,4 +1,4 @@
-v22.1
+v21.2
 -----
 
 * Added Sample oscillator
@@ -11,10 +11,6 @@ v22.1
 * Added WavFile for reading wav resources and converting to FloatArray
 * Changed enum for BUTTON_A, B, C to BUTTON_1, 2, 3 et c.
 * Fix FloatMatrix compilation
-
-v22.0
------
-
 * FAUST Checkbutton support
 * FAUST Soundfile support
 * Added CircularBuffer and DelayProcessor classes
@@ -31,10 +27,6 @@ v22.0
 * ShortArray and IntArray conversion methods renamed toFloat() and fromFloat()
 * New SignalGenerator and SignalProcessor abstract base classes
 * Refactored makefiles
-
-v21.2
------
-
 * Fixed 'test' make target
 * Allow patches to be compiled and run natively
 
