@@ -2,6 +2,7 @@
 #define __OpenWareLibrary_h__
 
 #include "AbstractSynth.h"
+#include "AgnesiOscillator.h"
 #include "AudioBuffer.h"
 #include "BiquadFilter.h"
 #include "ChirpOscillator.h"
