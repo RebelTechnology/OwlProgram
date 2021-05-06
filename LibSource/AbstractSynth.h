@@ -68,10 +68,10 @@ public:
     else if(msg.getControllerNumber() == MIDI_ALL_NOTES_OFF)
       allNotesOff();
   }
-  virtual void channelPressure(MidiMessage msg){
+  virtual void channelPressure(MidiMessage msg) override {
     setPressure(msg.getChannelPressure()/127.0f);
   }
-  virtual void polyKeyPressure(MidiMessage msg){
+  virtual void polyKeyPressure(MidiMessage msg) override {
     setPressure(msg.getPolyKeyPressure()/127.0f);
   }
   virtual void setModulation(float modulation){} // default implementation does nothing
