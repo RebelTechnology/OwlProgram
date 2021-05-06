@@ -36,6 +36,7 @@
 #include "RampOscillator.h"
 #include "Resample.h"
 #include "Resource.h"
+#include "SampleOscillator.h"
 #include "ShortArray.h"
 #include "ShortFastFourierTransform.h"
 #include "SignalGenerator.h"
