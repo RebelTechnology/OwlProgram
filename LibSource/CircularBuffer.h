@@ -181,19 +181,29 @@ public:
   }
   
   /**
+   * Write to buffer and read with a fractional delay
+   */
+  void interpolatedDelay(T* in, T* out, size_t len, float delay){
+    write(in, len);
+    float pos = fmodf(writepos-delay+size, size);
+    while(len--){
+      *out++ = interpolatedReadAt(pos);
+      pos += 1;
+    }
+  }
+  
+  /**
    * Write to buffer and read with a delay that ramps up or down
    * from @param beginDelay to @param endDelay
    */
   void interpolatedDelay(T* in, T* out, size_t len, float beginDelay, float endDelay){
-    setDelay(beginDelay);
     write(in, len);
-    float pos = readpos;
+    float pos = fmodf(writepos-delay+size, size);
     float incr = (len+endDelay-beginDelay)/len;
     while(len--){
       *out++ = interpolatedReadAt(pos);
       pos += incr;
     }
-    setDelay(endDelay);
   }
 
   size_t getReadCapacity(){
