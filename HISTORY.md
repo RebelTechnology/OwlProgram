@@ -1,6 +1,10 @@
 v21.2
 -----
 
+* Added DryWetProcessors
+* Added FeedbackProcessors
+* Added CrossFadingDelayProcessor
+* Added AudioBuffer::copyFrom(), copyTo(), multiply() and add()
 * Added Sample oscillator
 * Added Agnesi curve oscillator
 * Added MPE processor
