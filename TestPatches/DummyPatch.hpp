@@ -81,10 +81,6 @@ public:
   inline int getSize(){
     return size;
   }
-  void add(AudioBuffer& other){
-    getSamples(0).add(other.getSamples(0));
-    getSamples(1).add(other.getSamples(1));
-  }
 };
 
 #ifdef ARM_MATH_CM0
