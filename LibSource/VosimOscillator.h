@@ -12,8 +12,8 @@ private:
   const float fs;
   SineOscillator* formant1;
   SineOscillator* formant2;
-  float phase;
-  float incr;
+  float phase = 0;
+  float incr = 0;
 public:
   VosimOscillator(float samplerate, SineOscillator* osc2, SineOscillator* osc1) :
     fs(samplerate), formant1(osc1) , formant2(osc2) {}
