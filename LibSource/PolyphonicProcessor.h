@@ -15,6 +15,7 @@ protected:
   uint8_t notes[VOICES];
   uint16_t allocation[VOICES];
   uint16_t allocated;
+  bool dosustain = false;
 protected:
   void take(uint8_t ch, MidiMessage msg){
     release(ch);
@@ -24,7 +25,8 @@ protected:
   }
   void release(uint8_t ch){
     allocation[ch] = ++allocated;
-    voice[ch]->gate(false);
+    if(!dosustain)
+      voice[ch]->gate(false);
   }
 public:
   PolyphonicMidiProcessor() : allocated(0) {}
@@ -62,10 +64,17 @@ public:
 	release(i);
   }
   void controlChange(MidiMessage msg){
-    if(msg.getControllerNumber() == MIDI_CC_MODULATION)
+    switch(msg.getControllerNumber()){
+    case MIDI_CC_MODULATION:
       modulate(msg);
-    else if(msg.getControllerNumber() == MIDI_ALL_NOTES_OFF)
+      break;
+    case MIDI_CC_SUSTAIN:
+      sustain(msg);
+      break;
+    case MIDI_ALL_NOTES_OFF:
       allNotesOff();
+      break;
+    }
   }
   void pitchbend(MidiMessage msg){
     for(int i=0; i<VOICES; ++i)
@@ -75,6 +84,9 @@ public:
     float value = msg.getControllerValue()/127.0f;
     for(int i=0; i<VOICES; ++i)
       voice[i]->setModulation(value);
+  }
+  void sustain(MidiMessage msg){
+    setSustain(msg.getControllerValue() > 63);
   }
   // todo: unison note on/off
   void allNotesOn() {
@@ -109,6 +121,19 @@ public:
   void setParameter(uint8_t parameter_id, float value){
     for(int i=0; i<VOICES; ++i)
       voice[i]->setParameter(parameter_id, value);
+  }
+  bool getSustain(){
+    return dosustain;
+  }
+  void setSustain(bool value){
+    if(!value && dosustain){
+      // gate off any sustained (but not active) voices
+      for(int i=0; i<VOICES; ++i){
+	if(allocation[i] != TAKEN)
+	  voice[i]->gate(false);
+      }
+    }
+    dosustain = value;
   }
 };
 
