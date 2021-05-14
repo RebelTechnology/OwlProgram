@@ -198,7 +198,7 @@ public:
    */
   void interpolatedDelay(T* in, T* out, size_t len, float beginDelay, float endDelay){
     write(in, len);
-    float pos = fmodf(writepos-delay+size, size);
+    float pos = fmodf(writepos-beginDelay+size, size);
     float incr = (len+endDelay-beginDelay)/len;
     while(len--){
       *out++ = interpolatedReadAt(pos);
