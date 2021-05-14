@@ -59,7 +59,7 @@ public:
     return buffer.interpolatedReadAt(buffer.getWriteIndex()-delay);
   }
   void process(FloatArray input, FloatArray output){
-    buffer.interpolatedDelay(input, output, delay);
+    buffer.interpolatedDelay(input, output, input.getSize(), delay);
   }
   /**
    * Delay ramping smoothly from the previous delay time to @param newDelay
@@ -94,7 +94,7 @@ public:
     delay = samples;
   }
   float process(float input){
-    buffer.setDelay(samples);
+    buffer.setDelay(delay);
     buffer.write(input);
     return buffer.read();
   }
