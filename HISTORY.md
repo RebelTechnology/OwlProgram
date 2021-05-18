@@ -1,6 +1,9 @@
 v21.2
 -----
 
+* Added FloatArray::softclip()
+* Added clamp(x, lo, hi) macro
+* Added TapTempo
 * Added DryWetProcessors
 * Added FeedbackProcessors
 * Added CrossFadingDelayProcessor
