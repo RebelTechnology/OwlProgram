@@ -46,6 +46,9 @@
 #ifndef abs
 #define abs(x) ((x)>0?(x):-(x))
 #endif
+#ifndef clamp
+#define clamp(x, lo, hi) ((x)>(hi)?(hi):((x)<(lo)?(lo):(x)))
+#endif
 
 #ifdef __cplusplus
  extern "C" {
