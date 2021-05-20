@@ -16,8 +16,8 @@ LIBSOURCE    = $(BUILDROOT)/LibSource
 BUILDSOURCE  = $(BUILD)/Source
 TESTPATCHES  = $(BUILDROOT)/TestPatches
 DAISYSP      = $(BUILDROOT)/Libraries/DaisySP/Source
-CMSIS        = $(BUILDROOT)/Libraries/CMSIS/Include/
-DSPLIB       = $(BUILDROOT)/Libraries/CMSIS/DSP_Lib/Source
+CMSIS        = $(BUILDROOT)/Libraries/Drivers/CMSIS
+DSPLIB       = $(BUILDROOT)/Libraries/Drivers/CMSIS/DSP/Source
 LDSCRIPT    ?= $(BUILDROOT)/Source/flash.ld
 
 # Tool path
@@ -56,15 +56,15 @@ ARCH_FLAGS = -fsingle-precision-constant -mthumb
 ARCH_FLAGS += -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # ARCH_FLAGS += -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-sp-d16
 # ARCH_FLAGS += -mcpu=cortex-m0 -mfloat-abi=soft -msoft-float
-DEF_FLAGS = -DSTM32F4XX -DARM_MATH_CM4 -D__FPU_PRESENT -D__FPU_USED=1 -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
+DEF_FLAGS = -DSTM32F4XX -DARM_MATH_CM4 -D__FPU_PRESENT -D__FPU_USED=1U -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
 # DEF_FLAGS = -DSTM32F745xx -DARM_MATH_CM7 -D__FPU_PRESENT -D__FPU_USED=1
-INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(DEVICE) -I$(CMSIS) -I$(PERIPH_FILE)/inc -I$(SOURCE)
-INC_FLAGS += -I$(DEVICE)/Include -I$(CMSIS)
+INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(CMSIS)/Include -I$(PERIPH_FILE)/inc -I$(SOURCE)
+INC_FLAGS += -I$(CMSIS)/Core/Include -I$(CMSIS)/DSP/Include
 INC_FLAGS += -I$(USB_DEVICE_FILE)/Core/inc -I$(USB_DEVICE_FILE)/Class/cdc/inc
 INC_FLAGS += -I$(USB_OTG_FILE)/inc
 CPPFLAGS += $(ARCH_FLAGS) $(INC_FLAGS) $(DEF_FLAGS)
 CFLAGS   += -std=gnu11
-CXXFLAGS += -std=gnu++14
+CXXFLAGS += -std=gnu++17
 LDFLAGS  += -T$(LDSCRIPT) $(ARCH_FLAGS)
 CPPFLAGS += -I$(PATCHSOURCE)
 CPPFLAGS += -I$(LIBSOURCE)
