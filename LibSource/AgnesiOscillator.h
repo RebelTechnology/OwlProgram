@@ -51,7 +51,7 @@ public:
   }
   float generate(float fm){
     // modulate coefficient 'a' instead of rate
-    float y = agnesi(x, a+fm);
+    float y = agnesi(x, a*(1+fm));
     x += incr;
     if(x > N)
       x -= 2*N;

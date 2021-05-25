@@ -62,6 +62,18 @@ public:
   void getSamples(FloatArray output, FloatArray fm){
     generate(output, fm);
   }
+protected:
+  static float polyblep(float t, float dt){
+    if(t < dt){ // 0 <= t < 1
+      t /= dt;
+      return t+t - t*t - 1;
+    }else if(t > 1.0 - dt){ // -1 < t < 0      
+      t = (t - 1.0) / dt;
+      return t*t + t+t + 1;
+    }
+    // 0 otherwise
+    return 0;
+  }
 };
 
 #endif /* __Oscillator_h */

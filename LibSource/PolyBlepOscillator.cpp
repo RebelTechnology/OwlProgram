@@ -65,7 +65,7 @@ float PolyBlepOscillator::generate(){
 
 float PolyBlepOscillator::generate(float fm){
   float sample;
-  osc.Render<true>(nfreq+fm, pw, shape, &sample, 1);
+  osc.Render<true>(nfreq*(1+fm), pw, shape, &sample, 1);
   return sample;
 }
 
@@ -74,7 +74,8 @@ void PolyBlepOscillator::generate(FloatArray output){
 }
 
 void PolyBlepOscillator::generate(FloatArray output, FloatArray fm){
-  fm.add(nfreq); // add our base frequency
+  fm.multiply(nfreq); // scale by base frequency
+  fm.add(nfreq); // add base frequency : freq = nfreq + nfreq*fm
   osc.Render<true>(fm, pw, shape, output, output.getSize());
 }
 

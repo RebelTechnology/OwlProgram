@@ -53,10 +53,18 @@ public:
   }
   float generate(float fm){
     float sample = sinf(phase);
-    phase += incr + fm;
+    phase += incr * (1 + fm);
     if(phase >= 2*M_PI)
       phase -= 2*M_PI;
     return sample;
+  }
+  void generate(FloatArray output, FloatArray fm){
+    for(size_t i=0; i<output.getSize(); ++i){
+      output[i] = sinf(phase);
+      phase += incr * (1 + fm[i]);
+      if(phase >= 2*M_PI)
+	phase -= 2*M_PI;
+    }
   }
   static SineOscillator* create(float sr){
     return new SineOscillator(sr);

@@ -22,6 +22,7 @@ public:
   float generate();
   float generate(float fm);
   void generate(FloatArray samples);
+  void generate(FloatArray output, FloatArray fm);
   static WavetableOscillator* create(float sr, size_t size);
   static void destroy(WavetableOscillator* osc);
 };

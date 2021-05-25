@@ -127,6 +127,9 @@ public:
       pos += rate;
     }
   }
+  void generate(FloatArray output, FloatArray fm){
+    return generate(output);
+  }
   size_t findZeroCrossing(size_t index) {
     size_t len = buffer.getSize()-1;
     size_t i = min(index, len);

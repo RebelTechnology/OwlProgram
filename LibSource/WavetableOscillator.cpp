@@ -49,7 +49,7 @@ float WavetableOscillator::generate(){
 
 float WavetableOscillator::generate(float fm){
   float s = getSample(acc);
-  acc += inc + fm;
+  acc += inc * (1 + fm);
   if(acc > 1.0f)
     acc -= 1.0f;
   return s;
@@ -58,6 +58,15 @@ float WavetableOscillator::generate(float fm){
 void WavetableOscillator::generate(FloatArray samples){
   for(size_t i=0; i<samples.getSize();++i)
     samples[i] = generate();
+}
+
+void WavetableOscillator::generate(FloatArray output, FloatArray fm){
+  for(size_t i=0; i<output.getSize(); ++i){
+    output[i] = getSample(acc);
+    acc += inc * (1 + fm[i]);
+    if(acc > 1.0f)
+      acc -= 1.0f;
+  }
 }
 
 WavetableOscillator* WavetableOscillator::create(float sr, size_t size) {
