@@ -140,7 +140,7 @@ public:
     b->setDelay(delay);
     a->write(input);
     b->write(input);
-    float sample = (a->read()+b->read())/2;
+    float sample = (a->read()+b->read())*0.5;
     a->setDelay(delay);
     return sample;
   }
