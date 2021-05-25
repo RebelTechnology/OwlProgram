@@ -191,4 +191,134 @@ public:
   }  
 };
 
+template<class SynthVoice, int VOICES>
+class PolyphonicSignalProcessor : public PolyphonicMidiProcessor<SynthVoice, VOICES>, public SignalProcessor {
+private:
+  FloatArray buffer;
+public:
+  PolyphonicSignalProcessor(FloatArray buffer) : buffer(buffer) {}
+  virtual ~PolyphonicSignalProcessor(){};
+  using MidiProcessor::process;
+  float process(float input){
+    float sample = 0;
+    for(int i=0; i<VOICES; ++i)
+      sample += this->voice[i]->process(input);
+    return sample;
+  }
+  void process(FloatArray input, FloatArray output){
+    for(int i=0; i<VOICES; ++i){
+      this->voice[i]->process(input, buffer);
+      output.add(buffer);
+    }
+  }
+  static PolyphonicSignalProcessor<SynthVoice, VOICES>* create(size_t blocksize){
+    FloatArray buffer = FloatArray::create(blocksize);    
+    return new PolyphonicSignalProcessor<SynthVoice, VOICES>(buffer);
+  }
+  static void destroy(PolyphonicSignalProcessor<SynthVoice, VOICES>* obj){
+    FloatArray::destroy(obj->buffer);
+    delete obj;
+  }
+};
+
+template<class SynthVoice, int VOICES>
+class PolyphonicMultiSignalProcessor : public PolyphonicMidiProcessor<SynthVoice, VOICES>, public MultiSignalProcessor {
+private:
+  AudioBuffer* buffer;
+public:
+  PolyphonicMultiSignalProcessor(AudioBuffer* buffer) : buffer(buffer) {}
+  virtual ~PolyphonicMultiSignalProcessor(){};
+  using MidiProcessor::process;
+  void process(AudioBuffer& input, AudioBuffer& output){
+    for(int i=0; i<VOICES; ++i){
+      this->voice[i]->process(input, *buffer);
+      output.add(*buffer);
+    }
+  }  
+  static PolyphonicMultiSignalProcessor<SynthVoice, VOICES>* create(size_t channels, size_t blocksize){
+    AudioBuffer* buffer = AudioBuffer::create(channels, blocksize);    
+    return new PolyphonicMultiSignalProcessor<SynthVoice, VOICES>(buffer);
+  }
+  static void destroy(PolyphonicMultiSignalProcessor<SynthVoice, VOICES>* obj){
+    AudioBuffer::destroy(obj->buffer);
+    delete obj;
+  }
+};
+
+template<class SynthVoice, int VOICES>
+class PolyphonicProcessor : public PolyphonicMidiProcessor<SynthVoice, VOICES>,
+			    public SignalGenerator, public SignalProcessor {
+private:
+  FloatArray buffer;
+public:
+  PolyphonicProcessor(FloatArray buffer) : buffer(buffer) {}
+  virtual ~PolyphonicProcessor(){};
+  float generate(){
+    float sample = 0;
+    for(int i=0; i<VOICES; ++i)
+      sample += this->voice[i]->generate();
+    return sample;
+  }
+  void generate(FloatArray output){
+    this->voice[0]->generate(output);
+    for(int i=1; i<VOICES; ++i){
+      this->voice[i]->generate(buffer);
+      output.add(buffer);
+    }
+  }
+  using MidiProcessor::process;
+  float process(float input){
+    float sample = 0;
+    for(int i=0; i<VOICES; ++i)
+      sample += this->voice[i]->process(input);
+    return sample;
+  }
+  void process(FloatArray input, FloatArray output){
+    for(int i=0; i<VOICES; ++i){
+      this->voice[i]->process(input, buffer);
+      output.add(buffer);
+    }
+  }
+  static PolyphonicProcessor<SynthVoice, VOICES>* create(size_t blocksize){
+    FloatArray buffer = FloatArray::create(blocksize);    
+    return new PolyphonicProcessor<SynthVoice, VOICES>(buffer);
+  }
+  static void destroy(PolyphonicProcessor<SynthVoice, VOICES>* obj){
+    FloatArray::destroy(obj->buffer);
+    delete obj;
+  }
+};
+
+template<class SynthVoice, int VOICES>
+class PolyphonicMultiProcessor : public PolyphonicMidiProcessor<SynthVoice, VOICES>,
+				 public MultiSignalGenerator, public MultiSignalProcessor {
+private:
+  AudioBuffer* buffer;
+public:
+  PolyphonicMultiProcessor(AudioBuffer* buffer) : buffer(buffer) {}
+  virtual ~PolyphonicMultiProcessor(){};
+  static PolyphonicMultiProcessor<SynthVoice, VOICES>* create(size_t channels, size_t blocksize){
+    AudioBuffer* buffer = AudioBuffer::create(channels, blocksize);    
+    return new PolyphonicMultiProcessor<SynthVoice, VOICES>(buffer);
+  }
+  static void destroy(PolyphonicMultiProcessor<SynthVoice, VOICES>* obj){
+    AudioBuffer::destroy(obj->buffer);
+    delete obj;
+  }
+  void generate(AudioBuffer& output){
+    this->voice[0]->generate(output);
+    for(int i=1; i<VOICES; ++i){
+      this->voice[i]->generate(*buffer);
+      output.add(*buffer);
+    }
+  }  
+  using MidiProcessor::process;
+  void process(AudioBuffer& input, AudioBuffer& output){
+    for(int i=0; i<VOICES; ++i){
+      this->voice[i]->process(input, *buffer);
+      output.add(*buffer);
+    }
+  }  
+};
+
 #endif /* __PolyphonicProcessor_h__ */
