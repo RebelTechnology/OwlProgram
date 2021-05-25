@@ -14,6 +14,10 @@ public:
     for(size_t i=0; i<getChannels(); ++i)
       getSamples(i).multiply(scalar);
   }
+  void add(float scalar){
+    for(size_t i=0; i<getChannels(); ++i)
+      getSamples(i).add(scalar);
+  }
   void add(AudioBuffer& other){
     for(size_t i=0; i<getChannels(); ++i)
       getSamples(i).add(other.getSamples(i));
