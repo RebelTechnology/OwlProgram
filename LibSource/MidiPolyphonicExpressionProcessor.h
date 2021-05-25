@@ -26,26 +26,22 @@ protected:
   float note_pitchbend_range = 48;
   float zone_pitchbend_range = 2;
   uint16_t rpn = 0;
+  bool dosustain = false;
 public:
   MidiPolyphonicExpressionProcessor() {}
   virtual ~MidiPolyphonicExpressionProcessor(){};
-  // class RpnMessage {
-  // uint8_t ch;
-  // uint16_t rpn;
-  // uint16_t value;
-  // };
-  // RpnMessage getMCM(){
-  // returns the MPE Configuration Message
-  // ch0 cc 100:06 101:00 06:VOICES
-  // }
   void noteOn(MidiMessage msg){
-    uint8_t ch = getNoteChannel(msg);
-    if(ch < VOICES)
-      voice[ch]->noteOn(msg);
+    if(isMasterChannel(msg)){ // Zone message
+      // todo: how should this voice be allocated?
+    }else{
+      uint8_t ch = getNoteChannel(msg);
+      if(ch < VOICES)
+	voice[ch]->noteOn(msg);
+    }
   }
   void noteOff(MidiMessage msg){
     uint8_t ch = getNoteChannel(msg);
-    if(ch < VOICES)
+    if(ch < VOICES && !dosustain)
       voice[ch]->noteOff(msg);
   }
   void setPitchBendRange(float range){
@@ -56,18 +52,20 @@ public:
     case MIDI_CC_MODULATION: // handle modulation same as CC74 for non-MPE compatibility
     /* case MIDI_CC_FREQUENCY_CUTOFF: { */
     case 74: {
-// All MPE receivers are required to respond to CC #74 at the Zone and Note level. If a device receives CC #74
-// on both a Master Channel and Member Channel, it must combine such data meaningfully and separately for
-// each sounding note.
-      uint8_t ch = getNoteChannel(msg);
+      // All MPE receivers are required to respond to CC #74 at the Zone and Note level. If a device receives CC #74
+      // on both a Master Channel and Member Channel, it must combine such data meaningfully and separately for
+      // each sounding note.
       float value = msg.getControllerValue()/127.0f;
-      if(ch < VOICES){
-	voice[ch]->setModulation(zone_modulation + value);
-	modulation[ch] = value;
-      }else if(isMasterChannel(msg)){ // Zone message
+      if(isMasterChannel(msg)){ // Zone message
 	for(int i=0; i<VOICES; ++i)
 	  voice[i]->setModulation(value + modulation[i]);
 	zone_modulation = value;
+      }else{
+	uint8_t ch = getNoteChannel(msg);
+	if(ch < VOICES){
+	  voice[ch]->setModulation(zone_modulation + value);
+	  modulation[ch] = value;
+	}
       }
       break;
     }
@@ -138,35 +136,38 @@ public:
   }
   void pitchbend(MidiMessage msg){
     // Pitch Bend is both a Zone Message and a Note Level Message. If an MPE synthesizer receives Pitch Bend (for example) on both a Master and a Member Channel, it must combine the data meaningfully. The same is true for Channel Pressure. 
-    uint8_t ch = getNoteChannel(msg);
     float value = note_pitchbend_range*msg.getPitchBend()/8192.0f;
-    if(ch < VOICES){ // Note level message
-      voice[ch]->setPitchBend(zone_pitchbend + value);
-    }else if(isMasterChannel(msg)){ // Zone message
+    if(isMasterChannel(msg)){ // Zone message
       float delta = value - zone_pitchbend;
       for(int i=0; i<VOICES; ++i)
 	voice[i]->setPitchBend(voice[i]->getPitchBend()+delta);
       zone_pitchbend = value;
+    }else{
+      uint8_t ch = getNoteChannel(msg);
+      if(ch < VOICES){ // Note level message
+	voice[ch]->setPitchBend(zone_pitchbend + value);
+      }
     }
   }
   void channelPressure(MidiMessage msg){
-    uint8_t ch = getNoteChannel(msg);
+    // All MPE receivers are required to respond to Channel Pressure at the Note and Zone level.
+    // If a device receives Channel Pressure on both a Master Channel and Member Channel it must
+    // combine such data meaningfully and separately for each sounding note.
     float value = msg.getChannelPressure()/127.0f;
-    if(ch < VOICES){ // Note level message
-      voice[ch]->setPressure(zone_pressure + value);
-      pressure[ch] = value;
-    }else if(isMasterChannel(msg)){ // Zone message
-// All MPE receivers are required to respond to CC #74 at the Zone and Note level. If a device receives CC #74
-// on both a Master Channel and Member Channel, it must combine such data meaningfully and separately for
-// each sounding note.
+    if(isMasterChannel(msg)){ // Zone message
       for(int i=0; i<VOICES; ++i)
 	voice[i]->setPressure(value + pressure[i]);
       zone_pressure = value;
+    }else{
+      uint8_t ch = getNoteChannel(msg);
+      if(ch < VOICES){ // Note level message
+	voice[ch]->setPressure(zone_pressure + value);
+	pressure[ch] = value;
+      }
     }
   }
   void polyKeyPressure(MidiMessage msg){
-    // Polyphonic Key Pressure may be used with notes on the Master Channel, but not on
-    // other Channels
+    // Polyphonic Key Pressure may be used with notes on the Master Channel, but not on other Channels
     if(isMasterChannel(msg)){
       uint8_t note = msg.getNote();
       for(int i=0; i<VOICES; ++i)
@@ -190,6 +191,19 @@ public:
   void setParameter(uint8_t parameter_id, float value){
     for(int i=0; i<VOICES; ++i)
       voice[i]->setParameter(parameter_id, value);
+  }
+  bool getSustain(){
+    return dosustain;
+  }
+  void setSustain(bool value){
+    if(!value && dosustain){
+      // gate off any sustained (but not active) voices
+      for(int i=0; i<VOICES; ++i){ // todo!
+      // 	if(allocation[i] != TAKEN)
+	voice[i]->gate(false);
+      }
+    }
+    dosustain = value;
   }
 };
 
@@ -246,6 +260,60 @@ public:
       output.add(*buffer);
     }
   }  
+};
+
+template<class SynthVoice, int VOICES>
+class MidiPolyphonicExpressionSignalProcessor : public MidiPolyphonicExpressionProcessor<SynthVoice, VOICES>, public SignalProcessor {
+private:
+  FloatArray buffer;
+public:
+  MidiPolyphonicExpressionSignalProcessor(FloatArray buffer) : buffer(buffer) {}
+  virtual ~MidiPolyphonicExpressionSignalProcessor(){};
+  using MidiProcessor::process;
+  float process(float input){
+    float sample = 0;
+    for(int i=0; i<VOICES; ++i)
+      sample += this->voice[i]->process(input);
+    return sample;
+  }
+  void process(FloatArray input, FloatArray output){
+    for(int i=0; i<VOICES; ++i){
+      this->voice[i]->process(input, buffer);
+      output.add(buffer);
+    }
+  }
+  static MidiPolyphonicExpressionSignalProcessor<SynthVoice, VOICES>* create(size_t blocksize){
+    FloatArray buffer = FloatArray::create(blocksize);    
+    return new MidiPolyphonicExpressionSignalProcessor<SynthVoice, VOICES>(buffer);
+  }
+  static void destroy(MidiPolyphonicExpressionSignalProcessor<SynthVoice, VOICES>* obj){
+    FloatArray::destroy(obj->buffer);
+    delete obj;
+  }
+};
+
+template<class SynthVoice, int VOICES>
+class MidiPolyphonicExpressionMultiSignalProcessor : public MidiPolyphonicExpressionProcessor<SynthVoice, VOICES>, public MultiSignalProcessor {
+private:
+  AudioBuffer* buffer;
+public:
+  MidiPolyphonicExpressionMultiSignalProcessor(AudioBuffer* buffer) : buffer(buffer) {}
+  virtual ~MidiPolyphonicExpressionMultiSignalProcessor(){};
+  using MidiProcessor::process;
+  void process(AudioBuffer& input, AudioBuffer& output){
+    for(int i=0; i<VOICES; ++i){
+      this->voice[i]->process(input, *buffer);
+      output.add(*buffer);
+    }
+  }  
+  static MidiPolyphonicExpressionMultiSignalProcessor<SynthVoice, VOICES>* create(size_t channels, size_t blocksize){
+    AudioBuffer* buffer = AudioBuffer::create(channels, blocksize);    
+    return new MidiPolyphonicExpressionMultiSignalProcessor<SynthVoice, VOICES>(buffer);
+  }
+  static void destroy(MidiPolyphonicExpressionMultiSignalProcessor<SynthVoice, VOICES>* obj){
+    AudioBuffer::destroy(obj->buffer);
+    delete obj;
+  }
 };
 
 #endif /* __MidiPolyphonicExpressionProcessor_h__ */
