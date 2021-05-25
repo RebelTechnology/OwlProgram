@@ -179,16 +179,36 @@ public:
     write(in, len);
     read(out, len);
   }
+
+  /**
+   * Read with a fractional delay
+   */
+  void interpolatedDelay(T* out, size_t len, float delay){
+    float pos = fmodf(writepos-delay+size, size);
+    while(len--){
+      *out++ = interpolatedReadAt(pos);
+      pos += 1;
+    }
+  }  
   
   /**
    * Write to buffer and read with a fractional delay
    */
   void interpolatedDelay(T* in, T* out, size_t len, float delay){
     write(in, len);
-    float pos = fmodf(writepos-delay+size, size);
+    interpolatedDelay(out, len, delay);
+  }
+  
+  /**
+   * Read with a delay that ramps up or down
+   * from @param beginDelay to @param endDelay
+   */
+  void interpolatedDelay(T* out, size_t len, float beginDelay, float endDelay){
+    float pos = fmodf(writepos-beginDelay+size, size);
+    float incr = (len+endDelay-beginDelay)/len;
     while(len--){
       *out++ = interpolatedReadAt(pos);
-      pos += 1;
+      pos += incr;
     }
   }
   
@@ -198,12 +218,7 @@ public:
    */
   void interpolatedDelay(T* in, T* out, size_t len, float beginDelay, float endDelay){
     write(in, len);
-    float pos = fmodf(writepos-beginDelay+size, size);
-    float incr = (len+endDelay-beginDelay)/len;
-    while(len--){
-      *out++ = interpolatedReadAt(pos);
-      pos += incr;
-    }
+    interpolatedDelay(out, len, beginDelay, endDelay);
   }
 
   size_t getReadCapacity(){
