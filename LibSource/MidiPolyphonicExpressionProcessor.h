@@ -1,19 +1,23 @@
 #ifndef __MidiPolyphonicExpressionProcessor_h__
 #define __MidiPolyphonicExpressionProcessor_h__
 
+#include "MidiProcessor.h"
+#include "SignalGenerator.h"
+#include "VoiceAllocator.h"
+
 /**
- * Implementation of MPE, MidiPolyphonicExpression, message processing.
+ * Implementation of MPE (MIDI Polyphonic Expression) message processing.
  * We are controlling an AbstractSynth with:
  * X: Pitch Bend: setFrequency()
  * Y: CC74 or CC1 : setModulation()
  * Z: Channel Pressure : setPressure()
  */
 template<class SynthVoice, int VOICES>
-class MidiPolyphonicExpressionProcessor : public MidiProcessor {
+class MidiPolyphonicExpressionProcessor : public VoiceAllocator<SynthVoice, VOICES> {
 // routes five per-note messages (Note On, Note Off, Pitch Bend, CC74 and Channel Pressure/Aftertouch)
 // to the voice assigned to each channel
+  typedef VoiceAllocator<SynthVoice, VOICES> Allocator;
 protected:
-  SynthVoice* voice[VOICES];
   uint8_t notes[VOICES];
   float pressure[VOICES];
   float modulation[VOICES];
@@ -36,13 +40,13 @@ public:
     }else{
       uint8_t ch = getNoteChannel(msg);
       if(ch < VOICES)
-	voice[ch]->noteOn(msg);
+	Allocator::voice[ch]->noteOn(msg);
     }
   }
   void noteOff(MidiMessage msg){
     uint8_t ch = getNoteChannel(msg);
     if(ch < VOICES && !dosustain)
-      voice[ch]->noteOff(msg);
+      Allocator::voice[ch]->noteOff(msg);
   }
   void setPitchBendRange(float range){
     zone_pitchbend_range = range;
@@ -58,12 +62,12 @@ public:
       float value = msg.getControllerValue()/127.0f;
       if(isMasterChannel(msg)){ // Zone message
 	for(int i=0; i<VOICES; ++i)
-	  voice[i]->setModulation(value + modulation[i]);
+	  Allocator::voice[i]->setModulation(value + modulation[i]);
 	zone_modulation = value;
       }else{
 	uint8_t ch = getNoteChannel(msg);
 	if(ch < VOICES){
-	  voice[ch]->setModulation(zone_modulation + value);
+	  Allocator::voice[ch]->setModulation(zone_modulation + value);
 	  modulation[ch] = value;
 	}
       }
@@ -117,7 +121,7 @@ public:
       }
       break;
     case MIDI_ALL_NOTES_OFF:
-      allNotesOff();
+      Allocator::allNotesOff();
       break;
     }
   }
@@ -140,12 +144,12 @@ public:
     if(isMasterChannel(msg)){ // Zone message
       float delta = value - zone_pitchbend;
       for(int i=0; i<VOICES; ++i)
-	voice[i]->setPitchBend(voice[i]->getPitchBend()+delta);
+	Allocator::voice[i]->setPitchBend(Allocator::voice[i]->getPitchBend()+delta);
       zone_pitchbend = value;
     }else{
       uint8_t ch = getNoteChannel(msg);
       if(ch < VOICES){ // Note level message
-	voice[ch]->setPitchBend(zone_pitchbend + value);
+	Allocator::voice[ch]->setPitchBend(zone_pitchbend + value);
       }
     }
   }
@@ -156,12 +160,12 @@ public:
     float value = msg.getChannelPressure()/127.0f;
     if(isMasterChannel(msg)){ // Zone message
       for(int i=0; i<VOICES; ++i)
-	voice[i]->setPressure(value + pressure[i]);
+	Allocator::voice[i]->setPressure(value + pressure[i]);
       zone_pressure = value;
     }else{
       uint8_t ch = getNoteChannel(msg);
       if(ch < VOICES){ // Note level message
-	voice[ch]->setPressure(zone_pressure + value);
+	Allocator::voice[ch]->setPressure(zone_pressure + value);
 	pressure[ch] = value;
       }
     }
@@ -171,26 +175,9 @@ public:
     if(isMasterChannel(msg)){
       uint8_t note = msg.getNote();
       for(int i=0; i<VOICES; ++i)
-	if(voice[i]->getNote() == note)
-	  voice[i]->setPressure(msg.getPolyKeyPressure()/127.0f);
+	if(Allocator::voice[i]->getNote() == note)
+	  Allocator::voice[i]->setPressure(msg.getPolyKeyPressure()/127.0f);
     }
-  }
-  void allNotesOff() {
-    for(int i=0; i<VOICES; ++i)
-      voice[i]->gate(false);      
-  }
-  void setVoice(size_t index, SynthVoice* obj){
-    if(index < VOICES)
-      voice[index] = obj;
-  }
-  SynthVoice* getVoice(size_t index){
-    if(index < VOICES)
-      return voice[index];
-    return NULL;
-  }
-  void setParameter(uint8_t parameter_id, float value){
-    for(int i=0; i<VOICES; ++i)
-      voice[i]->setParameter(parameter_id, value);
   }
   bool getSustain(){
     return dosustain;
@@ -200,119 +187,10 @@ public:
       // gate off any sustained (but not active) voices
       for(int i=0; i<VOICES; ++i){ // todo!
       // 	if(allocation[i] != TAKEN)
-	voice[i]->gate(false);
+	Allocator::voice[i]->gate(false);
       }
     }
     dosustain = value;
-  }
-};
-
-
-template<class SynthVoice, int VOICES>
-class MidiPolyphonicExpressionSignalGenerator : public MidiPolyphonicExpressionProcessor<SynthVoice, VOICES>, public SignalGenerator {
-private:
-  FloatArray buffer;
-public:
-  MidiPolyphonicExpressionSignalGenerator(FloatArray buffer) : buffer(buffer) {}
-  virtual ~MidiPolyphonicExpressionSignalGenerator(){};
-  float generate(){
-    float sample = this->voice[0]->generate();
-    for(int i=1; i<VOICES; ++i)
-      sample += this->voice[i]->generate();
-    return sample;
-  }
-  void generate(FloatArray output){
-    this->voice[0]->generate(output);
-    for(int i=1; i<VOICES; ++i){
-      this->voice[i]->generate(buffer);
-      output.add(buffer);
-    }
-  }
-  static MidiPolyphonicExpressionSignalGenerator<SynthVoice, VOICES>* create(size_t blocksize){
-    FloatArray buffer = FloatArray::create(blocksize);    
-    return new MidiPolyphonicExpressionSignalGenerator<SynthVoice, VOICES>(buffer);
-  }
-  static void destroy(MidiPolyphonicExpressionSignalGenerator<SynthVoice, VOICES>* obj){
-    FloatArray::destroy(obj->buffer);
-    delete obj;
-  }
-};
-
-template<class SynthVoice, int VOICES>
-class MidiPolyphonicExpressionMultiSignalGenerator : public MidiPolyphonicExpressionProcessor<SynthVoice, VOICES>, public MultiSignalGenerator {
-private:
-  AudioBuffer* buffer;
-public:
-  MidiPolyphonicExpressionMultiSignalGenerator(AudioBuffer* buffer) : buffer(buffer) {}
-  virtual ~MidiPolyphonicExpressionMultiSignalGenerator(){};
-  static MidiPolyphonicExpressionMultiSignalGenerator<SynthVoice, VOICES>* create(size_t channels, size_t blocksize){
-    AudioBuffer* buffer = AudioBuffer::create(channels, blocksize);    
-    return new MidiPolyphonicExpressionMultiSignalGenerator<SynthVoice, VOICES>(buffer);
-  }
-  static void destroy(MidiPolyphonicExpressionMultiSignalGenerator<SynthVoice, VOICES>* obj){
-    AudioBuffer::destroy(obj->buffer);
-    delete obj;
-  }
-  void generate(AudioBuffer& output){
-    this->voice[0]->generate(output);
-    for(int i=1; i<VOICES; ++i){
-      this->voice[i]->generate(*buffer);
-      output.add(*buffer);
-    }
-  }  
-};
-
-template<class SynthVoice, int VOICES>
-class MidiPolyphonicExpressionSignalProcessor : public MidiPolyphonicExpressionProcessor<SynthVoice, VOICES>, public SignalProcessor {
-private:
-  FloatArray buffer;
-public:
-  MidiPolyphonicExpressionSignalProcessor(FloatArray buffer) : buffer(buffer) {}
-  virtual ~MidiPolyphonicExpressionSignalProcessor(){};
-  using MidiProcessor::process;
-  float process(float input){
-    float sample = 0;
-    for(int i=0; i<VOICES; ++i)
-      sample += this->voice[i]->process(input);
-    return sample;
-  }
-  void process(FloatArray input, FloatArray output){
-    for(int i=0; i<VOICES; ++i){
-      this->voice[i]->process(input, buffer);
-      output.add(buffer);
-    }
-  }
-  static MidiPolyphonicExpressionSignalProcessor<SynthVoice, VOICES>* create(size_t blocksize){
-    FloatArray buffer = FloatArray::create(blocksize);    
-    return new MidiPolyphonicExpressionSignalProcessor<SynthVoice, VOICES>(buffer);
-  }
-  static void destroy(MidiPolyphonicExpressionSignalProcessor<SynthVoice, VOICES>* obj){
-    FloatArray::destroy(obj->buffer);
-    delete obj;
-  }
-};
-
-template<class SynthVoice, int VOICES>
-class MidiPolyphonicExpressionMultiSignalProcessor : public MidiPolyphonicExpressionProcessor<SynthVoice, VOICES>, public MultiSignalProcessor {
-private:
-  AudioBuffer* buffer;
-public:
-  MidiPolyphonicExpressionMultiSignalProcessor(AudioBuffer* buffer) : buffer(buffer) {}
-  virtual ~MidiPolyphonicExpressionMultiSignalProcessor(){};
-  using MidiProcessor::process;
-  void process(AudioBuffer& input, AudioBuffer& output){
-    for(int i=0; i<VOICES; ++i){
-      this->voice[i]->process(input, *buffer);
-      output.add(*buffer);
-    }
-  }  
-  static MidiPolyphonicExpressionMultiSignalProcessor<SynthVoice, VOICES>* create(size_t channels, size_t blocksize){
-    AudioBuffer* buffer = AudioBuffer::create(channels, blocksize);    
-    return new MidiPolyphonicExpressionMultiSignalProcessor<SynthVoice, VOICES>(buffer);
-  }
-  static void destroy(MidiPolyphonicExpressionMultiSignalProcessor<SynthVoice, VOICES>* obj){
-    AudioBuffer::destroy(obj->buffer);
-    delete obj;
   }
 };
 
