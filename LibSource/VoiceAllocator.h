@@ -99,7 +99,7 @@ public:
 };
 
 template<class Allocator, class SynthVoice, int VOICES>
-class VoiceAllocatorMultiSignalGenerator : public Allocator, public SignalGenerator {
+class VoiceAllocatorMultiSignalGenerator : public Allocator, public MultiSignalGenerator {
   static_assert(std::is_base_of<VoiceAllocator<SynthVoice, VOICES>, Allocator>::value, "Allocator must derive from VoiceAllocator");
   typedef VoiceAllocatorMultiSignalGenerator<Allocator, SynthVoice, VOICES> MyClass;
 protected:
@@ -127,7 +127,7 @@ public:
 };
 
 template<class Allocator, class SynthVoice, int VOICES>
-class VoiceAllocatorMultiSignalProcessor : public Allocator, public SignalProcessor {
+class VoiceAllocatorMultiSignalProcessor : public Allocator, public MultiSignalProcessor {
   static_assert(std::is_base_of<VoiceAllocator<SynthVoice, VOICES>, Allocator>::value, "Allocator must derive from VoiceAllocator");
   typedef VoiceAllocatorMultiSignalProcessor<Allocator, SynthVoice, VOICES> MyClass;
 protected:
