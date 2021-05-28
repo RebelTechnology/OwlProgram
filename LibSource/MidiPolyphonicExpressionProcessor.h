@@ -18,7 +18,10 @@ class MidiPolyphonicExpressionProcessor : public VoiceAllocator<SynthVoice, VOIC
 // to the voice assigned to each channel
   typedef VoiceAllocator<SynthVoice, VOICES> Allocator;
 protected:
+  static const uint16_t TAKEN = 0xffff;
   uint8_t notes[VOICES];
+  uint16_t allocation[VOICES];
+  uint16_t allocated;
   float pressure[VOICES];
   float modulation[VOICES];
   uint8_t master_channel = 1;
@@ -31,26 +34,71 @@ protected:
   float zone_pitchbend_range = 2;
   uint16_t rpn = 0;
   bool dosustain = false;
+  void take(uint8_t ch, MidiMessage msg){
+    release(ch);
+    notes[ch] = msg.getNote();
+    allocation[ch] = TAKEN;
+    Allocator::voice[ch]->noteOn(msg);
+  }
+  void release(uint8_t ch){
+    allocation[ch] = ++allocated;
+    if(!dosustain)
+      Allocator::voice[ch]->gate(false);
+  }
 public:
   MidiPolyphonicExpressionProcessor() {}
   virtual ~MidiPolyphonicExpressionProcessor(){};
+
+  uint8_t findFreeVoice(MidiMessage msg){
+    uint8_t note = msg.getNote();
+    uint16_t minval = USHRT_MAX;
+    uint8_t minidx = 0;
+    // take oldest free voice, to allow voices to ring out
+    for(int i=0; i<VOICES; ++i){
+      if(notes[i] == note){
+	minidx = i;
+	break;
+      }
+      if(allocation[i] < minval){
+	minidx = i;
+	minval = allocation[i];
+      }
+    }
+    // take oldest voice
+    return minidx;
+  }
+
+  void releaseVoicesForNote(MidiMessage msg){
+    uint8_t note = msg.getNote();
+    for(int i=0; i<VOICES; ++i)
+      if(notes[i] == note)
+	release(i);
+  }
+
   void noteOn(MidiMessage msg){
     if(isMasterChannel(msg)){ // Zone message
-      // todo: how should this voice be allocated?
+      uint8_t idx = findFreeVoice(msg);
+      take(idx, msg);
+    }else{
+      uint8_t idx = getNoteChannel(msg);
+      take(idx, msg);
+    }
+  }
+
+  void noteOff(MidiMessage msg){
+    if(isMasterChannel(msg)){ // Zone message
+      releaseVoicesForNote(msg);
     }else{
       uint8_t ch = getNoteChannel(msg);
       if(ch < VOICES)
-	Allocator::voice[ch]->noteOn(msg);
+	release(ch);
     }
   }
-  void noteOff(MidiMessage msg){
-    uint8_t ch = getNoteChannel(msg);
-    if(ch < VOICES && !dosustain)
-      Allocator::voice[ch]->noteOff(msg);
-  }
+
   void setPitchBendRange(float range){
     zone_pitchbend_range = range;
-  }    
+  }
+
   void controlChange(MidiMessage msg){
     switch(msg.getControllerNumber()){
     case MIDI_CC_MODULATION: // handle modulation same as CC74 for non-MPE compatibility
@@ -140,13 +188,14 @@ public:
   }
   void pitchbend(MidiMessage msg){
     // Pitch Bend is both a Zone Message and a Note Level Message. If an MPE synthesizer receives Pitch Bend (for example) on both a Master and a Member Channel, it must combine the data meaningfully. The same is true for Channel Pressure. 
-    float value = note_pitchbend_range*msg.getPitchBend()/8192.0f;
     if(isMasterChannel(msg)){ // Zone message
+      float value = zone_pitchbend_range*msg.getPitchBend()/8192.0f;
       float delta = value - zone_pitchbend;
       for(int i=0; i<VOICES; ++i)
 	Allocator::voice[i]->setPitchBend(Allocator::voice[i]->getPitchBend()+delta);
       zone_pitchbend = value;
     }else{
+      float value = note_pitchbend_range*msg.getPitchBend()/8192.0f;
       uint8_t ch = getNoteChannel(msg);
       if(ch < VOICES){ // Note level message
 	Allocator::voice[ch]->setPitchBend(zone_pitchbend + value);
