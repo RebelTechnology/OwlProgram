@@ -26,6 +26,11 @@ public:
     mix_buffer.multiply(1-mix_amount);
     output.add(mix_buffer);
   }
+  template <typename... Args>
+  static DryWetSignalProcessor<Processor>* create(size_t blocksize, Args&&... args){
+    FloatArray buffer = FloatArray::create(blocksize);
+    return new DryWetSignalProcessor<Processor>(buffer, std::forward<Args>(args)...);
+  }    
   static void destroy(DryWetSignalProcessor<Processor>* obj){
     FloatArray::destroy(obj->mix_buffer);
     Processor::destroy(obj);
@@ -54,6 +59,11 @@ public:
     mix_buffer->multiply(1-mix_amount);
     output.add(*mix_buffer);
   }
+  template <typename... Args>
+  static DryWetMultiSignalProcessor<Processor>* create(size_t channels, size_t blocksize, Args&&... args){
+    AudioBuffer* buffer = AudioBuffer::create(channels, blocksize);
+    return new DryWetMultiSignalProcessor<Processor>(buffer, std::forward<Args>(args)...);
+  }    
   static void destroy(DryWetMultiSignalProcessor<Processor>* obj){
     AudioBuffer::destroy(obj->mix_buffer);
     Processor::destroy(obj);
