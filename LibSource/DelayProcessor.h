@@ -41,9 +41,11 @@ public:
 /**
  * Delay line signal processor implemented with a circular buffer, allowing fractional delay times.
  */
+template<InterpolationMethod im = LINEAR_INTERPOLATION>
 class FractionalDelayProcessor : public SignalProcessor {
 protected:
-  CircularFloatBuffer buffer;
+  // CircularFloatBuffer buffer;
+  InterpolatingCircularFloatBuffer<im> buffer;
   float delay;
 public:
   FractionalDelayProcessor() : delay(0) {}
@@ -56,16 +58,16 @@ public:
   }
   float process(float input){
     buffer.write(input);
-    return buffer.interpolatedReadAt(buffer.getWriteIndex()-delay);
+    return buffer.readAt(buffer.getWriteIndex()-delay);
   }
   void process(FloatArray input, FloatArray output){
-    buffer.interpolatedDelay(input, output, input.getSize(), delay);
+    buffer.delay(input, output, input.getSize(), delay);
   }
   /**
    * Delay ramping smoothly from the previous delay time to @param newDelay
    */
   void smooth(FloatArray input, FloatArray output, float newDelay){
-    buffer.interpolatedDelay(input, output, input.getSize(), delay, newDelay);
+    buffer.delay(input, output, input.getSize(), delay, newDelay);
     delay = newDelay;
   }
   static FractionalDelayProcessor* create(size_t len){

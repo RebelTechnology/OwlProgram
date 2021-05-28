@@ -61,6 +61,7 @@ public:
   void noteOff(MidiMessage msg){
     uint8_t note = msg.getNote();
     for(int i=0; i<VOICES; ++i)
+      // if(notes[i] == note && allocation[i] == TAKEN)
       if(notes[i] == note)
 	release(i);
   }

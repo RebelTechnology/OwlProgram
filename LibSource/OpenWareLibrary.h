@@ -23,6 +23,7 @@
 #include "FloatArray.h"
 #include "FloatMatrix.h"
 #include "IntArray.h"
+#include "Interpolator.h"
 #include "MidiProcessor.h"
 #include "MidiPolyphonicExpressionProcessor.h"
 #include "MidiStatus.h"

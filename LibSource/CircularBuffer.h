@@ -3,10 +3,11 @@
 
 #include <stdint.h>
 #include <string.h> // for memcpy
+#include "Interpolator.h"
 
-template<typename T = float>
+template<typename T>
 class CircularBuffer {
-private:
+protected:
   T* data;
   const size_t size;
   size_t writepos = 0;
@@ -51,19 +52,6 @@ public:
     data[index % size] = value;
   }
 
-  /**
-   * Interpolated write at sub-sample index.
-   * Inserts a value linearly interpolated at a fractional index.
-   */
-  void interpolatedWriteAt(float index, T value){
-    size_t idx = (size_t)index;
-    T low = readAt(idx);
-    T high = readAt(idx+1);
-    float frac = index - idx;
-    writeAt(idx, low + (value-low)*frac);
-    writeAt(idx+1, value + (high-value)*frac);
-  }
-
   T read(){
     T c = data[readpos++];
     if(readpos >= size)
@@ -87,18 +75,6 @@ public:
   
   T readAt(size_t index){
     return data[index % size];
-  }
-
-  /**
-   * Interpolated read at sub-sample index.
-   * @return a value linearly interpolated at a fractional index
-   */
-  inline float interpolatedReadAt(float index){
-    size_t idx = (size_t)index;
-    T low = readAt(idx);
-    T high = readAt(idx+1);
-    float frac = index - idx;
-    return high+frac*(low-high);
   }
 
   void skipUntilLast(char c){
@@ -180,47 +156,6 @@ public:
     read(out, len);
   }
 
-  /**
-   * Read with a fractional delay
-   */
-  void interpolatedDelay(T* out, size_t len, float delay){
-    float pos = fmodf(writepos-delay+size, size);
-    while(len--){
-      *out++ = interpolatedReadAt(pos);
-      pos += 1;
-    }
-  }  
-  
-  /**
-   * Write to buffer and read with a fractional delay
-   */
-  void interpolatedDelay(T* in, T* out, size_t len, float delay){
-    write(in, len);
-    interpolatedDelay(out, len, delay);
-  }
-  
-  /**
-   * Read with a delay that ramps up or down
-   * from @param beginDelay to @param endDelay
-   */
-  void interpolatedDelay(T* out, size_t len, float beginDelay, float endDelay){
-    float pos = fmodf(writepos-beginDelay+size, size);
-    float incr = (len+endDelay-beginDelay)/len;
-    while(len--){
-      *out++ = interpolatedReadAt(pos);
-      pos += incr;
-    }
-  }
-  
-  /**
-   * Write to buffer and read with a delay that ramps up or down
-   * from @param beginDelay to @param endDelay
-   */
-  void interpolatedDelay(T* in, T* out, size_t len, float beginDelay, float endDelay){
-    write(in, len);
-    interpolatedDelay(out, len, beginDelay, endDelay);
-  }
-
   size_t getReadCapacity(){
     return (writepos + size - readpos) % size;
   }
@@ -271,5 +206,133 @@ public:
 typedef CircularBuffer<float> CircularFloatBuffer;
 typedef CircularBuffer<int16_t> CircularShortBuffer;
 typedef CircularBuffer<int32_t> CircularIntBuffer;
+
+template<InterpolationMethod im = LINEAR_INTERPOLATION>
+class InterpolatingCircularFloatBuffer : public CircularFloatBuffer {
+public:
+  InterpolatingCircularFloatBuffer() {}
+  InterpolatingCircularFloatBuffer(float* data, size_t size): CircularFloatBuffer(data, size) {}
+  /**
+   * Interpolated write at sub-sample index.
+   * Inserts a value linearly interpolated at a fractional index.
+   */
+  void writeAt(float index, float value);
+
+  /**
+   * Interpolated read at sub-sample index.
+   * @return a value linearly interpolated at a fractional index
+   */
+  float readAt(float index);
+
+  /**
+   * Read with a fractional delay
+   */
+  void delay(float* out, size_t len, float delay){
+    float pos = fmodf(writepos-delay+size, size);
+    while(len--){
+      *out++ = readAt(pos);
+      pos += 1;
+    }
+  }  
+  
+  /**
+   * Write to buffer and read with a fractional delay
+   * @note input buffer length is added to delay time
+   */
+  void delay(float* in, float* out, size_t len, float readDelay){
+    write(in, len);
+    delay(out, len, readDelay);
+  }
+  
+  /**
+   * Read with a delay that ramps up or down
+   * from @param beginDelay to @param endDelay
+   */
+  void delay(float* out, size_t len, float beginDelay, float endDelay){
+    float pos = fmodf(writepos-beginDelay+size, size);
+    float incr = (len+endDelay-beginDelay)/len;
+    while(len--){
+      *out++ = readAt(pos);
+      pos += incr;
+    }
+  }
+  
+  /**
+   * Write to buffer and read with a delay that ramps up or down
+   * from @param beginDelay to @param endDelay
+   * @note input buffer length is added to delay times
+   */
+  void delay(float* in, float* out, size_t len, float beginDelay, float endDelay){
+    write(in, len);
+    delay(out, len, beginDelay, endDelay);
+  }
+};
+
+template<>
+float InterpolatingCircularFloatBuffer<LINEAR_INTERPOLATION>::readAt(float index){
+  size_t idx = (size_t)index;
+  float low = CircularFloatBuffer::readAt(idx);
+  float high = CircularFloatBuffer::readAt(idx+1);
+  float frac = index - idx;
+  return Interpolator::linear(low, high, frac);
+}
+
+template<>
+void InterpolatingCircularFloatBuffer<LINEAR_INTERPOLATION>::writeAt(float index, float value){
+  size_t idx = (size_t)index;
+  float low = CircularFloatBuffer::readAt(idx);
+  float high = CircularFloatBuffer::readAt(idx+1);
+  float frac = index - idx;
+  writeAt(idx, low + (value-low)*frac);
+  writeAt(idx+1, value + (high-value)*frac);
+}
+
+template<>
+float InterpolatingCircularFloatBuffer<COSINE_INTERPOLATION>::readAt(float index){
+  size_t idx = (size_t)index;
+  float low = CircularFloatBuffer::readAt(idx);
+  float high = CircularFloatBuffer::readAt(idx+1);
+  float frac = index - idx;
+  return Interpolator::cosine(low, high, frac);
+}
+
+template<>
+float InterpolatingCircularFloatBuffer<CUBIC_3P_INTERPOLATION>::readAt(float index){
+  size_t idx = (size_t)index;
+  float y0 = CircularFloatBuffer::readAt(idx-1);
+  float y1 = CircularFloatBuffer::readAt(idx);
+  float y2 = CircularFloatBuffer::readAt(idx+1);
+  return Interpolator::cubic(y0, y1, y2, index - idx);
+}
+
+template<>
+float InterpolatingCircularFloatBuffer<CUBIC_4P_INTERPOLATION>::readAt(float index){
+  size_t idx = (size_t)index;
+  float y0 = CircularFloatBuffer::readAt(idx-1);
+  float y1 = CircularFloatBuffer::readAt(idx);
+  float y2 = CircularFloatBuffer::readAt(idx+1);
+  float y3 = CircularFloatBuffer::readAt(idx+2);
+  return Interpolator::cubic(y0, y1, y2, y3, index - idx);
+}
+
+template<>
+float InterpolatingCircularFloatBuffer<CUBIC_4P_SMOOTH_INTERPOLATION>::readAt(float index){
+  size_t idx = (size_t)index;
+  float y0 = CircularFloatBuffer::readAt(idx-1);
+  float y1 = CircularFloatBuffer::readAt(idx);
+  float y2 = CircularFloatBuffer::readAt(idx+1);
+  float y3 = CircularFloatBuffer::readAt(idx+2);
+  return Interpolator::cubicSmooth(y0, y1, y2, y3, index - idx);
+}
+
+template<>
+float InterpolatingCircularFloatBuffer<HERMITE_INTERPOLATION>::readAt(float index){
+  size_t idx = (size_t)index;
+  float y0 = CircularFloatBuffer::readAt(idx-1);
+  float y1 = CircularFloatBuffer::readAt(idx);
+  float y2 = CircularFloatBuffer::readAt(idx+1);
+  float y3 = CircularFloatBuffer::readAt(idx+2);
+  return Interpolator::hermite(y0, y1, y2, y3, index - idx);
+}
 
 #endif /* _CircularBuffer_hpp_ */
