@@ -266,6 +266,17 @@ public:
     write(in, len);
     delay(out, len, beginDelay, endDelay);
   }
+
+  static InterpolatingCircularFloatBuffer<im>* create(size_t len){
+    InterpolatingCircularFloatBuffer<im>* obj = new InterpolatingCircularFloatBuffer<im>(new float[len], len);
+    obj->clear();
+    return obj;
+  }
+
+  static void destroy(InterpolatingCircularFloatBuffer<im>* obj){
+    delete[] obj->data;
+    delete obj;
+  }
 };
 
 template<>
