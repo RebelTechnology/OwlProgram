@@ -150,8 +150,8 @@ public:
   /**
    * Write to buffer and read with a delay
    */
-  void delay(T* in, T* out, size_t len, int delay){
-    setDelay(delay);
+  void delay(T* in, T* out, size_t len, int delay_samples){
+    setDelay(delay_samples); // set delay relative to where we start writing
     write(in, len);
     read(out, len);
   }
@@ -241,7 +241,7 @@ public:
    */
   void delay(float* in, float* out, size_t len, float readDelay){
     write(in, len);
-    delay(out, len, readDelay);
+    delay(out, len, readDelay + len); // set delay relative to where we started writing
   }
   
   /**
@@ -264,7 +264,7 @@ public:
    */
   void delay(float* in, float* out, size_t len, float beginDelay, float endDelay){
     write(in, len);
-    delay(out, len, beginDelay, endDelay);
+    delay(out, len, beginDelay + len, endDelay + len); // set delays relative to where we started writing
   }
 
   static InterpolatingCircularFloatBuffer<im>* create(size_t len){
@@ -345,5 +345,59 @@ float InterpolatingCircularFloatBuffer<HERMITE_INTERPOLATION>::readAt(float inde
   float y3 = CircularFloatBuffer::readAt(idx+2);
   return Interpolator::hermite(y0, y1, y2, y3, index - idx);
 }
+
+template<typename T>
+class CrossFadingCircularBuffer : public CircularBuffer<T> {
+protected:
+  FloatArray buffer;
+public:
+  CrossFadingCircularBuffer() {}
+  CrossFadingCircularBuffer(T* data, size_t size, FloatArray buffer):
+    CircularBuffer<T>(data, size), buffer(buffer) {}  
+  /**
+   * Read from buffer with a delay.
+   * The output will be crossfaded between the previous delay time and the new one.
+   */
+  void delay(T* out, size_t len, int delay_samples){
+    delay(out, len, CircularBuffer<T>::getDelay(), delay_samples);
+  }
+  /**
+   * Write to buffer and read with a delay
+   */
+  void delay(T* in, T* out, size_t len, int delay_samples){
+    CircularBuffer<T>::write(in, len);
+    delay(out, len, CircularBuffer<T>::getDelay(), delay_samples + len);
+  }
+  /**
+   * Read from buffer with a delay
+   */
+  void delay(T* out, size_t len, int beginDelay, int endDelay){
+    ASSERT(len <= buffer.getSize(), "Buffer too small");
+    FloatArray output(out, len);
+    CircularBuffer<T>::setDelay(beginDelay);
+    CircularBuffer<T>::read(out, len);
+    output.scale(1, 0);
+    CircularBuffer<T>::setDelay(endDelay);
+    CircularBuffer<T>::read(buffer.getData(), len);
+    buffer.scale(0, 1);
+    output.add(buffer);
+  }
+  /**
+   * Write to buffer and read with a delay
+   */
+  void delay(T* in, T* out, size_t len, int beginDelay, int endDelay){
+    CircularBuffer<T>::write(in, len);
+    delay(out, len, beginDelay + len, endDelay + len); // set delays relative to where we started writing
+  }
+  static CrossFadingCircularBuffer<T>* create(size_t len, size_t blocksize){
+    return new CrossFadingCircularBuffer<T>(new T[len], len, FloatArray::create(blocksize));
+  }
+  static void destroy(CrossFadingCircularBuffer<T>* obj){
+    FloatArray::destroy(obj->buffer);
+    delete obj;
+  }
+};
+
+typedef CrossFadingCircularBuffer<float> CrossFadingCircularFloatBuffer;
 
 #endif /* _CircularBuffer_hpp_ */
