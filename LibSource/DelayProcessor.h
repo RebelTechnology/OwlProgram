@@ -125,13 +125,12 @@ public:
  */
 class CrossFadingDelayProcessor : public SignalProcessor {
 protected:
-  CircularFloatBuffer* a;
-  CircularFloatBuffer* b;
+  CircularFloatBuffer* ringbuffer;
   FloatArray buffer;
   float delay = 0;
 public:
-  CrossFadingDelayProcessor(CircularFloatBuffer* a, CircularFloatBuffer* b, FloatArray buffer)
-    : a(a), b(b), buffer(buffer) {}  
+  CrossFadingDelayProcessor(CircularFloatBuffer* ringbuffer, FloatArray buffer)
+    : ringbuffer(ringbuffer), buffer(buffer) {}  
   float getDelay(){
     return delay;
   }
@@ -139,12 +138,11 @@ public:
     delay = samples;
   }
   float process(float input){
-    b->setDelay(delay);
-    a->write(input);
-    b->write(input);
-    float sample = (a->read()+b->read())*0.5;
-    a->setDelay(delay);
-    return sample;
+    ringbuffer->write(input);
+    float sample = ringbuffer->read();
+    ringbuffer->setDelay(delay);
+    sample += ringbuffer->read();
+    return sample*0.5;
   }
   void process(FloatArray input, FloatArray output){
     smooth(input, output, delay);
@@ -156,25 +154,21 @@ public:
     ASSERT(buffer.getSize() >= input.getSize(), "buffer array too small");
     ASSERT(output.getSize() >= input.getSize(), "output array too small");
     size_t len = input.getSize();
-    b->setDelay(newDelay);
-    a->write(input.getData(), len);
-    b->write(input.getData(), len);
-    a->read(buffer.getData(), len);
-    buffer.scale(0, 1);
-    b->read(output.getData(), len);
-    output.scale(1, 0);
+    ringbuffer->write(input.getData(), len);
+    ringbuffer->read(buffer.getData(), len); // read at previous delay position
+    buffer.scale(1, 0); // ramp down
+    ringbuffer->setDelay(newDelay);
+    ringbuffer->read(output.getData(), len); // read at new delay position
+    output.scale(0, 1); // ramp up
     output.add(buffer);
-    a->setDelay(newDelay);
     delay = newDelay;
   }
   static CrossFadingDelayProcessor* create(size_t delay_len, size_t buffer_len){
     return new CrossFadingDelayProcessor(CircularFloatBuffer::create(delay_len),
-					 CircularFloatBuffer::create(delay_len),
 					 FloatArray::create(buffer_len));
   }
   static void destroy(CrossFadingDelayProcessor* obj){
-    CircularFloatBuffer::destroy(obj->a);
-    CircularFloatBuffer::destroy(obj->b);
+    CircularFloatBuffer::destroy(obj->ringbuffer);
     FloatArray::destroy(obj->buffer);
     delete obj;
   }
