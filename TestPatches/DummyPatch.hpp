@@ -48,14 +48,15 @@ public:
   StereoSampleBuffer(int blocksize){
     left = FloatArray::create(blocksize);
     right = FloatArray::create(blocksize);
+    size = blocksize;
   }
   ~StereoSampleBuffer(){
     FloatArray::destroy(left);
     FloatArray::destroy(right);
   }
   void split16(int16_t* input, uint16_t blocksize){
-    size = blocksize;
-    for(int i=0; i<size; ++i){
+    ASSERT(blocksize == size, "Invalid buffer size");
+    for(int i=0; i<blocksize; ++i){
       left[i] = float(*input++)/INT16_MAX;
       right[i] = float(*input++)/INT16_MAX;
     }
