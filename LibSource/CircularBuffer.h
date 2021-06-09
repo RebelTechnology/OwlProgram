@@ -390,10 +390,14 @@ public:
     delay(out, len, beginDelay + len, endDelay + len); // set delays relative to where we started writing
   }
   static CrossFadingCircularBuffer<T>* create(size_t len, size_t blocksize){
-    return new CrossFadingCircularBuffer<T>(new T[len], len, FloatArray::create(blocksize));
+    CrossFadingCircularBuffer<T>* obj =
+      new CrossFadingCircularBuffer<T>(new T[len], len, FloatArray::create(blocksize));
+    obj->clear();
+    return obj;
   }
   static void destroy(CrossFadingCircularBuffer<T>* obj){
     FloatArray::destroy(obj->buffer);
+    delete[] obj->data;
     delete obj;
   }
 };
