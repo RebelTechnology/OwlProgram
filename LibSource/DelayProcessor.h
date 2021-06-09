@@ -4,6 +4,8 @@
 #include "CircularBuffer.h"
 #include "SignalProcessor.h"
 #include "FractionalCircularBuffer.h"
+#include "InterpolatingCircularBuffer.h"
+#include "CrossFadingCircularBuffer.h"
 
 /**
  * Delay line signal processor implemented with a circular buffer.
@@ -44,7 +46,6 @@ public:
 template<InterpolationMethod im = LINEAR_INTERPOLATION>
 class FractionalDelayProcessor : public SignalProcessor {
 protected:
-  // CircularFloatBuffer buffer;
   InterpolatingCircularFloatBuffer<im> buffer;
   float delay;
 public:
@@ -57,18 +58,16 @@ public:
     delay = samples;
   }
   float process(float input){
+    float sample = buffer.readAt(buffer.getWriteIndex() - delay);
     buffer.write(input);
-    return buffer.readAt(buffer.getWriteIndex()-delay);
-  }
-  void process(FloatArray input, FloatArray output){
-    buffer.delay(input, output, input.getSize(), delay);
+    return sample;
   }
   /**
-   * Delay ramping smoothly from the previous delay time to @param newDelay
+   * Delay smoothly from the previous delay time to @param newDelay
    */
-  void smooth(FloatArray input, FloatArray output, float newDelay){
-    buffer.delay(input, output, input.getSize(), delay, newDelay);
-    delay = newDelay;
+  void process(FloatArray input, FloatArray output){
+    // buffer.delay(input, output, input.getSize(), buffer.getFractionalDelay(), delay);
+    buffer.delay(input, output, input.getSize(), delay);
   }
   static FractionalDelayProcessor* create(size_t len){
     return new FractionalDelayProcessor(new float[len], len);
@@ -125,12 +124,11 @@ public:
  */
 class CrossFadingDelayProcessor : public SignalProcessor {
 protected:
-  CircularFloatBuffer* ringbuffer;
-  FloatArray buffer;
+  CrossFadingCircularFloatBuffer* ringbuffer;
   float delay = 0;
 public:
-  CrossFadingDelayProcessor(CircularFloatBuffer* ringbuffer, FloatArray buffer)
-    : ringbuffer(ringbuffer), buffer(buffer) {}  
+  CrossFadingDelayProcessor(CrossFadingCircularFloatBuffer* ringbuffer)
+    : ringbuffer(ringbuffer) {}  
   float getDelay(){
     return delay;
   }
@@ -145,31 +143,13 @@ public:
     return sample*0.5;
   }
   void process(FloatArray input, FloatArray output){
-    smooth(input, output, delay);
-  }
-  /**
-   * Delay ramping smoothly from the previous delay time to @param newDelay
-   */
-  void smooth(FloatArray input, FloatArray output, float newDelay){
-    ASSERT(buffer.getSize() >= input.getSize(), "buffer array too small");
-    ASSERT(output.getSize() >= input.getSize(), "output array too small");
-    size_t len = input.getSize();
-    ringbuffer->write(input.getData(), len);
-    ringbuffer->read(buffer.getData(), len); // read at previous delay position
-    buffer.scale(1, 0); // ramp down
-    ringbuffer->setDelay(newDelay);
-    ringbuffer->read(output.getData(), len); // read at new delay position
-    output.scale(0, 1); // ramp up
-    output.add(buffer);
-    delay = newDelay;
+    ringbuffer->delay(input, output, input.getSize(), delay);
   }
   static CrossFadingDelayProcessor* create(size_t delay_len, size_t buffer_len){
-    return new CrossFadingDelayProcessor(CircularFloatBuffer::create(delay_len),
-					 FloatArray::create(buffer_len));
+    return new CrossFadingDelayProcessor(CrossFadingCircularFloatBuffer::create(delay_len, buffer_len));
   }
   static void destroy(CrossFadingDelayProcessor* obj){
-    CircularFloatBuffer::destroy(obj->ringbuffer);
-    FloatArray::destroy(obj->buffer);
+    CrossFadingCircularFloatBuffer::destroy(obj->ringbuffer);
     delete obj;
   }
 };
