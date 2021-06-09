@@ -63,13 +63,13 @@ public:
   /**
    * Get tap tempo period in samples.
    */
-  size_t getSamples(){
+  size_t getPeriodInSamples(){
     return samples;
   }
   /**
    * Set tap tempo period in samples.
    */
-  void setSamples(size_t value){
+  void setPeriodInSamples(size_t value){
     samples = value;
   }
   static float bpmToFrequency(float bpm){
