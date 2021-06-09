@@ -11,23 +11,23 @@ public:
   virtual int getSize() = 0;
   virtual void clear() = 0;
   void multiply(float scalar){
-    for(size_t i=0; i<getChannels(); ++i)
+    for(int i=0; i<getChannels(); ++i)
       getSamples(i).multiply(scalar);
   }
   void add(float scalar){
-    for(size_t i=0; i<getChannels(); ++i)
+    for(int i=0; i<getChannels(); ++i)
       getSamples(i).add(scalar);
   }
   void add(AudioBuffer& other){
-    for(size_t i=0; i<getChannels(); ++i)
+    for(int i=0; i<getChannels(); ++i)
       getSamples(i).add(other.getSamples(i));
   }
   void copyFrom(AudioBuffer& other){
-    for(size_t i=0; i<getChannels(); ++i)
+    for(int i=0; i<getChannels(); ++i)
       getSamples(i).copyFrom(other.getSamples(i));
   }
   void copyTo(AudioBuffer& other){
-    for(size_t i=0; i<getChannels(); ++i)
+    for(int i=0; i<getChannels(); ++i)
       getSamples(i).copyTo(other.getSamples(i));
   }
   static AudioBuffer* create(int channels, int samples);
