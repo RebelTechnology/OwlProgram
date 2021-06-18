@@ -17,6 +17,7 @@ protected:
   float getSample();
 public:
   RampOscillator(float sr) : phase(0.0f), incr(0.0f) {
+    setSampleRate(sr);
   }
   RampOscillator(float freq, float sr) : phase(0.0f){
     setSampleRate(sr);
@@ -70,7 +71,7 @@ public:
     }
   }
   float generate(float fm){
-    float sample = phase;
+    float sample = getSample();
     phase += incr * (1 + fm);
     if(phase >= 1.0f)
       phase -= 2.0f;
@@ -78,7 +79,7 @@ public:
   }  
   void generate(FloatArray output, FloatArray fm){
     for(size_t i=0; i<output.getSize(); ++i){
-      output[i] = phase;
+      output[i] = getSample();
       phase += incr * (1 + fm[i]);
       if(phase >= 1)
 	phase -= 2;
@@ -128,7 +129,7 @@ float RampOscillator<POLYBLEP_SQUARE_SHAPE>::getSample(){
 typedef RampOscillator<POLYBLEP_SQUARE_SHAPE> AntialiasedSquareOscillator;
 
 // template<Waveshape shape=SQUARE_SHAPE>
-// class SquareOscillator : public RampOscillator<RAMP_SHAPE> {
+// class SquareOscillator : public RampOscillator<shape> {
 // protected:
 //   float pw = 0;
 // public:
