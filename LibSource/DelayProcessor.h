@@ -24,6 +24,9 @@ public:
     delay = samples;
     buffer.setDelay(samples);
   }
+  void clear(){
+    buffer.clear();
+  }
   float process(float input){
     buffer.write(input);
     return buffer.read();
@@ -56,6 +59,9 @@ public:
   }
   void setDelay(float samples){
     delay = samples;
+  }
+  void clear(){
+    buffer.clear();
   }
   float process(float input){
     float sample = buffer.readAt(buffer.getWriteIndex() - delay);
@@ -93,6 +99,9 @@ public:
   }
   void setDelay(float samples){
     delay = samples;
+  }
+  void clear(){
+    buffer.clear();
   }
   float process(float input){
     buffer.setDelay(delay);
@@ -134,6 +143,9 @@ public:
   }
   void setDelay(float samples){
     delay = samples;
+  }
+  void clear(){
+    ringbuffer->clear();
   }
   float process(float input){
     ringbuffer->write(input);
