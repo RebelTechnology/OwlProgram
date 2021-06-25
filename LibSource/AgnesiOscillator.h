@@ -35,12 +35,16 @@ public:
   float getPhase(){
     return M_PI*x/N+M_PI;
   }
+  void reset(){
+    x = -N;
+  }
   /**
    * Normalise offset and gain so that signal is between 0 and 1
    */
   void normalise(){
     offset = agnesi(N, a);
-    gain = 1/(agnesi(0, a) - offset);
+    gain = 2/(agnesi(0, a) - offset);
+    offset += 0.5;
   }
   float generate(){
     float y = agnesi(x, a);
