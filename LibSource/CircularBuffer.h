@@ -8,7 +8,7 @@ template<typename T>
 class CircularBuffer {
 protected:
   T* data;
-  const size_t size;
+  size_t size;
   size_t writepos = 0;
   size_t readpos = 0;
 public:
