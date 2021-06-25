@@ -109,7 +109,7 @@ public:
   void adjust(uint16_t s){
     if(abs(speed-s) > 16){
       int64_t delta = (int64_t)samples*(speed-s)/2048;
-      samples = max(1, samples+delta);
+      samples = max(1ll, samples+delta);
       speed = s;
     }
   }
