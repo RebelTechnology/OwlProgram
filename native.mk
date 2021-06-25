@@ -21,7 +21,7 @@ CPPFLAGS    += -I$(LIBSOURCE)
 CPPFLAGS    += -I$(BUILDSOURCE)
 CPPFLAGS    += -I$(TESTPATCHES)
 CPPFLAGS    += -ILibraries -ILibraries/KissFFT
-CXXFLAGS     = -std=c++14
+CXXFLAGS     = -std=gnu++17
 LDLIBS       = -lm
 LDFLAGS      = -Wl,--gc-sections
 
