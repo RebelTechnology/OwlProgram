@@ -83,7 +83,7 @@ public:
       Allocator::voice[i]->pitchbend(msg);
   }
   void modulate(MidiMessage msg){
-    float value = msg.getControllerValue()/127.0f;
+    float value = msg.getControllerValue()/128.0f;
     for(int i=0; i<VOICES; ++i)
       Allocator::voice[i]->setModulation(value);
   }
@@ -93,14 +93,14 @@ public:
   void channelPressure(MidiMessage msg){
     // route channel pressure to all voices
     for(int i=0; i<VOICES; ++i)
-      Allocator::voice[i]->setPressure(msg.getChannelPressure()/127.0f);
+      Allocator::voice[i]->setPressure(msg.getChannelPressure()/128.0f);
   }
   void polyKeyPressure(MidiMessage msg){
     // route poly key pressure to the right voice
     uint8_t note = msg.getNote();
     for(int i=0; i<VOICES; ++i)
       if(notes[i] == note)
-	Allocator::voice[i]->setPressure(msg.getPolyKeyPressure()/127.0f);
+	Allocator::voice[i]->setPressure(msg.getPolyKeyPressure()/128.0f);
   }
   bool getSustain(){
     return dosustain;

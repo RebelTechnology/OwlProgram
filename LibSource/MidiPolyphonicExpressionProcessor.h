@@ -107,7 +107,7 @@ public:
       // All MPE receivers are required to respond to CC #74 at the Zone and Note level. If a device receives CC #74
       // on both a Master Channel and Member Channel, it must combine such data meaningfully and separately for
       // each sounding note.
-      float value = msg.getControllerValue()/127.0f;
+      float value = msg.getControllerValue()/128.0f;
       if(isMasterChannel(msg)){ // Zone message
 	for(int i=0; i<VOICES; ++i)
 	  Allocator::voice[i]->setModulation(value + modulation[i]);
@@ -206,7 +206,7 @@ public:
     // All MPE receivers are required to respond to Channel Pressure at the Note and Zone level.
     // If a device receives Channel Pressure on both a Master Channel and Member Channel it must
     // combine such data meaningfully and separately for each sounding note.
-    float value = msg.getChannelPressure()/127.0f;
+    float value = msg.getChannelPressure()/128.0f;
     if(isMasterChannel(msg)){ // Zone message
       for(int i=0; i<VOICES; ++i)
 	Allocator::voice[i]->setPressure(value + pressure[i]);
@@ -225,7 +225,7 @@ public:
       uint8_t note = msg.getNote();
       for(int i=0; i<VOICES; ++i)
 	if(Allocator::voice[i]->getNote() == note)
-	  Allocator::voice[i]->setPressure(msg.getPolyKeyPressure()/127.0f);
+	  Allocator::voice[i]->setPressure(msg.getPolyKeyPressure()/128.0f);
     }
   }
   bool getSustain(){
