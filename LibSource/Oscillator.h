@@ -1,6 +1,7 @@
 #ifndef __Oscillator_h
 #define __Oscillator_h
 
+#include "basicmaths.h"
 #include "FloatArray.h"
 #include "SignalGenerator.h"
 

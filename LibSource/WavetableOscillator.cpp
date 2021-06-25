@@ -1,5 +1,4 @@
 #include "WavetableOscillator.h"
-#include "basicmaths.h"
 #include <stdint.h>
 
 WavetableOscillator::WavetableOscillator(float sr, const FloatArray wavetable):
