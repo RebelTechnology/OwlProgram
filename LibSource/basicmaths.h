@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <algorithm>
 #include "heap.h"
 
 #define _USE_MATH_DEFINES
@@ -28,8 +27,25 @@
 
 #ifdef __cplusplus
 #include <cmath>
+#include <algorithm>
+using std::min;
+using std::max;
+using std::abs;
+using std::clamp;
 #else
 #include <math.h>
+#ifndef min
+#define min(a,b) ((a)<(b)?(a):(b))
+#endif
+#ifndef max
+#define max(a,b) ((a)>(b)?(a):(b))
+#endif
+#ifndef abs
+#define abs(x) ((x)>0?(x):-(x))
+#endif
+#ifndef clamp
+#define clamp(x, lo, hi) ((x)>(hi)?(hi):((x)<(lo)?(lo):(x)))
+#endif
 #endif
 
 #ifndef M_PI
@@ -38,23 +54,7 @@
 #ifndef M_SQRT2
 #define M_SQRT2 1.41421356237309504880
 #endif
-/* #ifndef min */
-/* #define min(a,b) ((a)<(b)?(a):(b)) */
-/* #endif */
-/* #ifndef max */
-/* #define max(a,b) ((a)>(b)?(a):(b)) */
-/* #endif */
-/* #ifndef abs */
-/* #define abs(x) ((x)>0?(x):-(x)) */
-/* #endif */
-/* #ifndef clamp */
-/* #define clamp(x, lo, hi) ((x)>(hi)?(hi):((x)<(lo)?(lo):(x))) */
-/* #endif */
 
-using std::min;
-using std::max;
-using std::abs;
-using std::clamp;
 
 #ifdef __cplusplus
  extern "C" {
