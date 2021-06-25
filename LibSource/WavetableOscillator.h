@@ -18,6 +18,9 @@ public:
   float getFrequency();
   float getSample(float phase);
   void setPhase(float phase);
+  void reset(){
+    setPhase(0);
+  }
   float getPhase();
   float generate();
   float generate(float fm);
