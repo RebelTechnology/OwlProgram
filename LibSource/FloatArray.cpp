@@ -454,7 +454,7 @@ void FloatArray::scale(float from, float to, FloatArray destination){
 void FloatArray::softclip(FloatArray destination){
   for(size_t i=0; i<size; i++){
     float x = data[i];
-    destination[i] = clamp((3*x/2)*(1-x*x/3), -1, 1);
+    destination[i] = clamp((3*x/2)*(1-x*x/3), -1.0f, 1.0f);
   }
 }
 
