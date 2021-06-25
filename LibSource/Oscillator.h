@@ -38,7 +38,7 @@ public:
   /**
    * Reset oscillator (typically resets phase)
    */
-  virtual void reset(){}
+  virtual void reset() = 0;
   /**
    * Produce a sample with frequency modulation.
    */
@@ -62,16 +62,75 @@ public:
   void getSamples(FloatArray output, FloatArray fm){
     generate(output, fm);
   }
+};
+
+template<class T>
+class OscillatorTemplate : public Oscillator {
+protected:
+  float mul;
+  float phase;
+  float incr;
+public:
+  void setSampleRate(float sr){
+    float freq = getFrequency();
+    mul = (T::end_phase - T::begin_phase)/sr;
+    setFrequency(freq);
+  }
+  float getSampleRate(){
+    return (T::end_phase - T::begin_phase)/mul;
+  }
+  void setFrequency(float freq){
+    incr = freq*mul;
+  }
+  float getFrequency(){
+    return incr/mul;
+  }
+  void setPhase(float ph){
+    phase = (T::end_phase - T::begin_phase)*ph/(2*M_PI) + T::begin_phase;
+  }
+  float getPhase(){
+    // return phase 0 to 2*pi
+    return (phase - T::begin_phase)*2*M_PI/(T::end_phase - T::begin_phase);
+  }
+  void reset(){
+    phase = T::begin_phase;
+  }
+  float generate(){
+    float sample = static_cast<T*>(this)->getSample();
+    phase += incr;
+    if(phase >= T::end_phase)
+      phase -= (T::end_phase - T::begin_phase);
+    return sample;
+  }
+  float generate(float fm){
+    float sample = static_cast<T*>(this)->getSample();
+    phase += incr * (1 + fm);
+    if(phase >= T::end_phase)
+      phase -= (T::end_phase - T::begin_phase);
+    return sample;
+  }  
+  using Oscillator::generate;
+  static T* create(float sr){
+    T* obj = new T();
+    obj->setSampleRate(sr);
+    return obj;
+  }
+  static void destroy(T* osc){
+    delete osc;
+  }
 protected:
   static float polyblep(float t, float dt){
-    if(t < dt){ // 0 <= t < 1
-      t /= dt;
+    // PolyBLEP by various
+    // http://research.spa.aalto.fi/publications/papers/smc2010-phaseshaping/
+    // https://www.kvraudio.com/forum/viewtopic.php?t=375517
+    // http://www.martin-finke.de/blog/articles/audio-plugins-018-polyblep-oscillator/
+    if(t < T::begin_phase + dt){
+      t = (t - T::begin_phase) / dt;
       return t+t - t*t - 1;
-    }else if(t > 1.0 - dt){ // -1 < t < 0      
-      t = (t - 1.0) / dt;
+    }else if(t > T::end_phase - dt){
+      t = (t - T::end_phase) / dt;
       return t*t + t+t + 1;
     }
-    // 0 otherwise
     return 0;
   }
 };
