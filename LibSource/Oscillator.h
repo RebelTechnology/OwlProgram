@@ -125,11 +125,15 @@ protected:
     // http://research.spa.aalto.fi/publications/papers/smc2010-phaseshaping/
     // https://www.kvraudio.com/forum/viewtopic.php?t=375517
     // http://www.martin-finke.de/blog/articles/audio-plugins-018-polyblep-oscillator/
+    // https://www.metafunction.co.uk/post/all-about-digital-oscillators-part-2-blits-bleps
+    // if t and dt are normalised before call then end/begin phase are not needed    
     if(t < T::begin_phase + dt){
-      t = (t - T::begin_phase) / dt;
+      dt = dt / (T::end_phase - T::begin_phase); // normalise phase increment
+      t = (t - T::begin_phase) / dt; // distance from discontinuity
       return t+t - t*t - 1;
     }else if(t > T::end_phase - dt){
-      t = (t - T::end_phase) / dt;
+      dt = dt / (T::end_phase - T::begin_phase); // normalise phase increment
+      t = (t - T::end_phase) / dt; // distance from discontinuity
       return t*t + t+t + 1;
     }
     return 0;
