@@ -58,7 +58,7 @@ public:
    * Set tap tempo frequency.
    */
   void setFrequency(float freq){
-    samples = freq*sr;
+    samples = sr/freq;
   }
   /**
    * Get tap tempo period in samples.
