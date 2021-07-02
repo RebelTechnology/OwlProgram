@@ -39,7 +39,7 @@ public:
     x = -N;
   }
   /**
-   * Normalise offset and gain so that signal is between 0 and 1
+   * Normalise offset and gain so that signal is between -1 and 1
    */
   void normalise(){
     offset = agnesi(N, a);
@@ -51,7 +51,7 @@ public:
     x += incr;
     if(x > N)
       x -= 2*N;
-    return gain*(y-offset);
+    return clamp(gain*(y-offset), -1.0f, 1.0f);
   }
   float generate(float fm){
     // modulate coefficient 'a' instead of rate
@@ -59,7 +59,7 @@ public:
     x += incr;
     if(x > N)
       x -= 2*N;
-    return gain*(y-offset);
+    return clamp(gain*(y-offset), -1.0f, 1.0f);
   }
   using SignalGenerator::generate;
   static AgnesiOscillator* create(float sr, float a=0.5, float N=5){
