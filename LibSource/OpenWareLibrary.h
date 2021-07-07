@@ -26,7 +26,7 @@
 #include "IntArray.h"
 #include "Interpolator.h"
 #include "InterpolatingCircularBuffer.h"
-#include "LinearAdsrEnvelope.h"
+#include "AdsrEnvelope.h"
 #include "MidiProcessor.h"
 #include "MidiPolyphonicExpressionProcessor.h"
 #include "MidiStatus.h"
