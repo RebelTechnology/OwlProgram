@@ -30,7 +30,7 @@
 #define __EnvelopeTestPatch_hpp__
 
 #include "Patch.h"
-#include "LinearAdsrEnvelope.h"
+#include "AdsrEnvelope.h"
 
 class EnvelopeTestPatch : public Patch {
 public:
@@ -44,7 +44,6 @@ public:
     registerParameter(PARAMETER_C, "Sustain");
     registerParameter(PARAMETER_D, "Release");
     envBuffer = FloatArray::create(getBlockSize());
-    debugMessage("__");
   }
   ~EnvelopeTestPatch(){
     FloatArray::destroy(envBuffer);
