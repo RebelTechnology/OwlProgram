@@ -47,7 +47,6 @@ public:
     return voice[0]->getTuning();
   }
   void setTuning(float frequency){
-    debugMessage("set tuning", frequency);
     for(int i=0; i<VOICES; ++i)
       voice[i]->setTuning(frequency);
   }
