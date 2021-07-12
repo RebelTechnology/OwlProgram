@@ -1,7 +1,4 @@
-* Implemented RPN messages in VoiceAllocator
-* Update ExponentialDecayEnvelope
-* Implemented LinearAdsrEnvelope and ExponentialAdsrEnvelope
-* Changed to use std::min/max/abs/clamp for C++ compilation units
+* Updated CMSIS libraries
 
 v21.2
 -----
