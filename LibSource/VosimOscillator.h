@@ -14,7 +14,7 @@ private:
   SineOscillator* formant2;
 public:
   VosimOscillator(SineOscillator* osc2, SineOscillator* osc1) :
-    formant1(osc1) , formant2(osc2) {}
+    formant1(osc1), formant2(osc2) {}
   static constexpr float begin_phase = 0;
   static constexpr float end_phase = 1;
   float waveshape = 0;
@@ -22,8 +22,6 @@ public:
     float square = phase < 0.5 ? 0.0f : 1.0f;
     float saw = phase;
     return 1 - ( saw + (square - saw) * waveshape );
-    // return 1 - ( phase - polyblep(phase, incr));
-    // return 1 - phase;
   }
   void setWaveshape(float value){
     waveshape = value;
@@ -40,13 +38,11 @@ public:
   void setFormant2(float frequency){
     formant2->setFrequency(frequency);
   }
-  using Oscillator::generate;
   float generate(float fm){
     float sample = getSample() * (1 - 0.4*waveshape);
     float s1 = formant1->generate();
     float s2 = formant2->generate();
     sample = (s1*s1 + s2*s2)*sample;
-    float dt = incr * (1 + fm);
     phase += incr * (1 + fm);
     if(phase >= end_phase){
       phase -= (end_phase - begin_phase);
@@ -63,6 +59,41 @@ public:
   }
   float generate(){
     return generate(0);
+  }
+  void generate(FloatArray output){
+    float* out = output.getData();
+    size_t len = output.getSize();
+    float sample, s1, s2;
+    while(len--){
+      sample = getSample() * (1 - 0.4*waveshape);
+      s1 = formant1->generate();
+      s2 = formant2->generate();
+      *out++ = (s1*s1 + s2*s2)*sample;
+      phase += incr;
+      if(phase >= end_phase){
+	phase -= (end_phase - begin_phase);
+	formant1->reset();
+	formant2->reset();
+      }
+    }
+  }
+  void generate(FloatArray output, FloatArray input){
+    float* out = output.getData();
+    float* fm = input.getData();
+    size_t len = output.getSize();
+    float sample, s1, s2;
+    while(len--){
+      sample = getSample() * (1 - 0.4*waveshape);
+      s1 = formant1->generate();
+      s2 = formant2->generate();
+      *out++ = (s1*s1 + s2*s2)*sample;
+      phase += incr * (1 + *fm++);
+      if(phase >= end_phase){
+	phase -= (end_phase - begin_phase);
+	formant1->reset();
+	formant2->reset();
+      }
+    }
   }
   static VosimOscillator* create(float sr){
     SineOscillator* f1 = SineOscillator::create(sr);
