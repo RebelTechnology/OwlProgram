@@ -23,9 +23,7 @@ public:
 
  SampleOscillator(float sr, FloatArray sample)
     : sr(sr)
-    , buffer(sample) {
-    size = buffer.getSize() - 1;
-  }
+    , buffer(sample), pos(0), size(sample.getSize() - 1) {}
   void setFrequency(float freq) {
     rate = copysignf(freq / MIDDLE_C, rate); // preserve sign
   }
@@ -34,7 +32,7 @@ public:
   }
   void setSample(FloatArray sample){
     buffer = sample;
-    size = buffer.getSize() -1;
+    size = sample.getSize() -1;
     pos = 0;
   }
   FloatArray getSample(){

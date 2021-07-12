@@ -69,8 +69,8 @@ template<class T>
 class OscillatorTemplate : public Oscillator {
 protected:
   float mul;
-  float phase;
-  float incr;
+  float phase = 0;
+  float incr = 0;
 public:
   void setSampleRate(float sr){
     float freq = getFrequency();
@@ -105,7 +105,8 @@ public:
   }
   float generate(float fm){
     float sample = static_cast<T*>(this)->getSample();
-    phase += incr * (1 + fm);
+    // phase += incr * (1 + fm);
+    phase += incr  + (T::end_phase - T::begin_phase)*fm;
     if(phase >= T::end_phase)
       phase -= (T::end_phase - T::begin_phase);
     return sample;
