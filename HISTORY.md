@@ -1,3 +1,8 @@
+* Implemented RPN messages in VoiceAllocator
+* Update ExponentialDecayEnvelope
+* Implemented LinearAdsrEnvelope and ExponentialAdsrEnvelope
+* Changed to use std::min/max/abs/clamp for C++ compilation units
+
 v21.2
 -----
 
