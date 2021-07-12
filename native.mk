@@ -14,13 +14,16 @@ SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
 BUILDSOURCE  = $(BUILD)/Source
 TESTPATCHES  = $(BUILDROOT)/TestPatches
-DSPLIB       = Libraries/CMSIS/DSP_Lib/Source
+DSPINC       = $(BUILDROOT)/Libraries/CMSIS/DSP/Include
+DSPLIB       = $(BUILDROOT)/Libraries/CMSIS/DSP/Source
 CPPFLAGS    += -I$(SOURCE)
 CPPFLAGS    += -I$(PATCHSOURCE)
 CPPFLAGS    += -I$(LIBSOURCE)
 CPPFLAGS    += -I$(BUILDSOURCE)
 CPPFLAGS    += -I$(TESTPATCHES)
+CPPFLAGS    += -I$(DSPINC)
 CPPFLAGS    += -ILibraries -ILibraries/KissFFT
+CPPFLAGS    += -D__PROGRAM_START=1 # prevent compilation of __cmsis_start function
 CXXFLAGS     = -std=gnu++17
 LDLIBS       = -lm
 LDFLAGS      = -Wl,--gc-sections

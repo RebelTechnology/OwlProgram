@@ -1,3 +1,5 @@
+* Updated CMSIS libraries
+
 v21.2
 -----
 
