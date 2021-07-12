@@ -33,16 +33,25 @@ public:
       }
       Allocator::voice[0]->setNote(notes[lastNote - 1]);
     }else{
-      Allocator::voice[0]->gate(false);
+      if(!Allocator::dosustain)
+	Allocator::voice[0]->gate(false);
       lastNote = 0;
     }
+  }
+  void allNotesOn() {
+    Allocator::voice[0]->gate(true);
   }
   void allNotesOff() {
     Allocator::voice[0]->gate(false);
     lastNote = 0;
   }
-  void controlChange(MidiMessage msg){
-    Allocator::voice[0]->controlChange(msg);
+  virtual void sustainOff(){
+    if(lastNote == 0)
+      Allocator::voice[0]->gate(false);
+  }
+  // void sustain(MidiMessage msg){} // todo
+  void modulate(MidiMessage msg){
+    Allocator::voice[0]->modulate(msg);
   }
   void pitchbend(MidiMessage msg){
     Allocator::voice[0]->pitchbend(msg);

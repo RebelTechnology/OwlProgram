@@ -16,7 +16,6 @@ protected:
   uint8_t notes[VOICES];
   uint16_t allocation[VOICES];
   uint16_t allocated;
-  bool dosustain = false;
 protected:
   void take(uint8_t ch, MidiMessage msg){
     release(ch);
@@ -26,7 +25,7 @@ protected:
   }
   void release(uint8_t ch){
     allocation[ch] = ++allocated;
-    if(!dosustain)
+    if(!Allocator::dosustain)
       Allocator::voice[ch]->gate(false);
   }
 public:
@@ -65,30 +64,13 @@ public:
       if(notes[i] == note)
 	release(i);
   }
-  void controlChange(MidiMessage msg){
-    switch(msg.getControllerNumber()){
-    case MIDI_CC_MODULATION:
-      modulate(msg);
-      break;
-    case MIDI_CC_SUSTAIN:
-      sustain(msg);
-      break;
-    case MIDI_ALL_NOTES_OFF:
-      Allocator::allNotesOff();
-      break;
-    }
-  }
   void pitchbend(MidiMessage msg){
     for(int i=0; i<VOICES; ++i)
       Allocator::voice[i]->pitchbend(msg);
   }
   void modulate(MidiMessage msg){
-    float value = msg.getControllerValue()/128.0f;
     for(int i=0; i<VOICES; ++i)
-      Allocator::voice[i]->setModulation(value);
-  }
-  void sustain(MidiMessage msg){
-    setSustain(msg.getControllerValue() > 63);
+      Allocator::voice[i]->modulate(msg);
   }
   void channelPressure(MidiMessage msg){
     // route channel pressure to all voices
@@ -102,18 +84,12 @@ public:
       if(notes[i] == note)
 	Allocator::voice[i]->setPressure(msg.getPolyKeyPressure()/128.0f);
   }
-  bool getSustain(){
-    return dosustain;
-  }
-  void setSustain(bool value){
-    if(!value && dosustain){
-      // gate off any sustained (but not active) voices
-      for(int i=0; i<VOICES; ++i){
-	if(allocation[i] != TAKEN)
-	  Allocator::voice[i]->gate(false);
-      }
+  void sustainOff(){
+    // gate off any sustained (but not active) voices
+    for(int i=0; i<VOICES; ++i){
+      if(allocation[i] != TAKEN)
+	Allocator::voice[i]->gate(false);
     }
-    dosustain = value;
   }
 };
 

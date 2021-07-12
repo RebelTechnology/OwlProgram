@@ -31,9 +31,6 @@ protected:
   float zone_pressure = 0;
   float zone_modulation = 0;
   float note_pitchbend_range = 48;
-  float zone_pitchbend_range = 2;
-  uint16_t rpn = 0;
-  bool dosustain = false;
   void take(uint8_t ch, MidiMessage msg){
     release(ch);
     notes[ch] = msg.getNote();
@@ -42,7 +39,7 @@ protected:
   }
   void release(uint8_t ch){
     allocation[ch] = ++allocated;
-    if(!dosustain)
+    if(!Allocator::dosustain)
       Allocator::voice[ch]->gate(false);
   }
 public:
@@ -94,20 +91,14 @@ public:
 	release(ch);
     }
   }
-
-  void setPitchBendRange(float range){
-    zone_pitchbend_range = range;
-  }
-
   void controlChange(MidiMessage msg){
     switch(msg.getControllerNumber()){
     case MIDI_CC_MODULATION: // handle modulation same as CC74 for non-MPE compatibility
-    /* case MIDI_CC_FREQUENCY_CUTOFF: { */
-    case 74: {
+    case MIDI_CC_FREQ_CUTOFF: {
       // All MPE receivers are required to respond to CC #74 at the Zone and Note level. If a device receives CC #74
       // on both a Master Channel and Member Channel, it must combine such data meaningfully and separately for
       // each sounding note.
-      float value = msg.getControllerValue()/128.0f;
+      float value = Allocator::mod_range * msg.getControllerValue();
       if(isMasterChannel(msg)){ // Zone message
 	for(int i=0; i<VOICES; ++i)
 	  Allocator::voice[i]->setModulation(value + modulation[i]);
@@ -121,23 +112,23 @@ public:
       }
       break;
     }
-    case 100: // RPN LSB comes first
-      rpn = msg.getControllerValue();
+    default:
+      Allocator::controlChange(msg);
       break;
-    case 101: // RPN MSB
-      rpn |= msg.getControllerValue()<<7;
-      if(rpn == MIDI_RPN_RESET) // RPN reset
-	rpn = 0;
-      break;
-    case 6: // Data Entry MSB
-      if(rpn == MIDI_RPN_PITCH_BEND_RANGE){
-	uint8_t semitones = msg.getControllerValue();
+    }
+  }
+  void rpn(uint16_t id, uint8_t msb, uint8_t lsb, MidiMessage msg){
+    switch(id){
+    case MIDI_RPN_PITCH_BEND_RANGE: {
+      float semitones = msb + lsb/100.0f; // semitones and cents
 	if(isMasterChannel(msg)){
-	  zone_pitchbend_range = semitones;
+	  Allocator::setPitchBendRange(semitones);
 	}else{
 	  note_pitchbend_range = semitones;
 	}
-      }else if(rpn == MIDI_RPN_MPE_CONFIGURATION){
+	break;
+    }
+    case MIDI_RPN_MPE_CONFIGURATION: {
 	uint8_t n = msg.getChannel();
 	uint8_t mm = msg.getControllerValue();
 	// mm=0: MPE is Off (No Channels)
@@ -151,25 +142,10 @@ public:
 	}
 	// Each Zone is activated with its own message, which can be sent in either order.
 	// Sending an MCM with the number of Member Channels set to zero deactivates that Zone.
-      }
-      break;
-    case 38: // Data Entry LSB
-      if(rpn == 0){ // Pitch Bend Sensitivity
-	// It is recommended that MPE devices use an integer number of semitones
-	// for the range and either transmit the LSB as zero, or not transmit it
-	// at all so that the receiver infers zero. MPE devices can still choose
-	// to respond to 14-bit Pitch Bend Sensitivity messages for
-	// compatibility with other equipment.
-	float cents = msg.getControllerValue()/100.0f;
-	if(isMasterChannel(msg)){
-	  zone_pitchbend_range = ((int)zone_pitchbend_range) + cents;
-	}else{
-	  note_pitchbend_range = ((int)note_pitchbend_range) + cents;
-	}
-      }
-      break;
-    case MIDI_ALL_NOTES_OFF:
-      Allocator::allNotesOff();
+	break;
+    }
+    default:
+      Allocator::rpn(id, msb, lsb, msg);
       break;
     }
   }
@@ -189,7 +165,7 @@ public:
   void pitchbend(MidiMessage msg){
     // Pitch Bend is both a Zone Message and a Note Level Message. If an MPE synthesizer receives Pitch Bend (for example) on both a Master and a Member Channel, it must combine the data meaningfully. The same is true for Channel Pressure. 
     if(isMasterChannel(msg)){ // Zone message
-      float value = zone_pitchbend_range*msg.getPitchBend()/8192.0f;
+      float value = Allocator::getPitchBendRange()*msg.getPitchBend()/8192.0f;
       float delta = value - zone_pitchbend;
       for(int i=0; i<VOICES; ++i)
 	Allocator::voice[i]->setPitchBend(Allocator::voice[i]->getPitchBend()+delta);
@@ -228,18 +204,12 @@ public:
 	  Allocator::voice[i]->setPressure(msg.getPolyKeyPressure()/128.0f);
     }
   }
-  bool getSustain(){
-    return dosustain;
-  }
-  void setSustain(bool value){
-    if(!value && dosustain){
-      // gate off any sustained (but not active) voices
-      for(int i=0; i<VOICES; ++i){ // todo!
-      // 	if(allocation[i] != TAKEN)
+  void sustainOff(){
+    // gate off any sustained (but not active) voices
+    for(int i=0; i<VOICES; ++i){
+      if(allocation[i] != TAKEN)
 	Allocator::voice[i]->gate(false);
-      }
     }
-    dosustain = value;
   }
 };
 
