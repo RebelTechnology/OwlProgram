@@ -13,6 +13,9 @@
 #include <unistd.h>
 
 extern "C"{
+  int filestat(const char *file_name){
+    return access(file_name, R_OK);
+  }
   size_t fileread(const char *file_name, uint8_t** data, size_t size){
     FILE* fd;
     if(!file_name)

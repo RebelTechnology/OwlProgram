@@ -10,7 +10,7 @@ int errorcode = 0;
 
 extern "C"{
   int serviceCall(int service, void** params, int len){
-    int ret = -1;
+    int ret = OWL_SERVICE_INVALID_ARGS;
     switch(service){
     case OWL_SERVICE_LOAD_RESOURCE:
       if(len == 4){
@@ -19,8 +19,10 @@ extern "C"{
 	uint32_t offset = *(uint32_t*)params[2];
 	uint32_t* max_size = (uint32_t*)params[3];
 	printf("Service call (LOAD RESOURCE) : %s [%u:%u]\n", name, offset, *max_size);
-	*max_size = fileread(name, buffer, *max_size);
-	ret = OWL_SERVICE_OK;
+	if(filestat(name) == 0){
+	  *max_size = fileread(name, buffer, *max_size);
+	  ret = OWL_SERVICE_OK;
+	}
       }else{
 	printf("Service call (LOAD RESOURCE) Invalid");
       }	
@@ -115,14 +117,17 @@ void arm_bitreversal_16(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t
 
 extern "C"{
   void doSetButton(uint8_t bid, uint16_t value, uint16_t samples){
-    printf("Set button %c: %d\n", 'A'+bid-4, value);
+    printf("Set button B%d: %d\n", bid-4, value);
     if(value)
       button_values |= (1<<bid);
     else
       button_values &= ~(1<<bid);
   }
   void doSetPatchParameter(uint8_t pid, int16_t value){
-    printf("Set parameter %c: %d\n", 'A'+pid, value);
+    if(pid < PARAMETER_AA)
+      printf("Set parameter %c: %d\n", 'A'+pid, value);
+    else
+      printf("Set parameter %c%c: %d\n", '@'+(pid/8), 'A'+(pid%8), value);
     if(pid < 40)
       parameter_values[pid] = value/4096.0f;
   }
@@ -217,15 +222,11 @@ void PatchProcessor::setPatch(Patch* patch, const char* name){
 PatchProcessor::~PatchProcessor(){}
 
 void PatchProcessor::setPatchParameter(int pid, FloatParameter* param){
-  printf("Set parameter %c: %f\n", 'A'+pid, param->getValue());
-  if(pid < 40)
-    parameter_values[pid] = param->getValue();
+  doSetPatchParameter(pid, param->getValue()*4095);
 }
 
 void PatchProcessor::setPatchParameter(int pid, IntParameter* param){
-  printf("Set parameter %c: %d\n", 'A'+pid, param->getValue());
-  if(pid < 40)
-    parameter_values[pid] = param->getValue()/4096.0f;
+  doSetPatchParameter(pid, param->getValue());
 }
 
 Resource* Patch::getResource(char const* name){
@@ -272,9 +273,7 @@ float Patch::getParameterValue(PatchParameterId pid){
 }
 
 void Patch::setParameterValue(PatchParameterId pid, float value){
-  printf("Set parameter %c: %f\n", 'A'+pid, value);
-  if(pid < 40)
-    parameter_values[pid] = value;
+  doSetPatchParameter(pid, value*4095);
 }
 
 void Patch::setButton(PatchButtonId bid, uint16_t value, uint16_t samples){
