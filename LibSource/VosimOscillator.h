@@ -19,12 +19,15 @@ public:
   static constexpr float end_phase = 1;
   float waveshape = 0;
   float getSample(){
-    float square = phase < 0.5 ? 0.0f : 1.0f;
+    // return 1 - phase;
+    float square = phase < 0 ? 0.0f : 1.0f;
     float saw = phase;
-    return 1 - ( saw + (square - saw) * waveshape );
+    float sample = saw + (square - saw) * waveshape;
+    return 1 - sample * (1 - waveshape*0.5);
+    // return 1 - (1-waveshape)*phase + waveshape*sinf(phase*2*M_PI);
   }
   void setWaveshape(float value){
-    waveshape = value;
+    waveshape = value*0.25;
   }    
   float getFormant1(){
     return formant1->getFrequency();
@@ -39,10 +42,10 @@ public:
     formant2->setFrequency(frequency);
   }
   float generate(float fm){
-    float sample = getSample() * (1 - 0.4*waveshape);
+    float sample = getSample();
     float s1 = formant1->generate();
     float s2 = formant2->generate();
-    sample = (s1*s1 + s2*s2)*sample;
+    sample = (s1*s1 + s2*s2)*sample - 1;
     phase += incr * (1 + fm);
     if(phase >= end_phase){
       phase -= (end_phase - begin_phase);
