@@ -15,7 +15,7 @@ class ComplexOscillator : public ComplexSignalGenerator {
 public:
   ComplexOscillator() = default;
   virtual ~ComplexOscillator() = default;
-  using MultiSignalGenerator::generate;
+  using ComplexSignalGenerator::generate;
   /**
    * Set oscillator sample rate
    */

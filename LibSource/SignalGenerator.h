@@ -40,7 +40,7 @@ public:
  * in [-1..1] range unless
  * otherwise stated.
  */
-class ComplexSignalGenerator : public MultiSignalGenerator {
+class ComplexSignalGenerator {
 public:
   virtual ~ComplexSignalGenerator(){}
   /**
@@ -50,14 +50,10 @@ public:
   /**
    * Produce a block of samples
    */
-  virtual void generate(AudioBuffer& output) override{
+  virtual void generate(ComplexFloatArray output) {
     size_t size = output.getSize();
-    FloatArray left = output.getSamples(0);
-    FloatArray right = output.getSamples(1);
     for(size_t i=0; i<size; ++i) {
-      ComplexFloat sample = generate();
-      left[i] = sample.re;
-      right[i] = sample.im;
+      output[i] = generate();
     }
   }
 };
