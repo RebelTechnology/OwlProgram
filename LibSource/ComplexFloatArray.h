@@ -2,7 +2,9 @@
 #define __ComplexFloatArray_h__
 
 #include "FloatArray.h"
+#include "AudioBuffer.h"
 #include "basicmaths.h"
+
 /**
 * A structure defining a floating point complex number as two members of type float.
 */
@@ -498,6 +500,9 @@ public:
    * @param[out] destination The destination array.
   */
   void setMagnitude(FloatArray magnitude, int offset, size_t count, ComplexFloatArray destination);
+
+  void copyFrom(AudioBuffer& buffer);
+  void copyTo(AudioBuffer& buffer);
 };
 
 #endif // __ComplexFloatArray_h__

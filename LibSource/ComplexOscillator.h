@@ -3,7 +3,6 @@
 
 #include "SignalGenerator.h"
 #include "Oscillator.h"
-#include "ComplexFloatArray.h"
 
 /**
  * A complex oscillator is a MultiSignalGenerator with 2 channels that
@@ -12,7 +11,7 @@
  * A single sample is represented as a ComplexFloat value, while blocks
  * of audio are stored in an AudioBuffer with 2 channels.
  */
-class ComplexOscillator : public MultiSignalGenerator {
+class ComplexOscillator : public ComplexSignalGenerator {
 public:
   ComplexOscillator() = default;
   virtual ~ComplexOscillator() = default;
@@ -50,13 +49,9 @@ public:
     return generate(0.f);
   }
   virtual ComplexFloat generate(float fm) = 0;
-  virtual void generate(AudioBuffer& output) {
-    FloatArray left = output.getSamples(0);
-    FloatArray right = output.getSamples(1);
+  virtual void generate(ComplexFloatArray output) {
     for(size_t i=0; i<output.getSize(); ++i) {
-      ComplexFloat sample = generate();
-      left[i] = sample.re;
-      right[i] = sample.im;
+      output[i]= generate();
     }
   }
 };

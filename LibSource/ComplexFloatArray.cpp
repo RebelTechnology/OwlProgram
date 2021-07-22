@@ -312,3 +312,20 @@ ComplexFloatArray ComplexFloatArray::create(size_t size){
 void ComplexFloatArray::destroy(ComplexFloatArray array){
   delete[] array.data;
 }
+
+void ComplexFloatArray::copyFrom(AudioBuffer& buffer) {
+  FloatArray left = buffer.getSamples(0);
+  FloatArray right = buffer.getSamples(1);
+  for (size_t i = 0; i < getSize(); i++) {
+    data[i] = ComplexFloat(left[i], right[i]);
+  }
+}
+
+void ComplexFloatArray::copyTo(AudioBuffer& buffer) {
+  FloatArray left = buffer.getSamples(0);
+  FloatArray right = buffer.getSamples(1);
+  for (size_t i = 0; i < getSize(); i++) {
+    left[i] = data[i].re;
+    right[i] = data[i].im;
+  }
+}
