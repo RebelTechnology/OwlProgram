@@ -36,6 +36,7 @@ Either install gcc-arm-none-eabi system-wide and ensure the binaries are in your
 
 To compile puredata patches you need `hvcc`, the Heavy compiler.
 
+    $ sudo apt install python3 python3-pip
     $ sudo pip3 install hvcc
 
 To compile patches in native format (e.g. for testing) you will also need the gcc compiler:
