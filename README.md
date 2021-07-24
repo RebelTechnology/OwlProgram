@@ -32,18 +32,17 @@ This has been done on a Ubuntu server 18.04
 
 Either install gcc-arm-none-eabi system-wide and ensure the binaries are in your path, or edit OwlProgram/compile.mk and point TOOLROOT to where arm-none-eabi binaries are installed.
 
-    TOOLROOT = /usr/bin/ 
+    TOOLROOT = /usr/bin/
 
 To compile puredata patches you need `hvcc`, the Heavy compiler.
 
-    $ sudo apt install python python-enum34 python-jinja2 python-nose2
-    $ git clone https://github.com/pingdynasty/hvcc.git
+    $ sudo pip3 install hvcc
 
 To compile patches in native format (e.g. for testing) you will also need the gcc compiler:
 
     $ sudo apt install gcc
-    
-Compile FirmwareSender 
+
+Compile FirmwareSender
 
 FirmwareSender makes it possible to use `load` and `store` make targets, or by invoking FirmwareSender directly to load/store a compiled patch to the device using sysex codes.
 
@@ -53,7 +52,7 @@ FirmwareSender makes it possible to use `load` and `store` make targets, or by i
     $ make
     $ cp build/FirmwareSender ../../../OwlProgram/Tools
     $ cd ../../../
-   
+
 ## Make targets
 * make libs: build library archives
 * make patch: build patch binary
@@ -145,7 +144,7 @@ Note: use OWL parameters in Maximilian by adding maxiParam objects to your patch
 
 ## Using FirmwareSender
 
-If you prefer to build the patch first and send it later to the device you can 
+If you prefer to build the patch first and send it later to the device you can
 do it like this from the main directory of OwlProgram (this will store in slot 6)
 
     Tools/FirmwareSender -in ./Build/patch.bin -out "OWL-MIDI*" -store 6

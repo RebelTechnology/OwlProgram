@@ -9,15 +9,14 @@ from collections import OrderedDict as odict
 
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.append('%s/hvcc' % dir_path)
-import core.hv2ir.HeavyLangObject as HeavyLangObject
+from hvcc.core.hv2ir import HeavyLangObject
 
 heavy_hash = HeavyLangObject.HeavyLangObject.get_hash
 
 import jinja2
 
 OWL_BUTTONS = ['Push', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']
-               
+
 def get_template(path):
     templateLoader = jinja2.FileSystemLoader(searchpath=dir_path)
     templateEnv = jinja2.Environment(loader=templateLoader)
@@ -46,7 +45,7 @@ def main():
     with open(args.infilename, mode="r") as f:
         ir = json.load(f)
 
-        for name, v in ir['control']['receivers'].iteritems():
+        for name, v in ir['control']['receivers'].items():
             # skip __hv_init and similar
             if name.startswith("__"):
                 continue
@@ -65,7 +64,7 @@ def main():
                 jdata.append((key, name, 'RECV', "0x%x" % heavy_hash(name),
                               0, 1, 0.5, key in OWL_BUTTONS))
 
-        for k, v in ir['objects'].iteritems():
+        for k, v in ir['objects'].items():
             try:
                 if v['type'] == '__send':
                     name = v['args']['name']
@@ -84,7 +83,7 @@ def main():
                 pass
 
     # TODO, check that there is not channel defined both as input and output
-                                                              
+
     # Write to files
     with open(args.outfilename, mode="w") as f:
         template = get_template("Heavy_owl_constants.tpl.h")
