@@ -132,9 +132,9 @@ FloatMatrix FloatMatrix::create(size_t m, size_t n){
   
  void FloatMatrix::destroy(FloatMatrix array){
 #ifdef ARM_CORTEX
-  delete array.instance.pData;
+  delete[] array.instance.pData;
 #else
-  delete array.data;
+  delete[] array.data;
 #endif
 };
 
