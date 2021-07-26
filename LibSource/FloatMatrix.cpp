@@ -1,6 +1,7 @@
 #include "FloatMatrix.h"
 #include "basicmaths.h"
 #include "message.h"
+#include <cstring>
 
 #ifdef ARM_CORTEX
 FloatMatrix::FloatMatrix(){
@@ -122,6 +123,16 @@ void FloatMatrix::sigmoid(FloatMatrix destination){
   size_t size = getSize();
   for(size_t i = 0; i < size; i++)
     dest[i] = 1.0f / (1 + expf(-src[i]));
+}
+
+void FloatMatrix::copyTo(FloatMatrix destination) {
+  ASSERT(destination.getSize() >= getSize(), "Destination size too small");
+  memcpy((void*)destination.getData(), (void*)getData(), getSize() * sizeof(float));
+}
+
+void FloatMatrix::copyFrom(FloatMatrix source) {
+  ASSERT(getSize() >= source.getSize(), "Destination size too small");
+  memcpy((void*)getData(), (void*)source.getData(), source.getSize() * sizeof(float));
 }
 
 FloatMatrix FloatMatrix::create(size_t m, size_t n){

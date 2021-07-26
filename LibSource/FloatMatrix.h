@@ -168,6 +168,20 @@ public:
   }
 
   /**
+   * Copies the content of this matrix to another matrix.
+   * The other matrix needs to be at least as big as this matrix.
+   * @param[out] destination the destination matrix
+   */
+  void copyTo(FloatMatrix destination);
+
+  /**
+   * Copies the content of another matrix into this matrix.
+   * This matrix needs to be at least as big as the other matrix.
+   * @param[in] source the source matrix
+   */
+  void copyFrom(FloatMatrix source);
+
+  /**
    * Creates a new FloatMatrix.
    * Allocates rows*columns*sizeof(float) bytes of memory and returns a FloatMatrix that points to it.
    * @param rows the number of rows of the new FloatMatrix.
