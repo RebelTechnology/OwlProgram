@@ -108,3 +108,8 @@ C_SRC += $(DSPLIB)/StatisticsFunctions/arm_var_q15.c
 
 C_SRC += $(DSPLIB)/BasicMathFunctions/arm_add_q31.c
 
+
+C_SRC += $(DSPLIB)/MatrixFunctions/arm_mat_init_f32.c
+C_SRC += $(DSPLIB)/MatrixFunctions/arm_mat_add_f32.c
+C_SRC += $(DSPLIB)/MatrixFunctions/arm_mat_mult_f32.c
+
