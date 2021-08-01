@@ -6,10 +6,10 @@
 #include "FloatMatrix.h"
 
 template <size_t matrix_order>
-class AbstractTransform {
+class AbstractMatrix {
 public:
-    AbstractTransform() = default;
-    AbstractTransform(FloatMatrix matrix) {
+    AbstractMatrix() = default;
+    AbstractMatrix(FloatMatrix matrix) {
         this->matrix = matrix;
         resetMatrix();
     }
@@ -22,19 +22,21 @@ public:
             matrix[i][i] = 1;
         }
     }
+
 protected:
     FloatMatrix matrix;
 };
 
+/**
+ * This template creates classes that can manage a single transformation matrix
+ **/
 template <size_t matrix_order, typename Operation>
-class ComplexTransformTemplate : public AbstractTransform<matrix_order>,
-                                 public ComplexSignalProcessor {
+class TransformationMatrix : public AbstractMatrix<matrix_order>,
+                             public ComplexSignalProcessor {
 public:
-    using AbstractTransform<matrix_order>::AbstractTransform;
-    using AbstractTransform<matrix_order>::matrix;
+    using AbstractMatrix<matrix_order>::AbstractMatrix;
+    using AbstractMatrix<matrix_order>::matrix;
     using ComplexSignalProcessor::process;
-
-
 
     ComplexFloat process(ComplexFloat input) {
         if constexpr (matrix_order == 2) {
@@ -47,9 +49,8 @@ public:
                 input.re * matrix[1][0] + input.im * matrix[1][1] + matrix[1][2]);
         }
         else if constexpr (matrix_order > 3) {
-            ComplexFloat result {
-                input.re * matrix[0][0] + input.im * matrix[0][1],
-                input.re * matrix[1][0] + input.im * matrix[1][1]};
+            ComplexFloat result { input.re * matrix[0][0] + input.im * matrix[0][1],
+                input.re * matrix[1][0] + input.im * matrix[1][1] };
             for (size_t i = 2; i < matrix_order; i++) {
                 input.re += matrix[0][i];
                 input.im += matrix[0][i];
@@ -59,11 +60,9 @@ public:
             return ComplexFloat {};
         }
     }
-
     static Operation* create() {
         FloatMatrix matrix = FloatMatrix::create(matrix_order, matrix_order);
-        Operation* op = new Operation(matrix);
-        return op;
+        return new Operation(matrix);
     }
     static void destroy(Operation* transform) {
         FloatMatrix::destroy(transform->matrix);
@@ -71,162 +70,168 @@ public:
     }
 };
 
-class LinearReflection2D : public ComplexTransformTemplate<2, LinearReflection2D> {
+template <size_t matrix_order>
+class Rotation2D
+    : public TransformationMatrix<matrix_order, Rotation2D<matrix_order>> {
 public:
-    using ComplexTransformTemplate<2, LinearReflection2D>::ComplexTransformTemplate;
-    void setAngle(float angle) {
-        matrix[0][0] = cos(angle * 2);
-        matrix[1][0] = sin(angle * 2);
-        matrix[0][1] = matrix[0][1];
-        matrix[1][1] = -matrix[0][0];
+    using TransformationMatrix<matrix_order, Rotation2D<matrix_order>>::TransformationMatrix;
+    void rotate(float angle) {
+        FloatMatrix matrix =
+            static_cast<AbstractMatrix<matrix_order>*>(this)->getMatrix();
+        matrix[0][0] = cos(angle);
+        matrix[1][0] = sin(angle);
+    }
+    void rotate(ComplexFloat angle) {
+        FloatMatrix matrix =
+            static_cast<AbstractMatrix<matrix_order>*>(this)->getMatrix();
+        matrix[0][0] = angle.re;
+        matrix[1][0] = angle.im;
     }
 };
 
-class AffineReflection2D : public ComplexTransformTemplate<3, AffineReflection2D> {
+using LinearRotation2D = Rotation2D<2>;
+using AffineRotation2D = Rotation2D<3>;
+
+template <size_t matrix_order>
+class Reflection2D
+    : public TransformationMatrix<matrix_order, Reflection2D<matrix_order>> {
 public:
-    using ComplexTransformTemplate<3, AffineReflection2D>::ComplexTransformTemplate;
-    void setAngle(float angle) {
+    using TransformationMatrix<matrix_order, Reflection2D<matrix_order>>::TransformationMatrix;
+    void reflect(float angle) {
+        FloatMatrix matrix =
+            static_cast<AbstractMatrix<matrix_order>*>(this)->getMatrix();
         matrix[0][0] = cos(angle * 2);
         matrix[0][1] = sin(angle * 2);
-        matrix[1][0] = matrix[0][1];
-        matrix[1][1] = -matrix[0][0];
     }
 };
 
-class LinearRotation2D : public ComplexTransformTemplate<2, LinearRotation2D> {
-public:
-    using ComplexTransformTemplate<2, LinearRotation2D>::ComplexTransformTemplate;
-    void setAngle(float angle) {
-        matrix[0][0] = cos(angle);
-        matrix[1][0] = sin(angle);
-        matrix[0][1] = -matrix[1][0];
-        matrix[1][1] = matrix[0][0];
-    }
-};
+using LinearReflection2D = Reflection2D<2>;
+using AffineReflection2D = Reflection2D<3>;
 
-class AffineRotation2D : public ComplexTransformTemplate<3, AffineRotation2D> {
+template <size_t matrix_order>
+class Scale2D : public TransformationMatrix<matrix_order, Scale2D<matrix_order>> {
 public:
-    using ComplexTransformTemplate<3, AffineRotation2D>::ComplexTransformTemplate;
-    void setAngle(float angle) {
-        matrix[0][0] = cos(angle);
-        matrix[1][0] = sin(angle);
-        matrix[0][1] = -matrix[1][0];
-        matrix[1][1] = matrix[0][0];
-    }
-};
-
-class LinearScale2D : public ComplexTransformTemplate<2, LinearScale2D> {
-public:
-    using ComplexTransformTemplate<2, LinearScale2D>::ComplexTransformTemplate;
-    void setDirection(ComplexFloat vector) {
+    using TransformationMatrix<matrix_order, Scale2D<matrix_order>>::TransformationMatrix;
+    void scale(ComplexFloat vector) {
+        FloatMatrix matrix =
+            static_cast<AbstractMatrix<matrix_order>*>(this)->getMatrix();
         matrix[0][0] = vector.re;
         matrix[1][1] = vector.im;
     }
-    void setFactor(float factor) {
+    void scale(float factor) {
+        FloatMatrix matrix =
+            static_cast<AbstractMatrix<matrix_order>*>(this)->getMatrix();
         matrix[0][0] = factor;
         matrix[1][1] = factor;
     }
 };
 
-class AffineScale2D : public ComplexTransformTemplate<3, AffineScale2D> {
+using LinearScale2D = Scale2D<2>;
+using AffineScale2D = Scale2D<3>;
+
+template <size_t matrix_order>
+class Stretch2D
+    : public TransformationMatrix<matrix_order, Stretch2D<matrix_order>> {
 public:
-    using ComplexTransformTemplate<3, AffineScale2D>::ComplexTransformTemplate;
-    void setDirection(ComplexFloat vector) {
-        matrix[0][0] = vector.re;
-        matrix[1][1] = vector.im;
+    using TransformationMatrix<matrix_order, Stretch2D<matrix_order>>::TransformationMatrix;
+    void stretch(ComplexFloat vector) {
+        stretch(vector.re, vector.im);
     }
-    void setFactor(float factor) {
-        matrix[0][0] = factor;
-        matrix[1][1] = factor;
+    void stretch(float re, float im) {
+        FloatMatrix matrix =
+            static_cast<AbstractMatrix<matrix_order>*>(this)->getMatrix();
+        matrix[0][0] = re;
+        matrix[1][1] = im;
     }
 };
 
-class LinearStretch2D : public ComplexTransformTemplate<2, LinearStretch2D> {
-public:
-    using ComplexTransformTemplate<2, LinearStretch2D>::ComplexTransformTemplate;
-    void setDirection(ComplexFloat vector) {
-        matrix[0][0] = vector.re;
-        matrix[1][1] = vector.im;
-    }
-};
+using LinearStretch2D = Stretch2D<2>;
+using AffineStretch2D = Stretch2D<3>;
 
-class AffineStretch2D : public ComplexTransformTemplate<3, AffineStretch2D> {
+template <size_t matrix_order>
+class Squeeze2D
+    : public TransformationMatrix<matrix_order, Squeeze2D<matrix_order>> {
 public:
-    using ComplexTransformTemplate<3, AffineStretch2D>::ComplexTransformTemplate;
-    void setDirection(ComplexFloat vector) {
-        matrix[0][0] = vector.re;
-        matrix[1][1] = vector.im;
-    }
-};
-
-class LinearSqueeze2D : public ComplexTransformTemplate<2, LinearSqueeze2D> {
-public:
-    using ComplexTransformTemplate<2, LinearSqueeze2D>::ComplexTransformTemplate;
-    void setFactor(float scale) {
+    using TransformationMatrix<matrix_order, Squeeze2D<matrix_order>>::TransformationMatrix;
+    void squeeze(float scale) {
+        FloatMatrix matrix =
+            static_cast<AbstractMatrix<matrix_order>*>(this)->getMatrix();
         matrix[0][0] = scale;
         matrix[1][1] = 1.f / scale;
     }
 };
 
-class LinearShearX2D : public ComplexTransformTemplate<2, LinearShearX2D> {
-public:
-    using ComplexTransformTemplate<2, LinearShearX2D>::ComplexTransformTemplate;
-    void setFactor(float scale) {
-        matrix[0][1] = scale;
-    }
-};
-
-class AffineShearX2D : public ComplexTransformTemplate<3, AffineShearX2D> {
-public:
-    using ComplexTransformTemplate<3, AffineShearX2D>::ComplexTransformTemplate;
-    void setFactor(float scale) {
-        matrix[0][1] = scale;
-    }
-};
-
-class LinearShearY2D : public ComplexTransformTemplate<2, LinearShearY2D> {
-public:
-    using ComplexTransformTemplate<2, LinearShearY2D>::ComplexTransformTemplate;
-    void setFactor(float scale) {
-        matrix[1][0] = scale;
-    }
-};
-
-class AffineShearY2D : public ComplexTransformTemplate<3, AffineShearY2D> {
-public:
-    using ComplexTransformTemplate<3, AffineShearY2D>::ComplexTransformTemplate;
-    void setFactor(float scale) {
-        matrix[1][0] = scale;
-    }
-};
-
-class AffineTranslate2D : public ComplexTransformTemplate<3, AffineTranslate2D> {
-public:
-    using ComplexTransformTemplate<3, AffineTranslate2D>::ComplexTransformTemplate;
-    void setDirection(ComplexFloat vector) {
-        matrix[2][0] = vector.re;
-        matrix[2][1] = vector.im;
-    }
-};
+using LinearSqueeze2D = Squeeze2D<2>;
+using AffineSqueeze2D = Squeeze2D<3>;
 
 template <size_t matrix_order>
-class CompositeTransform
-    : public ComplexTransformTemplate<matrix_order, CompositeTransform<matrix_order>> {
+class Shear2D : public TransformationMatrix<matrix_order, Shear2D<matrix_order>> {
 public:
-    using BaseTransform = AbstractTransform<matrix_order>;
-    using BaseTransform::getMatrix;
-    using BaseTransform::matrix;
+    using TransformationMatrix<matrix_order, Shear2D<matrix_order>>::TransformationMatrix;
+    void shearX(float scale) {
+        FloatMatrix matrix =
+            static_cast<AbstractMatrix<matrix_order>*>(this)->getMatrix();
+        matrix[0][1] = scale;
+    }
+    void shearY(float scale) {
+        FloatMatrix matrix =
+            static_cast<AbstractMatrix<matrix_order>*>(this)->getMatrix();
+        matrix[1][0] = scale;
+    }
+};
 
-    CompositeTransform(FloatMatrix matrix, size_t num_transforms, BaseTransform** transforms)
-        : ComplexTransformTemplate<matrix_order, CompositeTransform<matrix_order>>(matrix)
+using LinearShear2D = Shear2D<2>;
+using AffineShear2D = Shear2D<3>;
+
+template <size_t matrix_order>
+class Translation2D
+    : public TransformationMatrix<matrix_order, Translation2D<matrix_order>> {
+public:
+    using TransformationMatrix<matrix_order, Translation2D<matrix_order>>::TransformationMatrix;
+    // template <std::size_t size = MatrixSource::matrix_order>
+    typename std::enable_if<matrix_order == 3>::type translate(ComplexFloat vector) {
+        translate(vector.re, vector.im);
+    }
+    typename std::enable_if<matrix_order == 3>::type translate(float re, float im) {
+        FloatMatrix matrix =
+            static_cast<AbstractMatrix<matrix_order>*>(this)->getMatrix();
+        matrix[0][2] = re;
+        matrix[1][2] = im;
+    }
+};
+/**
+ * Unlike other operations, translation can't be performed with matrix order below 3
+ **/
+using AffineTranslation2D = Translation2D<3>;
+
+/**
+ * Composite transform can apply a sequence of transformation matrices. Block based version
+ * calculates final transformation matrix just once per blocck rather than for every sample.
+ **/
+template <size_t matrix_order>
+class CompositeTransform
+    : public TransformationMatrix<matrix_order, CompositeTransform<matrix_order>> {
+private:
+    using MatrixType = AbstractMatrix<matrix_order>;
+
+public:
+    using TransformationMatrix<matrix_order, CompositeTransform<matrix_order>>::process;
+
+    CompositeTransform() = default;
+    CompositeTransform(FloatMatrix matrix, size_t num_transforms, MatrixType** transforms)
+        : TransformationMatrix<matrix_order, CompositeTransform<matrix_order>>(matrix)
         , transforms(transforms)
         , num_transforms(num_transforms) {
     }
 
+    ComplexFloat process(ComplexFloat input) {
+        computeMatrix();
+        return TransformationMatrix<matrix_order, CompositeTransform<matrix_order>>::process(input);
+    }
+
     void process(ComplexFloatArray input, ComplexFloatArray output) {
         computeMatrix();
-        ComplexTransformTemplate<matrix_order, CompositeTransform<matrix_order>>::process(
-            input, output);
+        TransformationMatrix<matrix_order, CompositeTransform<matrix_order>>::process(input, output);
     }
     void computeMatrix() {
         FloatMatrix m = this->matrix;
@@ -236,16 +241,13 @@ public:
         }
     }
 
-    void setTransform(size_t position, BaseTransform* transform) {
-        transforms[position] = transform;
-    }
-
-    static CompositeTransform* create(size_t transforms) {
+    template <typename... Transforms>
+    static CompositeTransform* create(Transforms*... transform_ptrs) {
         FloatMatrix matrix = FloatMatrix::create(matrix_order, matrix_order);
-        BaseTransform** transform_pointers = new BaseTransform*[transforms];
-        return new CompositeTransform(matrix, transforms, transform_pointers);
+        MatrixType** transforms = new MatrixType*[sizeof...(Transforms)];
+        setTransform(transforms, 0, transform_ptrs...);
+        return new CompositeTransform(matrix, sizeof...(Transforms), transforms);
     }
-
     static void destroy(CompositeTransform* transform) {
         FloatMatrix::destroy(transform->matrix);
         delete[] transform->transforms;
@@ -253,78 +255,96 @@ public:
     }
 
 protected:
-    BaseTransform** transforms;
+    MatrixType** transforms;
     size_t num_transforms;
+
+    template <typename... Transforms>
+    static void setTransform(MatrixType** transforms, size_t position,
+        MatrixType* transform, Transforms*... transform_ptrs) {
+        transforms[position] = transform;
+        setTransform(transforms, position + 1, transform_ptrs...);
+    }
+    static void setTransform(MatrixType** transforms, size_t position) {
+    }
 };
 
+/**
+ * This class calculates transformation matrix once per audio block just like the CompositeTemplate.
+ * In addition to that it calculates second matrix with delta values used to smoothly interpolate
+ * between matrix states at audio rate. This adds one matrix addition per sample
+ **/
 template <size_t matrix_order>
 class InterpolatedCompositeTransform
-    : public ComplexTransformTemplate<matrix_order, CompositeTransform<matrix_order>> {
+    : public TransformationMatrix<matrix_order, InterpolatedCompositeTransform<matrix_order>> {
+private:
+    using MatrixType = AbstractMatrix<matrix_order>;
+    using MatrixType::matrix;
+
 public:
-    using BaseTransform = AbstractTransform<matrix_order>;
-    using BaseTransform::getMatrix;
-    using BaseTransform::matrix;
-    using ComplexTransformTemplate<matrix_order, CompositeTransform<matrix_order>>::process;
+    using TransformationMatrix<matrix_order, InterpolatedCompositeTransform<matrix_order>>::process;
 
     InterpolatedCompositeTransform(FloatMatrix matrix, FloatMatrix prev_matrix,
-        FloatMatrix delta, size_t num_transforms, BaseTransform** transforms)
-        : ComplexTransformTemplate<matrix_order, CompositeTransform<matrix_order>>(matrix)
+        FloatMatrix delta_matrix, size_t num_transforms, MatrixType** transforms)
+        : TransformationMatrix<matrix_order, InterpolatedCompositeTransform<matrix_order>>(
+              matrix)
         , transforms(transforms)
         , num_transforms(num_transforms)
         , prev_matrix(prev_matrix)
-        , delta(delta) {
+        , delta_matrix(delta_matrix) {
     }
-
     void process(ComplexFloatArray input, ComplexFloatArray output) {
         computeMatrix();
         float mult = 1.f / input.getSize();
         for (size_t i = 0; i < matrix_order; i++) {
             for (size_t j = 0; j < matrix_order; j++) {
-                delta[i][j] = (matrix[i][j] - prev_matrix[i][j]) * mult;
+                delta_matrix[i][j] = (matrix[i][j] - prev_matrix[i][j]) * mult;
             }
         }
-
         matrix.copyFrom(prev_matrix);
         for (size_t i = 0; i < input.getSize(); i++) {
-            matrix.add(delta);
-            output[i] = process(input[i]);
+            matrix.add(delta_matrix);
+            output[i] = this->process(input[i]);
         }
         prev_matrix.copyFrom(matrix);
     }
     void computeMatrix() {
         FloatMatrix m = this->matrix;
-
         m.copyFrom(transforms[num_transforms - 1]->getMatrix());
         for (int i = num_transforms - 2; i >= 0; i--) {
             m.multiply(transforms[i]->getMatrix());
         }
     }
-
-    void setTransform(size_t position, BaseTransform* transform) {
-        transforms[position] = transform;
-    }
-
-    static InterpolatedCompositeTransform* create(size_t transforms) {
+    template <typename... Transforms>
+    static InterpolatedCompositeTransform* create(Transforms*... transform_ptrs) {
         FloatMatrix matrix = FloatMatrix::create(matrix_order, matrix_order);
-        BaseTransform** transform_pointers = new BaseTransform*[transforms];
         FloatMatrix prev_matrix = FloatMatrix::create(matrix_order, matrix_order);
-        FloatMatrix delta = FloatMatrix::create(matrix_order, matrix_order);
-        return new InterpolatedCompositeTransform(
-            matrix, prev_matrix, delta, transforms, transform_pointers);
+        FloatMatrix delta_matrix = FloatMatrix::create(matrix_order, matrix_order);
+        MatrixType** transforms = new MatrixType*[sizeof...(Transforms)];
+        setTransform(transforms, 0, transform_ptrs...);
+        return new InterpolatedCompositeTransform(matrix, prev_matrix,
+            delta_matrix, sizeof...(Transforms), transforms);
     }
-
     static void destroy(InterpolatedCompositeTransform* transform) {
         FloatMatrix::destroy(transform->matrix);
         FloatMatrix::destroy(transform->prev_matrix);
-        FloatMatrix::destroy(transform->delta);
+        FloatMatrix::destroy(transform->delta_matrix);
         delete[] transform->transforms;
         delete transform;
     }
 
 protected:
-    BaseTransform** transforms;
+    MatrixType** transforms;
     size_t num_transforms;
-    FloatMatrix prev_matrix, delta;
-};
+    FloatMatrix prev_matrix, delta_matrix;
 
+    template <typename... Transforms>
+    static void setTransform(MatrixType** transforms, size_t position,
+        MatrixType* transform, Transforms*... transform_ptrs) {
+        transforms[position] = transform;
+        setTransform(transforms, position + 1, transform_ptrs...);
+    }
+
+    static void setTransform(MatrixType** transforms, size_t position) {
+    }
+};
 #endif
