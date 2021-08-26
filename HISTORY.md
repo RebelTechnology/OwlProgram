@@ -1,3 +1,7 @@
+* Automatically add '>' to end of gen~ output parameters
+* Updated to use C++17
+* Use std::min/max/abs/clamp instead of macros for C++
+* Refactored AdsrEnvelope to Linear and Exponential versions
 * Updated CMSIS libraries
 
 v21.2
