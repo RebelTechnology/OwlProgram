@@ -43,6 +43,13 @@ public:
       phase -= 2*M_PI;
     return sample;
   }
+  float generate(float fm){
+    float sample = sinf(phase);
+    phase += incr + fm;
+    if(phase >= 2*M_PI)
+      phase -= 2*M_PI;
+    return sample;
+  }
   void generate(FloatArray output){
     size_t len = output.getSize();
     for(size_t i=0; i<len; ++i){
@@ -51,12 +58,13 @@ public:
     }
     phase = fmodf(phase, 2*M_PI);
   }
-  float generate(float fm){
-    float sample = sinf(phase);
-    phase += incr + fm;
-    if(phase >= 2*M_PI)
-      phase -= 2*M_PI;
-    return sample;
+  void generate(FloatArray output, FloatArray fm){
+    size_t len = output.getSize();
+    for(size_t i=0; i<len; ++i){
+      output[i] = sinf(phase);
+      phase += incr + fm[i]; // allow phase to overrun
+    }
+    phase = fmodf(phase, 2*M_PI);
   }
   static SineOscillator* create(float sr){
     return new SineOscillator(sr);
