@@ -63,7 +63,7 @@ def main():
             elif name.startswith('Channel-'):
                 key = name.split('Channel-', 1)[1]
                 jdata.append((key, name, 'RECV', "0x%x" % heavy_hash(name),
-                              0, 1, 0.5, key in OWL_BUTTONS))
+                              0, 1, None, key in OWL_BUTTONS))
 
         for k, v in ir['objects'].iteritems():
             try:
@@ -79,7 +79,7 @@ def main():
                     elif name.startswith('Channel-'):
                         key = name.split('Channel-', 1)[1]
                         jdata.append((key, name+'>', 'SEND', "0x%x" % heavy_hash(name),
-                                      0, 1, 0.5, key in OWL_BUTTONS))
+                                      0, 1, None, key in OWL_BUTTONS))
             except:
                 pass
 
