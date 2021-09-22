@@ -10,13 +10,6 @@ public:
   float getSample(){
     return sinf(phase);
   }
-  float generate(float fm){
-    float sample = sinf(phase);
-    phase += incr + fm;
-    if(phase >= 2*M_PI)
-      phase -= 2*M_PI;
-    return sample;
-  }
   void generate(FloatArray output){
     size_t len = output.getSize();
     for(size_t i=0; i<len; ++i){
@@ -33,15 +26,6 @@ public:
       // allow phase to overrun
     }
     phase = fmodf(phase, end_phase);
-  }
-  static SineOscillator* create(float sr){
-    return new SineOscillator(sr);
-  }
-  static SineOscillator* create(float freq, float sr){
-    return new SineOscillator(freq, sr);
-  }
-  static void destroy(SineOscillator* osc){
-    delete osc;
   }
   using OscillatorTemplate<SineOscillator>::generate;  
 };
