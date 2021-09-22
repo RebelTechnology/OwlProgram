@@ -77,7 +77,9 @@ public:
   }
   void read(size_t channel, FloatArray output){
     size_t channels = getNumberOfChannels();
-    size_t len = min(output.getSize(), getNumberOfSamples());
+    size_t len = getNumberOfSamples();
+    if(len > output.getSize())
+      len = output.getSize();
     size_t pos = channel % channels;
     if(header->audio_format == 1 && header->bps == 8){ // WAVE_FORMAT_PCM 8-bit
       int8_t* data = (int8_t*)getData();      
