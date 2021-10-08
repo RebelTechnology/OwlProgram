@@ -104,7 +104,7 @@ PHONY: libs web minify
 
 # JavaScript minifiers
 #CLOSURE = java -jar Tools/node_modules/google-closure-compiler/compiler.jar --language_in=ECMASCRIPT5
-UGLIFYJS = Tools/node_modules/uglifyjs/bin/uglifyjs
+UGLIFYJS = Tools/node_modules/uglify-js/bin/uglifyjs
 
 $(WEBDIR)/$(TARGET).js: $(PATCH_OBJS)
 	$(EMCC) $(LDFLAGS) $(PATCH_OBJS) -o $(WEBDIR)/$(TARGET).js Libraries/libowlweb.a -Wl,--whole-archive Libraries/libdaisyspweb.a -Wl,--no-whole-archive
