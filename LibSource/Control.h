@@ -8,7 +8,10 @@
 template<PatchParameterId PID>
 class Control {
 public:
-  Control<PID>(const float value=0){
+  Control<PID>(){
+    ASSERT(PID < getProgramVector()->parameters_size, "Invalid parameter ID");
+  }
+  Control<PID>(const float value){
     ASSERT(PID < getProgramVector()->parameters_size, "Invalid parameter ID");
     set(value);
   }

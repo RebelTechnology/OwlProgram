@@ -35,27 +35,31 @@ public:
   float getPhase(){
     return M_PI*x/N+M_PI;
   }
+  void reset(){
+    x = -N;
+  }
   /**
-   * Normalise offset and gain so that signal is between 0 and 1
+   * Normalise offset and gain so that signal is between -1 and 1
    */
   void normalise(){
     offset = agnesi(N, a);
-    gain = 1/(agnesi(0, a) - offset);
+    gain = 2/(agnesi(0, a) - offset);
+    offset += 0.5;
   }
   float generate(){
     float y = agnesi(x, a);
     x += incr;
     if(x > N)
       x -= 2*N;
-    return gain*(y-offset);
+    return clamp(gain*(y-offset), -1.0f, 1.0f);
   }
   float generate(float fm){
     // modulate coefficient 'a' instead of rate
-    float y = agnesi(x, a+fm);
+    float y = agnesi(x, a*(1+fm));
     x += incr;
     if(x > N)
       x -= 2*N;
-    return gain*(y-offset);
+    return clamp(gain*(y-offset), -1.0f, 1.0f);
   }
   using SignalGenerator::generate;
   static AgnesiOscillator* create(float sr, float a=0.5, float N=5){

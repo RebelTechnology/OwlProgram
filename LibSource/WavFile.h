@@ -72,6 +72,9 @@ public:
   size_t getBitsPerSample(){
     return header->bps;
   }
+  int16_t getAudioFormat(){
+    return header->audio_format;
+  }
   void* getData(){
     return datachunk->id + sizeof(WavDataChunk);
   }

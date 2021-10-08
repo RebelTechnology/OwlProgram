@@ -34,6 +34,7 @@ EMCCFLAGS += -Wno-unknown-warning-option
 EMCCFLAGS += --memory-init-file 0 # don't create separate memory init file .mem
 EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_getParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus','_WEB_getButtons','_WEB_setButton', '_WEB_processMidi', '_malloc']"
 EMCCFLAGS += -s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']"
+EMCCFLAGS += "-DPATCHNAME=\"$(PATCHNAME)\""
 
 include $(BUILDROOT)/sources.mk
 CPP_SRC += Source/Patch.cpp
@@ -51,7 +52,7 @@ EMCCFLAGS += -s WASM=0 # disables wasm output
 
 CPPFLAGS =
 CFLAGS   = $(EMCCFLAGS) -std=gnu11
-CXXFLAGS = $(EMCCFLAGS) -std=gnu++14
+CXXFLAGS = $(EMCCFLAGS) -std=gnu++17
 LDFLAGS  = $(EMCCFLAGS)
 
 EMCC_OBJS = $(addprefix $(WEBDIR)/, $(notdir $(CPP_SRC:.cpp=.o)))

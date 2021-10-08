@@ -10,9 +10,20 @@ class AbstractSynth : public Synth, public MidiProcessor, public VelocityCurve {
 protected:
   uint8_t note = 60; // C4
   float pb = 0;
-  float pb_range = 2;
+  float pb_range = 2/8192.0f;
+  float mod_range = 0.5/127.0f;
+  float tuning = 440;
 public:
   virtual ~AbstractSynth(){}
+  /**
+   * Set frequency in Hertz for middle A (defaults to Stuttgart pitch, A440, 440 Hz)
+   */
+  void setTuning(float value){
+    tuning = value;
+  }
+  float getTuning(){
+    return tuning;
+  }
   /**
    * Set note in whole semitones
    */
@@ -50,8 +61,14 @@ public:
    * Does not update the frequency; effective from next pitch bend change
    */
   void setPitchBendRange(float range){
-    this->pb_range = range;
-  }  
+    this->pb_range = range/8192.0f;
+  }
+  /**
+   * Set modulation depth range, from 0 to 1.0
+   */
+  void setModulationDepthRange(float range){
+    mod_range = range / 127.0f;
+  }
   // MIDI handlers
   virtual void noteOn(MidiMessage msg) override {
     setNote(msg.getNote());
@@ -64,30 +81,34 @@ public:
   }
   virtual void controlChange(MidiMessage msg) override {
     if(msg.getControllerNumber() == MIDI_CC_MODULATION)
-      setModulation(msg.getControllerValue()/127.0f);
+      setModulation(msg.getControllerValue()/128.0f);
     else if(msg.getControllerNumber() == MIDI_ALL_NOTES_OFF)
       allNotesOff();
   }
   virtual void channelPressure(MidiMessage msg) override {
-    setPressure(msg.getChannelPressure()/127.0f);
+    setPressure(msg.getChannelPressure()/128.0f);
   }
   virtual void polyKeyPressure(MidiMessage msg) override {
-    setPressure(msg.getPolyKeyPressure()/127.0f);
+    setPressure(msg.getPolyKeyPressure()/128.0f);
   }
-  virtual void setModulation(float modulation){} // default implementation does nothing
-  virtual void setPressure(float pressure){}
+  virtual void modulate(MidiMessage msg) override {
+    setModulation(mod_range * msg.getControllerValue());
+  }
   virtual void pitchbend(MidiMessage msg) override {
-    setPitchBend(pb_range*msg.getPitchBend()/8192.0f);
+    setPitchBend(pb_range * msg.getPitchBend());
   }
   virtual void allNotesOff(){
     gate(false);
   }
+  // default implementations do nothing
+  virtual void setModulation(float modulation){} 
+  virtual void setPressure(float pressure){}
   // static utility methods
-  static inline float frequencyToNote(float freq){
-    return 12 * log2f(freq / 440) + 69;
+  inline float frequencyToNote(float freq){
+    return 12 * log2f(freq / tuning) + 69;
   }
-  static inline float noteToFrequency(float note){
-    return 440 * exp2f((note - 69) / 12);
+  inline float noteToFrequency(float note){
+    return tuning * exp2f((note - 69) / 12);
   }
 };
 

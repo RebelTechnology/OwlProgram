@@ -4,16 +4,25 @@
 #include <stdint.h>
 #include <string.h> // for memcpy
 
-template<typename T = float>
+#ifndef FLOW_ASSERT
+#define FLOW_ASSERT(x, y)
+#endif
+
+template<typename T>
 class CircularBuffer {
-private:
+protected:
   T* data;
-  const size_t size;
+  size_t size;
   size_t writepos = 0;
   size_t readpos = 0;
 public:
   CircularBuffer(): data(NULL), size(0){}
   CircularBuffer(T* data, size_t size): data(data), size(size){}
+
+  void setData(T* data, size_t len) {
+    this->data = data;
+    size = len;
+  }
 
   size_t getSize() const {
     return size;
@@ -34,7 +43,7 @@ public:
   }
 
   void write(T* source, size_t len){
-    ASSERT(getWriteCapacity() >= len, "overflow");
+    FLOW_ASSERT(getWriteCapacity() >= len, "overflow");
     T* dest = getWriteHead();
     size_t rem = size-writepos;
     if(len > rem){
@@ -51,17 +60,14 @@ public:
     data[index % size] = value;
   }
 
-  /**
-   * Interpolated write at sub-sample index.
-   * Inserts a value linearly interpolated at a fractional index.
-   */
-  void interpolatedWriteAt(float index, T value){
-    size_t idx = (size_t)index;
-    T low = readAt(idx);
-    T high = readAt(idx+1);
-    float frac = index - idx;
-    writeAt(idx, low + (value-low)*frac);
-    writeAt(idx+1, value + (high-value)*frac);
+  void overdub(T c){
+    data[writepos++] += c;
+    if(writepos >= size)
+      writepos = 0;
+  }
+
+  void overdubAt(size_t index, T value){
+    data[index % size] += value;
   }
 
   T read(){
@@ -72,7 +78,7 @@ public:
   }
 
   void read(T* dst, size_t len){
-    ASSERT(getReadCapacity() >= len, "underflow");
+    FLOW_ASSERT(getReadCapacity() >= len, "underflow");
     T* src = getReadHead();
     size_t rem = size-readpos;
     if(len > rem){
@@ -87,18 +93,6 @@ public:
   
   T readAt(size_t index){
     return data[index % size];
-  }
-
-  /**
-   * Interpolated read at sub-sample index.
-   * @return a value linearly interpolated at a fractional index
-   */
-  inline float interpolatedReadAt(float index){
-    size_t idx = (size_t)index;
-    T low = readAt(idx);
-    T high = readAt(idx+1);
-    float frac = index - idx;
-    return high+frac*(low-high);
   }
 
   void skipUntilLast(char c){
@@ -131,11 +125,9 @@ public:
     return data+writepos;
   }
 
-  void moveWriteHead(size_t samples){
-    ASSERT(getWriteCapacity() < samples, "overflow");
-    writepos += samples;
-    if(writepos >= size)
-      writepos -= size;
+  void moveWriteHead(int32_t samples){
+    FLOW_ASSERT(getWriteCapacity() >= samples, "overflow");
+    writepos = (writepos + samples) % size;
   }
 
   size_t getReadIndex(){
@@ -150,11 +142,9 @@ public:
     return data+readpos;
   }
 
-  void moveReadHead(size_t samples){
-    ASSERT(getReadCapacity() < samples, "underflow");
-    readpos += samples;
-    if(readpos >= size)
-      readpos -= size;
+  void moveReadHead(int32_t samples){
+    FLOW_ASSERT(getReadCapacity() < samples, "underflow");
+    readpos = (readpos + samples) % size;
   }
 
   /**
@@ -174,26 +164,10 @@ public:
   /**
    * Write to buffer and read with a delay
    */
-  void delay(T* in, T* out, size_t len, int delay){
-    setDelay(delay);
+  void delay(T* in, T* out, size_t len, int delay_samples){
+    setDelay(delay_samples); // set delay relative to where we start writing
     write(in, len);
     read(out, len);
-  }
-  
-  /**
-   * Write to buffer and read with a delay that ramps up or down
-   * from @param beginDelay to @param endDelay
-   */
-  void interpolatedDelay(T* in, T* out, size_t len, float beginDelay, float endDelay){
-    setDelay(beginDelay);
-    write(in, len);
-    float pos = readpos;
-    float incr = (len+endDelay-beginDelay)/len;
-    while(len--){
-      *out++ = interpolatedReadAt(pos);
-      pos += incr;
-    }
-    setDelay(endDelay);
   }
 
   size_t getReadCapacity(){

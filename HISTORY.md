@@ -1,8 +1,19 @@
+* Automatically add '>' to end of gen~ output parameters
+* Updated to use C++17
+* Use std::min/max/abs/clamp instead of macros for C++
+* Refactored AdsrEnvelope to Linear and Exponential versions
 * Updated CMSIS libraries
 
 v21.2
 -----
 
+* Added FloatArray::softclip()
+* Added clamp(x, lo, hi) macro
+* Added TapTempo
+* Added DryWetProcessors
+* Added FeedbackProcessors
+* Added CrossFadingDelayProcessor
+* Added AudioBuffer::copyFrom(), copyTo(), multiply() and add()
 * Added Sample oscillator
 * Added Agnesi curve oscillator
 * Added MPE processor
