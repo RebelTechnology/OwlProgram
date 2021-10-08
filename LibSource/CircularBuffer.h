@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <string.h> // for memcpy
 
+#ifndef FLOW_ASSERT
+#define FLOW_ASSERT(x, y)
+#endif
+
 template<typename T>
 class CircularBuffer {
 protected:
@@ -14,6 +18,11 @@ protected:
 public:
   CircularBuffer(): data(NULL), size(0){}
   CircularBuffer(T* data, size_t size): data(data), size(size){}
+
+  void setData(T* data, size_t len) {
+    this->data = data;
+    size = len;
+  }
 
   size_t getSize() const {
     return size;
@@ -34,7 +43,7 @@ public:
   }
 
   void write(T* source, size_t len){
-    ASSERT(getWriteCapacity() >= len, "overflow");
+    FLOW_ASSERT(getWriteCapacity() >= len, "overflow");
     T* dest = getWriteHead();
     size_t rem = size-writepos;
     if(len > rem){
@@ -51,6 +60,16 @@ public:
     data[index % size] = value;
   }
 
+  void overdub(T c){
+    data[writepos++] += c;
+    if(writepos >= size)
+      writepos = 0;
+  }
+
+  void overdubAt(size_t index, T value){
+    data[index % size] += value;
+  }
+
   T read(){
     T c = data[readpos++];
     if(readpos >= size)
@@ -59,7 +78,7 @@ public:
   }
 
   void read(T* dst, size_t len){
-    ASSERT(getReadCapacity() >= len, "underflow");
+    FLOW_ASSERT(getReadCapacity() >= len, "underflow");
     T* src = getReadHead();
     size_t rem = size-readpos;
     if(len > rem){
@@ -106,11 +125,9 @@ public:
     return data+writepos;
   }
 
-  void moveWriteHead(size_t samples){
-    ASSERT(getWriteCapacity() < samples, "overflow");
-    writepos += samples;
-    if(writepos >= size)
-      writepos -= size;
+  void moveWriteHead(int32_t samples){
+    FLOW_ASSERT(getWriteCapacity() >= samples, "overflow");
+    writepos = (writepos + samples) % size;
   }
 
   size_t getReadIndex(){
@@ -125,11 +142,9 @@ public:
     return data+readpos;
   }
 
-  void moveReadHead(size_t samples){
-    ASSERT(getReadCapacity() < samples, "underflow");
-    readpos += samples;
-    if(readpos >= size)
-      readpos -= size;
+  void moveReadHead(int32_t samples){
+    FLOW_ASSERT(getReadCapacity() < samples, "underflow");
+    readpos = (readpos + samples) % size;
   }
 
   /**
