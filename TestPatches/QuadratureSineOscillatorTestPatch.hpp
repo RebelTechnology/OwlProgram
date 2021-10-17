@@ -45,13 +45,15 @@ public:
       AudioBuffer* s2 = AudioBuffer::create(2, 1000);
       ComplexFloatArray cmp = ComplexFloatArray::create(1000);
       osc1->generate(cmp);
-      cmp.copyTo(s1->getSamples(0), s2->getSamples(1));
+      cmp.copyTo(s1->getSamples(0), s1->getSamples(1));
       for(size_t i=0; i<1000; ++i) {
         ComplexFloat sample = osc2->generate();
         s2->getSamples(0)[i] = sample.re;
         s2->getSamples(1)[i] = sample.im;
       }
       for(size_t i=0; i<1000; ++i) {
+        CHECK_CLOSE(cmp[i].re, s2->getSamples(0)[i], 0.00002);
+        CHECK_CLOSE(cmp[i].im, s2->getSamples(1)[i], 0.00002);
         CHECK_CLOSE(s1->getSamples(0)[i], s2->getSamples(0)[i], 0.00002);
         CHECK_CLOSE(s1->getSamples(1)[i], s2->getSamples(1)[i], 0.00002);
       }
@@ -65,10 +67,10 @@ public:
         CHECK_CLOSE(cmp[i].re, s2->getSamples(0)[i], 0.00002);
         CHECK_CLOSE(cmp[i].im, s2->getSamples(1)[i], 0.00002);
       }
-      AudioBuffer::destroy(s1);      
-      AudioBuffer::destroy(s2);      
-      QuadratureSineOscillator::destroy(osc1);      
-      QuadratureSineOscillator::destroy(osc2);      
+      AudioBuffer::destroy(s1);
+      AudioBuffer::destroy(s2);
+      QuadratureSineOscillator::destroy(osc1);
+      QuadratureSineOscillator::destroy(osc2);
     }
 }
 };

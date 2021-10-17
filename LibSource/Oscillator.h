@@ -68,7 +68,7 @@ public:
 template<class T, class BaseOscillator=Oscillator, typename Sample=float>
 class OscillatorTemplate : public BaseOscillator {
 protected:
-  float mul;
+  float mul = 1;  // Prevent having NaN as default getFrequency result
   float phase = 0;
   float incr = 0;
 public:
