@@ -2,7 +2,6 @@
 #define __ComplexFloatArray_h__
 
 #include "FloatArray.h"
-#include "AudioBuffer.h"
 #include "basicmaths.h"
 
 /**
@@ -133,7 +132,6 @@ struct ComplexFloat {
 
   ComplexFloat& operator+=(float other) {
     re += other;
-    im += other;
     return *this;
   }
 
@@ -157,7 +155,6 @@ struct ComplexFloat {
 
   ComplexFloat& operator-=(float other) {
     re -= other;
-    im -= other;
     return *this;
   }
 
@@ -501,8 +498,23 @@ public:
   */
   void setMagnitude(FloatArray magnitude, int offset, size_t count, ComplexFloatArray destination);
 
-  void copyFrom(AudioBuffer& buffer);
-  void copyTo(AudioBuffer& buffer);
+  using SimpleArray<ComplexFloat>::copyFrom;
+  using SimpleArray<ComplexFloat>::copyTo;
+  /**
+   * Merge two channels of audio containing real and imaginary axis data into this array
+   * 
+   * @param[in] real Real axis data
+   * @param[in] imag Imaginary axis data
+  */
+  void copyFrom(FloatArray real, FloatArray imag);
+
+  /**
+   * Split complex data into two channels of audio containing real and imaginary axis data
+   * 
+   * @param[in] real Real axis data
+   * @param[in] imag Imaginary axis data
+  */
+  void copyTo(FloatArray real, FloatArray imag);
 };
 
 #endif // __ComplexFloatArray_h__

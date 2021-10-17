@@ -313,19 +313,15 @@ void ComplexFloatArray::destroy(ComplexFloatArray array){
   delete[] array.data;
 }
 
-void ComplexFloatArray::copyFrom(AudioBuffer& buffer) {
-  FloatArray left = buffer.getSamples(0);
-  FloatArray right = buffer.getSamples(1);
+void ComplexFloatArray::copyFrom(FloatArray real, FloatArray imag) {
   for (size_t i = 0; i < getSize(); i++) {
-    data[i] = ComplexFloat(left[i], right[i]);
+    data[i] = ComplexFloat(real[i], imag[i]);
   }
 }
 
-void ComplexFloatArray::copyTo(AudioBuffer& buffer) {
-  FloatArray left = buffer.getSamples(0);
-  FloatArray right = buffer.getSamples(1);
+void ComplexFloatArray::copyTo(FloatArray real, FloatArray imag) {
   for (size_t i = 0; i < getSize(); i++) {
-    left[i] = data[i].re;
-    right[i] = data[i].im;
+    real[i] = data[i].re;
+    imag[i] = data[i].im;
   }
 }
