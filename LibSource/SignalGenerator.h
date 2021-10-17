@@ -36,9 +36,8 @@ public:
 
 /**
  * Base class for stereo signal generators such as Oscillators.
- * A ComplexSignalGenerator produces complex numbers with parts
- * in [-1..1] range unless
- * otherwise stated.
+ * A ComplexSignalGenerator produces complex numbers with each channel
+ * containing samples in [-1..1] range unless otherwise stated.
  */
 class ComplexSignalGenerator {
 public:

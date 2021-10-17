@@ -45,15 +45,15 @@ public:
   /**
    * Produce a sample with frequency modulation.
    */
-  virtual ComplexFloat generate() {
-    return generate(0.f);
-  }
   virtual ComplexFloat generate(float fm) = 0;
-  virtual void generate(ComplexFloatArray output) {
-    for(size_t i=0; i<output.getSize(); ++i) {
-      output[i]= generate();
-    }
+  /**
+   * Produce a block of samples with frequency modulation.
+   */
+  virtual void generate(ComplexFloatArray output, FloatArray fm){
+    for(size_t i=0; i<output.getSize(); ++i)
+      output[i] = generate(fm[i]);
   }
+
 };
 
 template<typename OscillatorClass>
