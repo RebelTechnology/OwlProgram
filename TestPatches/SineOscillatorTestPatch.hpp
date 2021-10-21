@@ -45,14 +45,14 @@ public:
       FloatArray s2 = FloatArray::create(1000);
       osc1->generate(s1);
       for(size_t i=0; i<1000; ++i)
-	s2[i] = osc2->generate();
+        s2[i] = osc2->generate();
       for(size_t i=0; i<1000; ++i)
-	CHECK_CLOSE(s1[i], s2[i], 0.00002);
+        CHECK_CLOSE(s1[i], s2[i], 0.00002);
       osc1->generate(s1);
       for(size_t i=0; i<1000; ++i)
-	s2[i] = osc2->generate();
+        s2[i] = osc2->generate();
       for(size_t i=0; i<1000; ++i)
-	CHECK_CLOSE(s1[i], s2[i], 0.00002);
+        CHECK_CLOSE(s1[i], s2[i], 0.00002);
       FloatArray::destroy(s1);      
       FloatArray::destroy(s2);      
       SineOscillator::destroy(osc1);      
