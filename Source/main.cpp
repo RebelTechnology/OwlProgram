@@ -35,7 +35,6 @@ int main(void){
   HeapRegion_t regions[5];
   if(pv->checksum >= PROGRAM_VECTOR_CHECKSUM_V13 && pv->heapLocations != NULL){
     int cnt = 0;
-    extern char _eprogram, _eram; // remaining program space
     MemorySegment* seg = pv->heapLocations;
     while(seg != NULL && seg->location != NULL && cnt < 5){
       regions[cnt++] = { seg->location, seg->size };
