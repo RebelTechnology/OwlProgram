@@ -186,7 +186,6 @@ grind: $(DEPS) ## run valgrind on patch natively
 	@$(MAKE) -s -f native.mk grind
 
 check: ## run test patches and unit tests natively
-	@make libs docs
 	@for nm in $(TESTS) ; do \
 		$(MAKE) -s TEST=$$nm test || exit;\
 	done
