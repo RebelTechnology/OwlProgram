@@ -3,6 +3,7 @@
 
 #include "Patch.h"
 #include "gen.h"
+#include "genlib.h"
 #include "PatchMetadata.h"
 
 #if __has_include("metadata.h")
