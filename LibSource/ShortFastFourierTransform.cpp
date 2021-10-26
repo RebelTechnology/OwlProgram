@@ -34,7 +34,7 @@ void ShortFastFourierTransform::ifft(ComplexShortArray in, ShortArray out){
   arm_rfft_q15(&instance, (int16_t*)in.getData(), (int16_t*)out.getData());
 }
 
-int ShortFastFourierTransform::getSize(){
+size_t ShortFastFourierTransform::getSize(){
   return len;
 }
 
@@ -78,7 +78,7 @@ void ShortFastFourierTransform::ifft(ComplexShortArray input, ShortArray output)
   }
 }
     
-int ShortFastFourierTransform::getSize(){
+size_t ShortFastFourierTransform::getSize(){
   return temp.getSize();
 }
 

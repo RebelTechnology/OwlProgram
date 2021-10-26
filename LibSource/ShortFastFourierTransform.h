@@ -73,7 +73,7 @@ public:
    * Get the size of the FFT
    * @return The size of the FFT
   */
-  int getSize();
+  size_t getSize();
 };
 
 #endif // __ShortFastFourierTransform_h__
