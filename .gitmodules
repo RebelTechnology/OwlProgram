@@ -5,4 +5,4 @@
 [submodule "Tools/hvcc"]
 	path = Tools/hvcc
 	url = https://github.com/pingdynasty/hvcc.git
-	branch = feature/develop
+	branch = develop
