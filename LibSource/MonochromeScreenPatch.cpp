@@ -88,7 +88,7 @@ void MonochromeScreenBuffer::fade(uint16_t steps){
 
 template<>
 void MonochromeScreenBuffer::fill(Colour c) {
-  memset(pixels, c, height*width/8);
+  memset(pixels, c == WHITE ? 0xff : 0x00, height*width/8);
   // for(unsigned int i=0; i<height*width; ++i)
   //   pixels[i] = c;
 }
