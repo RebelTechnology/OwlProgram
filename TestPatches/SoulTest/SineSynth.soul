@@ -1,0 +1,118 @@
+/*
+    == SOUL example code ==
+    == Author: Jules ==
+*/
+
+/// Title: A simple MPE sine-wave synthesiser example
+///
+/// A simple sine-wave synthesiser featuring pitch-bend support, using a basic
+/// envelope and voice-allocator.
+
+graph SineSynth  [[ main ]]
+{
+    input smoothedGain.volume [[ name: "Volume", min: -40, max: 0, init: -6, step: 1 ]];
+    input event soul::midi::Message midiIn;
+    output stream float audioOut;
+
+    let
+    {
+        voices = Voice[8];
+        voiceAllocator = soul::voice_allocators::Basic(8);
+
+        smoothedGain = soul::gain::SmoothedGainParameter (0.5f);
+        gainProcessor = soul::gain::DynamicGain (float);
+    }
+
+    connection
+    {
+        midiIn -> soul::midi::MPEParser -> voiceAllocator;
+
+        // Plumb the voice allocator to the voices array
+        voiceAllocator.voiceEventOut -> voices.noteOn,
+                                        voices.noteOff,
+                                        voices.pitchBend;
+
+        // Sum the voices audio out to the output
+        voices       -> gainProcessor.in;
+        smoothedGain -> gainProcessor.gain;
+        gainProcessor -> audioOut;
+    }
+}
+
+//==============================================================================
+processor SineOsc
+{
+    input event
+    {
+        soul::note_events::NoteOn noteOn;
+        soul::note_events::NoteOff noteOff;
+        soul::note_events::PitchBend pitchBend;
+    }
+
+    output stream float audioOut;
+
+    event noteOn (soul::note_events::NoteOn e)
+    {
+        notePitch = e.note;
+        bendSemitones = 0.0f;
+        calculatePhaseIncrement();
+    }
+
+    event noteOff (soul::note_events::NoteOff e) {}
+
+    event pitchBend (soul::note_events::PitchBend e)
+    {
+        bendSemitones = e.bendSemitones;
+        calculatePhaseIncrement();
+    }
+
+    float notePitch, bendSemitones, phase, phaseIncrement;
+
+    void calculatePhaseIncrement()
+    {
+        let noteFrequency  = soul::noteNumberToFrequency (notePitch + bendSemitones);
+        phaseIncrement = float (noteFrequency * twoPi * processor.period);
+    }
+
+    void run()
+    {
+        loop
+        {
+            phase = addModulo2Pi (phase, phaseIncrement);
+            audioOut << sin (phase);
+            advance();
+        }
+    }
+}
+
+//==============================================================================
+graph Voice
+{
+    input event
+    {
+        soul::note_events::NoteOn noteOn;
+        soul::note_events::NoteOff noteOff;
+        soul::note_events::PitchBend pitchBend;
+    }
+
+    output stream float audioOut;
+
+    let
+    {
+        osc = SineOsc;
+        amplitudeEnvelope = soul::envelope::FixedAttackReleaseEnvelope (0.2f, 0.02f, 0.1f);
+        attenuator = soul::gain::DynamicGain (float);
+    }
+
+    connection
+    {
+        noteOn          -> osc.noteOn;
+        noteOff         -> osc.noteOff;
+        pitchBend       -> osc.pitchBend;
+        noteOn, noteOff -> amplitudeEnvelope.noteIn;
+
+        osc.audioOut                -> attenuator.in;
+        amplitudeEnvelope.levelOut  -> attenuator.gain;
+        attenuator                  -> audioOut;
+    }
+}

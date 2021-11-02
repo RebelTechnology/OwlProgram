@@ -3,6 +3,7 @@
 
 #include "Patch.h"
 #include "gen.h"
+#include "genlib.h"
 #include "PatchMetadata.h"
 
 #if __has_include("metadata.h")
@@ -105,8 +106,8 @@ class GenParameter : public GenParameterBase {
 public:
   PatchParameterId pid;
   int8_t index;
-  float min = 0.0;
-  float max = 1.0;
+  float min = 0.0f;
+  float max = 1.0f;
   GenParameter(Patch* patch, CommonState *context, const char* name, PatchParameterId id, int8_t idx) : pid(id), index(idx) {
 #ifndef OWL_METADATA
     patch->registerParameter(id, name);
@@ -222,7 +223,7 @@ public:
     for(int ch=channels; ch<gen::num_outputs(); ++ch)
       buffers[ch] = new float[getBlockSize()];
 
-    size_t nof_outs = gen::num_outputs()-min(gen::num_outputs(), channels);
+    size_t nof_outs = gen::num_outputs()-std::min((size_t)gen::num_outputs(), channels);
     // debugMessage("outs", (int)channels, nof_outs, sizeof(OutputParameter[nof_outs]));
     if(nof_outs > 0)
       outputs = SimpleArray<OutputParameter>(new OutputParameter[nof_outs], nof_outs);

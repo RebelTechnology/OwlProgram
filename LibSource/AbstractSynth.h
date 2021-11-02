@@ -70,31 +70,31 @@ public:
     mod_range = range / 127.0f;
   }
   // MIDI handlers
-  virtual void noteOn(MidiMessage msg) override {
+  virtual void noteOn(MidiMessage msg) {
     setNote(msg.getNote());
     setFrequency(noteToFrequency(note+pb));
     setGain(velocityToGain(msg.getVelocity()));
     gate(true);
   }
-  virtual void noteOff(MidiMessage msg) override {
+  virtual void noteOff(MidiMessage msg) {
     gate(false);
   }
-  virtual void controlChange(MidiMessage msg) override {
+  virtual void controlChange(MidiMessage msg) {
     if(msg.getControllerNumber() == MIDI_CC_MODULATION)
       setModulation(msg.getControllerValue()/128.0f);
     else if(msg.getControllerNumber() == MIDI_ALL_NOTES_OFF)
       allNotesOff();
   }
-  virtual void channelPressure(MidiMessage msg) override {
+  virtual void channelPressure(MidiMessage msg) {
     setPressure(msg.getChannelPressure()/128.0f);
   }
-  virtual void polyKeyPressure(MidiMessage msg) override {
+  virtual void polyKeyPressure(MidiMessage msg) {
     setPressure(msg.getPolyKeyPressure()/128.0f);
   }
-  virtual void modulate(MidiMessage msg) override {
+  virtual void modulate(MidiMessage msg) {
     setModulation(mod_range * msg.getControllerValue());
   }
-  virtual void pitchbend(MidiMessage msg) override {
+  virtual void pitchbend(MidiMessage msg) {
     setPitchBend(pb_range * msg.getPitchBend());
   }
   virtual void allNotesOff(){

@@ -463,4 +463,17 @@ short genlib_setstate(CommonState *cself, const char *state, setparameter_method
 	
 	return 0;
 }
+#else
+short genlib_setstate(CommonState *cself, const char *state, setparameter_method setmethod)
+{
+  return 0;
+}
+short genlib_getstate(CommonState *cself, char *state, getparameter_method getmethod)
+{
+  return 0;
+}
+size_t genlib_getstatesize(CommonState *cself, getparameter_method getmethod)
+{
+  return 0;
+}
 #endif

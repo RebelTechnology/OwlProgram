@@ -45,7 +45,11 @@ PATCHNAME   ?= $(SOUL)
 PATCHCLASS  ?= SoulPatch
 PATCHFILE   ?= SoulPatch.hpp
 SOULCLASS   ?= $(SOUL)
+ifneq ("$(wildcard $(PATCHSOURCE)/$(SOUL).soulpatch)","")
 SOULFILE    ?= $(SOUL).soulpatch
+else
+SOULFILE    ?= $(SOUL).soul
+endif
 SOULHPP     ?= $(SOUL).hpp
 DEPS        += soul
 else ifdef TEST
@@ -181,10 +185,17 @@ run: $(DEPS) ## run patch natively
 grind: $(DEPS) ## run valgrind on patch natively
 	@$(MAKE) -s -f native.mk grind
 
-check: ## run test patches and unit tests natively
+check: ## run test patches and unit tests
 	@for nm in $(TESTS) ; do \
 		$(MAKE) -s TEST=$$nm test || exit;\
 	done
+	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/CppTest PATCHNAME=CppTest clean patch web run
+	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/GenTest GEN=MIDItestMinMax clean patch web run
+	# @unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/FaustTest FAUST=FaustTest clean patch web run # FAUST is not installed for CI
+	@cp FaustSource/*.h TestPatches/FaustTest && unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/FaustTest PATCHNAME=Faust clean patch web run
+	# @unset PATCHNAME PATCHCLASS PATCHFILE SOULCLASS SOULFILE SOULHPP && $(MAKE) PATCHSOURCE=TestPatches/SoulTest SOUL=SineSynth clean patch web run # SOUL is not installed for CI
+	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/SoulTest PATCHNAME=Soul clean patch web run
+	@pip install -r Tools/hvcc/requirements.txt && unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/HeavyTest HEAVY=HeavyTest clean patch web run
 
 help: ## show this help
 	@echo 'Usage: make [target] ...'
