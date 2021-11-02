@@ -1,3 +1,4 @@
+* Improved realloc implementation
 * Block based SineOscillator::generate() with FM
 * Added test patches for automatic CI builds
 * Automatically add '>' to end of gen~ output parameters
