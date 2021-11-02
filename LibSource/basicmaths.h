@@ -86,12 +86,14 @@ using std::clamp;
 
    float fast_fmodf(float x, float y);
 
+#ifdef ARM_CORTEX
 #define malloc(x) pvPortMalloc(x)
 #define calloc(x, y) pvPortCalloc(x, y)
 #define free(x) vPortFree(x)
 #define realloc(x, y) pvPortRealloc(x, y);
 void* pvPortCalloc(size_t nmemb, size_t size);
 void* pvPortRealloc(void *pv, size_t xWantedSize);
+#endif
 
 #ifdef __cplusplus
 }

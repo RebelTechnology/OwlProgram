@@ -4,6 +4,7 @@
 #include "fastpow.h"
 #include "fastlog.h"
 
+#ifdef ARM_CORTEX
 /* The realloc() function changes the size of the memory block pointed  to */
 /* by ptr to size bytes.  The contents will be unchanged in the range from */
 /* the start of the region up to the minimum of the old and new sizes.  If */
@@ -42,6 +43,7 @@ void *pvPortCalloc(size_t nmemb, size_t size){
     memset(ptr, 0, xWantedSize);
   return ptr;
 }
+#endif
 
 // todo: see
 // http://www.hxa.name/articles/content/fast-pow-adjustable_hxa7241_2007.html
