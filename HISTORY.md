@@ -1,3 +1,5 @@
+* Block based SineOscillator::generate() with FM
+* Added test patches for automatic CI builds
 * Automatically add '>' to end of gen~ output parameters
 * Updated to use C++17
 * Use std::min/max/abs/clamp instead of macros for C++
