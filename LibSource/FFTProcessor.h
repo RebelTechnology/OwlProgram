@@ -78,7 +78,8 @@ public:
         Window in_win = Window::create(in_win_type, window_size);
         Window out_win = Window::create(out_win_type, window_size);
 
-        float norm[block_size] = {};
+        float norm[block_size];
+        memset(norm, 0, block_size * sizeof(float));
 
         // Accumulate shifted multiplications of both windows as norm
         for (size_t i = 0; i < window_size; i++) {
