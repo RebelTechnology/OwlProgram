@@ -5,7 +5,7 @@
 
 /**
  * Circular buffer that keeps a delta table of differences for faster fractional delay lines.
- * Note that this class requires twice as much buffer space as @class CircularBuffer.
+ * Note that this class requires twice as much buffer space as CircularBuffer.
  */
 template<typename T = float>
 class FractionalCircularBuffer {
