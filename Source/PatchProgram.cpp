@@ -101,9 +101,13 @@ void setup(ProgramVector* pv){
 void run(ProgramVector* pv){
   for(;;){
     pv->programReady();
+#ifdef BYPASS
+    memcpy(pv->audio_output, pv->audio_input, samples->getSize() * samples->getChannels() * sizeof(int32_t));
+#else
     samples->split(pv->audio_input);
     processor.setParameterValues(pv->parameters);
     processor.patch->processAudio(*samples);
     samples->comb(pv->audio_output);
+#endif
   }
 }
