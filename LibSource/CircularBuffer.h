@@ -15,6 +15,7 @@ protected:
   size_t size;
   size_t writepos = 0;
   size_t readpos = 0;
+  bool empty = true;
 public:
   CircularBuffer(): data(NULL), size(0){}
   CircularBuffer(T* data, size_t size): data(data), size(size){}
@@ -22,6 +23,7 @@ public:
   void setData(T* data, size_t len) {
     this->data = data;
     size = len;
+    empty;
   }
 
   size_t getSize() const {
@@ -33,20 +35,26 @@ public:
   }
   
   bool isEmpty() const {
-    return writepos == readpos;
+    return empty;
+  }
+  
+  bool isFull() const {
+    return (writepos == readpos) && !empty;
   }
 
   void write(T c){
+    FLOW_ASSERT(getWriteCapacity() > 0, "overflow");
     data[writepos++] = c;
     if(writepos >= size)
       writepos = 0;
+    empty = false;
   }
 
   void write(T* source, size_t len){
     FLOW_ASSERT(getWriteCapacity() >= len, "overflow");
     T* dest = getWriteHead();
     size_t rem = size-writepos;
-    if(len > rem){
+    if(len >= rem){
       memcpy(dest, source, rem*sizeof(T));
       writepos = len-rem;
       memcpy(data, source+rem, writepos*sizeof(T));
@@ -54,6 +62,7 @@ public:
       memcpy(dest, source, len*sizeof(T));
       writepos += len;
     }
+    empty = false;
   }
     
   void writeAt(size_t index, T value){
@@ -64,6 +73,7 @@ public:
     data[writepos++] += c;
     if(writepos >= size)
       writepos = 0;
+    empty = false;
   }
 
   void overdubAt(size_t index, T value){
@@ -71,9 +81,11 @@ public:
   }
 
   T read(){
+    FLOW_ASSERT(getReadCapacity() > 0, "underflow");
     T c = data[readpos++];
     if(readpos >= size)
       readpos = 0;
+    empty = readpos == writepos;
     return c;
   }
 
@@ -89,6 +101,7 @@ public:
       memcpy(dst, src, len*sizeof(T));
       readpos += len;
     }
+    empty = readpos == writepos;
   }
   
   T readAt(size_t index){
@@ -111,6 +124,7 @@ public:
 	return;
       }
     }
+    empty = readpos == writepos;
   }
 
   size_t getWriteIndex(){
@@ -128,6 +142,7 @@ public:
   void moveWriteHead(int32_t samples){
     FLOW_ASSERT(getWriteCapacity() >= samples, "overflow");
     writepos = (writepos + samples) % size;
+    empty = false;
   }
 
   size_t getReadIndex(){
@@ -145,6 +160,7 @@ public:
   void moveReadHead(int32_t samples){
     FLOW_ASSERT(getReadCapacity() < samples, "underflow");
     readpos = (readpos + samples) % size;
+    empty = readpos == writepos;
   }
 
   /**
@@ -157,7 +173,7 @@ public:
   /**
    * Get the read index expressed as delay behind the write index.
    */
-  int getDelay(){
+  size_t getDelay() const {
     return (writepos-readpos+size) % size;
   }
 
@@ -170,22 +186,22 @@ public:
     read(out, len);
   }
 
-  size_t getReadCapacity(){
-    return (writepos + size - readpos) % size;
+  size_t getReadCapacity() const {
+    return size - getWriteCapacity();
   }
 
-  size_t getWriteCapacity(){
-    return size - getReadCapacity();
+  size_t getWriteCapacity() const {
+    return size*empty + (readpos + size - writepos) % size;
   }
 
-  size_t getContiguousWriteCapacity(){
+  size_t getContiguousWriteCapacity() const {
     if(writepos < readpos)
       return readpos - writepos;
     else
       return size - writepos;
   }
 
-  size_t getContiguousReadCapacity(){
+  size_t getContiguousReadCapacity() const {
     if(writepos < readpos)
       return size - readpos;
     else
@@ -199,6 +215,7 @@ public:
 
   void reset(){
     readpos = writepos = 0;
+    empty = true;
   }
 
   void clear(){
