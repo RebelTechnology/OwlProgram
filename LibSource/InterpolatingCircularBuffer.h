@@ -12,6 +12,9 @@ protected:
 public:
   InterpolatingCircularFloatBuffer() {}
   InterpolatingCircularFloatBuffer(float* data, size_t size): CircularFloatBuffer(data, size) {}
+  using CircularBuffer<float>::writeAt;
+  using CircularBuffer<float>::readAt;
+
   /**
    * Interpolated write at sub-sample index.
    * Inserts a value linearly interpolated at a fractional index.
@@ -39,6 +42,7 @@ public:
       pos += 1;
     }
     delay_samples = delay;
+    empty = readpos == writepos;
   }  
   
   /**
@@ -65,6 +69,7 @@ public:
       *out++ = readAt(pos);
       pos += incr;
     }
+    empty = readpos == writepos;
   }
   
   /**
