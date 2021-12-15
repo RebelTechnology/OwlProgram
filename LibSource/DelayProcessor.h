@@ -64,9 +64,9 @@ public:
     buffer.clear();
   }
   float process(float input){
-    float sample = buffer.readAt(buffer.getWriteIndex() - delay);
     buffer.write(input);
-    return sample;
+    buffer.setDelay(delay);
+    return buffer.read();
   }
   /**
    * Delay smoothly from the previous delay time to @param newDelay
