@@ -9,6 +9,10 @@ protected:
 public:
   static constexpr float begin_phase = 0;
   static constexpr float end_phase = 1;
+  SquareWaveOscillator(){}
+  SquareWaveOscillator(float sr){
+    setSampleRate(sr);
+  }  
   /**
    * Set pulse width to a value between 0 and 1
    */

@@ -7,6 +7,10 @@ class SineOscillator : public OscillatorTemplate<SineOscillator> {
 public:
   static constexpr float begin_phase = 0;
   static constexpr float end_phase = 2*M_PI;
+  SineOscillator(){}
+  SineOscillator(float sr){
+    setSampleRate(sr);
+  }  
   float getSample(){
     return sinf(phase);
   }

@@ -7,6 +7,10 @@ class TriangleOscillator : public OscillatorTemplate<TriangleOscillator> {
 public:
   static constexpr float begin_phase = -1;
   static constexpr float end_phase = 1;
+  TriangleOscillator(){}
+  TriangleOscillator(float sr){
+    setSampleRate(sr);
+  }  
   float getSample(){
     return -2 * (fabsf(phase) - 0.5);
   }
