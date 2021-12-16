@@ -102,6 +102,13 @@ public:
     speed = s;
   }
   /**
+   * Adjust the tap tempo period by a positive or negative amount.
+   * Useful value range (-1, 1).
+   */
+  void adjustSpeed(float s){
+    setSpeed((s+1)*2048);
+  }
+  /**
    * Adjust the tap tempo period by a 12-bit value.
    * The difference between consecutive calls is used to 
    * recalculate the current tempo.
