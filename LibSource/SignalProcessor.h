@@ -10,7 +10,9 @@
 class SignalProcessor {
 public:
   virtual ~SignalProcessor(){}
-  virtual float process(float input) = 0;
+  virtual float process(float input){
+    return input;
+  }
   virtual void process(FloatArray input, FloatArray output){
     for(size_t i=0; i<output.getSize(); ++i)
       output[i] = process(input[i]);
