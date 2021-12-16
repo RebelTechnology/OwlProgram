@@ -106,7 +106,7 @@ public:
    * Useful value range (-1, 1).
    */
   void adjustSpeed(float s){
-    setSpeed((s+1)*2048);
+    adjust((s+1)*2048);
   }
   /**
    * Adjust the tap tempo period by a 12-bit value.
