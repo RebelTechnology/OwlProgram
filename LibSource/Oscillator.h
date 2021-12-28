@@ -96,14 +96,14 @@ public:
   void reset(){
     phase = T::begin_phase;
   }
-  Sample generate() override {
+  Sample generate() {
     Sample sample = static_cast<T*>(this)->getSample();
     phase += incr;
     if(phase >= T::end_phase)
       phase -= (T::end_phase - T::begin_phase);
     return sample;
   }
-  Sample generate(float fm) override {
+  Sample generate(float fm) {
     Sample sample = static_cast<T*>(this)->getSample();
     // phase += incr * (1 + fm);
     phase += incr  + (T::end_phase - T::begin_phase)*fm;

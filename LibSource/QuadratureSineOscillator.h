@@ -15,7 +15,7 @@ public:
     ComplexFloat getSample() {
         return ComplexFloat { cosf(phase), sinf(phase) };
     }
-    void generate(ComplexFloatArray output) override {
+    void generate(ComplexFloatArray output) {
         size_t len = output.getSize();
         for (size_t i = 0; i < len; ++i) {
             output[i].re = cosf(phase);
@@ -24,7 +24,7 @@ public:
         }
         phase = fmodf(phase, end_phase);
     }
-    void generate(ComplexFloatArray output, FloatArray fm) override {
+    void generate(ComplexFloatArray output, FloatArray fm) {
         size_t len = output.getSize();
         for (size_t i = 0; i < len; ++i) {
             output[i].re = cosf(phase);
@@ -57,7 +57,7 @@ public:
             cosf(phase + last_sample.re * feedback), sinf(phase + last_sample.im * feedback));
         return last_sample;
     }
-    void generate(ComplexFloatArray output) override {
+    void generate(ComplexFloatArray output) {
         size_t len = output.getSize();
         for (size_t i = 0; i < len; ++i) {
             output[i].re = cosf(phase + last_sample.re * feedback);
@@ -67,7 +67,7 @@ public:
         }
         phase = fmodf(phase, end_phase);
     }
-    void generate(ComplexFloatArray output, FloatArray fm) override {
+    void generate(ComplexFloatArray output, FloatArray fm) {
         size_t len = output.getSize();
         for (size_t i = 0; i < len; ++i) {
             output[i].re = cosf(phase + last_sample.re * feedback);
@@ -105,7 +105,7 @@ public:
             cosf(phase + last_sample.re * feedback.re), sinf(phase + last_sample.im * feedback.im));
         return last_sample;
     }
-    void generate(ComplexFloatArray output) override {
+    void generate(ComplexFloatArray output) {
         size_t len = output.getSize();
         for (size_t i = 0; i < len; ++i) {
             output[i].re = cosf(phase + last_sample.re * feedback.re);
@@ -115,7 +115,7 @@ public:
         }
         phase = fmodf(phase, end_phase);
     }
-    void generate(ComplexFloatArray output, FloatArray fm) override {
+    void generate(ComplexFloatArray output, FloatArray fm) {
         size_t len = output.getSize();
         for (size_t i = 0; i < len; ++i) {
             output[i].re = cosf(phase + last_sample.re * feedback.re);
