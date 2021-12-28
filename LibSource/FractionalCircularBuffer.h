@@ -173,7 +173,7 @@ public:
   
   /**
    * Write to buffer and read with a delay that ramps up or down
-   * from @param beginDelay to @param endDelay
+   * from **beginDelay** to **endDelay**.
    */
   void delay(T* in, T* out, size_t len, float beginDelay, float endDelay){
     setDelay(beginDelay);

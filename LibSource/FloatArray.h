@@ -359,7 +359,7 @@ public:
   FloatArray subArray(int offset, size_t length);
   /**
    * Create a linear ramp from one value to another.
-   * Interpolates all samples in the FloatArray between the endpoints @param from to @param to.
+   * Interpolates all samples in the FloatArray between the endpoints **from** to **to**.
    */
   void ramp(float from, float to);
 
