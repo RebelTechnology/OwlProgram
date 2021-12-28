@@ -8,24 +8,24 @@
 #define FLOW_ASSERT(x, y)
 #endif
 
-template<typename DataType>
+template<typename DataType, typename IndexType = size_t>
 class CircularBuffer {
 protected:
   DataType* data;
-  size_t size;
-  size_t writepos = 0;
-  size_t readpos = 0;
+  IndexType size;
+  IndexType writepos = 0;
+  IndexType readpos = 0;
   bool empty = true;
 public:
   CircularBuffer(): data(NULL), size(0){}
-  CircularBuffer(DataType* data, size_t size): data(data), size(size){}
+  CircularBuffer(DataType* data, IndexType size): data(data), size(size){}
 
-  void setData(DataType* data, size_t len) {
+  void setData(DataType* data, IndexType len) {
     this->data = data;
     size = len;
   }
 
-  size_t getSize() const {
+  IndexType getSize() const {
     return size;
   }
 
@@ -49,10 +49,10 @@ public:
     empty = false;
   }
 
-  void write(DataType* source, size_t len){
+  void write(DataType* source, IndexType len){
     FLOW_ASSERT(getWriteCapacity() >= len, "overflow");
     DataType* dest = getWriteHead();
-    size_t rem = size-writepos;
+    IndexType rem = size-writepos;
     if(len >= rem){
       memcpy(dest, source, rem*sizeof(DataType));
       writepos = len-rem;
@@ -64,7 +64,7 @@ public:
     empty = false;
   }
     
-  void writeAt(size_t index, DataType value){
+  void writeAt(IndexType index, DataType value){
     data[index % size] = value;
   }
 
@@ -75,7 +75,7 @@ public:
     empty = false;
   }
 
-  void overdubAt(size_t index, DataType value){
+  void overdubAt(IndexType index, DataType value){
     data[index % size] += value;
   }
 
@@ -88,10 +88,10 @@ public:
     return c;
   }
 
-  void read(DataType* dst, size_t len){
+  void read(DataType* dst, IndexType len){
     FLOW_ASSERT(getReadCapacity() >= len, "underflow");
     DataType* src = getReadHead();
-    size_t rem = size-readpos;
+    IndexType rem = size-readpos;
     if(len > rem){
       memcpy(dst, src, rem*sizeof(DataType));
       readpos = len-rem;
@@ -103,13 +103,13 @@ public:
     empty = readpos == writepos;
   }
   
-  DataType readAt(size_t index){
+  DataType readAt(IndexType index){
     return data[index % size];
   }
 
   void skipUntilLast(char c){
     DataType* src = getReadHead();
-    size_t rem = size-readpos;
+    IndexType rem = size-readpos;
     for(int i=0; i<rem; ++i){
       if(src[i] != c){
 	readpos += i;
@@ -126,11 +126,11 @@ public:
     empty = readpos == writepos;
   }
 
-  size_t getWriteIndex(){
+  IndexType getWriteIndex(){
     return writepos;
   }
 
-  void setWriteIndex(size_t pos){
+  void setWriteIndex(IndexType pos){
     writepos = pos % size;
   }
 
@@ -144,11 +144,11 @@ public:
     empty = false;
   }
 
-  size_t getReadIndex(){
+  IndexType getReadIndex(){
     return readpos;
   }
 
-  void setReadIndex(size_t pos){
+  void setReadIndex(IndexType pos){
     readpos = pos % size;
   }
 
@@ -172,35 +172,35 @@ public:
   /**
    * Get the read index expressed as delay behind the write index.
    */
-  size_t getDelay() const {
+  IndexType getDelay() const {
     return (writepos-readpos+size) % size;
   }
 
   /**
    * Write to buffer and read with a delay
    */
-  void delay(DataType* in, DataType* out, size_t len, int delay_samples){
+  void delay(DataType* in, DataType* out, IndexType len, int delay_samples){
     setDelay(delay_samples); // set delay relative to where we start writing
     write(in, len);
     read(out, len);
   }
 
-  size_t getReadCapacity() const {
+  IndexType getReadCapacity() const {
     return size - getWriteCapacity();
   }
 
-  size_t getWriteCapacity() const {
+  IndexType getWriteCapacity() const {
     return size*empty + (readpos + size - writepos) % size;
   }
 
-  size_t getContiguousWriteCapacity() const {
+  IndexType getContiguousWriteCapacity() const {
     if(writepos < readpos)
       return readpos - writepos;
     else
       return size - writepos;
   }
 
-  size_t getContiguousReadCapacity() const {
+  IndexType getContiguousReadCapacity() const {
     if(writepos < readpos)
       return size - readpos;
     else
@@ -208,7 +208,7 @@ public:
   }
 
   void setAll(const DataType value){
-    for(size_t i=0; i<size; ++i)
+    for(IndexType i=0; i<size; ++i)
       data[i] = value;
   }
 
@@ -221,7 +221,7 @@ public:
     setAll(0);
   }
 
-  static CircularBuffer<DataType>* create(size_t len){
+  static CircularBuffer<DataType>* create(IndexType len){
     CircularBuffer<DataType>* obj = new CircularBuffer<DataType>(new DataType[len], len);
     obj->clear();
     return obj;
