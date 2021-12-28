@@ -1,3 +1,5 @@
+* Added InvertingRampOscillator
+* Added StateVariableFilter::setAllpass() and ::processLowMidHighBand()
 * Improved realloc implementation
 * Block based SineOscillator::generate() with FM
 * Added test patches for automatic CI builds
