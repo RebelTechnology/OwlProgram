@@ -38,7 +38,7 @@ public:
       *out++ = readAt(pos);
       pos += rate;
     }
-    readpos = ((size_t)pos + len) % size;
+    readpos = fmodf(pos + size, size);
     empty = readpos == writepos;
   }
 
