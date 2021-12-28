@@ -113,7 +113,7 @@ public:
       FloatArray delay = FloatArray::create(20);
       input.ramp(0, 20);
       buffer->delay(input, delay, input.getSize(), 0.5); // delay by half a sample
-      for(int i=1; i<input.getSize(); ++i){
+      for(size_t i=1; i<input.getSize(); ++i){
 	CHECK_CLOSE(delay[i], (input[i-1] + input[i])/2, DEFAULT_TOLERANCE);
       }
       LinearFloatBuffer::destroy(buffer);
@@ -128,6 +128,24 @@ public:
       buffer->write(input, input.getSize());
       for(size_t j=0; j<5; ++j)
 	CHECK_CLOSE(buffer->readAt(j+0.5f), j+0.5f, DEFAULT_TOLERANCE);
+      LinearFloatBuffer::destroy(buffer);
+      FloatArray::destroy(input);
+    }
+    {
+      TEST("fractional rate read");
+      LinearFloatBuffer* buffer = LinearFloatBuffer::create(5);
+      FloatArray input = FloatArray::create(5);
+      FloatArray output = FloatArray::create(10);
+      input.ramp(0, 5);
+      buffer->write(input, input.getSize());
+      buffer->read(output, output.getSize(), 0.5f);
+      for(size_t j=0; j<9; ++j) // not checking last value in loop
+	CHECK_CLOSE(output[j], j*0.5f, DEFAULT_TOLERANCE);
+      CHECK_CLOSE(output[9], 2.0f, DEFAULT_TOLERANCE); // interpolated between 4 and 0 (wrapping)
+      CHECK_EQUAL((int)buffer->getWriteCapacity(), 5);
+      CHECK_EQUAL((int)buffer->getReadCapacity(), 0);
+      CHECK(buffer->isEmpty());
+      CHECK(!buffer->isFull());
       LinearFloatBuffer::destroy(buffer);
       FloatArray::destroy(input);
     }
