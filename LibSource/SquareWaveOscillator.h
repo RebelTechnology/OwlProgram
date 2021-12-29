@@ -55,8 +55,8 @@ public:
   }
   float getSample(){
     float sample = phase < pw ? 1 : -1;
-    sample += polyblep(incr, phase);
-    sample -= polyblep(incr, fmod(phase + 1 + pw, 2));
+    sample += polyblep(phase, incr);
+    sample -= polyblep(fmod(phase + 1 - pw, 1), incr);
     return sample;
   }
 };

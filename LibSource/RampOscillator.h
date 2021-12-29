@@ -35,12 +35,14 @@ public:
   }
 };
 
-class AntialisedRampOscillator : public OscillatorTemplate<AntialisedRampOscillator> {
+class AntialiasedRampOscillator : public OscillatorTemplate<AntialiasedRampOscillator> {
 public:
-  static constexpr float begin_phase = -1;
+  static constexpr float begin_phase = 0;
   static constexpr float end_phase = 1;
   float getSample(){
-    return phase - polyblep(phase, incr);
+    float sample = 2*phase-1; // naive ramp
+    sample -= polyblep(phase, incr);
+    return sample;
   }
 };
   

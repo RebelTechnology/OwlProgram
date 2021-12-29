@@ -115,11 +115,19 @@ protected:
 public:
   AdjustableTapTempo(float sr, size_t min, size_t max) :
     TapTempo(sr, min, max), speed(scale(0.5f)) {}
+  [[deprecated("use resetSpeed() instead.")]]  
+  void resetAdjustment(uint16_t s){
+    resetSpeed(s/4096.0f);
+  }
   void resetSpeed(float s){
     speed = scale(s);
   }
   void setRange(float value){
     range = value*0.75f;
+  }
+  [[deprecated("use adjustSpeed() instead.")]]  
+  void adjust(uint16_t s){
+    adjustSpeed(s/4096.0f);
   }
   /**
    * Adjust the tap tempo period.
