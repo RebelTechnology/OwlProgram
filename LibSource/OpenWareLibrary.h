@@ -30,6 +30,7 @@
 #include "MidiProcessor.h"
 #include "MidiPolyphonicExpressionProcessor.h"
 #include "MidiStatus.h"
+#include "MorphingOscillator.h"
 #include "MonophonicProcessor.h"
 #include "NoiseGenerator.h"
 #include "OpenWareMidiControl.h"
