@@ -1,3 +1,5 @@
+* Fixed Antialiased oscillators (Triangle, SquareWave, Ramp)
+* Added MorphingOscillator
 * AdjustableTapTempo interface changes
 * CircularBuffer improvements, added isFull()
 * Added InvertedRampOscillator
