@@ -44,6 +44,35 @@ public:
     sample -= polyblep(phase, incr);
     return sample;
   }
+  void generate(FloatArray output){
+    size_t len = output.getSize();
+    float blep;
+    if(phase < incr){ // discontinuity at previous sample
+      float t = phase / incr;
+      blep = t+t - t*t - 1;
+    }else{
+      blep = 0;
+    }
+    for(size_t i=0; i<len; ++i){
+      float sample = 2*phase-1;
+      sample -= blep;
+      phase += incr;
+      if(phase >= 1){
+	// wrap phase
+	phase -= 1;
+	// correct current sample
+	float t = (phase - incr) / incr;
+	sample -= t*t + t+t + 1;
+	// correct next sample
+	t = phase / incr;
+	blep = t+t - t*t - 1;
+      }else{
+	blep = 0;
+      }
+      output[i] = sample;
+    }
+  }
+  using OscillatorTemplate<AntialiasedRampOscillator>::generate;  
 };
   
 #endif /* __RampOscillator_h */
