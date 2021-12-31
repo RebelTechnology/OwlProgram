@@ -13,12 +13,13 @@ class MorphingOscillator : public Oscillator {
 protected:
   Oscillator** osc;
   size_t osc_count;
+  FloatArray buffer;
   Oscillator* lo = NULL;
   Oscillator* hi = NULL;
   float xf = 0;
 public:
-  MorphingOscillator(Oscillator** osc, size_t count)
-    : osc(osc), osc_count(count){}
+  MorphingOscillator(Oscillator** osc, size_t count, FloatArray buffer)
+    : osc(osc), osc_count(count), buffer(buffer){}
   void setFrequency(float value){
     lo->setFrequency(value);
     hi->setFrequency(value);
@@ -47,7 +48,20 @@ public:
     float h = hi->generate(fm);
     return l + (h - l) * xf;
   }
-  using Oscillator::generate;
+ void generate(FloatArray output){
+   lo->generate(output);
+   output.multiply(1-xf);
+   hi->generate(buffer);
+   buffer.multiply(xf);
+   output.add(buffer);
+ }
+ void generate(FloatArray output, FloatArray fm){
+   lo->generate(output, fm);
+   output.multiply(1-xf);
+   hi->generate(buffer, fm);
+   buffer.multiply(xf);
+   output.add(buffer);
+ }
   /**
    * Morph between all configured oscillators.
    * @param value a cross fade index between 0 and 1.
@@ -80,10 +94,12 @@ public:
     lo = hi;
     hi = oscillator;
   }
-  static MorphingOscillator* create(size_t oscillator_count){
-    return new MorphingOscillator(new Oscillator*[oscillator_count], oscillator_count);
+  static MorphingOscillator* create(size_t oscillator_count, size_t blocksize){
+    return new MorphingOscillator(new Oscillator*[oscillator_count], oscillator_count,
+				  FloatArray::create(blocksize));
   }  
   static void destroy(MorphingOscillator* obj){
+    FloatArray::destroy(obj->buffer);
     delete[] obj->osc;
     delete obj;
   }
