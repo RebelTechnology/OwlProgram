@@ -58,6 +58,10 @@ public:
     sample -= polyblep(phase, incr);
     return sample;
   }
+  /**
+   * Note: mixing sample based and block based generate() calls is not supported
+   * by this class.
+   */
   void generate(FloatArray output){
     size_t len = output.getSize();
     float blep = lastblep;
