@@ -88,8 +88,8 @@ public:
 
   static void setAllPass(float* coefficients, float omega, float q){
     float K = tanf(omega);
-    float norm = 1 / (1 + K / Q + K * K);
-    coefficients[0] = (1 - K / Q + K * K) * norm;
+    float norm = 1 / (1 + K / q + K * K);
+    coefficients[0] = (1 - K / q + K * K) * norm;
     coefficients[1] = 2 * (K * K - 1) * norm;
     coefficients[2] = 1;
     coefficients[3] = coefficients[1];
