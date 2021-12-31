@@ -1,3 +1,6 @@
+v22.2
+-----
+* Added NoiseOscillator (whitenoise s+h)
 * Added PhaseShiftOscillator template
 * Added Biquad allpass filter configuration
 * Fixed Antialiased oscillators (Triangle, SquareWave, Ramp)

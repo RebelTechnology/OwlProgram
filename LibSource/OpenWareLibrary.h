@@ -33,6 +33,7 @@
 #include "MorphingOscillator.h"
 #include "MonophonicProcessor.h"
 #include "NoiseGenerator.h"
+#include "NoiseOscillator.h"
 #include "OpenWareMidiControl.h"
 #include "Oscillator.h"
 #include "Patch.h"
