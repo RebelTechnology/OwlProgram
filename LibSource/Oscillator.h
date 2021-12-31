@@ -134,11 +134,40 @@ protected:
     if(t < dt){
       t /= dt;
       return t+t - t*t - 1;
-    }else if(t > 1 - dt){
+    }else if(t + dt > 1){
       t = (t - 1) / dt;
       return t*t + t+t + 1;
     }
     return 0;
+  }
+};
+
+template<class Osc>
+class PhaseShiftOscillator : public Osc {
+protected:
+  float phaseshift;
+public:
+  template <typename... Args>
+  PhaseShiftOscillator(float phaseshift, Args&&... args) :
+    Osc(std::forward<Args>(args)...), phaseshift(phaseshift) {}
+  void setPhase(float phase){
+    Osc::setPhase(phase +  phaseshift);
+  }
+  float getPhase(){
+    return Osc::getPhase() - phaseshift;
+  }
+  void reset(){
+    Osc::setPhase(phaseshift);
+  }
+  /**
+   * @param phaseshift oscillator phase shift in radians
+   */
+  template <typename... Args>
+  static PhaseShiftOscillator<Osc>* create(float phaseshift, Args&&... args){
+    return new PhaseShiftOscillator<Osc>(phaseshift, std::forward<Args>(args)...);
+  }    
+  static void destroy(PhaseShiftOscillator<Osc>* obj){
+    Osc::destroy(obj);
   }
 };
 

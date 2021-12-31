@@ -1,3 +1,4 @@
+* Added PhaseShiftOscillator template
 * Added Biquad allpass filter configuration
 * Fixed Antialiased oscillators (Triangle, SquareWave, Ramp)
 * Added MorphingOscillator
