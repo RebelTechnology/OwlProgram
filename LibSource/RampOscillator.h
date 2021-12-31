@@ -36,9 +36,23 @@ public:
 };
 
 class AntialiasedRampOscillator : public OscillatorTemplate<AntialiasedRampOscillator> {
+protected:
+  float lastblep;
 public:
   static constexpr float begin_phase = 0;
   static constexpr float end_phase = 1;
+  AntialiasedRampOscillator(){}
+  AntialiasedRampOscillator(float sr){
+    setSampleRate(sr);
+  }  
+  void setPhase(float ph){
+    lastblep = 0;
+    OscillatorTemplate<AntialiasedRampOscillator>::setPhase(ph);
+  }
+  void reset(){
+    lastblep = 0;
+    OscillatorTemplate<AntialiasedRampOscillator>::reset();
+  }
   float getSample(){
     float sample = 2*phase-1; // naive ramp
     sample -= polyblep(phase, incr);
@@ -46,13 +60,7 @@ public:
   }
   void generate(FloatArray output){
     size_t len = output.getSize();
-    float blep;
-    if(phase < incr){ // discontinuity at previous sample
-      float t = phase / incr;
-      blep = t+t - t*t - 1;
-    }else{
-      blep = 0;
-    }
+    float blep = lastblep;
     for(size_t i=0; i<len; ++i){
       float sample = 2*phase-1;
       sample -= blep;
@@ -71,6 +79,7 @@ public:
       }
       output[i] = sample;
     }
+    lastblep = blep; // carry over polyblep correction
   }
   using OscillatorTemplate<AntialiasedRampOscillator>::generate;  
 };
