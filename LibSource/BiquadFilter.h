@@ -27,6 +27,10 @@ public:
     setBandPass(coefficients, fc*M_PI/sr, q);
   }
   
+  void setAllPass(float fc, float q, float sr){
+    setAllPass(coefficients, fc*M_PI/sr, q);
+  }
+  
   void setNotch(float fc, float q, float sr){
     setNotch(coefficients, fc*M_PI/sr, q);
   }
@@ -80,6 +84,16 @@ public:
     coefficients[2] = -coefficients[0];
     coefficients[3] = - 2 * (K * K - 1) * norm;
     coefficients[4] = - (1 - K / q + K * K) * norm;
+  }
+
+  static void setAllPass(float* coefficients, float omega, float q){
+    float K = tanf(omega);
+    float norm = 1 / (1 + K / Q + K * K);
+    coefficients[0] = (1 - K / Q + K * K) * norm;
+    coefficients[1] = 2 * (K * K - 1) * norm;
+    coefficients[2] = 1;
+    coefficients[3] = coefficients[1];
+    coefficients[4] = coefficients[0];
   }
 
   static void setNotch(float* coefficients, float omega, float q){
@@ -310,6 +324,13 @@ public:
     }
   }
 
+  void processAllPass(FloatArray in, FloatArray fc, float q, FloatArray out){
+    for(size_t i = 0; i < in.getSize(); i++){
+      setAllPass(fc[i], q);
+      out[i] = process(in[i]);
+    }
+  }
+
   /* process a single sample and return the result */
   float process(float input){
     float output;
@@ -329,6 +350,11 @@ public:
 
   void setBandPass(float fc, float q){
     FilterStage::setBandPass(coefficients, fc*pioversr, q);
+    copyCoefficients();
+  }
+
+  void setAllPass(float fc, float q){
+    FilterStage::setAllPass(coefficients, fc*pioversr, q);
     copyCoefficients();
   }
 
