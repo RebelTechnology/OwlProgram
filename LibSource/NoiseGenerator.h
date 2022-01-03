@@ -7,7 +7,7 @@
 
 class WhiteNoiseGenerator : public SignalGenerator {
  public:
-  /* returns white noise in the range -0.5 to 0.5 */
+  /* returns white noise in the range -1 to 1 */
   virtual float generate(){
 #if 0 // #ifdef ARM_CORTEX
     // todo: fixme

@@ -96,7 +96,7 @@ public:
     return filter->process(input); // this doesn't really make sense
   }
   /**
-   * Up-sample param @input and put results into @param output. Note: in-place processing not supported
+   * Up-sample @param input and put results into @param output. Note: in-place processing not supported
    */
   void process(FloatArray input, FloatArray output){
     ASSERT(input.getSize()*factor==output.getSize(), "wrong size");

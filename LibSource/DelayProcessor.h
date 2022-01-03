@@ -64,9 +64,9 @@ public:
     buffer.clear();
   }
   float process(float input){
-    float sample = buffer.readAt(buffer.getWriteIndex() - delay);
+    buffer.setDelay(delay);
     buffer.write(input);
-    return sample;
+    return buffer.read();
   }
   /**
    * Delay smoothly from the previous delay time to @param newDelay
@@ -129,7 +129,10 @@ public:
 };
 
 /**
- * Delay line signal processor that crossfades to smooth changes in delay time.
+ * Delay line signal processor that crossfades to ensure smooth changes in delay time.
+ * Cross fade time in samples is equal to one block size.
+ * Delay time should be updated at block rate, before calling the block-based process() method.
+ * Sample based processing should not be used with this class.
  */
 class CrossFadingDelayProcessor : public SignalProcessor {
 protected:
@@ -146,13 +149,6 @@ public:
   }
   void clear(){
     ringbuffer->clear();
-  }
-  float process(float input){
-    ringbuffer->write(input);
-    float sample = ringbuffer->read();
-    ringbuffer->setDelay(delay);
-    sample += ringbuffer->read();
-    return sample*0.5;
   }
   void process(FloatArray input, FloatArray output){
     ringbuffer->delay(input, output, input.getSize(), delay);

@@ -102,11 +102,11 @@ public:
 
   /**
    * Copies the content of an array into a subset of the array.
-   * Copies **samples** elements starting from **sourceOffset** of **source** to **destinationOffset** in the current array.
+   * Copies **len** elements starting from **sourceOffset** of **source** to **destinationOffset** in the current array.
    * @param[in] source the source array
    * @param[in] sourceOffset the offset into the source array
    * @param[in] destinationOffset the offset into the destination array
-   * @param[in] samples the number of samples to copy
+   * @param[in] len the number of samples to copy
   */
   void insert(SimpleArray<T> source, int sourceOffset, int destinationOffset, size_t len){
     ASSERT(size >= destinationOffset+len, "Array too small");

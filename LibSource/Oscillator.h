@@ -96,14 +96,14 @@ public:
   void reset(){
     phase = T::begin_phase;
   }
-  Sample generate() override {
+  Sample generate() {
     Sample sample = static_cast<T*>(this)->getSample();
     phase += incr;
     if(phase >= T::end_phase)
       phase -= (T::end_phase - T::begin_phase);
     return sample;
   }
-  Sample generate(float fm) override {
+  Sample generate(float fm) {
     Sample sample = static_cast<T*>(this)->getSample();
     // phase += incr * (1 + fm);
     phase += incr  + (T::end_phase - T::begin_phase)*fm;
@@ -121,23 +121,53 @@ public:
     delete osc;
   }
 protected:
+  /** 
+   * Calculate poly blep antialiasing compensation on normalised (to range [0, 1])
+   * phase and phase increment (angular rate) values.
+   */
   static float polyblep(float t, float dt){
     // PolyBLEP by various
     // http://research.spa.aalto.fi/publications/papers/smc2010-phaseshaping/
     // https://www.kvraudio.com/forum/viewtopic.php?t=375517
     // http://www.martin-finke.de/blog/articles/audio-plugins-018-polyblep-oscillator/
     // https://www.metafunction.co.uk/post/all-about-digital-oscillators-part-2-blits-bleps
-    // if t and dt are normalised before call then end/begin phase are not needed    
-    if(t < T::begin_phase + dt){
-      dt = dt / (T::end_phase - T::begin_phase); // normalise phase increment
-      t = (t - T::begin_phase) / dt; // distance from discontinuity
+    if(t < dt){
+      t /= dt;
       return t+t - t*t - 1;
-    }else if(t > T::end_phase - dt){
-      dt = dt / (T::end_phase - T::begin_phase); // normalise phase increment
-      t = (t - T::end_phase) / dt; // distance from discontinuity
+    }else if(t + dt > 1){
+      t = (t - 1) / dt;
       return t*t + t+t + 1;
     }
     return 0;
+  }
+};
+
+template<class Osc>
+class PhaseShiftOscillator : public Osc {
+protected:
+  float phaseshift;
+public:
+  template <typename... Args>
+  PhaseShiftOscillator(float phaseshift, Args&&... args) :
+    Osc(std::forward<Args>(args)...), phaseshift(phaseshift) {}
+  void setPhase(float phase){
+    Osc::setPhase(phase +  phaseshift);
+  }
+  float getPhase(){
+    return Osc::getPhase() - phaseshift;
+  }
+  void reset(){
+    Osc::setPhase(phaseshift);
+  }
+  /**
+   * @param phaseshift oscillator phase shift in radians
+   */
+  template <typename... Args>
+  static PhaseShiftOscillator<Osc>* create(float phaseshift, Args&&... args){
+    return new PhaseShiftOscillator<Osc>(phaseshift, std::forward<Args>(args)...);
+  }    
+  static void destroy(PhaseShiftOscillator<Osc>* obj){
+    Osc::destroy(obj);
   }
 };
 

@@ -61,7 +61,7 @@ void ShortFastFourierTransform::init(int aSize){
 void ShortFastFourierTransform::fft(ShortArray input, ComplexShortArray output){
   ASSERT(input.getSize() >= getSize(), "Input array too small");
   ASSERT(output.getSize() >= getSize(), "Output array too small");
-  for(int n=0; n<getSize(); n++){
+  for(size_t n=0; n<getSize(); n++){
     temp[n].re=input[n];
     temp[n].im=0;
   }
@@ -73,7 +73,7 @@ void ShortFastFourierTransform::ifft(ComplexShortArray input, ShortArray output)
   ASSERT(output.getSize() >= getSize(), "Output array too small");
   kiss_fft(cfgifft, (kiss_fft_cpx*)(int16_t*)input.getData(), (kiss_fft_cpx*)(int16_t*)temp.getData());
   float scale=1.0f/getSize();
-  for(int n=0; n<getSize(); n++){
+  for(size_t n=0; n<getSize(); n++){
     output[n]=temp[n].re*scale;
   }
 }

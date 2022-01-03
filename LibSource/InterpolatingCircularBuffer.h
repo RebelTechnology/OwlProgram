@@ -12,6 +12,10 @@ protected:
 public:
   InterpolatingCircularFloatBuffer() {}
   InterpolatingCircularFloatBuffer(float* data, size_t size): CircularFloatBuffer(data, size) {}
+  using CircularBuffer<float>::writeAt;
+  using CircularBuffer<float>::readAt;
+  using CircularBuffer<float>::read;
+
   /**
    * Interpolated write at sub-sample index.
    * Inserts a value linearly interpolated at a fractional index.
@@ -23,6 +27,20 @@ public:
    * @return a value linearly interpolated at a fractional index
    */
   float readAt(float index);
+
+  /**
+   * Interpolated read at fractional rate
+   * @param rate read speed, in samples/sample
+   */
+  void read(float* out, size_t len, float rate){
+    float pos = readpos; // quantizes fractional read pos from last read
+    while(len--){
+      *out++ = readAt(pos);
+      pos += rate;
+    }
+    readpos = fmodf(pos + size, size);
+    empty = readpos == writepos;
+  }
 
   float getFractionalDelay(){
     return delay_samples;

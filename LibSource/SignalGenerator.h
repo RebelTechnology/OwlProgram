@@ -16,7 +16,9 @@ public:
   /**
    * Produce the next consecutive sample.
    */
-  virtual float generate() = 0;
+  virtual float generate(){
+    return 0;
+  }
   /**
    * Produce a block of samples
    */

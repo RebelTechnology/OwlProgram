@@ -142,7 +142,7 @@ public:
 
     /**
    * Get a single float stored in the FloatMatrix.
-   * @return the float stored at index @param index
+   * @return the float stored at index **row** and **col**
   */
   float getElement(int row, int col){
     return getData()[row*getColumns()+col];

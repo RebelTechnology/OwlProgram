@@ -9,6 +9,10 @@ protected:
 public:
   static constexpr float begin_phase = 0;
   static constexpr float end_phase = 1;
+  SquareWaveOscillator(){}
+  SquareWaveOscillator(float sr){
+    setSampleRate(sr);
+  }  
   /**
    * Set pulse width to a value between 0 and 1
    */
@@ -51,8 +55,8 @@ public:
   }
   float getSample(){
     float sample = phase < pw ? 1 : -1;
-    sample += polyblep(incr, phase);
-    sample -= polyblep(incr, fmod(phase + 1 + pw, 2));
+    sample += polyblep(phase, incr);
+    sample -= polyblep(fmod(phase + 1 - pw, 1), incr);
     return sample;
   }
 };

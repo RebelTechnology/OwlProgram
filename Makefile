@@ -185,10 +185,12 @@ run: $(DEPS) ## run patch natively
 grind: $(DEPS) ## run valgrind on patch natively
 	@$(MAKE) -s -f native.mk grind
 
-check: ## run test patches and unit tests
+tests: ## run all unit tests
 	@for nm in $(TESTS) ; do \
 		$(MAKE) -s TEST=$$nm test || exit;\
 	done
+
+check: tests ## run test patches and unit tests
 	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/CppTest PATCHNAME=CppTest clean patch web run
 	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/DaisySPTest PATCHNAME=DaisySPTest clean patch web run
 	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/GenTest GEN=MIDItestMinMax clean patch web run

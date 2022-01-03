@@ -1,3 +1,14 @@
+v22.2
+-----
+* Added NoiseOscillator (whitenoise s+h)
+* Added PhaseShiftOscillator template
+* Added Biquad allpass filter configuration
+* Fixed Antialiased oscillators (Triangle, SquareWave, Ramp)
+* Added MorphingOscillator
+* AdjustableTapTempo interface changes
+* CircularBuffer improvements, added isFull()
+* Added InvertedRampOscillator
+* Added StateVariableFilter::setAllpass() and processLowMidHighBand()
 * Improved realloc implementation
 * Block based SineOscillator::generate() with FM
 * Added test patches for automatic CI builds

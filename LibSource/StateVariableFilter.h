@@ -4,121 +4,115 @@
 #include "FloatArray.h"
 #include "SignalProcessor.h"
 
+#define SVF_COMPUTE_BOUNDED
+
 /**
  * State Variable Filter based on Andy Simper's code and analysis:
  * @ref http://www.cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
+ * This is a so-called Zero Delay Feedback, trapezoidal integration filter
+ * and is suited to audio rate modulation of filter coefficients.
+ *
+ * Andy provides two versions of the algorithm: bounded form, and with unbounded 'g' term.
+ * Define SVF_COMPUTE_BOUNDED to use the bounded form (default).
  */
 class AbstractStateVariableFilter {
+protected:
+  float kvalue(float fc, float q){
+#ifdef SVF_COMPUTE_BOUNDED
+    const float g = tanf(pioversr*fc);
+#else
+    g = tanf(pioversr*fc);
+#endif
+    const float k = 1.0f / q;
+    a1 = 1.0f/(1.0f + g * (g + k));
+    a2 = g * a1;
+    a3 = g * a2;
+    return k;
+  }
 public:
   AbstractStateVariableFilter(float sr): pioversr(M_PI/sr) {}
 
+  void setCutoff(float fc, float q){
+    const float k = kvalue(fc, q);
+    m0 = k;
+  }
+
   void setLowPass(float fc, float q){
-    const float w = tanf(pioversr*fc);
-    const float g = w;
-    const float k = 1. / q;
-    m_a1 = 1./(1. + g * (g + k));
-    m_a2 = g * m_a1;
-    m_a3 = g * m_a2;
-    m_m0 = 0;
-    m_m1 = 0;
-    m_m2 = 1.;
+    kvalue(fc, q);
+    m0 = 0;
+    m1 = 0;
+    m2 = 1.0f;
   }
 
   void setHighPass(float fc, float q){
-    const float w = tanf(pioversr*fc);
-    const float g = w;
-    const float k = 1. / q;
-    m_a1 = 1./(1. + g * (g + k));
-    m_a2 = g * m_a1;
-    m_a3 = g * m_a2;
-    m_m0 = 1.;
-    m_m1 = -k;
-    m_m2 = -1.;
+    m0 = 1.0f;
+    m1 = -kvalue(fc, q);
+    m2 = -1.0f;
   }
 
   void setBandPass(float fc, float q){
-    const float w = tanf(pioversr*fc);
-    const float g = w;
-    const float k = 1. / q;
-    m_a1 = 1./(1. + g * (g + k));
-    m_a2 = g * m_a1;
-    m_a3 = g * m_a2;
-    m_m0 = 0.;
-    m_m1 = 1.;
-    m_m2 = 0.;
+    kvalue(fc, q);
+    m0 = 0.0f;
+    m1 = 1.0f;
+    m2 = 0.0f;
   }
 
   void setNotch(float fc, float q){
-    const float w = tanf(pioversr*fc);
-    const float g = w;
-    const float k = 1. / q;
-    m_a1 = 1./(1. + g * (g + k));
-    m_a2 = g * m_a1;
-    m_a3 = g * m_a2;
-    m_m0 = 1.;
-    m_m1 = -k;
-    m_m2 = 0.;
+    const float k = kvalue(fc, q);
+    m0 = 1.0f;
+    m1 = -k;
+    m2 = 0.0f;
   }
 
   void setPeak(float fc, float q){
-    const float w = tanf(pioversr*fc);
-    const float g = w;
-    const float k = 1. / q;
-    m_a1 = 1./(1. + g * (g + k));
-    m_a2 = g * m_a1;
-    m_a3 = g * m_a2;
-    m_m0 = 1.;
-    m_m1 = -k;
-    m_m2 = -2.;
+    const float k = kvalue(fc, q);
+    m0 = 1.0f;
+    m1 = -k;
+    m2 = -2.0f;
   }
   
   void setBell(float fc, float q, float gain){
-    const float w = tanf(pioversr*fc);
+    const float k = kvalue(fc, q);
     const float A = exp10f(gain/40.);
-    const float g = w;
-    const float k = 1 / q;
-    m_a1 = 1./(1. + g * (g + k));
-    m_a2 = g * m_a1;
-    m_a3 = g * m_a2;
-    m_m0 = 1.;
-    m_m1 = k * (A * A - 1.);
-    m_m2 = 0.;
+    m0 = 1.0f;
+    m1 = k * (A * A - 1.);
+    m2 = 0.0f;
   }
   
   void setLowShelf(float fc, float q, float gain){
-    const float w = tanf(pioversr*fc);
+    const float k = kvalue(fc, q);
     const float A = exp10f(gain/40.);
-    const float g = w / sqrtf(A);
-    const float k = 1. / q;
-    m_a1 = 1./(1. + g * (g + k));
-    m_a2 = g * m_a1;
-    m_a3 = g * m_a2;
-    m_m0 = 1.;
-    m_m1 = k * (A - 1.);
-    m_m2 = (A * A - 1.);
+    m0 = 1.0f;
+    m1 = k * (A - 1.0f);
+    m2 = (A * A - 1.0f);
   }
 
   void setHighShelf(float fc, float q, float gain){
-    const float w = tanf(pioversr*fc);
+    const float k = kvalue(fc, q);
     const float A = exp10f(gain/40.);
-    const float g = w / sqrtf(A);
-    const float k = 1. / q;
-    m_a1 = 1./(1. + g * (g + k));
-    m_a2 = g * m_a1;
-    m_a3 = g * m_a2;
-    m_m0 = A*A;
-    m_m1 = k*(1. - A)*A;
-    m_m2 = (1. - A*A);
+    m0 = A * A;
+    m1 = k * (1.0f - A) * A;
+    m2 = (1.0f - A * A);
+  }
+
+  void setAllPass(float fc, float q){
+    const float k = kvalue(fc, q);
+    m0 = 1.0f;
+    m1 = 2.0f * k;
+    m2 = 0.0f;
   }
 protected:
-  float pioversr;
+  const float pioversr;
   // coefficients
-  float m_a1 = 0.;
-  float m_a2 = 0.;
-  float m_a3 = 0.;
-  float m_m0 = 0.;
-  float m_m1 = 0.;
-  float m_m2 = 0.;
+#ifndef SVF_COMPUTE_BOUNDED
+  float g = 0.0f;
+#endif
+  float a1 = 0.0f;
+  float a2 = 0.0f;
+  float a3 = 0.0f;
+  float m0 = 0.0f;
+  float m1 = 0.0f;
+  float m2 = 0.0f;
 };
 
 class StateVariableFilter : public AbstractStateVariableFilter, SignalProcessor {
@@ -126,12 +120,17 @@ public:
   StateVariableFilter(float sr): AbstractStateVariableFilter(sr) {}
 
   float process(float v0){
-    float v3 = v0 - mIc2eq;
-    float v1 = m_a1 * mIc1eq + m_a2*v3;
-    float v2 = mIc2eq + m_a2 * mIc1eq + m_a3 * v3;
-    mIc1eq = 2. * v1 - mIc1eq;
-    mIc2eq = 2. * v2 - mIc2eq;
-    return m_m0 * v0 + m_m1 * v1 + m_m2 * v2;
+#ifdef SVF_COMPUTE_BOUNDED
+    float v3 = v0 - ic2eq;
+    float v1 = a1 * ic1eq + a2*v3;
+    float v2 = ic2eq + a2 * ic1eq + a3 * v3;
+#else
+    float v1 = a1 * ic1eq + a2 * (v0 - ic2eq);
+    float v2 = ic2eq + g * v1;
+#endif
+    ic1eq = 2. * v1 - ic1eq;
+    ic2eq = 2. * v2 - ic2eq;
+    return m0 * v0 + m1 * v1 + m2 * v2;
   }
 
   void process(FloatArray input, FloatArray output){
@@ -139,12 +138,17 @@ public:
     float v0, v1, v2, v3;
     for(size_t s = 0; s < nFrames; s++){
       v0 = input[s];
-      v3 = v0 - mIc2eq;
-      v1 = m_a1 * mIc1eq + m_a2*v3;
-      v2 = mIc2eq + m_a2 * mIc1eq + m_a3 * v3;
-      mIc1eq = 2. * v1 - mIc1eq;
-      mIc2eq = 2. * v2 - mIc2eq;
-      output[s] = m_m0 * v0 + m_m1 * v1 + m_m2 * v2;
+#ifdef SVF_COMPUTE_BOUNDED
+      v3 = v0 - ic2eq;
+      v1 = a1 * ic1eq + a2*v3;
+      v2 = ic2eq + a2 * ic1eq + a3 * v3;
+#else
+      v1 = a1 * ic1eq + a2 * (v0 - ic2eq);
+      v2 = ic2eq + g * v1;
+#endif
+      ic1eq = 2. * v1 - ic1eq;
+      ic2eq = 2. * v2 - ic2eq;
+      output[s] = m0 * v0 + m1 * v1 + m2 * v2;
     }
   }
 
@@ -169,9 +173,63 @@ public:
     }
   }
 
+  /**
+   * Simultaneously process lowpass, bandpass and highpass filtered output
+   */
+  void processLowBandHighPass(FloatArray in, float fc, float q, FloatArray low, FloatArray band, FloatArray high){
+    size_t nFrames = in.getSize();
+    float v0, v1, v2, v3;
+    setCutoff(fc, q);
+    for(size_t s = 0; s < nFrames; s++){
+      v0 = in[s];
+#ifdef SVF_COMPUTE_BOUNDED
+      v3 = v0 - ic2eq;
+      v1 = a1 * ic1eq + a2*v3;
+      v2 = ic2eq + a2 * ic1eq + a3 * v3;
+#else
+      v1 = a1 * ic1eq + a2 * (v0 - ic2eq);
+      v2 = ic2eq + g * v1;
+#endif
+      ic1eq = 2. * v1 - ic1eq;
+      ic2eq = 2. * v2 - ic2eq;
+      low[s] = v2;
+      band[s] = v1;
+      high[s] = v0 - m0*v1 - v2;
+      // notch = low + high = v0 - k*v1;
+      // peak = low - high = v0 - k*v1 - 2*v2;
+      // all = low + high - k*band = v0 - 2*k*v1;
+    }
+  }
+
+  void processLowBandHighPass(FloatArray in, FloatArray fc, float q,
+			      FloatArray low, FloatArray band, FloatArray high){
+    size_t nFrames = in.getSize();
+    float v0, v1, v2, v3;
+    for(size_t s = 0; s < nFrames; s++){
+      setCutoff(fc[s], q);
+      v0 = in[s];
+#ifdef SVF_COMPUTE_BOUNDED
+      v3 = v0 - ic2eq;
+      v1 = a1 * ic1eq + a2*v3;
+      v2 = ic2eq + a2 * ic1eq + a3 * v3;
+#else
+      v1 = a1 * ic1eq + a2 * (v0 - ic2eq);
+      v2 = ic2eq + g * v1;
+#endif
+      ic1eq = 2. * v1 - ic1eq;
+      ic2eq = 2. * v2 - ic2eq;
+      low[s] = v2;
+      band[s] = v1;
+      high[s] = v0 - m0*v1 - v2;
+      // notch = low + high = v0 - k*v1;
+      // peak = low - high = v0 - k*v1 - 2*v2;
+      // all = low + high - k*band = v0 - 2*k*v1;
+    }
+  }
+
   void reset() {
-    mIc1eq = 0.;
-    mIc2eq = 0.;
+    ic1eq = 0.0f;
+    ic2eq = 0.0f;
   }
 
   static StateVariableFilter* create(float sr){
@@ -184,9 +242,10 @@ public:
   
 private:
   // state
-  float mIc1eq = 0.;
-  float mIc2eq = 0.;
+  float ic1eq = 0.0f;
+  float ic2eq = 0.0f;
 };
+
 
 class MultiStateVariableFilter : public AbstractStateVariableFilter, MultiSignalProcessor {
 protected:
@@ -209,19 +268,24 @@ public:
       FloatArray out = output.getSamples(ch);
       size_t nFrames = in.getSize();
       float v0, v1, v2, v3;
-      float mIc1eq = state[0];
-      float mIc2eq = state[1];
+      float ic1eq = state[0];
+      float ic2eq = state[1];
       for(size_t s = 0; s < nFrames; s++){
 	v0 = in[s];
-	v3 = v0 - mIc2eq;
-	v1 = m_a1 * mIc1eq + m_a2*v3;
-	v2 = mIc2eq + m_a2 * mIc1eq + m_a3 * v3;
-	mIc1eq = 2. * v1 - mIc1eq;
-	mIc2eq = 2. * v2 - mIc2eq;
-	out[s] = m_m0 * v0 + m_m1 * v1 + m_m2 * v2;
+#ifdef SVF_COMPUTE_BOUNDED
+	v3 = v0 - ic2eq;
+	v1 = a1 * ic1eq + a2*v3;
+	v2 = ic2eq + a2 * ic1eq + a3 * v3;
+#else
+	v1 = a1 * ic1eq + a2 * (v0 - ic2eq);
+	v2 = ic2eq + g * v1;
+#endif
+	ic1eq = 2. * v1 - ic1eq;
+	ic2eq = 2. * v2 - ic2eq;
+	out[s] = m0 * v0 + m1 * v1 + m2 * v2;
       }
-      state[0] = mIc1eq;
-      state[1] = mIc2eq;
+      state[0] = ic1eq;
+      state[1] = ic2eq;
       state += STATE_VARIABLES_PER_CHANNEL;
     }
   }
