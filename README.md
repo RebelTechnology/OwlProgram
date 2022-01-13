@@ -87,7 +87,7 @@ Make sure to do a `make clean` before compiling a new patch, or add `clean` to y
 * PATCHOUT: number of output channels, default 2
 * SLOT: user program slot to store patch in, default 0, use with `store`
 * TARGET: changes the output prefix, default 'patch'
-
+* PLATFORM: changes the target platform: OWL1, OWL2 (default) or OWL3
 
 All files for a patch must be copied to the `PATCHSOURCE` directory. Take care to put only files required by the patch you want to compile here.
 
@@ -158,6 +158,19 @@ Specify your patch name (and optionally the PATCHSOURCE directory) as usual, but
 * `make SOUL=Foo clean patch`
 
 
+## Target Platform
+
+Most patches will compile to run on all OWL devices by default. However there are some platform differences, notably the maximum binary size (in kilobytes):
+
+* OWL1 (Legacy OWL Pedal and OWL Modular): 64K
+* OWL2 (OWL Pedal mkII, Alchemist, Wizard, Magus, Witch, Lich): 144K
+* OWL3 (Genius, Xibeca): 80K or 512K
+
+The target platform can be selected with the `PLATFORM` option, which defaults to `OWL2`. This can create patches up to 144K in binary size. Patches over 64K will not run on OWL1 devices, and patches over 80K will not run on OWL3 devices.
+
+To verify that a patch will run on all devices you can compile with `PLATFORM=OWL1`. Patches over 64K in binary size will then fail with a link error.
+
+Alternatively, to target **exclusively** OWL3 devices you can specify `PLATFORM=OWL3`. This will primarily do two things: link the binary against a bigger D1 memory segment, and enable double precision FPU. Both of these features are only available on the Cortex M7 microcontrollers used by OWL3 devices. Patches compiled with this option will not run on OWL1 or OWL2 devices.
 
 # Examples
 
