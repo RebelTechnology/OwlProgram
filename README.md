@@ -170,7 +170,7 @@ The target platform can be selected with the `PLATFORM` option, which defaults t
 
 To verify that a patch will run on all devices you can compile with `PLATFORM=OWL1`. Patches over 64K in binary size will then fail with a link error.
 
-Alternatively, to target **exclusively** OWL3 devices you can specify `PLATFORM=OWL3`. This will primarily do two things: link the binary against a bigger D1 memory segment, and enable double precision FPU. Both of these features are only available on the Cortex M7 microcontrollers used by OWL3 devices. Patches compiled with this option will not run on OWL1 or OWL2 devices.
+Alternatively, to target **exclusively** OWL3 devices you can specify `PLATFORM=OWL3`. This will primarily do two things: firstly link the binary against D1 memory allowing patches up to 512K, secondly enable double precision FPU. Both of these features are only available on the Cortex M7 microcontrollers used by OWL3 devices. Patches compiled with this option will not run on OWL1 or OWL2 devices.
 
 # Examples
 
