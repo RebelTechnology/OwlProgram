@@ -32,8 +32,8 @@ public:
    * Interpolated read at fractional rate
    * @param rate read speed, in samples/sample
    */
-  void read(float* out, size_t len, float rate){
-    float pos = readpos; // quantizes fractional read pos from last read
+  void read(float* out, size_t len, float startpos, float rate){
+    float pos = startpos;
     while(len--){
       *out++ = readAt(pos);
       pos += rate;

@@ -38,15 +38,6 @@ void PatchProcessor::setPatch(Patch* p, const char* n){
   name = n;
 }
 
-AudioBuffer* PatchProcessor::createMemoryBuffer(int channels, int size){
-  MemoryBuffer* buf = new ManagedMemoryBuffer(channels, size);
-  if(buf == NULL)
-    return NULL;
-  buffers[bufferCount++] = buf;
-  buf->clear();
-  return buf;
-}
-
 void PatchProcessor::setParameterValues(int16_t *params){
   if(getProgramVector()->hardware_version == OWL_MODULAR_HARDWARE){
     for(int i=0; i<4 && i<parameterCount; ++i)
