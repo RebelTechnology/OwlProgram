@@ -60,10 +60,19 @@ public:
     return sample;
   }
   void generate(FloatArray output){
-    float sample = phase < pw ? 1 : -1;
-    if(phase < incr){
-      float t = phase / incr;
-      sample += t+t - t*t - 1;
+    float sample;
+    if(phase < pw){
+      sample = 1;
+      if(phase < incr){
+	float t = phase / incr;
+	sample += t+t - t*t - 1;
+      }
+    }else{
+      sample = -1;
+      if(phase-pw < incr){
+	float t = fmod(phase + 1 - pw, 1) / incr;
+	sample -= t+t - t*t - 1;
+      }
     }
     size_t len = output.getSize();
     float* dest = output.getData();
