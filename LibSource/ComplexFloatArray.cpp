@@ -312,3 +312,16 @@ ComplexFloatArray ComplexFloatArray::create(size_t size){
 void ComplexFloatArray::destroy(ComplexFloatArray array){
   delete[] array.data;
 }
+
+void ComplexFloatArray::copyFrom(FloatArray real, FloatArray imag) {
+  for (size_t i = 0; i < getSize(); i++) {
+    data[i] = ComplexFloat(real[i], imag[i]);
+  }
+}
+
+void ComplexFloatArray::copyTo(FloatArray real, FloatArray imag) {
+  for (size_t i = 0; i < getSize(); i++) {
+    real[i] = data[i].re;
+    imag[i] = data[i].im;
+  }
+}

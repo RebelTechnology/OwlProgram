@@ -29,12 +29,12 @@
 #ifndef __EnvelopeTestPatch_hpp__
 #define __EnvelopeTestPatch_hpp__
 
-#include "StompBox.h"
-#include "Envelope.h"
+#include "Patch.h"
+#include "AdsrEnvelope.h"
 
 class EnvelopeTestPatch : public Patch {
 public:
-  AdsrEnvelope env;
+  LinearAdsrEnvelope env;
   FloatArray envBuffer;
   EnvelopeTestPatch():
     env(getSampleRate())
@@ -44,7 +44,6 @@ public:
     registerParameter(PARAMETER_C, "Sustain");
     registerParameter(PARAMETER_D, "Release");
     envBuffer = FloatArray::create(getBlockSize());
-    debugMessage("__");
   }
   ~EnvelopeTestPatch(){
     FloatArray::destroy(envBuffer);

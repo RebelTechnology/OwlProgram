@@ -16,14 +16,26 @@ BUILDSOURCE  = $(BUILD)/Source
 TESTPATCHES  = $(BUILDROOT)/TestPatches
 DSPINC       = $(BUILDROOT)/Libraries/CMSIS/DSP/Include
 DSPLIB       = $(BUILDROOT)/Libraries/CMSIS/DSP/Source
+DAISYSP      = $(BUILDROOT)/Libraries/DaisySP/Source
 CPPFLAGS    += -I$(SOURCE)
 CPPFLAGS    += -I$(PATCHSOURCE)
 CPPFLAGS    += -I$(LIBSOURCE)
 CPPFLAGS    += -I$(BUILDSOURCE)
 CPPFLAGS    += -I$(TESTPATCHES)
 CPPFLAGS    += -I$(DSPINC)
+CPPFLAGS    += -I$(DAISYSP)
+CPPFLAGS    += -I$(DAISYSP)/Control
+CPPFLAGS    += -I$(DAISYSP)/Drums
+CPPFLAGS    += -I$(DAISYSP)/Dynamics
+CPPFLAGS    += -I$(DAISYSP)/Effects
+CPPFLAGS    += -I$(DAISYSP)/Filters
+CPPFLAGS    += -I$(DAISYSP)/Noise
+CPPFLAGS    += -I$(DAISYSP)/PhysicalModeling
+CPPFLAGS    += -I$(DAISYSP)/Synthesis
+CPPFLAGS    += -I$(DAISYSP)/Utility
 CPPFLAGS    += -ILibraries -ILibraries/KissFFT
 CPPFLAGS    += -D__PROGRAM_START=1 # prevent compilation of __cmsis_start function
+CPPFLAGS    += "-DPATCHNAME=\"$(PATCHNAME)\""
 CXXFLAGS     = -std=gnu++17
 LDLIBS       = -lm
 LDFLAGS      = -Wl,--gc-sections
@@ -54,6 +66,7 @@ C_SRC   += $(wildcard $(BUILDSOURCE)/*.c)
 CPP_SRC += $(wildcard $(BUILDSOURCE)/*.cpp)
 C_SRC   += $(wildcard $(PATCHSOURCE)/*.c)
 CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
+CPP_SRC += $(wildcard $(DAISYSP)/*/*.cpp)
 ifdef MAXIMILIAN
 CPP_SRC := $(filter-out $(PATCHSOURCE)/$(MAXIMILIAN).cpp, $(CPP_SRC))
 endif

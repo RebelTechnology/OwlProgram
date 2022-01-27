@@ -9,9 +9,9 @@ class FilterStage {
 public:
   FloatArray coefficients;
   FloatArray state;
-  static const float BESSEL_Q;
-  static const float SALLEN_KEY_Q;
-  static const float BUTTERWORTH_Q;
+  static constexpr float BESSEL_Q = 0.57735026919f; // 1/sqrt(3)
+  static constexpr float SALLEN_KEY_Q = 0.5f; // 1/2
+  static constexpr float BUTTERWORTH_Q = 0.70710678118f; // 1/sqrt(2)
 
   FilterStage(FloatArray co, FloatArray st) : coefficients(co), state(st){}
 
@@ -25,6 +25,10 @@ public:
   
   void setBandPass(float fc, float q, float sr){
     setBandPass(coefficients, fc*M_PI/sr, q);
+  }
+  
+  void setAllPass(float fc, float q, float sr){
+    setAllPass(coefficients, fc*M_PI/sr, q);
   }
   
   void setNotch(float fc, float q, float sr){
@@ -80,6 +84,16 @@ public:
     coefficients[2] = -coefficients[0];
     coefficients[3] = - 2 * (K * K - 1) * norm;
     coefficients[4] = - (1 - K / q + K * K) * norm;
+  }
+
+  static void setAllPass(float* coefficients, float omega, float q){
+    float K = tanf(omega);
+    float norm = 1 / (1 + K / q + K * K);
+    coefficients[0] = (1 - K / q + K * K) * norm;
+    coefficients[1] = 2 * (K * K - 1) * norm;
+    coefficients[2] = 1;
+    coefficients[3] = coefficients[1];
+    coefficients[4] = coefficients[0];
   }
 
   static void setNotch(float* coefficients, float omega, float q){
@@ -310,6 +324,13 @@ public:
     }
   }
 
+  void processAllPass(FloatArray in, FloatArray fc, float q, FloatArray out){
+    for(size_t i = 0; i < in.getSize(); i++){
+      setAllPass(fc[i], q);
+      out[i] = process(in[i]);
+    }
+  }
+
   /* process a single sample and return the result */
   float process(float input){
     float output;
@@ -329,6 +350,11 @@ public:
 
   void setBandPass(float fc, float q){
     FilterStage::setBandPass(coefficients, fc*pioversr, q);
+    copyCoefficients();
+  }
+
+  void setAllPass(float fc, float q){
+    FilterStage::setAllPass(coefficients, fc*pioversr, q);
     copyCoefficients();
   }
 
@@ -462,9 +488,5 @@ public:
     MultiBiquadFilter::destroy(filter);
   }
 };
-
-const float FilterStage::BESSEL_Q = 1/sqrtf(3); // 1/sqrt(3)
-const float FilterStage::SALLEN_KEY_Q = 0.5f; // 1/2
-const float FilterStage::BUTTERWORTH_Q = 1/sqrtf(2); // 1/sqrt(2)
 
 #endif // __BiquadFilter_h__

@@ -142,7 +142,7 @@ public:
 
     /**
    * Get a single float stored in the FloatMatrix.
-   * @return the float stored at index @param index
+   * @return the float stored at index **row** and **col**
   */
   float getElement(int row, int col){
     return getData()[row*getColumns()+col];
@@ -166,6 +166,20 @@ public:
   void sigmoid(){
     sigmoid(*this);
   }
+
+  /**
+   * Copies the content of this matrix to another matrix.
+   * The other matrix needs to be at least as big as this matrix.
+   * @param[out] destination the destination matrix
+   */
+  void copyTo(FloatMatrix destination);
+
+  /**
+   * Copies the content of another matrix into this matrix.
+   * This matrix needs to be at least as big as the other matrix.
+   * @param[in] source the source matrix
+   */
+  void copyFrom(FloatMatrix source);
 
   /**
    * Creates a new FloatMatrix.

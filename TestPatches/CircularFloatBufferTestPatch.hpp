@@ -9,6 +9,8 @@ public:
       TEST("Default ctor");
       CircularFloatBuffer empty;
       CHECK_EQUAL(empty.getSize(), 0);
+      CHECK(empty.isEmpty());
+      CHECK(!empty.isFull());
       CHECK(empty.getReadHead() == NULL);
       CHECK(empty.getWriteHead() == NULL);
     }
@@ -25,10 +27,39 @@ public:
     {
       TEST("create");
       CircularFloatBuffer* buffer = CircularFloatBuffer::create(512);
-      CHECK_EQUAL((int)buffer->getSize(), 512);
+      CHECK_EQUAL(buffer->getSize(), 512);
       REQUIRE(buffer->getReadHead() != NULL);
       for(size_t i=0; i<512; ++i)
 	CHECK_EQUAL(buffer->readAt(i), 0);
+      CircularFloatBuffer::destroy(buffer);
+    }
+    {
+      TEST("size/capacity/isEmpty/isFull");
+      const size_t size = 64;
+      float data[size];
+      CircularFloatBuffer* buffer = CircularFloatBuffer::create(size);
+      CHECK_EQUAL((int)buffer->getSize(), size);
+      CHECK_EQUAL((int)buffer->getWriteCapacity(), size);
+      CHECK_EQUAL((int)buffer->getReadCapacity(), 0);
+      CHECK(buffer->isEmpty());
+      CHECK(!buffer->isFull());
+      buffer->write(data, size/2);
+      CHECK_EQUAL((int)buffer->getWriteCapacity(), size/2);
+      CHECK_EQUAL((int)buffer->getReadCapacity(), size/2);
+      CHECK(!buffer->isEmpty());
+      CHECK(!buffer->isFull());
+      buffer->write(data, size/2);
+      CHECK_EQUAL((int)buffer->getWriteCapacity(), 0);
+      CHECK_EQUAL((int)buffer->getReadCapacity(), size);
+      CHECK(!buffer->isEmpty());
+      CHECK(buffer->isFull());
+      // buffer->read(data, size);
+      for(size_t j=0; j<size; ++j)
+	buffer->read();
+      CHECK_EQUAL((int)buffer->getWriteCapacity(), size);
+      CHECK_EQUAL((int)buffer->getReadCapacity(), 0);
+      CHECK(buffer->isEmpty());
+      CHECK(!buffer->isFull());
       CircularFloatBuffer::destroy(buffer);
     }
     {
@@ -39,6 +70,10 @@ public:
       buffer->write(input, input.getSize());
       for(size_t j=0; j<5; ++j)
 	CHECK_CLOSE(buffer->read(), j, DEFAULT_TOLERANCE);
+      CHECK_EQUAL((int)buffer->getWriteCapacity(), 10);
+      CHECK_EQUAL((int)buffer->getReadCapacity(), 0);
+      CHECK(buffer->isEmpty());
+      CHECK(!buffer->isFull());
       CircularFloatBuffer::destroy(buffer);
       FloatArray::destroy(input);
     }

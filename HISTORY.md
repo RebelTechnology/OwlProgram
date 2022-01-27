@@ -1,8 +1,33 @@
+v22.2
+-----
+* Added NoiseOscillator (whitenoise s+h)
+* Added PhaseShiftOscillator template
+* Added Biquad allpass filter configuration
+* Fixed Antialiased oscillators (Triangle, SquareWave, Ramp)
+* Added MorphingOscillator
+* AdjustableTapTempo interface changes
+* CircularBuffer improvements, added isFull()
+* Added InvertedRampOscillator
+* Added StateVariableFilter::setAllpass() and processLowMidHighBand()
+* Improved realloc implementation
+* Block based SineOscillator::generate() with FM
+* Added test patches for automatic CI builds
+* Automatically add '>' to end of gen~ output parameters
+* Updated to use C++17
+* Use std::min/max/abs/clamp instead of macros for C++
+* Refactored AdsrEnvelope to Linear and Exponential versions
 * Updated CMSIS libraries
 
 v21.2
 -----
 
+* Added FloatArray::softclip()
+* Added clamp(x, lo, hi) macro
+* Added TapTempo
+* Added DryWetProcessors
+* Added FeedbackProcessors
+* Added CrossFadingDelayProcessor
+* Added AudioBuffer::copyFrom(), copyTo(), multiply() and add()
 * Added Sample oscillator
 * Added Agnesi curve oscillator
 * Added MPE processor

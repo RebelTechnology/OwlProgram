@@ -13,6 +13,9 @@
 #include <unistd.h>
 
 extern "C"{
+  int filestat(const char *file_name){
+    return access(file_name, R_OK);
+  }
   size_t fileread(const char *file_name, uint8_t** data, size_t size){
     FILE* fd;
     if(!file_name)
@@ -38,7 +41,7 @@ extern "C"{
         errx(1, "Data buffer not specified");
     if ((fd = creat(file_name, 0666)) < 1)
         errx(1, "Error creating file");
-    if (write(fd, data, size) < size)
+    if (write(fd, data, size) < ssize_t(size))
         errx(1, "Error writing samples");
     close(fd);
     return size;

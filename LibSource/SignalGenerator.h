@@ -2,6 +2,7 @@
 #define __SignalGenerator_h__
 
 #include "FloatArray.h"
+#include "ComplexFloatArray.h"
 #include "AudioBuffer.h"
 
 /**
@@ -15,7 +16,9 @@ public:
   /**
    * Produce the next consecutive sample.
    */
-  virtual float generate() = 0;
+  virtual float generate(){
+    return 0;
+  }
   /**
    * Produce a block of samples
    */
@@ -25,10 +28,34 @@ public:
   }
 };
 
+
 class MultiSignalGenerator {
 public:
   virtual ~MultiSignalGenerator(){}
   virtual void generate(AudioBuffer& output) = 0;
 };
 
+
+/**
+ * Base class for stereo signal generators such as Oscillators.
+ * A ComplexSignalGenerator produces complex numbers with each channel
+ * containing samples in [-1..1] range unless otherwise stated.
+ */
+class ComplexSignalGenerator {
+public:
+  virtual ~ComplexSignalGenerator(){}
+  /**
+   * Produce the next consecutive sample.
+   */
+  virtual ComplexFloat generate() = 0;
+  /**
+   * Produce a block of samples
+   */
+  virtual void generate(ComplexFloatArray output) {
+    size_t size = output.getSize();
+    for(size_t i=0; i<size; ++i) {
+      output[i] = generate();
+    }
+  }
+};
 #endif // __SignalGenerator_h__

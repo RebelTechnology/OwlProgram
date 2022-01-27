@@ -1,7 +1,7 @@
 # OwlProgram
 Dynamically loaded OWL program.
 
-OwlProgram is the patch build environment for the OWL Pedal, OWL Modular, Magus, Wizard and Alchemist products from Rebel Technology. For details see https://www.rebeltech.org (moved from http://hoxtonowl.com).
+OwlProgram is the patch build environment for the OWL Pedal, OWL Modular, Magus, Wizard and Alchemist products from Rebel Technology. For more details see [www.rebeltech.org](https://www.rebeltech.org), the [community forum](community.rebeltech.org), or refer to [www.openwarelab.org](https://www.openwarelab.org/) for documentation.
 
 It is used to build, run and store patches written in Pure Data, FAUST, Max Gen, SOUL, Maximilian and C++.
 

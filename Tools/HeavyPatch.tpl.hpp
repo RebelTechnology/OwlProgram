@@ -75,7 +75,9 @@ public:
     {% for param, name, typ, namehash, minvalue, maxvalue, defvalue, button in jdata if button == False %}
     // {{name}}
     registerParameter(PARAMETER_{{param}}, HV_NAME_CHANNEL_{{param}});
+    {% if defvalue != None %}    
     setParameterValue(PARAMETER_{{param}}, HV_DEFAULT_CHANNEL_{{param}});
+    {% endif %}
     {% endfor %}
   }
 

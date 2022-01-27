@@ -9,6 +9,7 @@ public:
       TEST("Default ctor");
       FractionalCircularFloatBuffer empty;
       CHECK_EQUAL(empty.getSize(), 0);
+      CHECK(empty.isEmpty());
       CHECK(empty.getReadHead() == NULL);
       CHECK(empty.getWriteHead() == NULL);
     }
@@ -54,25 +55,31 @@ public:
       FractionalCircularFloatBuffer::destroy(buffer);
       FloatArray::destroy(input);
     }
-    // failing test
-    // {
-    //   TEST("delay");
-    //   FractionalCircularFloatBuffer* buffer = FractionalCircularFloatBuffer::create(60);
-    //   FloatArray input = FloatArray::create(20);
-    //   FloatArray output = FloatArray::create(20);
-    //   input.noise();
-    //   CHECK(!input.equals(output));
-    //   buffer->setDelay(5);
-    //   buffer->write(input, input.getSize());
-    //   buffer->read(output, output.getSize());
-    //   // buffer->delay(input, output, input.getSize(), 5);
-    //   for(size_t j=0; j<10; ++j)
-    // 	CHECK_CLOSE(input[j], output[j+5], DEFAULT_TOLERANCE);
-    //   // CHECK(input.subArray(0, 9).equals(output.subArray(10, 9)));
-    //   FractionalCircularFloatBuffer::destroy(buffer);
-    //   FloatArray::destroy(input);
-    //   FloatArray::destroy(output);
-    // }
+    {
+      TEST("fractional delay");
+      FractionalCircularFloatBuffer* buffer = FractionalCircularFloatBuffer::create(20);
+      FloatArray input = FloatArray::create(20);
+      FloatArray delay = FloatArray::create(20);
+      input.ramp(0, 20);
+      buffer->delay(input, delay, input.getSize(), 0.5); // delay by half a sample
+      for(int i=1; i<input.getSize(); ++i){
+	CHECK_CLOSE(delay[i], (input[i-1] + input[i])/2, DEFAULT_TOLERANCE);
+      }
+      FractionalCircularFloatBuffer::destroy(buffer);
+      FloatArray::destroy(input);
+      FloatArray::destroy(delay);
+    }
+    {
+      TEST("fractional readAt");
+      FractionalCircularFloatBuffer* buffer = FractionalCircularFloatBuffer::create(7);
+      FloatArray input = FloatArray::create(7);
+      input.ramp(0, 7);
+      buffer->write(input, input.getSize());
+      for(size_t j=0; j<5; ++j)
+	CHECK_CLOSE(buffer->readAt(j+0.5f), j+0.5f, DEFAULT_TOLERANCE);
+      FractionalCircularFloatBuffer::destroy(buffer);
+      FloatArray::destroy(input);
+    }
   }
 };
 

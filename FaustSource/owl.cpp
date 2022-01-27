@@ -911,7 +911,15 @@ public:
             }
             else if (strcasecmp(id, "PUSH") == 0)
                 fButton = PUSHBUTTON;
-        }
+	    else if (strcasecmp(id, "ButtonA") == 0)
+                fButton = BUTTON_A;
+            else if (strcasecmp(id, "ButtonB") == 0)
+                fButton = BUTTON_B;
+            else if (strcasecmp(id, "ButtonC") == 0)
+                fButton = BUTTON_C;
+            else if (strcasecmp(id, "ButtonD") == 0)
+                fButton = BUTTON_D;
+	}
         // else if (strcasecmp(k, "midi") == 0) {
 	//   if (strcasecmp(id, "pitchwheel") == 0){ // PB
 	//   }else if (strcasecmp(id, "ctrl") == 0){ // CC

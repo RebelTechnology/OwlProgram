@@ -3,10 +3,15 @@
 
 #include "FloatArray.h"
 #include "basicmaths.h"
+
 /**
 * A structure defining a floating point complex number as two members of type float.
 */
 struct ComplexFloat {
+  constexpr ComplexFloat() : re(0), im(0) {}
+  constexpr ComplexFloat(float x) : re(x), im(0) {}
+  constexpr ComplexFloat(float re, float im) : re(re), im(im) {}
+
   /**
    * The real part of the complex number.
    */
@@ -75,6 +80,20 @@ struct ComplexFloat {
     im = magnitude*sinf(phase);
   }
 
+  /**
+   * Returns complex conjugate - a copy of current number with imaginary part inverted
+   */
+  ComplexFloat getComplexConjugate() const {
+    return ComplexFloat {re, -im};
+  }
+
+  /**
+   * Returns dot product with another complex float value
+   */
+  ComplexFloat getDotProduct(ComplexFloat other) const {
+    return ComplexFloat {re * other.re - im  * other.im, re * other.im + im * other.re};
+  }
+
   bool operator<(const ComplexFloat& other) const {
     return getMagnitudeSquared() < other.getMagnitudeSquared();
   }
@@ -97,6 +116,88 @@ struct ComplexFloat {
   
   bool operator!=(const ComplexFloat& other) const {
     return re != other.re || im != other.im;
+  }
+
+  friend const ComplexFloat operator+(const ComplexFloat&lhs, const ComplexFloat& rhs) {
+    ComplexFloat result = lhs;
+    result += rhs;
+    return result;
+  }
+
+  friend const ComplexFloat operator+(const ComplexFloat&lhs, float rhs) {
+    ComplexFloat result = lhs;
+    result += rhs;
+    return result;
+  }
+
+  ComplexFloat& operator+=(float other) {
+    re += other;
+    return *this;
+  }
+
+  ComplexFloat& operator+=(const ComplexFloat& other) {
+    re += other.re;
+    im += other.im;
+    return *this;
+  }
+
+  friend const ComplexFloat operator-(const ComplexFloat&lhs, const ComplexFloat& rhs) {
+    ComplexFloat result = lhs;
+    result -= rhs;
+    return result;
+  }
+
+  friend const ComplexFloat operator-(const ComplexFloat&lhs, float rhs) {
+    ComplexFloat result = lhs;
+    result -= rhs;
+    return result;
+  }
+
+  ComplexFloat& operator-=(float other) {
+    re -= other;
+    return *this;
+  }
+
+  ComplexFloat& operator-=(const ComplexFloat& other) {
+    re -= other.re;
+    im -= other.im;
+    return *this;
+  }
+
+  friend const ComplexFloat operator*(const ComplexFloat&lhs, const ComplexFloat& rhs) {
+    ComplexFloat result = lhs;
+    result *= rhs;
+    return result;
+  }
+
+  friend const ComplexFloat operator*(const ComplexFloat&lhs, float rhs) {
+    ComplexFloat result = lhs;
+    result *= rhs;
+    return result;
+  }
+
+  ComplexFloat& operator*=(float other) {
+    re *= other;
+    im *= other;
+    return *this;
+  }
+
+  ComplexFloat& operator*=(const ComplexFloat& other) {
+    re = re * other.re - im * other.im;
+    im = re * other.im + im * other.re;
+    return *this;
+  }
+
+  friend const ComplexFloat operator/(const ComplexFloat&lhs, float rhs) {
+    ComplexFloat result = lhs;
+    result /= rhs;
+    return result;
+  }
+
+  ComplexFloat& operator/=(float other) {
+    re /= other;
+    im /= other;
+    return *this;
   }
 
 };
@@ -396,6 +497,24 @@ public:
    * @param[out] destination The destination array.
   */
   void setMagnitude(FloatArray magnitude, int offset, size_t count, ComplexFloatArray destination);
+
+  using SimpleArray<ComplexFloat>::copyFrom;
+  using SimpleArray<ComplexFloat>::copyTo;
+  /**
+   * Merge two channels of audio containing real and imaginary axis data into this array
+   * 
+   * @param[in] real Real axis data
+   * @param[in] imag Imaginary axis data
+  */
+  void copyFrom(FloatArray real, FloatArray imag);
+
+  /**
+   * Split complex data into two channels of audio containing real and imaginary axis data
+   * 
+   * @param[in] real Real axis data
+   * @param[in] imag Imaginary axis data
+  */
+  void copyTo(FloatArray real, FloatArray imag);
 };
 
 #endif // __ComplexFloatArray_h__

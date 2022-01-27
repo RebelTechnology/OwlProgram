@@ -11,21 +11,17 @@ protected:
 public:
   MemoryBuffer(float* buf, size_t ch, size_t sz): buffer(buf), channels(ch), size(sz) {}
   virtual ~MemoryBuffer(){}
-  void clear() override {
+  void clear() {
     memset(buffer, 0, size*channels*sizeof(float));
   }
-  FloatArray getSamples(int channel) override {
-    ASSERT(channel < channels, "Invalid channel");
+  FloatArray getSamples(int channel) {
+    ASSERT((size_t)channel < channels, "Invalid channel");
     return FloatArray(buffer+channel*size, size);
   }
-  void add(AudioBuffer& other) override {
-    for(size_t i=0; i<channels; ++i)
-      getSamples(i).add(other.getSamples(i));
-  }
-  int getChannels() override {
+  int getChannels() {
     return channels;
   }
-  int getSize() override {
+  int getSize() {
     return size;
   }
 };

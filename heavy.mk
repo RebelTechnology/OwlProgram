@@ -1,5 +1,3 @@
-HEAVYRELEASE ?= r2018.03
-# release version, see https://enzienaudio.com/a/releases
 HEAVYFILE    ?= $(HEAVY).pd
 HEAVYNAME    ?= owl
 HEAVYSRC     ?= $(BUILDROOT)/HeavySource

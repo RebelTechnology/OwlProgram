@@ -4,21 +4,46 @@
 #include "fastpow.h"
 #include "fastlog.h"
 
-void* pvPortRealloc(void *ptr, size_t size ){  
+#ifdef ARM_CORTEX
+/* The realloc() function changes the size of the memory block pointed  to */
+/* by ptr to size bytes.  The contents will be unchanged in the range from */
+/* the start of the region up to the minimum of the old and new sizes.  If */
+/* the  new size is larger than the old size, the added memory will not be */
+/* initialized.  If ptr is NULL, then  the  call  is  equivalent  to  mal‐ */
+/* loc(size), for all values of size; if size is equal to zero, and ptr is */
+/* not NULL, then the call is equivalent  to  free(ptr).   Unless  ptr  is */
+/* NULL,  it  must have been returned by an earlier call to malloc(), cal‐ */
+/* loc(), or realloc().  If the area pointed to was moved, a free(ptr)  is */
+/* done. */
+void* pvPortRealloc(void *ptr, size_t new_size) {
+  if(ptr == NULL) 
+    return pvPortMalloc(new_size);
+  size_t old_size = vPortGetSizeBlock(ptr);
+  if(new_size == 0){
+    vPortFree(ptr);
+    return NULL;
+  }
+  if(new_size <= old_size)
+    return ptr;
+  void* p = pvPortMalloc(new_size);
+  if(p == NULL)
+    return p;
+  memcpy(p, ptr, old_size);
   vPortFree(ptr);
-  ptr = pvPortMalloc(size);
-  if(ptr != NULL)
-    memset(ptr, 0, size);
-  return ptr;
+  return p;
 }
 
-void *pvPortCalloc(size_t nmemb, size_t size){
+/* The calloc() function allocates memory for an array of  nmemb  elements */
+/* of  size bytes each and returns a pointer to the allocated memory. */
+/* The memory is set to zero. */
+void *pvPortCalloc(size_t nmemb, size_t size){						  
   size_t xWantedSize = nmemb*size;
   void* ptr = pvPortMalloc(xWantedSize);
   if(ptr != NULL)
     memset(ptr, 0, xWantedSize);
   return ptr;
 }
+#endif
 
 // todo: see
 // http://www.hxa.name/articles/content/fast-pow-adjustable_hxa7241_2007.html
@@ -47,7 +72,7 @@ uint32_t arm_rand32(){
 }
 
 float randf(){
-  return arm_rand32()/4294967296.0f;
+  return arm_rand32()*(1/4294967296.0f);
 }
 
 float arm_sqrtf(float in){
