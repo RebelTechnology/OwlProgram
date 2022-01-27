@@ -25,7 +25,7 @@ else ifdef HEAVY
 # options for Heavy PD compilation
 PATCHNAME   ?= $(HEAVY)
 PATCHCLASS  ?= HeavyPatch
-PATCHFILE   ?= HeavyPatch.hpp
+PATCHFILE   ?= HeavyOWL_owl.hpp
 DEPS        += heavy
 else ifdef GEN
 # options for Max/MSP Gen compilation
@@ -76,13 +76,13 @@ TEST_FILES = $(notdir $(wildcard $(BUILDROOT)/TestPatches/*TestPatch.hpp))
 TESTS = $(filter-out ShortFastFourierTest, $(TEST_FILES:%Patch.hpp=%))
 
 export BUILD BUILDROOT TARGET
-export PATCHNAME PATCHCLASS PATCHSOURCE 
+export PATCHNAME PATCHCLASS PATCHSOURCE
 export PATCHFILE PATCHIN PATCHOUT
 export HEAVYTOKEN HEAVYSERVICETOKEN  HEAVY
 export SOUL SOULCLASS SOULFILE SOULHPP
 export CONFIG PLATFORM
 
-DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
+DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s
 
 all: libs patch web
 
