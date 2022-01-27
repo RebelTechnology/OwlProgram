@@ -2,7 +2,7 @@ HEAVYFILE    ?= $(HEAVY).pd
 HEAVYNAME    ?= owl
 HEAVYSRC     ?= $(BUILDROOT)/HeavySource
 HEAVYDIR     ?= $(BUILD)/Heavy
-HEAVYARGS    ?= -g c -n $(HEAVYNAME) -p $(HEAVYDIR) -o $(BUILD)
+HEAVYARGS    ?= -g owl -n $(HEAVYNAME) -p $(HEAVYDIR) -o $(BUILD)
 HVCC         ?= hvcc
 HVCC_OWL     ?= $(BUILDROOT)/Tools/build_send_receive_constants.py
 
@@ -12,9 +12,6 @@ $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@cp -f $< $@
 
 $(BUILD)/Source/Heavy_owl.h: $(HEAVYDIR)/_main.pd
-	@$(HVCC) $(HEAVYDIR)/_main.pd  $(HEAVYARGS)
-	@mv -f $(BUILD)/c/* $(BUILD)/Source
-	@cp -f $(HEAVYSRC)/HvUtils.h $(HEAVYSRC)/HvMessage.c $(BUILD)/Source
-	@python3 $(HVCC_OWL) $(BUILD)/ir/owl.heavy.ir.json $(BUILD)/Source/Heavy_$(HEAVYNAME)_constants.h
+	$(HVCC) $(HEAVYDIR)/_main.pd  $(HEAVYARGS)
 
 heavy: $(BUILD)/Source/Heavy_owl.h
