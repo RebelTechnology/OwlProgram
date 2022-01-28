@@ -1,33 +1,52 @@
 #ifndef __WavetableOscillator_h__
 #define __WavetableOscillator_h__
 
-#include "FloatArray.h"
 #include "Oscillator.h"
 
-class WavetableOscillator : public Oscillator {
+class WavetableOscillator : public OscillatorTemplate<WavetableOscillator> {
 private:
-  float mul;
   FloatArray wave;
-  float acc;
-  float inc;
 public:
-  WavetableOscillator(float sr, const FloatArray wavetable);
-  void setSampleRate(float sr);
-  float getSampleRate();
-  void setFrequency(float freq);
-  float getFrequency();
-  float getSample(float phase);
-  void setPhase(float phase);
-  void reset(){
-    setPhase(0);
+  static constexpr float begin_phase = 0;
+  static constexpr float end_phase = 1;
+  WavetableOscillator(){}
+  WavetableOscillator(float sr){
+    setSampleRate(sr);
   }
-  float getPhase();
-  float generate();
-  float generate(float fm);
-  void generate(FloatArray samples);
-  void generate(FloatArray output, FloatArray fm);
-  static WavetableOscillator* create(float sr, size_t size);
-  static void destroy(WavetableOscillator* osc);
+  WavetableOscillator(float sr, const FloatArray wavetable): wave(wavetable) {
+    setSampleRate(sr);
+  }
+  FloatArray getWavetable(){
+    return wave;
+  }    
+  float getSample(){
+    size_t index = phase*wave.getSize();
+    // index = min(index, size-1);
+    return wave[index];
+  }
+};
+
+
+class AntialiasedWavetableOscillator : public OscillatorTemplate<AntialiasedWavetableOscillator> {
+private:
+  FloatArray wave;
+public:
+  static constexpr float begin_phase = 0;
+  static constexpr float end_phase = 1;
+  AntialiasedWavetableOscillator(){}
+  AntialiasedWavetableOscillator(float sr){
+    setSampleRate(sr);
+  }  
+  AntialiasedWavetableOscillator(float sr, FloatArray wave):wave(wave){
+    setSampleRate(sr);
+  }  
+  float getSample(){
+    size_t index = phase*wave.getSize();
+    float sample = wave[index];
+    sample -= polyblep(phase, incr);
+    return sample;
+  }
+  using OscillatorTemplate<AntialiasedWavetableOscillator>::generate;  
 };
 
 #endif /* __WavetableOscillator_h__ */
