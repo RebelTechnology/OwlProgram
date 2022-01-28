@@ -14,12 +14,6 @@ static int16_t saturateTo16(int64_t value){
 }
 #endif
 
-ShortArray::ShortArray() :
- data(NULL), size(0) {}
-
-ShortArray::ShortArray(int16_t* d, size_t s) :
- data(d), size(s) {}
-
 void ShortArray::getMin(int16_t* value, int* index){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
@@ -219,6 +213,7 @@ void ShortArray::clip(int16_t max){
       data[n]=-max;
   }
 }
+
 void ShortArray::clip(int16_t min, int16_t max){
   for(size_t n=0; n<size; n++){
     if(data[n]>max)
@@ -227,60 +222,10 @@ void ShortArray::clip(int16_t min, int16_t max){
       data[n]=min;
   }
 }
+
 ShortArray ShortArray::subArray(int offset, size_t length){
   ASSERT(size >= offset+length, "Array too small");
   return ShortArray(data+offset, length);
-}
-
-void ShortArray::copyTo(ShortArray destination){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  copyTo(destination, min(size, destination.getSize()));
-}
-
-void ShortArray::copyFrom(ShortArray source){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  copyFrom(source, min(size, source.getSize()));
-}
-
-void ShortArray::copyTo(int16_t* other, size_t length){
-  ASSERT(size >= length, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_q15(data, other, length);
-#else
-  memcpy((void *)other, (void *)getData(), length*sizeof(int16_t));
-#endif /* ARM_CORTEX */
-}
-
-void ShortArray::copyFrom(int16_t* other, size_t length){
-  ASSERT(size >= length, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_q15(other, data, length);
-#else
-  memcpy((void *)getData(), (void *)other, length*sizeof(int16_t));
-#endif /* ARM_CORTEX */
-}
-
-void ShortArray::insert(ShortArray source, int sourceOffset, int destinationOffset, size_t samples){
-  ASSERT(size >= destinationOffset+samples, "Array too small");
-  ASSERT(source.size >= sourceOffset+samples, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_q15(source.data+sourceOffset, data+destinationOffset, samples);  
-#else
-  memcpy((void*)(getData()+destinationOffset), (void*)(source.getData()+sourceOffset), samples*sizeof(int16_t));
-#endif /* ARM_CORTEX */
-}
-
-void ShortArray::insert(ShortArray source, int destinationOffset, size_t samples){
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-  insert(source, 0, destinationOffset, samples);
-}
-
-void ShortArray::move(int fromIndex, int toIndex, size_t samples){
-  ASSERT(size >= toIndex+samples, "Array too small");
-  memmove(data+toIndex, data+fromIndex, samples*sizeof(int16_t)); //TODO: evaluate if it is appropriate to use arm_copy_q15 for this method
 }
 
 void ShortArray::setAll(int16_t value){
@@ -510,7 +455,6 @@ void ShortArray::noise(){
 void ShortArray::noise(int16_t min, int16_t max){
   uint16_t amplitude = abs((int32_t)max-(int32_t)min);
   int16_t offset = min;
-  //debugMessage("amp off", amplitude,offset);
   for(size_t n=0; n<size; n++){
     data[n]=(rand()/((float)RAND_MAX)) * amplitude + offset;
   }
@@ -587,33 +531,17 @@ void ShortArray::correlateInitialized(ShortArray operand2, ShortArray destinatio
 
 void ShortArray::shift(int shiftValue){
 #ifdef ARM_CORTEX
-    arm_shift_q15(data, shiftValue, data, size);
+  arm_shift_q15(data, shiftValue, data, size);
 #else
-    for(size_t n = 0; n < getSize(); ++n){
-      int16_t value = data[n];
-      if(shiftValue > 0){
-        int32_t v = (int32_t)value << shiftValue;
-        if(v < SHRT_MIN)
-          v = SHRT_MIN;
-        else if (v > SHRT_MAX)
-          v = SHRT_MAX;
-        value = (int16_t)v;
-      } else {
-        value = value >> -shiftValue;
-      }
-      data[n] = value;
-    } 
-#endif
+  if(shiftValue >= 0){
+    for(size_t n=0; n<size; n++)
+      data[n] = data[n] << shiftValue;
+  }else{
+    shiftValue = -shiftValue;
+    for(size_t n=0; n<size; n++)
+      data[n] = data[n] >> shiftValue;
   }
-
-ShortArray ShortArray::create(int size){
-  ShortArray fa(new int16_t[size], size);
-  fa.clear();
-  return fa;
-}
-
-void ShortArray::destroy(ShortArray array){
-  delete array.data;
+#endif
 }
 
 void ShortArray::setFloatValue(uint32_t n, float value){
@@ -624,7 +552,7 @@ float ShortArray::getFloatValue(uint32_t n){
   return data[n] / (float)-SHRT_MIN;
 }
 
-void ShortArray::copyFrom(FloatArray source){
+void ShortArray::fromFloat(FloatArray source){
   ASSERT(source.getSize() == size, "Size does not match");
 #ifdef ARM_CORTEX
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
@@ -636,7 +564,7 @@ void ShortArray::copyFrom(FloatArray source){
 #endif
 }
 
-void ShortArray::copyTo(FloatArray destination){
+void ShortArray::toFloat(FloatArray destination){
   ASSERT(destination.getSize() == size, "Size does not match");
 #ifdef ARM_CORTEX
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
@@ -646,4 +574,14 @@ void ShortArray::copyTo(FloatArray destination){
     destination[n] = getFloatValue(n);
   }
 #endif
+}
+
+ShortArray ShortArray::create(int size){
+  ShortArray fa(new int16_t[size], size);
+  fa.clear();
+  return fa;
+}
+
+void ShortArray::destroy(ShortArray array){
+  delete[] array.data;
 }

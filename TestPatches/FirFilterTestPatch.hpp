@@ -21,7 +21,7 @@ public:
   void processAudio(AudioBuffer &buffer){
     FloatArray fa=buffer.getSamples(0);
     // fa.noise();
-    filter->processBlock(fa, temp);
+    filter->process(fa, temp);
     // fa.copyFrom(temp);
     // debugMessage("max value",fa.getMaxValue());
   }

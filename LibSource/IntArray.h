@@ -1,26 +1,23 @@
-class IntArray
-{
-private:
-  int32_t* data;
-  int size;
+#ifndef __IntArray_h__
+#define __IntArray_h__
+
+#include <stdint.h>
+#include "SimpleArray.h"
+#include "FloatArray.h"
+#include <limits.h>
+
+class IntArray : public SimpleArray<int32_t> {
 public:
-  IntArray();
-  IntArray(int32_t* data, int size);
-
-  int getSize() const{
-    return size;
-  }
-
-  int getSize(){
-    return size;
-  }
+  IntArray(){}
+  IntArray(int32_t* data, size_t size) :
+    SimpleArray(data, size) {}
 
   void setAll(int32_t value){
   /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
   #ifdef ARM_CORTEX
     arm_fill_q31(value, data, size);
   #else
-    for(int n=0; n<size; n++){
+    for(size_t n=0; n<size; n++){
       data[n]=value;
     }
   #endif /* ARM_CORTEX */
@@ -46,7 +43,7 @@ public:
   #ifdef ARM_CORTEX
     arm_add_q31(data, operand2.data, destination.data, size);
   #else
-    for(int n=0; n<size; n++){
+    for(size_t n=0; n<size; n++){
       destination[n]=data[n]+operand2[n];
     }
   #endif /* ARM_CORTEX */
@@ -61,67 +58,97 @@ public:
   /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
     add(operand2, *this);
   } //in-place
-  
+
   /**
-   * Allows to index the array using array-style brackets.
-   * @param index the index of the element
-   * @return the value of the **index** element of the array
-   * Example usage:
-   * @code
-   * int size=1000;
-   * int32_t content[size]; 
-   * IntArray intArray(content, size);
-   * for(int n=0; n<size; n++)
-   *   content[n]==intArray[n]; //now the IntArray can be indexed as if it was an array
-   * @endcode
-  */
-  int32_t& operator [](const int index){
-    return data[index];
-  }
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * **const** version of operator[]
-  */
-  int32_t& operator [](const int index) const{
-    return data[index];
-  }
-  
-  /**
-   * Compares two arrays.
-   * Performs an element-wise comparison of the values contained in the arrays.
-   * @param other the array to compare against.
-   * @return **true** if the arrays have the same size and the value of each of the elements of the one 
-   * match the value of the corresponding element of the other, or **false** otherwise.
-  */
-  bool equals(const IntArray& other) const{
-    if(size!=other.getSize()){
-      return false;
+   * Bitshift the array values, saturating.
+   *
+   * @param shiftValue number of positions to shift. A positive value will shift left, a negative value will shift right.
+   */
+  void shift(int shiftValue){
+#ifdef ARM_CORTEX
+    arm_shift_q31(data, shiftValue, data, size);
+#else
+    if(shiftValue >= 0){
+      for(size_t n=0; n<size; n++)
+	data[n] = data[n] << shiftValue;
+    }else{
+      shiftValue = -shiftValue;
+      for(size_t n=0; n<size; n++)
+	data[n] = data[n] >> shiftValue;
     }
-    for(int n=0; n<size; n++){
-      if(data[n]!=other[n]){
-        return false;
-      }
+#endif
+  }
+
+    /**
+   * A subset of the array.
+   * Returns a array that points to subset of the memory used by the original array.
+   * @param[in] offset the first element of the subset.
+   * @param[in] length the number of elments in the new IntArray.
+   * @return the newly created IntArray.
+   * @remarks no memory is allocated by this method. The memory is still shared with the original array.
+   * The memory should not be de-allocated elsewhere (e.g.: by calling IntArray::destroy() on the original IntArray) 
+   * as long as the IntArray returned by this method is still in use.
+   * @remarks Calling IntArray::destroy() on a IntArray instance created with this method might cause an exception.
+  */
+  IntArray subArray(int offset, size_t length){
+    ASSERT(size >= offset+length, "Array too small");
+    return IntArray(data+offset, length);
+  }
+
+
+  /**
+   * Copies the content of the array to a FloatArray, interpreting the content
+   * of the IntArray as 1.31.
+   * @param[out] destination the destination array
+   */
+  void toFloat(FloatArray destination){
+    ASSERT(destination.getSize() == size, "Size does not match");
+#ifdef ARM_CORTEX
+    /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+    arm_q31_to_float(data, destination.getData(), size);
+#else
+    for(size_t n = 0; n < size; ++n)
+      destination[n] = getFloatValue(n);
+#endif
+  }
+
+  /**
+   * Copies the content of a FloatArray into a IntArray, converting
+   * the float elements to fixed-point 1.31.
+   * @param[in] source the source array
+   */
+  void fromFloat(FloatArray source){
+    ASSERT(source.getSize() == size, "Size does not match");
+#ifdef ARM_CORTEX
+    /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
+    arm_float_to_q31(source.getData(), data, size);
+#else
+    for(size_t n = 0; n < size; ++n){
+      setFloatValue(n, source[n]);
     }
-    return true;
+#endif
   }
-  
+
   /**
-   * Casting operator to int32_t*
-   * @return a int32_t* pointer to the data stored in the IntArray
-  */
-  operator int32_t*(){
-    return data;
+   * Converts a float to int16 and stores it.
+   *
+   * @param n the array element to write to.
+   * @value the value to write
+   */
+  void setFloatValue(uint32_t n, float value){
+    data[n] = (int32_t)(value * -(float)INT_MIN);
   }
-  
+
   /**
-   * Get the data stored in the IntArray.
-   * @return a int32_t* pointer to the data stored in the IntArray
-  */
-  int32_t* getData(){
-    return data;
+   * Returns an element of the array converted to float.
+   *
+   * @param n the array element to read.
+   * @return the floating point representation of the element.
+   */
+  float getFloatValue(uint32_t n){
+    return data[n] / -(float)INT_MIN;
   }
-  
+
   /**
    * Creates a new IntArray.
    * Allocates size*sizeof(int32_t) bytes of memory and returns a IntArray that points to it.
@@ -142,21 +169,8 @@ public:
    * @remarks a IntArray object that has not been created by the IntArray::create() method might cause an exception if passed as an argument to this method.
   */
   static void destroy(IntArray array){
-    delete array.data;
-  }
-
-  /**
-   * Bitshift the array values, saturating.
-   *
-   * @param shiftValue number of positions to shift. A positive value will shift left, a negative value will shift right.
-   */
-  void shift(int shiftValue){
-#ifdef ARM_CORTEX
-    arm_shift_q31(data, shiftValue, data, size);
-#else
-    #warning TODO
-    
-    //ASSERT(false, "TODO");
-#endif
+    delete[] array.data;
   }
 };
+
+#endif // __IntArray_h__

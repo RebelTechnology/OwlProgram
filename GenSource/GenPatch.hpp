@@ -3,6 +3,12 @@
 
 #include "Patch.h"
 #include "gen.h"
+#include "genlib.h"
+#include "PatchMetadata.h"
+
+#if __has_include("metadata.h")
+#include "metadata.h"
+#endif
 
 #define GEN_OWL_PARAM_FREQ "freq"
 #define GEN_OWL_PARAM_GAIN "gain"
@@ -14,7 +20,6 @@
 #define GEN_OWL_PARAM_BUTTON_B "ButtonB"
 #define GEN_OWL_PARAM_BUTTON_C "ButtonC"
 #define GEN_OWL_PARAM_BUTTON_D "ButtonD"
-#define GEN_OWL_MAX_PARAM_COUNT 20
 
 class MonoVoiceAllocator {
   float& freq;
@@ -101,14 +106,19 @@ class GenParameter : public GenParameterBase {
 public:
   PatchParameterId pid;
   int8_t index;
-  float min = 0.0;
-  float max = 1.0;
+  float min = 0.0f;
+  float max = 1.0f;
   GenParameter(Patch* patch, CommonState *context, const char* name, PatchParameterId id, int8_t idx) : pid(id), index(idx) {
+#ifndef OWL_METADATA
     patch->registerParameter(id, name);
+#endif
     if(gen::getparameterhasminmax(context, index)){
       min = gen::getparametermin(context, index);
       max = gen::getparametermax(context, index);
     }    
+    float defaultvalue;
+    gen::getparameter(context, index, &defaultvalue);
+    patch->setParameterValue(id, defaultvalue);
   }
   void update(Patch* patch, CommonState *context){
     float value = patch->getParameterValue(pid);
@@ -152,8 +162,19 @@ public:
 
 class GenPatch : public Patch {
 private:
+  class OutputParameter {
+  public:
+    uint16_t id;
+    const char* name;
+    FloatArray buffer;
+    OutputParameter() : name(NULL) {}
+    OutputParameter(uint16_t id, const char* name, FloatArray buffer)
+      : id(id), name(name), buffer(buffer) {}
+  };
+  SimpleArray<OutputParameter> outputs;
+
   CommonState *context;
-  GenParameterBase* params[GEN_OWL_MAX_PARAM_COUNT];
+  GenParameterBase** params;
   size_t param_count = 0;
   float freq = 440.0f;
   float gain = 0.0f;
@@ -165,7 +186,8 @@ public:
   GenPatch() : allocator(freq, gain, gate, bend) {
     context = (CommonState*)gen::create(getSampleRate(), getBlockSize());
     int numParams = gen::num_params();
-    for(int i = 0; i < numParams && param_count < GEN_OWL_MAX_PARAM_COUNT; i++){
+    params = new GenParameterBase*[numParams];
+    for(int i = 0; i < numParams; i++){
       const char* name = gen::getparametername(context, i);
       if(strcasecmp(GEN_OWL_PARAM_FREQ, name) == 0){
 	params[param_count++] = new GenVariableParameter(this, context, name, &freq, i);
@@ -192,27 +214,71 @@ public:
 	params[param_count++] = new GenParameter(this, context, name, (PatchParameterId)index, i);
       }else if(strlen(name) == 2 && name[0] >= 'A' && name[0] <= 'H'
 	                         && name[1] >= 'A' && name[1] <= 'H'){
-	uint8_t index = PARAMETER_H*(name[0]-'A') + name[1]-'A';
+	uint8_t index = PARAMETER_AA*(1+name[0]-'A') + name[1]-'A';
 	params[param_count++] = new GenParameter(this, context, name, (PatchParameterId)index, i);
       }
     }
     buffers = new float*[gen::num_outputs()];
     size_t channels = getNumberOfChannels();
-    debugMessage("SR/CH/BS", (int)getSampleRate(), getNumberOfChannels(), getBlockSize());
+    for(int ch=channels; ch<gen::num_outputs(); ++ch)
+      buffers[ch] = new float[getBlockSize()];
+
+    size_t nof_outs = gen::num_outputs()-std::min((size_t)gen::num_outputs(), channels);
+    // debugMessage("outs", (int)channels, nof_outs, sizeof(OutputParameter[nof_outs]));
+    if(nof_outs > 0)
+      outputs = SimpleArray<OutputParameter>(new OutputParameter[nof_outs], nof_outs);
+#ifdef OWL_METADATA
+    size_t outputindex = 0;
+    for(int i=0; i<PatchMetadata::parameter_count; ++i){
+      const PatchMetadata::Control& ctrl = PatchMetadata::parameters[i];
+      PatchParameterId pid = (PatchParameterId)ctrl.id;
+      if(ctrl.flags & CONTROL_OUTPUT){
+	if(outputindex < nof_outs)
+	  outputs[outputindex] = OutputParameter(pid, ctrl.name, FloatArray(buffers[channels+outputindex], getBlockSize()));
+	outputindex++;
+      }
+      size_t len = strlen(ctrl.name);
+      if(ctrl.flags & CONTROL_OUTPUT && ctrl.name[len-1] != '>'){
+	// add a > at end of name
+	char name[len+2];
+	strcpy(name, ctrl.name);
+	name[len] = '>';
+	name[len+1] = '\0';
+	registerParameter(pid, name);
+      }else{
+	registerParameter(pid, ctrl.name);
+      }
+    }
+    for(int i=0; i<PatchMetadata::button_count; ++i){
+      const PatchMetadata::Control& ctrl = PatchMetadata::buttons[i];
+      if(ctrl.flags & CONTROL_OUTPUT){
+	if(outputindex < nof_outs)
+	  outputs[outputindex] = OutputParameter(ctrl.id+0x100, ctrl.name, FloatArray(buffers[channels+outputindex], getBlockSize()));
+	outputindex++;
+      }
+    }
+    if(outputindex != nof_outs)
+      debugMessage("Output parameters not matching", (int)outputindex, nof_outs);
+#else
     char name[] = "Out0>";
     for(int ch=channels; ch<gen::num_outputs(); ++ch){
-      buffers[ch] = new float[getBlockSize()];
       name[3] = '1'+ch;
-      registerParameter((PatchParameterId)(PARAMETER_F+(ch-channels)), name);
+      PatchParameterId pid = (PatchParameterId)(PARAMETER_F+(ch-channels));
+      registerParameter(pid, name);
+      outputs[ch-channels] = OutputParameter(pid, name, FloatArray(buffers[ch], getBlockSize()));
     }
+#endif
   }
 
   ~GenPatch() {
     gen::destroy(context);
     for(int i=0; i<param_count; ++i)
       delete params[i];
+    delete[] params;
     for(int i=getNumberOfChannels(); i<gen::num_outputs(); ++i)
       delete[] buffers[i];
+    delete[] buffers;
+    delete[] outputs.getData();
   }
 
   void processMidi(MidiMessage msg){
@@ -227,9 +293,14 @@ public:
     for(ch=0; ch<channels; ++ch)
       buffers[ch] = buffer.getSamples(ch);
     gen::perform(context, buffers, channels, buffers, gen::num_outputs(), buffer.getSize());
-    for(int ch=channels; ch<gen::num_outputs(); ++ch){
-      float avg = FloatArray(buffers[ch], buffer.getSize()).getMean();
-      setParameterValue((PatchParameterId)(PARAMETER_F+(ch-channels)), avg);
+    for(int i=0; i<outputs.getSize(); ++i){
+      if(outputs[i].id > 0x100){
+	float maxvalue = outputs[i].buffer.getMaxValue();
+	setButton((PatchButtonId)(outputs[i].id-0x100), maxvalue > 0.5);
+      }else{
+	float avg = outputs[i].buffer.getMean();
+	setParameterValue((PatchParameterId)outputs[i].id, avg);      
+      }
     }
   }
 };

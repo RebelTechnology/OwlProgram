@@ -2,70 +2,33 @@
 #define ENVELOPE_HPP
 
 #include "FloatArray.h"
+#include "SignalGenerator.h"
+#include "SignalProcessor.h"
 
-class Envelope {
+class Envelope : public SignalGenerator, SignalProcessor {
 public:
+  using SignalGenerator::generate;
   virtual void trigger(){
     trigger(true, 0);
   }
   virtual void trigger(bool state){
     trigger(state, 0);
   }
-  virtual void trigger(bool state, int triggerDelay){}
+  virtual void trigger(bool state, int triggerDelay) = 0;
   virtual void gate(bool state){
     gate(state, 0);
   }
   virtual void gate(bool state, int gateDelay){}
-};
-
-/**
- * Linear ADSR Envelope
- */
-class AdsrEnvelope : public Envelope {
-private:
-  enum EnvelopeStage { kAttack, kDecay, kSustain, kRelease, kIdle };
-  enum EnvelopeTrigger { kGate, kTrigger };
-
-public:
-  AdsrEnvelope(float newSampleRate);
-  virtual ~AdsrEnvelope();
-  void setSampleRate(float sampleRate){
-    samplePeriod = 1.0/sampleRate;
+  virtual float process(float input){
+    return input*generate();
   }
-  void setAttack(float newAttack);
-  void setDecay(float newDecay);
-  void setRelease(float newRelase);
-  void setSustain(float newSustain);
-  void trigger();
-  void trigger(bool state);
-  void trigger(bool state, int triggerDelay);
-  void setRetrigger(bool on);
-  void gate(bool state);
-  void gate(bool state, int gateDelay);
-  float getLevel();
-  void setLevel(float newLevel);
-  float getNextSample(); // increments envelope one step
-  void getEnvelope(FloatArray output); // increments envelope by output buffer length
-  void attenuate(FloatArray buf); // increments envelope by buffer length
-  static AdsrEnvelope* create(float sr){
-    return new AdsrEnvelope(sr);
+  /**
+   * Attenuate samples in @param input by envelope and place results in @param output
+   */
+  virtual void process(FloatArray input, FloatArray output){
+    for(size_t n = 0; n < output.getSize(); n++)
+      output[n] = input[n]*generate();
   }
-  static void destroy(AdsrEnvelope* env){
-    delete env;
-  }
-private:
-  static const float minTime;
-  float samplePeriod;
-  EnvelopeStage stage;
-  EnvelopeTrigger trig;
-  bool retrigger;
-  float level;
-  float attackIncrement;
-  float decayIncrement;
-  float releaseIncrement;
-  float sustain;
-  bool gateState;
-  int gateTime;
 };
 
 #endif /* ENVELOPE_HPP */

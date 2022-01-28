@@ -537,3 +537,18 @@ const HeapRegion_t *pxHeapRegion;
 	xBlockAllocatedBit = ( ( size_t ) 1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 );
 }
 
+/* 
+ * ref: https://sudonull.com/post/25551-We-embed-the-Lua-interpreter-in-the-project-for-the-microcontroller-stm32
+ */
+int vPortGetSizeBlock (void *pv) {
+    uint8_t *puc = (uint8_t *)pv;
+    BlockLink_t *pxLink;
+    if (pv != NULL) {
+        puc -= uxHeapStructSize;
+        pxLink = (BlockLink_t *)puc;
+        configASSERT((pxLink->xBlockSize & xBlockAllocatedBit) != 0);
+        configASSERT(pxLink->pxNextFreeBlock == NULL);
+        return pxLink->xBlockSize & ~xBlockAllocatedBit;
+    }
+    return 0;
+}

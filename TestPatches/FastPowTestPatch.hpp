@@ -10,11 +10,15 @@ public:
     {
       TEST("FastPow");
       float maxPerc = 0;
-      float threshold = 0.04; // maximum relative error accepted
+#ifdef ARM_CORTEX
+      float threshold = 0.04;
+#else
+      float threshold = 0.544; // maximum relative error accepted: 0.04 for big tables, 0.544 for small
+#endif      
       int errs = 0;
       int tests = 0;
       for(int n = -1000; n < 1000; n++){
-        float base = rand()/(float)RAND_MAX * 10;
+        float base = randf() * 10;
         float exponent = n*10/1000.f;
         float approx = fast_powf(base, exponent);
         float exact = powf(base, exponent);

@@ -3,42 +3,57 @@
 
 #include "FloatArray.h"
 #include "basicmaths.h"
+
 /**
 * A structure defining a floating point complex number as two members of type float.
 */
 struct ComplexFloat {
+  constexpr ComplexFloat() : re(0), im(0) {}
+  constexpr ComplexFloat(float x) : re(x), im(0) {}
+  constexpr ComplexFloat(float re, float im) : re(re), im(im) {}
+
   /**
-  The real part of the complex number.
-  */
+   * The real part of the complex number.
+   */
   float re;
   
   /**
-  The imaginary part of the complex number.
-  */
+   * The imaginary part of the complex number.
+   */
   float im;
   
   /**
-  Get the magnitude of the complex number.
-  Computes and returns the magnitude of the complex number.
-  @return The magnitude of the complex number.
-  */
-  float getMagnitude(){
+   * Get the magnitude of the complex number.
+   * Computes and returns the magnitude of the complex number.
+   * @return The magnitude of the complex number.
+   */
+  float getMagnitude() const{
     return sqrtf(re*re+im*im);  
   }
   
   /**
-  Get the phase of the complex number.
-  Computes and returns the phase of the complex number.
-  @return The phase of the complex number.
+   * Get the squared magnitude of the complex number.
+   * Computes and returns the squaredmagnitude of the complex number,
+   * which is cheaper to compute than the magnitude itself.
+   * @return The squared magnitude of the complex number.
+   */
+  float getMagnitudeSquared() const{
+    return re*re+im*im;  
+  }
+  
+  /**
+   * Get the phase of the complex number.
+  * Computes and returns the phase of the complex number.
+  * @return The phase of the complex number.
   */  
-  float getPhase(){
+  float getPhase() const{
     return atan2f(im,re);
   }
   
   /**
-  Set the phase of the complex number.
-  Set the phase of the complex number, keeping the magnitude unaltered.
-  @param phase The new phase of the complex number
+     * Set the phase of the complex number.
+  * Set the phase of the complex number, keeping the magnitude unaltered.
+  * @param phase The new phase of the complex number
   */
   void setPhase(float phase){
     float magnitude = getMagnitude();
@@ -46,60 +61,167 @@ struct ComplexFloat {
   }
   
   /**
-  Set the magnitude of the complex number.
-  Set the magnitude of the complex number, keeping the phase unaltered.
-  @param magnitude The new magnitude of the complex number
+  * Set the magnitude of the complex number.
+  * Set the magnitude of the complex number, keeping the phase unaltered.
+  * @param magnitude The new magnitude of the complex number
   */
   void setMagnitude(float magnitude){
     float phase = getPhase();
     setPolar(magnitude, phase);
-  }
-  
+  }  
   
   /**
-  Set magnitude and phase of the complex number.
-  @param magnitude The new magnitude of the complex number
-  @param phase The new phase of the complex number
+  * Set magnitude and phase of the complex number.
+  * @param magnitude The new magnitude of the complex number
+  * @param phase The new phase of the complex number
   */
   void setPolar(float magnitude, float phase){
     re = magnitude*cosf(phase);
     im = magnitude*sinf(phase);
   }
+
+  /**
+   * Returns complex conjugate - a copy of current number with imaginary part inverted
+   */
+  ComplexFloat getComplexConjugate() const {
+    return ComplexFloat {re, -im};
+  }
+
+  /**
+   * Returns dot product with another complex float value
+   */
+  ComplexFloat getDotProduct(ComplexFloat other) const {
+    return ComplexFloat {re * other.re - im  * other.im, re * other.im + im * other.re};
+  }
+
+  bool operator<(const ComplexFloat& other) const {
+    return getMagnitudeSquared() < other.getMagnitudeSquared();
+  }
+
+  bool operator>(const ComplexFloat& other) const {
+    return getMagnitudeSquared() > other.getMagnitudeSquared();
+  }
+
+  bool operator<=(const ComplexFloat& other) const {
+    return getMagnitudeSquared() <= other.getMagnitudeSquared();
+  }
+
+  bool operator>=(const ComplexFloat& other) const {
+    return getMagnitudeSquared() >= other.getMagnitudeSquared();
+  }
+
+  bool operator==(const ComplexFloat& other) const {
+    return re == other.re && im == other.im;
+  }
+  
+  bool operator!=(const ComplexFloat& other) const {
+    return re != other.re || im != other.im;
+  }
+
+  friend const ComplexFloat operator+(const ComplexFloat&lhs, const ComplexFloat& rhs) {
+    ComplexFloat result = lhs;
+    result += rhs;
+    return result;
+  }
+
+  friend const ComplexFloat operator+(const ComplexFloat&lhs, float rhs) {
+    ComplexFloat result = lhs;
+    result += rhs;
+    return result;
+  }
+
+  ComplexFloat& operator+=(float other) {
+    re += other;
+    return *this;
+  }
+
+  ComplexFloat& operator+=(const ComplexFloat& other) {
+    re += other.re;
+    im += other.im;
+    return *this;
+  }
+
+  friend const ComplexFloat operator-(const ComplexFloat&lhs, const ComplexFloat& rhs) {
+    ComplexFloat result = lhs;
+    result -= rhs;
+    return result;
+  }
+
+  friend const ComplexFloat operator-(const ComplexFloat&lhs, float rhs) {
+    ComplexFloat result = lhs;
+    result -= rhs;
+    return result;
+  }
+
+  ComplexFloat& operator-=(float other) {
+    re -= other;
+    return *this;
+  }
+
+  ComplexFloat& operator-=(const ComplexFloat& other) {
+    re -= other.re;
+    im -= other.im;
+    return *this;
+  }
+
+  friend const ComplexFloat operator*(const ComplexFloat&lhs, const ComplexFloat& rhs) {
+    ComplexFloat result = lhs;
+    result *= rhs;
+    return result;
+  }
+
+  friend const ComplexFloat operator*(const ComplexFloat&lhs, float rhs) {
+    ComplexFloat result = lhs;
+    result *= rhs;
+    return result;
+  }
+
+  ComplexFloat& operator*=(float other) {
+    re *= other;
+    im *= other;
+    return *this;
+  }
+
+  ComplexFloat& operator*=(const ComplexFloat& other) {
+    re = re * other.re - im * other.im;
+    im = re * other.im + im * other.re;
+    return *this;
+  }
+
+  friend const ComplexFloat operator/(const ComplexFloat&lhs, float rhs) {
+    ComplexFloat result = lhs;
+    result /= rhs;
+    return result;
+  }
+
+  ComplexFloat& operator/=(float other) {
+    re /= other;
+    im /= other;
+    return *this;
+  }
+
 };
 
-class ComplexFloatArray {
-private:
-  ComplexFloat* data;
-  size_t size;
+class ComplexFloatArray : public SimpleArray<ComplexFloat> {
 public:
-  /**Constructor
-    Initializes size to 0.
-  */
-  ComplexFloatArray() :
-    data(NULL), size(0) {}
-  
-  /**
-    Constructor.      
-    @param array A pointer to an array of ComplexFloat
-    @param size The length of the rray
-  */
-  ComplexFloatArray(ComplexFloat* array, size_t size) :
-    data(array), size(size) {}
-      
+  ComplexFloatArray(){}
+  ComplexFloatArray(ComplexFloat* data, size_t size) :
+    SimpleArray(data, size) {}
+    
   /** 
-    The real part of an element of the array.      
-    @param i The index of the element
-    @return The real part of the element
-  */
+   * Get the real part of an element of the array.      
+   * @param i The index of the element
+   * @return The real part of the element
+   */
   float re(const int i){
     return data[i].re;
   }
   
   /**
-    The imaginary part of an element of the array.
-    @param i The index of the element
-    @return The imaginary part of the element
-  */
+   *  Get the imaginary part of an element of the array.
+   * @param i The index of the element
+   * @return The imaginary part of the element
+   */
   float im(const int i){
     return data[i].im;
   }
@@ -109,10 +231,10 @@ public:
   }
 
   /**
-    The magnitude of an element of the array.
-    @param i The index of the element
-    @return The magnitude of the element
-  */  
+   * Get the magnitude of an element of the array.
+   *  @param i The index of the element
+   *  @return The magnitude of the element
+   */  
   float mag(const int i);
   
   /**
@@ -190,10 +312,6 @@ public:
    * @param operand2 second operand for the sum
   */
   void subtract(ComplexFloatArray operand2);
-
-  size_t getSize() const{
-    return size;
-  }
   
   /**
     The value of the element with the maximum magnitude in the array.
@@ -236,77 +354,6 @@ public:
   void scale(float factor);
   
   /**
-   * Allows to index the array using array-style brackets.
-   * @param index The index of the element
-   * @return the Value of the <code>index</code> element of the array
-   * Example usage:
-   * @code
-   * int size=1000;
-   * float content[size]; 
-   * ComplexFloatArray complexFloatArray(content, size);
-   * for(size_t n=0; n<size; n+=2){//now the ComplexFloatArray can be indexed as if it was an array
-   *   content[n]==complexFloatArray[n/2].re; 
-   *   content[n+1]==complexFloatArray[n/2].im;
-   * }
-   * @endcode
-  */
-  ComplexFloat& operator [](const int index){
-    return data[index];
-  }
-  
-  /**
-   * Allows to index the array using array-style brackets.
-   * 
-   * <code>const</code> version of operator[]
-  */
-  ComplexFloat& operator [](const int i) const{
-    return data[i];
-  }
-
-  /**
-   * Casting operator to ComplexFloat*
-   * @return A ComplexFloat* pointer to the data stored in the ComplexFloatArray
-  */  
-  operator ComplexFloat*() {
-    return data;
-  }
-  
-  /**
-   * Casting operator to float*
-   * @return A float* pointer to the data stored in the ComplexFloatArray
-  */ 
-  operator float*() {
-    return (float *)data;
-  }
-  
-  /**
-   * Get the data stored in the ComplexFloatArray.
-   * @return a ComplexFloat* pointer to the data stored in the ComplexFloatArray
-  */
-  ComplexFloat* getData(){
-    return data;
-  }
-
-  /**
-   * Compares two arrays.
-   * Performs an element-wise comparison of the values contained in the arrays.
-   * @param other the array to compare against.
-   * @return <code>true</code> if the arrays have the same size and the value of each of the elements of the one 
-   * match the value of the corresponding element of the other, or <code>false</code> otherwise.
-  */
-  bool equals(const ComplexFloatArray other) const{
-    if(size!=other.getSize()){
-      return false;
-    }
-    for(size_t n=0; n<size; n++){
-      if(data[n].re!=other[n].re || data[n].im!=other[n].im){
-        return false;
-      }
-    }
-    return true;
-  }
-  
-  /**
    * Creates a new ComplexFloatArray.
    * Allocates size*sizeof(float) bytes of memory and returns a ComplexFloatArray that points to it.
    * @param size The size of the new ComplexFloatArray.
@@ -324,45 +371,17 @@ public:
   static void destroy(ComplexFloatArray);
 
   /**
-   * Copies the content of an array into another array.
+   * Copies real values from a FloatArray, sets imaginary values to 0
    * @param[in] source The source array
   */
-  void copyFrom(FloatArray source);
-
-  /**
-   * Copies the content of a FloatArray into the ComplexFloatArray.
-   * @param[in] source The source array
-   * @remarks The size of the FloatArray must be twice the size of the ComplexFloatArray.
-  */
-  void copyFrom(ComplexFloatArray source);
+  void fromFloat(FloatArray source);
   
   /**
-   * Copies an array of ComplexFloat into the array.
-   * @param[in] source A pointer to the beginning of the portion of memory to read from.
-   * @param[in] length Number of samples to copy.
-  */
-  void copyFrom(ComplexFloat* source, size_t length);
-  
-  /**
-   * Copies the content of the ComplexFloatArray into a FloatArray.
+   * Copies real and imaginary values of the ComplexFloatArray into a FloatArray.
    * @param[out] destination The destination array
    * @remarks The size of the FloatArray must be twice the size of the ComplexFloatArray.
   */
-  void copyTo(FloatArray destination);
-
-  /**
-   * Copies the content of the array to another array.
-   * @param[out] destination The destination array
-  */
-  void copyTo(ComplexFloatArray destination);
-  
-  /**
-   * Copies an array of ComplexFloat into the array.
-   * @param[in] destination A pointer to the beginning of the portion of memory to write to.
-   * @param[in] length Number of samples to copy.
-  */
-  void copyTo(ComplexFloat* destination, size_t length);
-
+  void toFloat(FloatArray destination);
 
   /**
    * Set all the elements in the array.
@@ -478,6 +497,24 @@ public:
    * @param[out] destination The destination array.
   */
   void setMagnitude(FloatArray magnitude, int offset, size_t count, ComplexFloatArray destination);
+
+  using SimpleArray<ComplexFloat>::copyFrom;
+  using SimpleArray<ComplexFloat>::copyTo;
+  /**
+   * Merge two channels of audio containing real and imaginary axis data into this array
+   * 
+   * @param[in] real Real axis data
+   * @param[in] imag Imaginary axis data
+  */
+  void copyFrom(FloatArray real, FloatArray imag);
+
+  /**
+   * Split complex data into two channels of audio containing real and imaginary axis data
+   * 
+   * @param[in] real Real axis data
+   * @param[in] imag Imaginary axis data
+  */
+  void copyTo(FloatArray real, FloatArray imag);
 };
 
 #endif // __ComplexFloatArray_h__

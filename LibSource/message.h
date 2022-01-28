@@ -12,7 +12,11 @@
 /* #define ASSERT_FALSE(cond) if(cond){debugAssertFailed("Assertion failed", __PRETTY_FUNCTION__, __LINE__);} */
 /* #define ASSERT(cond, msg) if(!(cond)){debugAssertFailed(msg, __PRETTY_FUNCTION__, __LINE__);} */
 
+#ifndef NDEBUG
 #define ASSERT(cond, msg) if(!(cond)){assert_failed(msg, __PRETTY_FUNCTION__, __LINE__);}
+#else
+#define ASSERT(cond, msg)
+#endif
 
 #ifndef CHECKSUM_ERROR_STATUS
 #define CHECKSUM_ERROR_STATUS      -10

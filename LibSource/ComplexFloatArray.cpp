@@ -67,10 +67,10 @@ void ComplexFloatArray::getPhaseValues(FloatArray destination){
 void ComplexFloatArray::complexDotProduct(ComplexFloatArray operand2, ComplexFloat& result){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
-  arm_cmplx_dot_prod_f32 ( (float*)data, (float*)operand2, size, &(result.re), &(result.im) );
+  arm_cmplx_dot_prod_f32 ( (float*)getData(), (float*)operand2.getData(), size, &(result.re), &(result.im) );
 #else
-  float *pSrcA=(float*)data;
-  float *pSrcB=(float*)operand2;
+  float *pSrcA=(float*)getData();
+  float *pSrcB=(float*)operand2.getData();
   float realResult=0;    
   float imagResult=0;    
   for(size_t n=0; n<size; n++) {    
@@ -86,12 +86,12 @@ void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray operand
   ASSERT(operand2.size == size && result.size >= size, "Arrays size mismatch");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
-  arm_cmplx_mult_cmplx_f32( (float*)data, (float*)operand2, (float*)result, size );  
+  arm_cmplx_mult_cmplx_f32( (float*)getData(), (float*)operand2.getData(), (float*)result.getData(), size );  
 #else
-  float *pSrcA=(float*)data;
-  float *pSrcB=(float*)operand2;
-  float *pDst=(float*)result;
-  for(size_t n=0; n<size; n++) {        
+  float *pSrcA=(float*)getData();
+  float *pSrcB=(float*)operand2.getData();
+  float *pDst=(float*)result.getData();
+  for(size_t n=0; n<size; n++) {
     pDst[(2*n)+0] = pSrcA[(2*n)+0] * pSrcB[(2*n)+0] - pSrcA[(2*n)+1] * pSrcB[(2*n)+1];        
     pDst[(2*n)+1] = pSrcA[(2*n)+0] * pSrcB[(2*n)+1] + pSrcA[(2*n)+1] * pSrcB[(2*n)+0];        
   }        
@@ -101,7 +101,7 @@ void ComplexFloatArray::complexByComplexMultiplication(ComplexFloatArray operand
 void ComplexFloatArray::add(ComplexFloatArray operand2, ComplexFloatArray destination){
   ASSERT(operand2.size == size && destination.size >= size, "Arrays size mismatch");
 #ifdef ARM_CORTEX
-  arm_add_f32((float*)data, (float*)operand2.data, (float*)destination.data, size*2);
+  arm_add_f32((float*)getData(), (float*)operand2.getData(), (float*)destination.getData(), size*2);
 #else
   for(size_t n=0; n<size; n++){
     destination[n].re = data[n].re + operand2[n].re;
@@ -117,7 +117,7 @@ void ComplexFloatArray::add(ComplexFloatArray operand2){
 void ComplexFloatArray::subtract(ComplexFloatArray operand2, ComplexFloatArray destination){
   ASSERT(operand2.size == size && destination.size >= size, "Arrays size mismatch");
 #ifdef ARM_CORTEX
-  arm_sub_f32((float*)data, (float*)operand2.data, (float*)destination.data, size*2);
+  arm_sub_f32((float*)data, (float*)operand2.data, (float*)destination.getData(), size*2);
 #else
   for(size_t n=0; n<size; n++){
     destination[n].re = data[n].re - operand2[n].re;
@@ -134,10 +134,10 @@ void ComplexFloatArray::getComplexConjugateValues(ComplexFloatArray destination)
   ASSERT(size==destination.getSize(), "Wrong array size");
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
-  arm_cmplx_conj_f32( (float*)data, (float*)destination, size );  
+  arm_cmplx_conj_f32( (float*)getData(), (float*)destination.getData(), size );  
 #else
-  float *pSrc=(float*)data;
-  float *pDst=(float *)destination;
+  float *pSrc=(float*)getData();
+  float *pDst=(float *)destination.getData();
   for(size_t n=0; n<size; n++) {        
     pDst[(2*n)+0] = pSrc[(2*n)+0];     // real part        
     pDst[(2*n)+1] = -pSrc[(2*n)+1];    // imag part        
@@ -149,11 +149,11 @@ void ComplexFloatArray::complexByRealMultiplication(FloatArray operand2, Complex
   ASSERT(size==operand2.getSize(), "Wrong size"); 
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
 #ifdef ARM_CORTEX
-  arm_cmplx_mult_real_f32 ( (float*)data, (float*)operand2, (float*)result, size );  
+  arm_cmplx_mult_real_f32 ( (float*)getData(), (float*)operand2.getData(), (float*)result.getData(), size );  
 #else
-  float *pSrcCmplx=(float*)data;
-  float *pSrcReal=(float*)operand2;
-  float *pCmplxDst=(float*)result;
+  float *pSrcCmplx=(float*)getData();
+  float *pSrcReal=(float*)operand2.getData();
+  float *pCmplxDst=(float*)result.getData();
   for(size_t n=0; n<size; n++) {
       pCmplxDst[(2*n)+0] = pSrcCmplx[(2*n)+0] * pSrcReal[n];        
       pCmplxDst[(2*n)+1] = pSrcCmplx[(2*n)+1] * pSrcReal[n];        
@@ -215,64 +215,22 @@ void ComplexFloatArray::scale(float factor){
 #endif
 }
 
-ComplexFloatArray ComplexFloatArray::create(size_t size){
-  return ComplexFloatArray(new ComplexFloat[size], size);
-}
-
-void ComplexFloatArray::destroy(ComplexFloatArray array){
-  delete array.data;
-}
-
-/* Copies real values from a FloatArray, sets imaginary values to 0
- */
-void ComplexFloatArray::copyFrom(FloatArray source){
-  for(size_t n=0; n<min(size,source.getSize()); n++){
-    data[n].re=source[n];
-    data[n].im=0;
+void ComplexFloatArray::fromFloat(FloatArray source){
+  ASSERT(source.getSize() >= size, "Array too small");
+  for(size_t n=0; n<size; n++){
+    data[n].re = source[n];
+    data[n].im = 0;
   }
 }
 
 /* Copies real part to a FloatArray */
-void ComplexFloatArray::copyTo(FloatArray destination){
-  for(size_t n=0; n<min(size,destination.getSize()); n++){
-    destination[n]=data[n].re;
+void ComplexFloatArray::toFloat(FloatArray destination){
+  ASSERT(destination.getSize() >= size, "Array too small");
+  for(size_t n=0; n<size; n++){
+    destination[n] = data[n].re;
   }
 }
 
-/*BEGIN -- methods copied and adapted from ComplexFloatArray.cpp*/
-void ComplexFloatArray::copyTo(ComplexFloatArray destination){
-  copyTo(destination, min(size, destination.getSize()));
-}
-
-void ComplexFloatArray::copyFrom(ComplexFloatArray source){
-  copyFrom(source, min(size, source.getSize()));
-}
-
-void ComplexFloatArray::copyTo(ComplexFloat* other, size_t length){
-  ASSERT(size >= length, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_f32((float *)data, (float *)other, length*sizeof(ComplexFloat)/sizeof(float));
-#else
-  for(size_t n=0; n<length; n++){
-    other[n].re=data[n].re;
-    other[n].im=data[n].im;
-  }
-#endif /* ARM_CORTEX */
-}
-
-void ComplexFloatArray::copyFrom(ComplexFloat* other, size_t length){
-  ASSERT(size >= length, "Array too small");
-/// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
-#ifdef ARM_CORTEX
-  arm_copy_f32((float *)other, (float *)data, length*sizeof(ComplexFloat)/sizeof(float));  //note the *2 multiplier which accounts for real and imaginary parts
-#else
-  for(size_t n=0; n<length; n++){
-    data[n].re=other[n].re;
-    data[n].im=other[n].im;
-  }
-#endif /* ARM_CORTEX */
-}
 
 void ComplexFloatArray::setAll(float value){
 /// @note When built for ARM Cortex-M processor series, this method uses the optimized <a href="http://www.keil.com/pack/doc/CMSIS/General/html/index.html">CMSIS library</a>
@@ -285,7 +243,6 @@ void ComplexFloatArray::setAll(float value){
   setAll(val);
 #endif /* ARM_CORTEX */
 }
-/*END -- methods copied and adapted from ComplexFloatArray.cpp*/
 
 void ComplexFloatArray::setAll(ComplexFloat value){
   for(size_t n=0; n<size; n++){
@@ -343,5 +300,28 @@ void ComplexFloatArray::setMagnitude(FloatArray magnitude, int offset, size_t co
   ASSERT(offset+count<=getSize(), "Wrong size3");
   for(size_t n=offset; n<count+offset; n++){
     destination.getData()[n].setPolar(magnitude[n], getData()[n].getPhase());
+  }
+}
+
+ComplexFloatArray ComplexFloatArray::create(size_t size){
+  ComplexFloatArray obj(new ComplexFloat[size], size);
+  obj.clear();
+  return obj;
+}
+
+void ComplexFloatArray::destroy(ComplexFloatArray array){
+  delete[] array.data;
+}
+
+void ComplexFloatArray::copyFrom(FloatArray real, FloatArray imag) {
+  for (size_t i = 0; i < getSize(); i++) {
+    data[i] = ComplexFloat(real[i], imag[i]);
+  }
+}
+
+void ComplexFloatArray::copyTo(FloatArray real, FloatArray imag) {
+  for (size_t i = 0; i < getSize(); i++) {
+    real[i] = data[i].re;
+    imag[i] = data[i].im;
   }
 }

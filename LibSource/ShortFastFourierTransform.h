@@ -1,10 +1,12 @@
 #ifndef __ShortFastFourierTransform_h__
 #define __ShortFastFourierTransform_h__
 
+#include "basicmaths.h"
 #include "ShortArray.h"
 #include "ComplexShortArray.h"
 
 #ifndef ARM_CORTEX
+#define FIXED_POINT 16
 #include "kiss_fft.h"
 #endif /* ARM_CORTEX */
 
@@ -71,7 +73,7 @@ public:
    * Get the size of the FFT
    * @return The size of the FFT
   */
-  int getSize();
+  size_t getSize();
 };
 
 #endif // __ShortFastFourierTransform_h__

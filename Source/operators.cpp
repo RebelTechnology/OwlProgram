@@ -12,6 +12,7 @@ void * operator new[](size_t size) { return pvPortMalloc(size); }
 void operator delete(void* ptr) { vPortFree(ptr); }
 void operator delete(void* ptr, unsigned int) { vPortFree(ptr); }
 void operator delete[](void * ptr) { vPortFree(ptr); }
+void operator delete[](void* ptr, unsigned int) { vPortFree(ptr); }
 //int _gettimeofday(struct timeval *__p, void *__tz){return 0;}
 
 // Static initialisation thread safety guards

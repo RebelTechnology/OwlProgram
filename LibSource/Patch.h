@@ -7,6 +7,7 @@
 #include "FloatArray.h"
 #include "PatchParameter.h"
 #include "SmoothValue.h"
+#include "AudioBuffer.h"
 #include "OpenWareMidiControl.h"
 
 #ifdef USE_MIDI_CALLBACK
@@ -16,16 +17,6 @@
 enum PatchChannelId {
   LEFT_CHANNEL = 0,
   RIGHT_CHANNEL = 1
-};
-
-class AudioBuffer {
-public:
-  virtual ~AudioBuffer();
-  virtual FloatArray getSamples(int channel) = 0;
-  virtual int getChannels() = 0;
-  virtual int getSize() = 0;
-  virtual void clear() = 0;
-  static AudioBuffer* create(int channels, int samples);
 };
 
 class Patch {
@@ -48,21 +39,24 @@ public:
   FloatParameter getFloatParameter(const char* name, float min, float max, float defaultValue=0.0f, float lambda=0.0f, float delta=0.0, float skew=LIN);
   IntParameter getIntParameter(const char* name, int min, int max, int defaultValue=0, float lambda=0.0f, float delta=0.0, float skew=LIN);
   void registerParameter(PatchParameterId pid, const char* name);
+  [[deprecated]]
   void registerParameter(PatchParameterId pid, const char* name, const char* desc){
     registerParameter(pid, name);
   }    
   float getParameterValue(PatchParameterId pid);
   void setParameterValue(PatchParameterId pid, float value);
   bool isButtonPressed(PatchButtonId bid);
-  /** @deprecated */
+  [[deprecated]]
   int getSamplesSinceButtonPressed(PatchButtonId bid);
   void setButton(PatchButtonId bid, uint16_t value, uint16_t samples=0);
   int getBlockSize();
   int getNumberOfChannels();
   float getSampleRate();
+  float getBlockRate();
   AudioBuffer* createMemoryBuffer(int channels, int samples);
   float getElapsedBlockTime();
   int getElapsedCycles();
+  [[deprecated]]
   virtual void encoderChanged(PatchParameterId pid, int16_t delta, uint16_t samples){};
   virtual void buttonChanged(PatchButtonId bid, uint16_t value, uint16_t samples){}
   /* virtual void parameterChanged(PatchParameterId pid, float value, int samples){} */

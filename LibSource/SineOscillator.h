@@ -3,55 +3,35 @@
 
 #include "Oscillator.h"
 
-class SineOscillator : public Oscillator {
-private:
-  float mul;
-  float phase;
-  float incr;
+class SineOscillator : public OscillatorTemplate<SineOscillator> {
 public:
-  SineOscillator() : phase(0.0f), incr(0.0f) {    
-    setSampleRate(48000);
-  }
-  SineOscillator(float sr) : phase(0.0f), incr(0.0f){
+  static constexpr float begin_phase = 0;
+  static constexpr float end_phase = 2*M_PI;
+  SineOscillator(){}
+  SineOscillator(float sr){
     setSampleRate(sr);
-  }    
-  void setSampleRate(float sr){
-    mul = 2*M_PI/sr;
-  }
-  void setFrequency(float freq){
-    incr = freq*mul;
-  }
-  void setPhase(float ph){
-    phase = ph;
-    while(phase >= 2*M_PI)
-      phase -= 2*M_PI;
-  }
-  void reset(){
-    phase = 0.0f;
-  }
-  float getPhase(){
-    return phase;
-  }
-  float getNextSample(){
-    float sample = sinf(phase);
-    phase += incr;
-    if(phase >= 2*M_PI)
-      phase -= 2*M_PI;
-    return sample;
-  }
-  float getNextSample(float fm){
-    float sample = sinf(phase);
-    phase += incr + fm;
-    if(phase >= 2*M_PI)
-      phase -= 2*M_PI;
-    return sample;
   }  
-  static SineOscillator* create(float sr){
-    return new SineOscillator(sr);
+  float getSample(){
+    return sinf(phase);
   }
-  static void destroy(SineOscillator* osc){
-    delete osc;
+  void generate(FloatArray output){
+    size_t len = output.getSize();
+    for(size_t i=0; i<len; ++i){
+      output[i] = sinf(phase);
+      phase += incr; // allow phase to overrun
+    }
+    phase = fmodf(phase, end_phase);
   }
+  void generate(FloatArray output, FloatArray fm){
+    size_t len = output.getSize();
+    for(size_t i=0; i<len; ++i){
+      output[i] = sinf(phase);
+      phase += incr * (1 + fm[i]);
+      // allow phase to overrun
+    }
+    phase = fmodf(phase, end_phase);
+  }
+  using OscillatorTemplate<SineOscillator>::generate;  
 };
 
 #endif /* SINE_OSCILLATOR_H */

@@ -34,7 +34,7 @@ void ShortFastFourierTransform::ifft(ComplexShortArray in, ShortArray out){
   arm_rfft_q15(&instance, (int16_t*)in.getData(), (int16_t*)out.getData());
 }
 
-int ShortFastFourierTransform::getSize(){
+size_t ShortFastFourierTransform::getSize(){
   return len;
 }
 
@@ -61,24 +61,24 @@ void ShortFastFourierTransform::init(int aSize){
 void ShortFastFourierTransform::fft(ShortArray input, ComplexShortArray output){
   ASSERT(input.getSize() >= getSize(), "Input array too small");
   ASSERT(output.getSize() >= getSize(), "Output array too small");
-  for(int n=0; n<getSize(); n++){
+  for(size_t n=0; n<getSize(); n++){
     temp[n].re=input[n];
     temp[n].im=0;
   }
-  kiss_fft(cfgfft, (kiss_fft_cpx*)(float*)temp.getData(), (kiss_fft_cpx*)(float*)output);
+  kiss_fft(cfgfft, (kiss_fft_cpx*)(int16_t*)temp.getData(), (kiss_fft_cpx*)(int16_t*)output.getData());
 }
   
 void ShortFastFourierTransform::ifft(ComplexShortArray input, ShortArray output){
   ASSERT(input.getSize() >= getSize(), "Input array too small");
   ASSERT(output.getSize() >= getSize(), "Output array too small");
-  kiss_fft(cfgifft, (kiss_fft_cpx*)(float*)input, (kiss_fft_cpx*)(float*)temp.getData());
+  kiss_fft(cfgifft, (kiss_fft_cpx*)(int16_t*)input.getData(), (kiss_fft_cpx*)(int16_t*)temp.getData());
   float scale=1.0f/getSize();
-  for(int n=0; n<getSize(); n++){
+  for(size_t n=0; n<getSize(); n++){
     output[n]=temp[n].re*scale;
   }
 }
     
-int ShortFastFourierTransform::getSize(){
+size_t ShortFastFourierTransform::getSize(){
   return temp.getSize();
 }
 

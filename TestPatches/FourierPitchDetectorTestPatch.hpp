@@ -29,11 +29,11 @@
 #ifndef __FourierPitchDetectorTestPatch_hpp__
 #define __FourierPitchDetectorTestPatch_hpp__
 
-#include "StompBox.h"
+#include "Patch.h"
+#include "PitchDetector.h"
 
 class FourierPitchDetectorTestPatch : public Patch {
 public:
-  BiquadFilter *filter;
   FourierPitchDetector fpd;
   FloatArray aux;
   int fftOccurrency;
@@ -71,7 +71,7 @@ public:
     float mix=getParameterValue(PARAMETER_A);
     float envelope=fa.getRms();
     fa.multiply(1-mix);
-    for(int n=0;n<fa.getSize(); n++){
+    for(size_t n=0;n<fa.getSize(); n++){
       static float phase=0;
       static float pastEnvelope=0;
       phase += 2.0 * M_PI * estimated/getSampleRate();

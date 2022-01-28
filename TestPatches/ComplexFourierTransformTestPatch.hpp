@@ -47,11 +47,11 @@ public:
   };
   void processAudio(AudioBuffer &buffer){
     FloatArray samples=buffer.getSamples(0);
-    inout.copyFrom(samples); //copies only real values 
+    inout.fromFloat(samples); // copies only real values 
     fftArm.fft(inout);
     fftArm.ifft(inout);
-    inout.copyTo(samples);
-    samples.scale(0.2);
+    inout.getRealValues(samples);
+    samples.multiply(0.2);
 
   }
 };

@@ -27,16 +27,13 @@
 
 #ifdef __cplusplus
 #include <cmath>
+#include <algorithm>
+using std::min;
+using std::max;
+using std::abs;
+using std::clamp;
 #else
 #include <math.h>
-#endif
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-#ifndef M_SQRT2
-#define M_SQRT2 1.41421356237309504880
-#endif
 #ifndef min
 #define min(a,b) ((a)<(b)?(a):(b))
 #endif
@@ -46,6 +43,18 @@
 #ifndef abs
 #define abs(x) ((x)>0?(x):-(x))
 #endif
+#ifndef clamp
+#define clamp(x, lo, hi) ((x)>(hi)?(hi):((x)<(lo)?(lo):(x)))
+#endif
+#endif
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+#ifndef M_SQRT2
+#define M_SQRT2 1.41421356237309504880
+#endif
+
 
 #ifdef __cplusplus
  extern "C" {
@@ -66,9 +75,8 @@
    float fast_logf(float x);
    float fast_log2f(float x);
    float fast_log10f(float x);
-   void fast_log_set_table(const float* table, int size);
-
    uint32_t fast_log2i(uint32_t x);
+   void fast_log_set_table(const float* table, int size);
 
    // fast approximations
    float fast_atan2f(float a, float b);
@@ -76,17 +84,16 @@
    /** generate a random number between 0 and 1 */
    float randf();
 
-   static inline uint32_t log2i(const uint32_t x){
-     return (31 - __builtin_clz (x));
-   }
+   float fast_fmodf(float x, float y);
 
-
+#ifdef ARM_CORTEX
 #define malloc(x) pvPortMalloc(x)
 #define calloc(x, y) pvPortCalloc(x, y)
 #define free(x) vPortFree(x)
 #define realloc(x, y) pvPortRealloc(x, y);
 void* pvPortCalloc(size_t nmemb, size_t size);
 void* pvPortRealloc(void *pv, size_t xWantedSize);
+#endif
 
 #ifdef __cplusplus
 }
@@ -97,8 +104,8 @@ void* pvPortRealloc(void *pv, size_t xWantedSize);
 #define sinf(x) arm_sin_f32(x)
 #define cos(x) arm_cos_f32(x)
 #define cosf(x) arm_cos_f32(x)
-#define sqrt(x) arm_sqrtf(x)
-#define sqrtf(x) arm_sqrtf(x)
+#define sqrt(x) sqrtf(x)
+/* #define sqrtf(x) arm_sqrtf(x) */
 #define rand() arm_rand32()
 
 #ifdef __FAST_MATH__ /* set by gcc option -ffast-math */
@@ -124,7 +131,12 @@ void* pvPortRealloc(void *pv, size_t xWantedSize);
 #define log10(x) fast_log10f(x)
 #define log10f(x) fast_log10f(x)
 
-#endif
+#else /* __FAST_MATH__ */
+
+#define exp10(x) powf(10, x)
+#define exp10f(x) powf(10, x)
+
+#endif /* __FAST_MATH__ */
 
 #undef RAND_MAX
 #define RAND_MAX UINT32_MAX

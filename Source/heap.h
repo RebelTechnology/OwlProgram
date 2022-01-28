@@ -27,6 +27,7 @@
    size_t xPortGetFreeHeapSize( void );
    size_t xPortGetMinimumEverFreeHeapSize( void );
    void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions );
+   int vPortGetSizeBlock (void *pv);
 
 #ifdef __cplusplus
 }

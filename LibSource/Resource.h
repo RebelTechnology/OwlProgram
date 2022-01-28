@@ -61,9 +61,7 @@ public:
    * Returned object must be garbage collected with Resource::destroy()
    * 
    * @param name resource name
-   * 
    * @return NULL if resource does not exist or can't be read.
-   * 
    */
   static Resource* open(const char* name);
 
@@ -71,6 +69,9 @@ public:
    * Open resource and load data.
    * Allocates extra memory to hold the resource if required.
    * Returned object must be garbage collected with Resource::destroy()
+   * 
+   * @param name resource name
+   * @return NULL if resource does not exist or can't be read.
    */
   static Resource* load(const char* name);
 
