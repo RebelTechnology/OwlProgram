@@ -15,9 +15,7 @@ SOURCE       = $(BUILDROOT)/Source
 LIBSOURCE    = $(BUILDROOT)/LibSource
 BUILDSOURCE  = $(BUILD)/Source
 TESTPATCHES  = $(BUILDROOT)/TestPatches
-DAISYSP      = $(BUILDROOT)/Libraries/DaisySP/Source
-CMSIS        = $(BUILDROOT)/Libraries/CMSIS/Include/
-DSPINC       = $(BUILDROOT)/Libraries/CMSIS/DSP/Include
+CMSIS        = $(BUILDROOT)/Libraries/CMSIS
 DSPLIB       = $(BUILDROOT)/Libraries/CMSIS/DSP/Source
 
 # Tool path
@@ -81,10 +79,8 @@ ARCH_FLAGS += -fsingle-precision-constant -mthumb
 DEF_FLAGS +=  -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
 DEF_FLAGS += "-DPATCHNAME=\"$(PATCHNAME)\""
 # DEF_FLAGS = -DSTM32F745xx -DARM_MATH_CM7 -D__FPU_PRESENT=1 -D__FPU_USED=1U
-INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(DEVICE) -I$(CMSIS) -I$(PERIPH_FILE)/inc -I$(SOURCE)
-INC_FLAGS += -I$(DEVICE)/Include -I$(CMSIS)
-INC_FLAGS += -I$(USB_DEVICE_FILE)/Core/inc -I$(USB_DEVICE_FILE)/Class/cdc/inc
-INC_FLAGS += -I$(USB_OTG_FILE)/inc
+INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(PERIPH_FILE)/inc -I$(SOURCE)
+INC_FLAGS += -I$(CMSIS)/Include -I$(CMSIS)/Core/Include -I$(CMSIS)/DSP/Include
 CPPFLAGS += $(ARCH_FLAGS) $(INC_FLAGS) $(DEF_FLAGS)
 CPPFLAGS += -D__PROGRAM_START=1 # prevent compilation of __cmsis_start function
 CFLAGS   += -std=gnu11
@@ -94,17 +90,6 @@ CPPFLAGS += -I$(PATCHSOURCE)
 CPPFLAGS += -I$(LIBSOURCE)
 CPPFLAGS += -I$(BUILDSOURCE)
 CPPFLAGS += -I$(TESTPATCHES)
-CPPFLAGS += -I$(DSPINC)
-CPPFLAGS += -I$(DAISYSP)
-CPPFLAGS += -I$(DAISYSP)/Control
-CPPFLAGS += -I$(DAISYSP)/Drums
-CPPFLAGS += -I$(DAISYSP)/Dynamics
-CPPFLAGS += -I$(DAISYSP)/Effects
-CPPFLAGS += -I$(DAISYSP)/Filters
-CPPFLAGS += -I$(DAISYSP)/Noise
-CPPFLAGS += -I$(DAISYSP)/PhysicalModeling
-CPPFLAGS += -I$(DAISYSP)/Synthesis
-CPPFLAGS += -I$(DAISYSP)/Utility
 CPPFLAGS += -DARM_CORTEX
 CPPFLAGS += -DEXTERNAL_SRAM
 CPPFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
@@ -134,8 +119,6 @@ endif
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_S_SRC:.s=.o)))
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_C_SRC:.c=.o)))
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
-DAISYSP_CPP_SRC = $(wildcard $(DAISYSP)/*/*.cpp)
-DAISYSP_OBJS = $(addprefix $(BUILD)/, $(notdir $(DAISYSP_CPP_SRC:.cpp=.o)))
 
 # include common make files
 include $(BUILDROOT)/libs.mk
@@ -153,11 +136,16 @@ OBJS = $(addprefix $(BUILD)/,$(notdir $(C_SRC:.c=.o)))
 OBJS += $(addprefix $(BUILD)/,$(notdir $(CPP_SRC:.cpp=.o)))
 OBJS += $(addprefix $(BUILD)/,$(notdir $(S_SRC:.S=.o)))
 
+include $(BUILDROOT)/daisysp.mk
+DAISYSP_CPP_SRC = $(wildcard $(DAISYSP)/*/*.cpp)
+DAISYSP_OBJS = $(addprefix $(BUILD)/, $(notdir $(DAISYSP_CPP_SRC:.cpp=.o)))
+
 # Set up search path
 vpath %.S $(sort $(dir $(S_SRC)))
 vpath %.s $(sort $(dir $(S_SRC) $(PATCH_S_SRC)))
 vpath %.c $(sort $(dir $(C_SRC) $(PATCH_C_SRC)))
-vpath %.cpp $(sort $(dir $(CPP_SRC) $(PATCH_CPP_SRC) $(DAISYSP_CPP_SRC)))
+vpath %.cpp $(sort $(dir $(CPP_SRC) $(PATCH_CPP_SRC)))
+vpath %.cpp $(sort $(dir $(DAISYSP_CPP_SRC)))
 
 .PHONY: libs as map compile size
 
