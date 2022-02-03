@@ -939,17 +939,80 @@ public:
     }
 };
 
-/* Simple heap based memory manager.
+/* Heap based memory manager.
  * Uses overloaded new/delete operators on OWL hardware.
  */
 struct OwlMemoryManager : public dsp_memory_manager {
-    void* allocate(size_t size) {
-        void* res = new uint8_t[size];
-        return res;
+#if 0
+  struct AllocationInfo {
+    size_t size;
+    size_t reads;
+    size_t writes;
+    void* ptr;
+  };
+  size_t pos;
+  size_t nof_allocations;
+  AllocationInfo* list;
+public:
+  // callbacks
+  void info(size_t size, size_t reads, size_t writes){
+    list[pos++] = { size, reads, writes, 0 };
+  }
+  void* allocate(size_t size){
+    // this doesn't allocate, it returns preallocated pointer
+    void* p = list[pos++].ptr;
+    if(pos == nof_allocations)
+      delete[] list;
+    return p;
+  }
+  void destroy(void* ptr) {
+    delete[] (uint8_t*)ptr;
+  }
+  void begin(size_t count){
+    nof_allocations = count;
+    list = new AllocationInfo[count];
+    pos = 0;
+  }
+  void end(){
+    // allocate memory in order of priority
+    size_t len = nof_allocations;
+    while(len--){
+      size_t index = getHighestPriorityAllocation();
+      list[index].ptr = alloc(list[index].size);
     }
-    virtual void destroy(void* ptr) {
-        delete (uint8_t*)ptr;
+    pos = 0;
+  }
+protected:
+  size_t getHighestPriorityAllocation(){
+    size_t high = getPriority(list[0]);
+    size_t index = 0;
+    for(size_t i=1; i<nof_allocations; ++i){
+      if(getPriority(list[i]) > high){
+	high = getPriority(list[i]);
+	index = i;
+      }
     }
+    return index;
+  }
+  size_t getPriority(AllocationInfo& info){
+    if(info.ptr)
+      return 0;
+    // optionally apply some weighting here
+    return info.reads + info.writes;
+  }
+  void* alloc(size_t size) {
+    void* res = new uint8_t[size];
+    return res;
+  }
+#else
+  void* allocate(size_t size) {
+    void* res = new uint8_t[size];
+    return res;
+  }
+  void destroy(void* ptr) {
+    delete[] (uint8_t*)ptr;
+  }
+#endif
 };
 
 #endif // __FaustCommonInfrastructure__
@@ -970,7 +1033,7 @@ struct OwlMemoryManager : public dsp_memory_manager {
 
     ***************************************************************************************/
 
-    class FaustPatch : public Patch {
+class FaustPatch : public Patch {
     mydsp* fDSP;
     OwlUI fUI;
     OwlMemoryManager mem;
@@ -978,34 +1041,23 @@ struct OwlMemoryManager : public dsp_memory_manager {
 public:
     FaustPatch()
         : fUI(this) {
-        // // Allocate memory for dsp object first to ensure high priority
-        // memory is used void* allocated = mem.allocate(sizeof(mydsp));
-        // // DSP static data is initialised using classInit.
-        // mydsp::classInit(int(getSampleRate()), &mem);
-        // // call mydsp constructor
-        // fDSP = new (allocated) mydsp();
-        // fDSP->instanceInit(int(getSampleRate()));
-        // // Map OWL parameters and faust widgets
-        // fDSP->buildUserInterface(&fUI);
-
-        fBend = 1.0f;
-        fDSP = new mydsp();
-        fDSP->metadata(&fUI.meta);
-        if (fUI.meta.message != NULL)
-            debugMessage(fUI.meta.message);
-        fUI.addVOct();
-
         mydsp::fManager = &mem; // set custom memory manager
+	mydsp::memoryInfo();
         mydsp::classInit(int(getSampleRate())); // initialise static tables
-        fDSP->instanceInit(int(getSampleRate())); // initialise DSP instance
+	fDSP = new (mem.allocate(sizeof(mydsp))) mydsp(); // placement new
+	fDSP->instanceInit(int(getSampleRate())); // initialise DSP instance
         fDSP->buildUserInterface(&fUI); // Map OWL parameters
+        fBend = 1.0f;
+        fDSP->metadata(&fUI.meta);
+        if(fUI.meta.message != NULL)
+	  debugMessage(fUI.meta.message);
+        fUI.addVOct();
     }
 
     ~FaustPatch() {
-        delete fDSP;
-        // mem.destroy(fDSP);
-        // DSP static data is destroyed using classDestroy.
-        mydsp::classDestroy();
+        mydsp::classDestroy(); // delete DSP static data
+	fDSP->~mydsp(); // call mydsp destructor
+	mem.destroy(fDSP); // delete DSP object
     }
 
     void processMidi(MidiMessage msg) {
