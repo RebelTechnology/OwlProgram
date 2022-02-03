@@ -5,7 +5,6 @@ FAUSTSOURCE ?= $(BUILDROOT)/FaustSource
 
 FAUSTCC ?= faust
 FAUSTFLAGS ?= -light
-FAUSTCODE = FaustCode
 
 faust: $(BUILD)/Source/FaustPatch.hpp
 
