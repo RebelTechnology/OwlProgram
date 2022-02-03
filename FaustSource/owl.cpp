@@ -43,6 +43,8 @@
 #include "WaveReader.h"
 #endif
 
+#define OWL_FAUST_REORDER_MEMORY
+
 // We have to undefine min/max from OWL's basicmaths.h, otherwise they cause
 // errors when Faust calls functions with the same names in std:: namespace
 #undef min
@@ -943,27 +945,31 @@ public:
  * Uses overloaded new/delete operators on OWL hardware.
  */
 struct OwlMemoryManager : public dsp_memory_manager {
-#if 0
+#ifdef OWL_FAUST_REORDER_MEMORY
   struct AllocationInfo {
     size_t size;
     size_t reads;
     size_t writes;
     void* ptr;
   };
-  size_t pos;
-  size_t nof_allocations;
-  AllocationInfo* list;
+  size_t pos = 0;
+  size_t nof_allocations = 0;
+  AllocationInfo* list = NULL;
 public:
   // callbacks
   void info(size_t size, size_t reads, size_t writes){
-    list[pos++] = { size, reads, writes, 0 };
+    list[pos++] = { size, reads, writes, NULL };
   }
   void* allocate(size_t size){
-    // this doesn't allocate, it returns preallocated pointer
-    void* p = list[pos++].ptr;
-    if(pos == nof_allocations)
-      delete[] list;
-    return p;
+    ASSERT(pos < nof_allocations && list != NULL, "Allocator misuse");
+    if(pos < nof_allocations && list != NULL){
+      ASSERT(list[pos].size == size, "Allocation mismatch");
+      // this doesn't allocate, it returns preallocated pointer
+      void* p = list[pos++].ptr;
+      return p;
+    }else{
+      return alloc(size);
+    }
   }
   void destroy(void* ptr) {
     delete[] (uint8_t*)ptr;
@@ -981,6 +987,10 @@ public:
       list[index].ptr = alloc(list[index].size);
     }
     pos = 0;
+  }
+  void cleanup(){
+    delete[] list;
+    list = NULL;
   }
 protected:
   size_t getHighestPriorityAllocation(){
@@ -1004,7 +1014,7 @@ protected:
     void* res = new uint8_t[size];
     return res;
   }
-#else
+#else // OWL_FAUST_REORDER_MEMORY
   void* allocate(size_t size) {
     void* res = new uint8_t[size];
     return res;
@@ -1012,6 +1022,7 @@ protected:
   void destroy(void* ptr) {
     delete[] (uint8_t*)ptr;
   }
+  void cleanup(){}
 #endif
 };
 
@@ -1046,6 +1057,7 @@ public:
         mydsp::classInit(int(getSampleRate())); // initialise static tables
 	fDSP = new (mem.allocate(sizeof(mydsp))) mydsp(); // placement new
 	fDSP->instanceInit(int(getSampleRate())); // initialise DSP instance
+	mem.cleanup(); // we are done with allocations
         fDSP->buildUserInterface(&fUI); // Map OWL parameters
         fBend = 1.0f;
         fDSP->metadata(&fUI.meta);
