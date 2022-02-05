@@ -9,7 +9,7 @@ endif
 endif
 
 ifndef PLATFORM
-  PLATFORM=OWL
+  PLATFORM=OWL2
 endif
 
 DEPS = .FORCE

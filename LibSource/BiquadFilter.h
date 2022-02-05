@@ -220,8 +220,13 @@ public:
     init();
   }
   virtual ~BiquadFilter(){}
+
   void setSampleRate(float sr){
     pioversr = M_PI/sr;
+  }
+
+  float getSampleRate(){
+    return M_PI / pioversr;
   }
 
   size_t getStages(){
@@ -274,13 +279,14 @@ public:
     arm_biquad_cascade_df2T_f32(&df2, input, output, size);
 #else
     for(size_t k=0; k<stages; k++){
-      float b0=getFilterStage(k).getCoefficients()[0];
-      float b1=getFilterStage(k).getCoefficients()[1];
-      float b2=getFilterStage(k).getCoefficients()[2];
-      float a1=getFilterStage(k).getCoefficients()[3];
-      float a2=getFilterStage(k).getCoefficients()[4];
-      float d1=state[k*BIQUAD_STATE_VARIABLES_PER_STAGE];
-      float d2=state[k*BIQUAD_STATE_VARIABLES_PER_STAGE+1];
+      float* coeffs = getFilterStage(k).getCoefficients();
+      float b0 = *coeffs++;
+      float b1 = *coeffs++;
+      float b2 = *coeffs++;
+      float a1 = *coeffs++;
+      float a2 = *coeffs++;
+      float d1 = state[k*BIQUAD_STATE_VARIABLES_PER_STAGE];
+      float d2 = state[k*BIQUAD_STATE_VARIABLES_PER_STAGE+1];
       for(size_t n=0; n<size; n++){ //manually apply filter, one stage
         float out=b0 * input[n] + d1; 
         d1 = b1 * input[n] + a1 * out + d2;

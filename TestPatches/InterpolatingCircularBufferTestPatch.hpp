@@ -138,7 +138,7 @@ public:
       FloatArray output = FloatArray::create(10);
       input.ramp(0, 5);
       buffer->write(input, input.getSize());
-      buffer->read(output, output.getSize(), 0.5f);
+      buffer->read(output, output.getSize(), 0.0f, 0.5f); // read at half rate from first position
       for(size_t j=0; j<9; ++j) // not checking last value in loop
 	CHECK_CLOSE(output[j], j*0.5f, DEFAULT_TOLERANCE);
       CHECK_CLOSE(output[9], 2.0f, DEFAULT_TOLERANCE); // interpolated between 4 and 0 (wrapping)

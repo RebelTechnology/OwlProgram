@@ -1,5 +1,7 @@
 v22.2
 -----
+
+* Added PLATFORM=OWL1/2/3 build option
 * Added NoiseOscillator (whitenoise s+h)
 * Added PhaseShiftOscillator template
 * Added Biquad allpass filter configuration
