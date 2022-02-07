@@ -1055,12 +1055,12 @@ public:
 	fDSP = new (mem.allocate(sizeof(mydsp))) mydsp(); // placement new
 	fDSP->instanceInit(int(getSampleRate())); // initialise DSP instance
 	mem.cleanup(); // we are done with allocations
-        fDSP->buildUserInterface(&fUI); // Map OWL parameters
-        fBend = 1.0f;
         fDSP->metadata(&fUI.meta);
         if(fUI.meta.message != NULL)
 	  debugMessage(fUI.meta.message);
         fUI.addVOct();
+        fDSP->buildUserInterface(&fUI); // Map OWL parameters
+        fBend = 1.0f;
     }
 
     ~FaustPatch() {

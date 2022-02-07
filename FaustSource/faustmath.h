@@ -11,6 +11,21 @@
 
 // Float versions
 
+#define fast_logf logf
+#define fast_log2f log2f
+#define fast_log10f log10f
+#define fast_powf powf
+#undef sinf
+#undef cosf
+#undef sqrt
+#undef powf
+#undef expf
+#undef exp2f
+#undef exp10f
+#undef logf
+#undef log2f
+#undef log10f
+
 #define fast_fabsf(x) abs(x) 
 #define fast_acosf(x) acosf(x)
 #define fast_asinf(x) asinf(x)
