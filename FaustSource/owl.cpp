@@ -45,11 +45,6 @@
 
 #define OWL_FAUST_REORDER_MEMORY
 
-// We have to undefine min/max from OWL's basicmaths.h, otherwise they cause
-// errors when Faust calls functions with the same names in std:: namespace
-#undef min
-#undef max
-
 #include <string.h>
 #include <strings.h>
 
@@ -980,6 +975,7 @@ public:
     pos = 0;
   }
   void end(){
+    ASSERT(pos == nof_allocations, "Missing memory info");
     // allocate memory in order of priority
     size_t len = nof_allocations;
     while(len--){
@@ -989,12 +985,13 @@ public:
     pos = 0;
   }
   void cleanup(){
+    ASSERT(pos == nof_allocations, "Missing allocations");
     delete[] list;
     list = NULL;
   }
 protected:
   size_t getHighestPriorityAllocation(){
-    size_t high = getPriority(list[0]);
+    float high = getPriority(list[0]);
     size_t index = 0;
     for(size_t i=1; i<nof_allocations; ++i){
       if(getPriority(list[i]) > high){
@@ -1004,11 +1001,11 @@ protected:
     }
     return index;
   }
-  size_t getPriority(AllocationInfo& info){
+  float getPriority(AllocationInfo& info){
     if(info.ptr)
-      return 0;
+      return -1;
     // optionally apply some weighting here
-    return info.reads + info.writes;
+    return (info.reads + 2*info.writes) / info.size;
   }
   void* alloc(size_t size) {
     void* res = new uint8_t[size];
