@@ -1045,7 +1045,8 @@ class FaustPatch : public Patch {
     mydsp* fDSP;
     OwlUI fUI;
     OwlMemoryManager mem;
-
+    size_t channels;
+    float** samples;
 public:
     FaustPatch()
         : fUI(this) {
@@ -1061,9 +1062,12 @@ public:
         fUI.addVOct();
         fDSP->buildUserInterface(&fUI); // Map OWL parameters
         fBend = 1.0f;
+	channels = std::max(fDSP->getNumInputs(), fDSP->getNumOutputs());
+	samples = new float*[channels];
     }
 
     ~FaustPatch() {
+	delete[] samples;
         mydsp::classDestroy(); // delete DSP static data
 	fDSP->~mydsp(); // call mydsp destructor
 	mem.destroy(fDSP); // delete DSP object
@@ -1075,28 +1079,15 @@ public:
     }
 
     void processAudio(AudioBuffer& buffer) {
-        // Reasonably assume we will not have more than 32 channels
-        float* ins[32];
-        float* outs[32];
-        int n = buffer.getChannels();
+      // fill the table of input/output channels
+      for(size_t ch=0; ch<channels; ++ch)
+	samples[ch] = buffer.getSamples(ch);
 
-        if ((fDSP->getNumInputs() < 32) && (fDSP->getNumOutputs() < 32)) {
-            // create the table of input channels
-            for (int ch = 0; ch < fDSP->getNumInputs(); ++ch) {
-                ins[ch] = buffer.getSamples(ch % n);
-            }
+      // read OWL parameters and updates corresponding Faust Widgets zones
+      fUI.update();
 
-            // create the table of output channels
-            for (int ch = 0; ch < fDSP->getNumOutputs(); ++ch) {
-                outs[ch] = buffer.getSamples(ch % n);
-            }
-
-            // read OWL parameters and updates corresponding Faust Widgets zones
-            fUI.update();
-
-            // Process the audio samples
-            fDSP->compute(buffer.getSize(), ins, outs);
-        }
+      // Process the audio samples in-place
+      fDSP->compute(buffer.getSize(), samples, samples);
     }
 };
 
