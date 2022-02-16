@@ -4,7 +4,7 @@ PATCHSOURCE ?= $(BUILDROOT)/PatchSource
 FAUSTSOURCE ?= $(BUILDROOT)/FaustSource
 
 FAUSTCC ?= faust
-FAUSTFLAGS ?= -mem -light -scal -inpl # -exp10 -mcd 0 -ftz 2
+FAUSTFLAGS ?= -mem -light -scal -inpl -mapp # -exp10 -mcd 0 -ftz 2
 
 faust: $(BUILD)/Source/FaustPatch.hpp
 
