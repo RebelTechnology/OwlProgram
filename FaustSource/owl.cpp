@@ -1053,7 +1053,7 @@ public:
         mydsp::fManager = &mem; // set custom memory manager
 	mydsp::memoryInfo();
         mydsp::classInit(int(getSampleRate())); // initialise static tables
-	fDSP = new (mem.allocate(sizeof(mydsp))) mydsp(); // placement new
+	fDSP = mydsp::create(); // allocate DSP instance
 	fDSP->instanceInit(int(getSampleRate())); // initialise DSP instance
 	mem.cleanup(); // we are done with allocations
         fDSP->metadata(&fUI.meta);
@@ -1069,8 +1069,7 @@ public:
     ~FaustPatch() {
 	delete[] samples;
         mydsp::classDestroy(); // delete DSP static data
-	fDSP->~mydsp(); // call mydsp destructor
-	mem.destroy(fDSP); // delete DSP object
+	mydsp::destroy(fDSP); // delete DSP object
     }
 
     void processMidi(MidiMessage msg) {
