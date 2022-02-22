@@ -26,6 +26,7 @@
 #include "IntArray.h"
 #include "Interpolator.h"
 #include "InterpolatingCircularBuffer.h"
+#include "InterpolatingSignalGenerator.h"
 #include "AdsrEnvelope.h"
 #include "MidiProcessor.h"
 #include "MidiPolyphonicExpressionProcessor.h"
@@ -46,7 +47,7 @@
 #include "Resource.h"
 #include "SampleOscillator.h"
 #include "ShortArray.h"
-#include "ShortFastFourierTransform.h"
+/* #include "ShortFastFourierTransform.h" links in static q15 coefficients */
 #include "SignalGenerator.h"
 #include "SignalProcessor.h"
 #include "SineOscillator.h"
