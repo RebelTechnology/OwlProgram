@@ -12,6 +12,7 @@
 
 /**
  * This class performs direct and inverse ShortFast Fourier Transform.
+ * Note that on ARM, this links in static coefficients for all supported FFT sizes!
  */ 
 class ShortFastFourierTransform {
 private:
