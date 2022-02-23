@@ -6,7 +6,6 @@
 #include "Resource.h"
 #include "FloatArray.h"
 #include "PatchParameter.h"
-#include "SmoothValue.h"
 #include "AudioBuffer.h"
 #include "OpenWareMidiControl.h"
 
@@ -36,7 +35,9 @@ public:
    * Skew specifies exponentiation: > 1.0 for logarithmic, < 1.0 for exponential, or 1.0 for linear scaling (default).
    */
   FloatParameter getParameter(const char* name, float defaultValue);
+  [[deprecated]]
   FloatParameter getFloatParameter(const char* name, float min, float max, float defaultValue=0.0f, float lambda=0.0f, float delta=0.0, float skew=LIN);
+  [[deprecated]]
   IntParameter getIntParameter(const char* name, int min, int max, int defaultValue=0, float lambda=0.0f, float delta=0.0, float skew=LIN);
   void registerParameter(PatchParameterId pid, const char* name);
   [[deprecated]]
