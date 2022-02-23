@@ -1,3 +1,10 @@
+* Added EnvelopeFollower
+* Added ExponentialMovingAverage and MovingAverage
+* Added KaiserWindow (from the Loris C++ Class Library)
+* Added LinearValue, ExponentialValue and LogarithmicValue
+* Refactored Smooth and StiffValue
+* Added InterpolatingSignalGenerator
+
 v22.2
 -----
 
