@@ -14,9 +14,9 @@
 template<typename T, typename Value = SimpleValue<T>>
 class SmoothValue : public Value {
 public:
-  T lambda;
-  SmoothValue() : lambda(0.9) {}
-  SmoothValue(T value) : Value(value), lambda(0.9) {}
+  T lambda = Value::DEFAULT_LAMBDA;
+  SmoothValue() {}
+  SmoothValue(T value) : Value(value) {}
   SmoothValue(T lambda, T init) : Value(init), lambda(lambda) {}
   SmoothValue(const SmoothValue<T, Value>& other) : Value(other), lambda(other.lambda) {}
   void update(T x){
@@ -48,6 +48,8 @@ public:
   static T normal(float lambda, int blocksize);
 };
 
+template class SmoothValue<int>;
+template class SmoothValue<float>;
 typedef SmoothValue<float> SmoothFloat;
 typedef SmoothValue<int> SmoothInt;
 
@@ -58,9 +60,9 @@ typedef SmoothValue<int> SmoothInt;
 template<typename T, typename Value = SimpleValue<T>>
 class StiffValue : public Value {
 public:
-  T delta;
-  StiffValue() : delta(0.02) {}
-  StiffValue(T value) : Value(value), delta(0.02) {}
+  T delta = Value::DEFAULT_DELTA;
+  StiffValue() {}
+  StiffValue(T value) : Value(value) {}
   StiffValue(T delta, T init) : Value(init), delta(delta) {}
   StiffValue(const StiffValue<T, Value>& other) : Value(other), delta(other.delta) {}
   void update(T newValue){
@@ -93,6 +95,8 @@ public:
   static T normal(float delta);
 };
 
+template class StiffValue<int>;
+template class StiffValue<float>;
 typedef StiffValue<float> StiffFloat;
 typedef StiffValue<int> StiffInt;
 typedef SmoothValue<float, StiffFloat> SmoothStiffFloat;
@@ -165,8 +169,12 @@ public:
   }
 };
 
+template class LinearValue<int>;
+template class LinearValue<float>;
 typedef LinearValue<float>  LinearFloat;
+typedef LinearValue<int>  LinearInt;
 typedef SmoothValue<float, LinearFloat> SmoothLinearFloat;
+typedef SmoothValue<int, LinearInt> SmoothLinearInt;
 
 /**
  * Exponentially scaled value. Scales an input on the range [0, 1] exponentially to the range [min, max].
@@ -176,14 +184,14 @@ typedef SmoothValue<float, LinearFloat> SmoothLinearFloat;
  * Ref: https://www.desmos.com/calculator/wehcvtggk7
  */
 template<typename T, typename Value = SimpleValue<T>>
-class ExponentialValue {
+class ExponentialValue : public Value {
 protected:
-  T c;
-  T k;
+  T c = Value::DEFAULT_EXP_C;
+  T k = Value::DEFAULT_EXP_K;
 public:
   /** Default range scales [0, 1] to [0.5, 2] */
-  ExponentialValue(): c(1), k(2*M_LN2) {}
-  ExponentialValue(T value): Value(value), c(1), k(2*M_LN2) {}
+  ExponentialValue() {}
+  ExponentialValue(T value): Value(value) {}
   ExponentialValue(const ExponentialValue<T>& other): Value(other), c(other.c), k(other.k) {}
   ExponentialValue(T minimum, T maximum, T init): Value(init) {
     setRange(minimum, maximum);
@@ -227,7 +235,11 @@ public:
   }
 };
 
+template class ExponentialValue<int>;
+template class ExponentialValue<float>;
+typedef ExponentialValue<int>  ExponentialInt;
 typedef ExponentialValue<float>  ExponentialFloat;
+typedef SmoothValue<int, ExponentialInt> SmoothExponentialInt;
 typedef SmoothValue<float, ExponentialFloat> SmoothExponentialFloat;
 
 /**
@@ -240,12 +252,12 @@ typedef SmoothValue<float, ExponentialFloat> SmoothExponentialFloat;
 template<typename T, typename Value = SimpleValue<T>>
 class LogarithmicValue : public Value {
 protected:
-  T c;
-  T k;
+  T c = Value::DEFAULT_LOG_C;
+  T k = Value::DEFAULT_LOG_K;
 public:
   /** Default range scales [0, 1] to [0.5, 2] */
-  LogarithmicValue(): c(1.6487212707), k(5.74033482823) {}
-  LogarithmicValue(T value): Value(value), c(1.6487212707), k(5.74033482823) {}
+  LogarithmicValue() {}
+  LogarithmicValue(T value): Value(value) {}
   LogarithmicValue(const LogarithmicValue<T>& other): Value(other), c(other.c), k(other.k) {}
   LogarithmicValue(T a, T b, T init): Value(init) {
     setRange(a, b);
@@ -288,6 +300,8 @@ public:
 };
 
 template class LogarithmicValue<float>;
+template class LogarithmicValue<int>;
 typedef LogarithmicValue<float> LogarithmicFloat;
+typedef LogarithmicValue<int> LogarithmicInt;
 
 #endif /* __SmoothValue_h__ */
