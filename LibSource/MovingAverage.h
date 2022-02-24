@@ -16,6 +16,17 @@ public:
     y = value;
   }
   /**
+   * Set the exponential decay time coefficient. Lambda should be a value
+   * between 0 and 1, typically greater than 0.9. 
+   * Higher values gives more smoothing.
+   */
+  void setLambda(float value){
+    lambda = value;
+  }
+  float getLambda(){
+    return lambda;
+  }
+  /**
    * Set lambda (time coefficient) as amount of smoothing over number of 
    * observations.
    * With smoothing = 2.0 and observations = N, this corresponds roughly to 
@@ -49,6 +60,7 @@ public:
   float process(float in){
     return getNextAverage(in);
   }
+  using SignalProcessor::process;
   static ExponentialMovingAverage* create(float lambda){
     return new ExponentialMovingAverage(lambda);
   }
@@ -60,14 +72,14 @@ public:
 /**
  * Simple Moving Average SMA
  */
-class MovingAverage : public SignalProcessor {
+class SimpleMovingAverage : public SignalProcessor {
 private:
-  const FloatArray buffer;
+  FloatArray buffer;
   size_t writeIndex = 0;
   float sum = 0;
 public:
-  MovingAverage() {}
-  MovingAverage(FloatArray buf) : buffer(buf), sum(buf.getSum()) {}
+  SimpleMovingAverage() {}
+  SimpleMovingAverage(FloatArray buf) : buffer(buf), sum(buf.getSum()) {}
   void reset(){
     buffer.clear();
     sum = 0;
@@ -88,21 +100,17 @@ public:
   float getNextAverage(float push){
     return getNextSum(push)/buffer.getSize();
   }
-  void setAverage(float value){
-    sum + value*buffer.getSize();
-    buffer.setAll(value);
-  }
   size_t getSize(){
     return buffer.getSize();
   }
   float process(float in){
     return getNextAverage(in);
   }
-  static MovingAverage* create(int samples){
-    return new MovingAverage(FloatArray::create(samples));
+  using SignalProcessor::process;
+  static SimpleMovingAverage* create(int samples){
+    return new SimpleMovingAverage(FloatArray::create(samples));
   }
-
-  static void destroy(MovingAverage* buf){
+  static void destroy(SimpleMovingAverage* buf){
     FloatArray::destroy(buf->buffer);
     delete buf;
   }
