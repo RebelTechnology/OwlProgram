@@ -26,6 +26,22 @@ public:
     update(other);
     return *this;
   }
+  SimpleValue<T>& operator+=(const T& other){
+    update(value + other);
+    return *this;
+  }
+  SimpleValue<T>& operator-=(const T& other){
+    update(value - other);
+    return *this;
+  }
+  SimpleValue<T>& operator*=(const T& other){
+    update(value * other);
+    return *this;
+  }
+  SimpleValue<T>& operator/=(const T& other){
+    update(value / other);
+    return *this;
+  }
   operator T(){
     return get();
   }
