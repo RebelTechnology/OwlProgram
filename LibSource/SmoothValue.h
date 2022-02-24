@@ -144,6 +144,22 @@ public:
     update(x);
     return *this;
   }
+  LinearValue<T, Value>& operator+=(const T& other){
+    update(Value::get() + other);
+    return *this;
+  }
+  LinearValue<T, Value>& operator-=(const T& other){
+    update(Value::get() - other);
+    return *this;
+  }
+  LinearValue<T, Value>& operator*=(const T& other){
+    update(Value::get() * other);
+    return *this;
+  }
+  LinearValue<T, Value>& operator/=(const T& other){
+    update(Value::get() / other);
+    return *this;
+  }
   operator T(){
     return Value::get();
   }
@@ -193,6 +209,22 @@ public:
     update(x);
     return *this;
   }
+  ExponentialValue<T, Value>& operator+=(const T& other){
+    update(Value::get() + other);
+    return *this;
+  }
+  ExponentialValue<T, Value>& operator-=(const T& other){
+    update(Value::get() - other);
+    return *this;
+  }
+  ExponentialValue<T, Value>& operator*=(const T& other){
+    update(Value::get() * other);
+    return *this;
+  }
+  ExponentialValue<T, Value>& operator/=(const T& other){
+    update(Value::get() / other);
+    return *this;
+  }
 };
 
 typedef ExponentialValue<float>  ExponentialFloat;
@@ -235,6 +267,22 @@ public:
   /* assignment operator */
   LogarithmicValue<T, Value>& operator=(const T& x){
     update(x);
+    return *this;
+  }
+  LogarithmicValue<T, Value>& operator+=(const T& other){
+    update(Value::get() + other);
+    return *this;
+  }
+  LogarithmicValue<T, Value>& operator-=(const T& other){
+    update(Value::get() - other);
+    return *this;
+  }
+  LogarithmicValue<T, Value>& operator*=(const T& other){
+    update(Value::get() * other);
+    return *this;
+  }
+  LogarithmicValue<T, Value>& operator/=(const T& other){
+    update(Value::get() / other);
     return *this;
   }
 };
