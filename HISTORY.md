@@ -1,3 +1,4 @@
+* Added TakeoverValue
 * Added EnvelopeFollower
 * Added ExponentialMovingAverage and SimpleMovingAverage
 * Added KaiserWindow (from the Loris C++ Class Library)

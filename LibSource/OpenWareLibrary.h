@@ -60,6 +60,7 @@
 #include "SquareWaveOscillator.h"
 #include "Synth.h"
 #include "TapTempo.h"
+#include "TakeoverValue.h"
 #include "TriangleOscillator.h"
 #include "VariableShapeOscillator.h"
 #include "VoltsPerOctave.h"
