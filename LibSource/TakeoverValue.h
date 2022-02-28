@@ -9,7 +9,7 @@
  * controls to be multiplexed while avoiding sudden jumps in settings.
  * Other common control modes are 'Relative' and 'Jump-to' or 'Skip'.
  * 
- * A TakeoverValue can be 'locked' by calling `setLocked(true)`.
+ * A TakeoverValue can be locked by calling `setLocked(true)`.
  * Further updates are then prevented, until either the TakeoverValue
  * is manually unlocked (i.e. with `setLocked(false)`), or the new value
  * falls within a given threshold of the previously set value.
@@ -19,7 +19,7 @@ template<typename T, typename Value = SimpleValue<T>>
 class TakeoverValue : public Value {
 protected:
   bool locked = false;
-  T threshold = 0;
+  T threshold = Value::DEFAULT_DELTA;
 public:
   TakeoverValue() {}
   TakeoverValue(T value): Value(value) {}
@@ -32,7 +32,7 @@ public:
     return locked;
   }
   void update(T x){
-    if(locked && abs(Value::get() - x) < threshold)
+    if(locked && abs(Value::get() - x) <= threshold)
       locked = false;
     if(!locked)
       Value::update(x);
