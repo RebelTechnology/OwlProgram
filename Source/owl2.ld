@@ -22,7 +22,7 @@ SECTIONS
     _startprog = ABSOLUTE(.);         /* define a global symbol at program start */
     KEEP(*(.program_header)) /* Startup code */
     . = ALIGN(8);
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
 
   /* The program code and other data goes into PATCHRAM */
   .text :
@@ -124,8 +124,7 @@ SECTIONS
     PROVIDE ( _eprogram = . );
     PROVIDE ( _stack = . );
   } >PATCHRAM
-  _eram = ORIGIN(PATCHRAM) + 80k;    /* Limit to 80k for OwlWare compatiblity */
-  _estack = ORIGIN(PATCHRAM) + 80k;
+  _estack = ORIGIN(PATCHRAM) + 80K; /* for compatibility with older firmwares */
 
   .fastheap (NOLOAD) :
   {
