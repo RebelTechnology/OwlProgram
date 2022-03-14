@@ -101,7 +101,7 @@ $(BUILD)/registerpatch.h: .FORCE
 	@echo "#include \"$(PATCHFILE)\"" > $@
 
 $(BUILD)/Source/startup.s: .FORCE
-	@echo '.string "'$(PATCHNAME)'"' > $(BUILD)/Source/progname.s
+	@printf '.string "%.23s"\r\n' $(PATCHNAME) > $(BUILD)/Source/progname.s
 
 $(BUILD)/%.syx: $(BUILD)/%.bin
 	@$(FIRMWARESENDER) -q -d 0 -in $< -save $@
@@ -160,7 +160,7 @@ clean: ## remove generated patch files
 	@rm -rf $(BUILD)/*
 
 realclean: clean ## remove all library object files
-	@find Libraries/ -maxdepth 1 name '*.[a|o]' -delete
+	@find Libraries/ -maxdepth 1 -name '*.[a|o]' -delete
 
 size: patch ## show binary size metrics and large object summary
 	@$(MAKE) -s -f compile.mk size
