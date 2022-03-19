@@ -18,10 +18,8 @@ SECTIONS
   /* The startup code goes first into PATCHRAM */
   .program_header :
   {
-    . = ALIGN(8);
     _startprog = ABSOLUTE(.);         /* define a global symbol at program start */
     KEEP(*(.program_header)) /* Startup code */
-    . = ALIGN(8);
   } >PATCHRAM
 
   /* The program code and other data goes into PATCHRAM */
@@ -124,7 +122,6 @@ SECTIONS
     PROVIDE ( _eprogram = . );
     PROVIDE ( _stack = . );
   } >PATCHRAM
-  _eram = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM);
   _estack = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM);
 
   .fastheap (NOLOAD) :
