@@ -78,6 +78,9 @@ class MidiMessage {
   uint8_t getProgramChange(){
     return data[1];
   }
+  /**
+   * Get pitch bend value as a signed integer between -8192 and 8191
+   */
   int16_t getPitchBend(){
     int16_t pb = (data[2] | (data[3]<<7)) - 8192;
     return pb;
