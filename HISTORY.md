@@ -1,3 +1,5 @@
+* Added InterpolatingWavetableOscillator
+* Added MovingAverage::process(FloatArray) and ::getAverage()
 * Added TakeoverValue
 * Added EnvelopeFollower
 * Added ExponentialMovingAverage and SimpleMovingAverage
