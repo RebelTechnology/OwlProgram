@@ -989,21 +989,20 @@ public:
         // fDSP->buildUserInterface(&fUI);
 
         fBend = 1.0f;
-        fDSP = new mydsp();
+        mydsp::fManager = &mem; // set custom memory manager
+        fDSP = mydsp::create();
         fDSP->metadata(&fUI.meta);
         if (fUI.meta.message != NULL)
             debugMessage(fUI.meta.message);
         fUI.addVOct();
 
-        mydsp::fManager = &mem; // set custom memory manager
         mydsp::classInit(int(getSampleRate())); // initialise static tables
         fDSP->instanceInit(int(getSampleRate())); // initialise DSP instance
         fDSP->buildUserInterface(&fUI); // Map OWL parameters
     }
 
     ~FaustPatch() {
-        delete fDSP;
-        // mem.destroy(fDSP);
+        mydsp::destroy(fDSP);
         // DSP static data is destroyed using classDestroy.
         mydsp::classDestroy();
     }
