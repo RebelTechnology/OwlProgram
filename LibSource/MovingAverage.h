@@ -52,13 +52,24 @@ public:
     float cfc = cosf(fc);
     lambda = cfc - 1 + sqrtf(cfc*cfc - 4*cfc + 3);
   }
+  /** RMS detection with smoothing coefficient (Moving RMS) as per:
+   * R. J. Cassidy, “Level Detection Tunings and Techniques for the Dynamic Range Compression of Audio Signals,” presented at the 117th Convention of the Audio Engineering Society (2004 Oct.), convention paper 6235.
+   * Referenced in https://www.eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf
+   */
   float getNextAverage(float x){
     y = y*lambda + x*(1.0f - lambda);
+    return y;
+  }
+  float getAverage(){
     return y;
   }
   /* process a single sample and return the result */
   float process(float in){
     return getNextAverage(in);
+  }
+  void process(FloatArray input){
+    for(size_t i=0; i<input.getSize(); i++)
+      getNextAverage(input[i]);
   }
   using SignalProcessor::process;
   static ExponentialMovingAverage* create(float lambda){
@@ -100,11 +111,18 @@ public:
   float getNextAverage(float push){
     return getNextSum(push)/buffer.getSize();
   }
+  float getAverage(){
+    return sum/buffer.getSize();
+  }
   size_t getSize(){
     return buffer.getSize();
   }
   float process(float in){
     return getNextAverage(in);
+  }
+  void process(FloatArray input){
+    for(size_t i=0; i<input.getSize(); i++)
+      getNextSum(input[i]);
   }
   using SignalProcessor::process;
   static SimpleMovingAverage* create(int samples){
