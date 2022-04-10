@@ -24,6 +24,13 @@ MonochromeScreenPatch::MonochromeScreenPatch(){
 
 MonochromeScreenPatch::~MonochromeScreenPatch(){}
 
+uint16_t MonochromeScreenPatch::getScreenWidth(){
+  return 128;
+}
+uint16_t MonochromeScreenPatch::getScreenHeight(){
+  return 64;
+}
+
 template<>
 Colour MonochromeScreenBuffer::getPixel(unsigned int x, unsigned int y){
   if(x >= width || y >= height)
