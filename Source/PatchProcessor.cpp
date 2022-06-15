@@ -60,6 +60,9 @@ private:
 public:
   LinearParameterUpdater(T min, T max, V initialValue)
     : parameter(NULL), minimum(min), maximum(max), value(initialValue) {}
+  V& getValue(){
+    return value;
+  }
   void update(int16_t newValue){
     value = (newValue*(maximum-minimum))/4096+minimum;
     if(parameter != NULL)
@@ -88,6 +91,9 @@ public:
     : parameter(NULL), skew(skw), minimum(min), maximum(max), value(initialValue) {
     //    ASSERT(skew > 0.0 && skew <= 2.0, "Invalid exponential skew value");
     ASSERT(skew > 0.0, "Invalid exponential skew value");
+  }
+  V& getValue(){
+    return value;
   }
   void update(int16_t newValue){
     float v = newValue/4096.0f;
@@ -140,7 +146,11 @@ PatchParameter<T> PatchProcessor::getParameter(const char* name, T min, T max, T
       }else if(lambda == 0.0){      
 	updater = new LinearParameterUpdater<T, StiffValue<T> >(min, max, StiffValue<T>(d, defaultValue));
       }else{
-	updater = new LinearParameterUpdater<T, SmoothStiffValue<T> >(min, max, SmoothStiffValue<T>(l, d, defaultValue));
+	LinearParameterUpdater<T, SmoothStiffValue<T> >* obj =
+	  new LinearParameterUpdater<T, SmoothStiffValue<T> >(min, max, SmoothStiffValue<T>(defaultValue));
+	obj->getValue().lambda = l;
+	obj->getValue().delta = d;
+	updater = obj;
       }
     }else{
       if(lambda == 0.0 && delta == 0.0){
@@ -150,7 +160,11 @@ PatchParameter<T> PatchProcessor::getParameter(const char* name, T min, T max, T
       }else if(lambda == 0.0){      
 	updater = new ExponentialParameterUpdater<T, StiffValue<T> >(skew, min, max, StiffValue<T>(d, defaultValue));
       }else{
-	updater = new ExponentialParameterUpdater<T, SmoothStiffValue<T> >(skew, min, max, SmoothStiffValue<T>(l, d, defaultValue));
+	ExponentialParameterUpdater<T, SmoothStiffValue<T> >* obj =
+	  new ExponentialParameterUpdater<T, SmoothStiffValue<T> >(skew, min, max, SmoothStiffValue<T>(defaultValue));
+	obj->getValue().lambda = l;
+	obj->getValue().delta = d;
+	updater = obj;
       }
     }
     parameters[pid] = updater;

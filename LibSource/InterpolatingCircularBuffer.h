@@ -108,6 +108,12 @@ public:
 };
 
 template<>
+float InterpolatingCircularFloatBuffer<NO_INTERPOLATION>::readAt(float index){
+  size_t idx = (size_t)roundf(index);
+  return CircularFloatBuffer::readAt(idx);
+}
+
+template<>
 float InterpolatingCircularFloatBuffer<LINEAR_INTERPOLATION>::readAt(float index){
   size_t idx = (size_t)index;
   float low = CircularFloatBuffer::readAt(idx);

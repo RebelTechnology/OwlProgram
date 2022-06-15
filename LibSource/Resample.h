@@ -35,8 +35,8 @@ public:
     BiquadFilter::destroy(downfilter);
   }
   void init(){
-    upfilter=BiquadFilter::create(upsampleStages);
-    downfilter=BiquadFilter::create(downsampleStages);
+    upfilter=BiquadFilter::create(0, upsampleStages);
+    downfilter=BiquadFilter::create(0, downsampleStages);
     // [B, A]=cheby1(2, 2, 0.25); then use [B, -A(2:end)] , note the minus sign in front of the A coefficients!!!!
     //alternatively, we could use FilterStage to compute the coefficients
     static float downCoeffs[5]={0.07609109, 0.15218218, 0.07609109, +1.16511283,  -0.54828486};
@@ -79,7 +79,7 @@ private:
 public:
   UpSampler(BiquadFilter* filter, int factor=4): filter(filter), factor(factor) {}
   static UpSampler* create(int stages, int factor=4){
-    BiquadFilter* filter = BiquadFilter::create(stages);
+    BiquadFilter* filter = BiquadFilter::create(0, stages);
     // [B, A]=cheby1(2, 2, 0.25); then use [B, -A(2:end)] , note the minus sign in front of the A coefficients!!!!
     //alternatively, we could use FilterStage to compute the coefficients
     float upCoeffs[5]= {0.07609109, 0.15218218, 0.07609109, +1.16511283,  -0.54828486};
@@ -117,7 +117,7 @@ private:
 public:
   DownSampler(BiquadFilter* filter, int factor=4): filter(filter), factor(factor) {}
   static DownSampler* create(int stages, int factor=4){
-    BiquadFilter* filter = BiquadFilter::create(stages);
+    BiquadFilter* filter = BiquadFilter::create(0, stages);
     // [B, A]=cheby1(2, 2, 0.25); then use [B, -A(2:end)] , note the minus sign in front of the A coefficients!!!!
     //alternatively, we could use FilterStage to compute the coefficients
     static float downCoeffs[5]={0.07609109, 0.15218218, 0.07609109, +1.16511283,  -0.54828486};

@@ -1,40 +1,30 @@
 ifeq ($(CONFIG),Debug)
-EMCCFLAGS   ?= -g
+CPPFLAGS   ?= -g
 endif
 
 ifeq ($(CONFIG),Release)
-EMCCFLAGS   ?= -Oz # optimise for size
+CPPFLAGS   ?= -Oz # optimise for size
 endif
 
 LIBSOURCE    = $(BUILDROOT)/LibSource
 SOURCE       = $(BUILDROOT)/Source
 BUILDSOURCE    = $(BUILD)/Source
-DAISYSP      = $(BUILDROOT)/Libraries/DaisySP/Source
 
 # emscripten
 EMCC      ?= emcc
 EMAR      ?= emar
-EMCCFLAGS += -fno-rtti -fno-exceptions
-# EMCCFLAGS += -s ASSERTIONS=1 -Wall
-EMCCFLAGS += -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILDSOURCE) -I$(BUILD)
-EMCCFLAGS += -I$(BUILD)/Source
-EMCCFLAGS += -I$(DAISYSP)
-EMCCFLAGS += -I$(DAISYSP)/Control
-EMCCFLAGS += -I$(DAISYSP)/Drums
-EMCCFLAGS += -I$(DAISYSP)/Dynamics
-EMCCFLAGS += -I$(DAISYSP)/Effects
-EMCCFLAGS += -I$(DAISYSP)/Filters
-EMCCFLAGS += -I$(DAISYSP)/Noise
-EMCCFLAGS += -I$(DAISYSP)/PhysicalModeling
-EMCCFLAGS += -I$(DAISYSP)/Synthesis
-EMCCFLAGS += -I$(DAISYSP)/Utility
-EMCCFLAGS +=  -ILibraries -ILibraries/KissFFT -DHV_SIMD_NONE -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
-EMCCFLAGS += -Wno-warn-absolute-paths
-EMCCFLAGS += -Wno-unknown-warning-option
-EMCCFLAGS += --memory-init-file 0 # don't create separate memory init file .mem
-EMCCFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_getParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus','_WEB_getButtons','_WEB_setButton', '_WEB_processMidi', '_malloc']"
-EMCCFLAGS += -s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']"
-EMCCFLAGS += "-DPATCHNAME=\"$(PATCHNAME)\""
+CPPFLAGS += -fno-rtti -fno-exceptions
+# CPPFLAGS += -s ASSERTIONS=1 -Wall
+CPPFLAGS += -I$(SOURCE) -I$(PATCHSOURCE) -I$(LIBSOURCE) -I$(BUILDSOURCE) -I$(BUILD)
+CPPFLAGS += -I$(BUILD)/Source
+CPPFLAGS += -ILibraries -ILibraries/KissFFT -DHV_SIMD_NONE
+CPPFLAGS += -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
+CPPFLAGS += -Wno-warn-absolute-paths
+CPPFLAGS += -Wno-unknown-warning-option
+CPPFLAGS += --memory-init-file 0 # don't create separate memory init file .mem
+CPPFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_getParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus','_WEB_getButtons','_WEB_setButton', '_WEB_processMidi', '_malloc']"
+CPPFLAGS += -s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']"
+CPPFLAGS += "-DPATCHNAME=\"$(PATCHNAME)\""
 
 include $(BUILDROOT)/sources.mk
 CPP_SRC += Source/Patch.cpp
@@ -43,17 +33,18 @@ CPP_SRC += Source/message.cpp
 CPP_SRC += WebSource/web.cpp
 C_SRC   += Libraries/KissFFT/kiss_fft.c
 
+include $(BUILDROOT)/daisysp.mk
+
 ifdef MAXIMILIAN
 EMCC_SRC := $(filter-out $(PATCHSOURCE)/$(MAXIMILIAN).cpp, $(EMCC_SRC))
 endif
 WEBDIR   = $(BUILD)/web
 
-EMCCFLAGS += -s WASM=0 # disables wasm output
+CPPFLAGS += -s WASM=0 # disables wasm output
 
-CPPFLAGS =
-CFLAGS   = $(EMCCFLAGS) -std=gnu11
-CXXFLAGS = $(EMCCFLAGS) -std=gnu++17
-LDFLAGS  = $(EMCCFLAGS)
+CFLAGS   = -std=gnu11
+CXXFLAGS = -std=gnu++17
+LDFLAGS  = $(CPPFLAGS)
 
 EMCC_OBJS = $(addprefix $(WEBDIR)/, $(notdir $(CPP_SRC:.cpp=.o)))
 EMCC_OBJS += $(addprefix $(WEBDIR)/, $(notdir $(C_SRC:.c=.o)))
@@ -97,7 +88,7 @@ vpath %.cpp WebSource
 vpath %.c Libraries/KissFFT
 
 ifeq ($(CONFIG),Debug)
-EMCCFLAGS += -s ASSERTIONS=1
+CPPFLAGS += -s ASSERTIONS=1
 endif
 
 PHONY: libs web minify

@@ -201,10 +201,10 @@ public:
   }
 
   IndexType getContiguousReadCapacity() const {
-    if(writepos < readpos)
-      return size - readpos;
-    else
+    if(writepos > readpos)
       return writepos - readpos;
+    else
+      return size - readpos;
   }
 
   void setAll(const DataType value){

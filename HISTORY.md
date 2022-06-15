@@ -1,3 +1,13 @@
+* Added InterpolatingWavetableOscillator
+* Added MovingAverage::process(FloatArray) and ::getAverage()
+* Added TakeoverValue
+* Added EnvelopeFollower
+* Added ExponentialMovingAverage and SimpleMovingAverage
+* Added KaiserWindow (from the Loris C++ Class Library)
+* Added LinearValue, ExponentialValue and LogarithmicValue
+* Refactored Smooth and StiffValue
+* Added InterpolatingSignalGenerator
+
 v22.2
 -----
 

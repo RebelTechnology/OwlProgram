@@ -99,6 +99,7 @@ public:
 
 class GenParameterBase {
 public:
+  ~GenParameterBase(){}
   virtual void update(Patch* patch, CommonState *context){}
 };
 
@@ -272,10 +273,10 @@ public:
 
   ~GenPatch() {
     gen::destroy(context);
-    for(int i=0; i<param_count; ++i)
+    for(size_t i=0; i<param_count; ++i)
       delete params[i];
     delete[] params;
-    for(int i=getNumberOfChannels(); i<gen::num_outputs(); ++i)
+    for(size_t i=getNumberOfChannels(); i<gen::num_outputs(); ++i)
       delete[] buffers[i];
     delete[] buffers;
     delete[] outputs.getData();
@@ -286,14 +287,14 @@ public:
   }
 
   void processAudio(AudioBuffer &buffer) {
-    for(int i=0; i<param_count; ++i)
+    for(size_t i=0; i<param_count; ++i)
       params[i]->update(this, context);
     size_t channels = buffer.getChannels();
     size_t ch;
     for(ch=0; ch<channels; ++ch)
       buffers[ch] = buffer.getSamples(ch);
     gen::perform(context, buffers, channels, buffers, gen::num_outputs(), buffer.getSize());
-    for(int i=0; i<outputs.getSize(); ++i){
+    for(size_t i=0; i<outputs.getSize(); ++i){
       if(outputs[i].id > 0x100){
 	float maxvalue = outputs[i].buffer.getMaxValue();
 	setButton((PatchButtonId)(outputs[i].id-0x100), maxvalue > 0.5);
