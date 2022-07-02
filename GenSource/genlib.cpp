@@ -20,6 +20,8 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "genlib.h"
 #include "genlib_exportfunctions.h"
+#include "Resource.h"
+#include "WavFile.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h> // for memcpy
@@ -152,7 +154,7 @@ unsigned long systime_ticks(void)
 // void operator delete[](void *p) { sysmem_freeptr(p); }
 
 void * genlib_obtain_reference_from_string(const char * name) {
-	return 0; // to be implemented
+	return (void*)Resource::load(name);
 }
 
 // the rest is stuff to isolate gensym, attrs, atoms, buffers etc.
@@ -217,6 +219,19 @@ t_genlib_data * genlib_obtain_data_from_reference(void *ref)
 	self->info.channels = 0;
 	self->info.data = 0;
 	self->cursor = 0;
+	if (ref != 0) {
+		Resource* resource = (Resource*)ref;
+		WavFile wav(resource->getData(), resource->getSize());
+		if (wav.isValid()) {
+			self->info.dim = wav.getNumberOfSamples();
+			self->info.channels = wav.getNumberOfChannels();
+			self->info.data = wav.createFloatArray().getData();
+			self->cursor = 0;
+			// debugMessage("Num samples = ", (int)self->info.dim);
+			// debugMessage("Num channels = ", (int)self->info.channels);
+		}
+		Resource::destroy(resource);
+	}
 	return (t_genlib_data *)self;
 }
 
