@@ -297,11 +297,13 @@ void genlib_data_resize(t_genlib_data *b, long s, long c) {
 			self->info.channels = c;
 		}
 		
-		set_zero64(self->info.data, s * c);
+		// This erases the buffer, but it seems to be a bug. If enabled,
+		// old buffer contents is lost. This prevents correct WAV file playback.
+		//set_zero64(self->info.data, s * c);
 		return;
 		
 	} else {
-		
+
 		// allocate new:
 		replaced = (t_sample *)sysmem_newptr(sz);
 		
