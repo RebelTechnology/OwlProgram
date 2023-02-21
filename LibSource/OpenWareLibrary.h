@@ -19,6 +19,7 @@
 #include "ExponentialDecayEnvelope.h"
 #include "FastFourierTransform.h"
 #include "FeedbackProcessor.h"
+#include "FFTProcessor.h"
 #include "FractionalCircularBuffer.h"
 #include "FirFilter.h"
 #include "FloatArray.h"
