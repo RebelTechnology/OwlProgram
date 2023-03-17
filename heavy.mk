@@ -1,10 +1,8 @@
 HEAVYFILE    ?= $(HEAVY).pd
 HEAVYNAME    ?= owl
-HEAVYSRC     ?= $(BUILDROOT)/HeavySource
 HEAVYDIR     ?= $(BUILD)/Heavy
 HEAVYARGS    ?= -g owl -n $(HEAVYNAME) -p $(HEAVYDIR) -o $(BUILD)
 HVCC         ?= hvcc
-HVCC_OWL     ?= $(BUILDROOT)/Tools/build_send_receive_constants.py
 
 $(HEAVYDIR)/_main.pd: $(PATCHSOURCE)/$(HEAVYFILE)
 	@mkdir -p $(HEAVYDIR)
