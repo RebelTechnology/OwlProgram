@@ -24,9 +24,9 @@ jobs:
       with:
         version: 2.0.10
     - name: Setup python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.8
+        python-version: 3.9
     - name: make
       run: make
     - name: make check
