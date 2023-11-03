@@ -76,7 +76,7 @@ class MidiMessage {
     return data[3];
   }
   uint8_t getProgramChange(){
-    return data[1];
+    return data[2];
   }
   int16_t getPitchBend(){
     int16_t pb = (data[2] | (data[3]<<7)) - 8192;
