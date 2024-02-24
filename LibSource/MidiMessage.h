@@ -96,7 +96,7 @@ class MidiMessage {
       data[0] == USB_COMMAND_SYSEX_EOX1 ||
       data[0] == USB_COMMAND_SYSEX_EOX2 ||
       data[0] == USB_COMMAND_SYSEX_EOX3;
-  }      
+  }
   bool isControlChange(){
     return (data[1] & MIDI_STATUS_MASK) == CONTROL_CHANGE;
   }
@@ -127,6 +127,9 @@ class MidiMessage {
       return MidiMessage(USB_COMMAND_NOTE_OFF, NOTE_OFF|(ch&0xf), note&0x7f, velocity&0x7f);
     else
       return MidiMessage(USB_COMMAND_NOTE_ON, NOTE_ON|(ch&0xf), note&0x7f, velocity&0x7f);
+  }
+  static MidiMessage kp(uint8_t ch, uint8_t note, uint8_t value){
+    return MidiMessage(USB_COMMAND_POLY_KEY_PRESSURE, POLY_KEY_PRESSURE|(ch&0xf), note&0x7f, value&0x7f);
   }
   static MidiMessage cp(uint8_t ch, uint8_t value){
     return MidiMessage(USB_COMMAND_CHANNEL_PRESSURE, CHANNEL_PRESSURE|(ch&0xf), value&0x7f, 0);
