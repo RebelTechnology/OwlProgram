@@ -30,12 +30,10 @@ public:
       controlChange(msg);
     }else if(msg.isChannelPressure()) {
       channelPressure(msg);
-    }else if(msg.isChannelPressure()) {
-      channelPressure(msg);
     }else if(msg.isPolyKeyPressure()) {
       polyKeyPressure(msg);
     }
-  }  
+  }
 };
 
 #endif // __MidiProcessor_h__
