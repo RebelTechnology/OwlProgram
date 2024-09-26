@@ -24,6 +24,13 @@ ColourScreenPatch::ColourScreenPatch(){
 
 ColourScreenPatch::~ColourScreenPatch(){}
 
+uint16_t ColourScreenPatch::getScreenWidth(){
+  return 64;
+}
+uint16_t ColourScreenPatch::getScreenHeight(){
+  return 64;
+}
+
 template<>
 Colour ColourScreenBuffer::getPixel(unsigned int x, unsigned int y){
   if(x >= width || y >= height)

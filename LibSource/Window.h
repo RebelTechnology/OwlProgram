@@ -26,7 +26,9 @@ public:
     HannWindow,
     HanningWindow,
     TriangularWindow,
-    RectangularWindow // no window
+    RectangularWindow,
+    WelchWindow,
+    SineWindow
   } WindowType;
   Window(){}
   Window(float* win, int size) : FloatArray(win, size) {}
@@ -63,6 +65,12 @@ public:
     case HammingWindow:
       hamming(window, size);
       break;
+    case WelchWindow:
+      welch(window, size);
+      break;
+    case SineWindow:
+      sine(window, size);
+      break;
     case TriangularWindow:
       triangular(window, size);
       break;
@@ -83,6 +91,17 @@ public:
   static void hamming(float *window, int size){
     for(int n=0; n<size; n++)
       window[n] = 0.54-0.46*cosf((float)n/(size-1)*2*M_PI);
+  }
+  static void welch(float *window, int size){
+    for(int n=0; n<size; n++){
+      float x = (n - size/2)/(size/2);
+      window[n] = 1 - x*x;
+    }
+  }
+  static void sine(float *window, int size){
+    for(int n=0; n<size; n++){
+      window[n] = sinf((M_PI*n)/size);
+    }
   }
   static void triangular(float *window, int size){
     float rampStep = 1/(size/2.0f);

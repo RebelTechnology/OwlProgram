@@ -44,11 +44,11 @@ int main(void){
   }else{
     /* Defined by the linker */
     extern char _fastheap, _fasteheap; // internal RAM dedicated to heap
-    extern char _eprogram, _eram; // remaining program space
+    extern char _eprogram, _estack; // remaining program space
     extern char _heap, _eheap; // external memory
     int cnt = 0;
     regions[cnt++] = { (uint8_t*)&_fastheap, (size_t)(&_fasteheap - &_fastheap) };
-    regions[cnt++] = { (uint8_t*)&_eprogram, (size_t)(&_eram - &_eprogram) };
+    regions[cnt++] = { (uint8_t*)&_eprogram, (size_t)(&_estack - &_eprogram) };
     regions[cnt++] = { (uint8_t*)&_heap, (size_t)(&_eheap - &_heap) };
     regions[cnt] = {NULL, 0}; // terminate the array
   }

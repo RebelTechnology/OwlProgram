@@ -3,7 +3,6 @@ ENTRY(Reset_Handler)
 
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size  = 0x000; /* required amount of heap  */
-_Min_Stack_Size = 0x800; /* required amount of stack */
 
 /* Specify the memory areas */
 MEMORY
@@ -16,16 +15,14 @@ MEMORY
 /* Define output sections */
 SECTIONS
 {
-  /* The startup code goes first into FLASH */
+  /* The startup code goes first into PATCHRAM */
   .program_header :
   {
-    . = ALIGN(8);
     _startprog = ABSOLUTE(.);         /* define a global symbol at program start */
     KEEP(*(.program_header)) /* Startup code */
-    . = ALIGN(8);
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
 
-  /* The program code and other data goes into FLASH */
+  /* The program code and other data goes into PATCHRAM */
   .text :
   {
     . = ALIGN(8);
@@ -55,36 +52,36 @@ SECTIONS
     . = ALIGN(8);
     _etext = .;        /* define a global symbol at end of code */
     _text_end = .;
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
 
   _text_load = LOADADDR (.text);
-  .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >PATCHRAM /* AT>PATCHFLASH */
+  .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >PATCHRAM
   .ARM : {
     __exidx_start = .;
     *(.ARM.exidx*)
     __exidx_end = .;
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
 
   .preinit_array     :
   {
     PROVIDE_HIDDEN (__preinit_array_start = .);
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
   .init_array :
   {
     PROVIDE_HIDDEN (__init_array_start = .);
     KEEP (*(SORT(.init_array.*)))
     KEEP (*(.init_array*))
     PROVIDE_HIDDEN (__init_array_end = .);
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
   .fini_array :
   {
     PROVIDE_HIDDEN (__fini_array_start = .);
     KEEP (*(.fini_array*))
     KEEP (*(SORT(.fini_array.*)))
     PROVIDE_HIDDEN (__fini_array_end = .);
-  } >PATCHRAM /* AT>PATCHFLASH */
+  } >PATCHRAM
 
   /* used by the startup to initialize data */
   _sidata = .;
@@ -125,8 +122,7 @@ SECTIONS
     PROVIDE ( _eprogram = . );
     PROVIDE ( _stack = . );
   } >PATCHRAM
-  _eram = ORIGIN(PATCHRAM) + 80k;    /* Limit to 80k for OwlWare compatiblity */
-  _estack = ORIGIN(PATCHRAM) + 80k;
+  _estack = ORIGIN(PATCHRAM) + LENGTH(PATCHRAM);
 
   .fastheap (NOLOAD) :
   {
