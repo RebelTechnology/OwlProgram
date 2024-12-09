@@ -15,8 +15,6 @@ ShortFastFourierTransform::~ShortFastFourierTransform(){}
 void ShortFastFourierTransform::init(int aSize){
   len = aSize;
   ASSERT(len==32 || len ==64 || len==128 || len==256 || len==512 || len==1024 || len==2048 || len==4096, "Unsupported FFT size");
-  void* args[] = {(void*)&instance, (void*)&len};
-  // getProgramVector()->serviceCall(OWL_SERVICE_ARM_RFFT_FAST_INIT_Q15, args, 2);
   // Supported FFT Lengths are 32, 64, 128, 256, 512, 1024, 2048, 4096.
 }
 

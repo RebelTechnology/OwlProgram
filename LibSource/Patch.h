@@ -6,7 +6,6 @@
 #include "Resource.h"
 #include "FloatArray.h"
 #include "PatchParameter.h"
-#include "SmoothValue.h"
 #include "AudioBuffer.h"
 #include "OpenWareMidiControl.h"
 

@@ -48,6 +48,8 @@ public:
        strncmp(datachunk->id, "data", 4) ||
        datachunk->size == 0)
       return false;
+    if(getNumberOfChannels() == 0 || getNumberOfSamples() == 0)
+      return false;
     if(header->audio_format == 1 && header->bps == 8)
       return true; // 8-bit PCM
     if(header->audio_format == 1 && header->bps == 16)

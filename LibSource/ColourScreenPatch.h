@@ -1,3 +1,6 @@
+#ifndef __ColourScreenPatch_h__
+#define __ColourScreenPatch_h__
+
 #include "Patch.h"
 #include "ScreenBuffer.h"
 
@@ -26,3 +29,5 @@ public:
   uint16_t getScreenHeight();
   virtual void processScreen(ColourScreenBuffer& screen) = 0;
 };
+
+#endif // __ColourScreenPatch_h__

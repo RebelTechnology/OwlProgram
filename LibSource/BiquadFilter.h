@@ -11,7 +11,7 @@ public:
   FloatArray state;
   static constexpr float BESSEL_Q = 0.57735026919f; // 1/sqrt(3)
   static constexpr float SALLEN_KEY_Q = 0.5f; // 1/2
-  static constexpr float BUTTERWORTH_Q = 0.70710678118f; // 1/sqrt(2)
+  static constexpr float BUTTERWORTH_Q = M_SQRT1_2; // 1/sqrt(2)
 
   FilterStage(FloatArray co, FloatArray st) : coefficients(co), state(st){}
 

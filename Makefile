@@ -101,10 +101,10 @@ $(BUILD)/registerpatch.h: .FORCE
 	@echo "#include \"$(PATCHFILE)\"" > $@
 
 $(BUILD)/Source/startup.s: .FORCE
-	@echo '.string "'$(PATCHNAME)'"' > $(BUILD)/Source/progname.s
+	@printf '.string "%.23s"\r\n' $(PATCHNAME) > $(BUILD)/Source/progname.s
 
 $(BUILD)/%.syx: $(BUILD)/%.bin
-	@$(FIRMWARESENDER) -q -in $< -save $@
+	@$(FIRMWARESENDER) -q -d 0 -in $< -save $@
 
 patch: $(DEPS) ## build patch binary
 	@$(MAKE) -s -f compile.mk compile
@@ -140,15 +140,15 @@ sysex: patch $(BUILD)/$(TARGET).syx ## package patch binary as MIDI sysex
 
 load: patch ## upload patch to attached OWL via MIDI
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to load
-	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out "$(OWLDEVICE)" -run
+	@$(FIRMWARESENDER) -q -d 2 -in $(BUILD)/$(TARGET).bin -out "$(OWLDEVICE)" -run
 
 store: patch ## upload and save patch to attached OWL
 	@echo Sending patch $(PATCHNAME) to $(OWLDEVICE) to store in slot $(SLOT)
-	@$(FIRMWARESENDER) -q -in $(BUILD)/$(TARGET).bin -out "$(OWLDEVICE)" -store $(SLOT)
+	@$(FIRMWARESENDER) -q -d 2 -in $(BUILD)/$(TARGET).bin -out "$(OWLDEVICE)" -store $(SLOT)
 
 resource: $(RESOURCE) ## upload and save resource to attached OWL
 	@echo Sending resource $(RESOURCE) to $(OWLDEVICE) to store in slot $(SLOT)
-	@$(FIRMWARESENDER) -q -in $(RESOURCE) -out "$(OWLDEVICE)" -store $(SLOT)
+	@$(FIRMWARESENDER) -q -d 2 -in $(RESOURCE) -out "$(OWLDEVICE)" -store $(SLOT)
 
 docs: ## generate HTML documentation
 	@doxygen Doxyfile
@@ -160,7 +160,7 @@ clean: ## remove generated patch files
 	@rm -rf $(BUILD)/*
 
 realclean: clean ## remove all library object files
-	@find Libraries/ -name '*.[a|o]' -delete
+	@find Libraries/ -maxdepth 1 -name '*.[a|o]' -delete
 
 size: patch ## show binary size metrics and large object summary
 	@$(MAKE) -s -f compile.mk size
