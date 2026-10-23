@@ -18,9 +18,10 @@
 #     compiler (https://github.com/RebelTechnology/OwlServer) uses to turn a
 #     patch into a browser-runnable build, so it is installed by default here.
 #
-# This image compiles ARM patches, builds the web (emscripten) patch, and runs
-# the native unit tests. FAUST/SOUL compilers are still optional — see the
-# notes at the bottom.
+# This image compiles ARM patches, builds the web (emscripten) patch, builds
+# FAUST and SOUL patches, runs the native unit tests, and bundles
+# FirmwareSender for MIDI sysex packaging / device upload. See the usage notes
+# at the bottom.
 
 FROM ubuntu:20.04
 
@@ -33,6 +34,15 @@ ENV DEBIAN_FRONTEND=noninteractive
 # binutils-arm-none-eabi + libnewlib -> assembler/linker + freestanding libc
 # python2 / python3 + pip -> Heavy (hvcc) PD compiler
 # libasound2-dev libcurl4-openssl-dev pkg-config -> FirmwareSender build deps
+# libfreetype6-dev libx11-dev libxext-dev libxinerama-dev libxrandr-dev
+# libxcursor-dev libgl1-mesa-dev -> JUCE module compile deps pulled in by
+#   FirmwareSender's juce_audio_devices/juce_events modules (even though the
+#   app itself is a headless ConsoleApp, the JUCE sources #include these).
+# faust -> FAUST DSP compiler for `make FAUST=...` patches (focal ships
+#          2.20.2, a 2019-era release that matches the "last stable" window).
+#          OwlProgram's faust.mk calls the `faust` binary directly with its
+#          own FaustSource/owl.cpp architecture file, so no faust2owl needed.
+# curl unzip -> fetch + unpack the SOUL compiler release (binary distribution)
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         make \
@@ -48,6 +58,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libasound2-dev \
         libcurl4-openssl-dev \
         pkg-config \
+        faust \
+        curl \
+        unzip \
+        libfreetype6-dev \
+        libx11-dev \
+        libxext-dev \
+        libxinerama-dev \
+        libxrandr-dev \
+        libxcursor-dev \
+        libgl1-mesa-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /owl
@@ -69,8 +89,45 @@ RUN git clone https://github.com/emscripten-core/emsdk.git /opt/emsdk \
 ENV EMSDK=/opt/emsdk \
     PATH=/opt/emsdk:/opt/emsdk/upstream/emscripten:/opt/emsdk/node/12.18.1_64bit/bin:$PATH
 
+# ---- SOUL compiler 1.0.82 — for `make SOUL=...` patches --------------------
+# ROLI/soul-lang shipped SOUL as a prebuilt binary (the compiler is not
+# open-source-buildable). 1.0.82 is the last 1.0.x release (2020), matching
+# the "last stable" era. The release zip (binaries-linux-combined.zip) carries
+# per-arch CLIs under linux/{x64,arm32,arm64,bela}/soul — we must pick the x64
+# one (a bare `find -name soul` can grab an ARM build that won't exec here).
+# OwlProgram's soul.mk invokes it as `Tools/soul generate --cpp ...`, so we
+# drop the binary at /usr/local/bin/soul AND symlink it into the source tree's
+# Tools/ after COPY (see below). Network fetch is confined to this layer so it
+# doesn't invalidate the source COPY layer.
+RUN curl -sSLf -o /tmp/soul.zip \
+        https://github.com/soul-lang/SOUL/releases/download/1.0.82/binaries-linux-combined.zip \
+ && unzip -o /tmp/soul.zip -d /tmp/soul \
+ && install -m 0755 /tmp/soul/linux/x64/soul /usr/local/bin/soul \
+ && rm -rf /tmp/soul /tmp/soul.zip \
+ && soul --version 2>&1 | head -1
+
+# ---- FirmwareSender — for `make load/store/sysex` device upload ------------
+# Built from pingdynasty/FirmwareSender (JUCE app). Needs ALSA + curl dev libs
+# (installed above). Produces a CLI that packs a patch .bin into MIDI sysex and
+# sends it to an attached OWL device over USB-MIDI. The OwlProgram Makefile
+# expects it at Tools/FirmwareSender; we build to /usr/local/bin/FirmwareSender
+# and symlink into Tools/ after COPY. Actual device upload also needs USB/MIDI
+# passthrough into the container (e.g. `docker run --device=/dev/snd ...`).
+RUN git clone --depth 1 https://github.com/pingdynasty/FirmwareSender.git /opt/FirmwareSender \
+ && make -C /opt/FirmwareSender/Builds/Linux CONFIG=Release \
+ && install -m 0755 \
+        "$(find /opt/FirmwareSender/Builds/Linux/build -type f -name FirmwareSender | head -1)" \
+        /usr/local/bin/FirmwareSender \
+ && FirmwareSender --help >/dev/null 2>&1; echo "FirmwareSender installed"
+
 # Copy the already-checked-out source (submodules included) into the image.
 COPY . /owl
+
+# Wire the SOUL + FirmwareSender binaries into the paths OwlProgram's Makefiles
+# expect (Tools/soul and Tools/FirmwareSender), pointing at the versions
+# installed above. Symlinks keep the single source of truth in /usr/local/bin.
+RUN ln -sf /usr/local/bin/soul /owl/Tools/soul \
+ && ln -sf /usr/local/bin/FirmwareSender /owl/Tools/FirmwareSender
 
 # Point the ARM Makefiles at the apt-installed cross toolchain. The apt
 # package puts arm-none-eabi-* on PATH under /usr/bin, so TOOLROOT is /usr/bin/
@@ -86,24 +143,37 @@ RUN pip3 install --no-cache-dir -r Tools/hvcc/requirements.txt || true
 RUN echo "=== Toolchain versions ===" \
  && arm-none-eabi-gcc --version | head -1 \
  && gcc --version | head -1 \
- && make --version | head -1
+ && make --version | head -1 \
+ && (faust --version 2>&1 | head -1) \
+ && (soul --version 2>&1 | head -1) \
+ && (echo "FirmwareSender: $(ls -1 /usr/local/bin/FirmwareSender)")
 
 # Default: show the build help. Override with e.g.
 #   docker run --rm owlprogram:stable make PATCHNAME=Template patch
 CMD ["make", "help"]
 
 # ---------------------------------------------------------------------------
-# Optional extras (not installed to keep the image lean and the build fast):
+# What this image can build:
 #
-#  FAUST patches (make FAUST=...):  install faust + faust2owl.
-#  SOUL  patches (make SOUL=...):   install the soul compiler.
+#   ARM patch (default OWL2/OWL3):   make PATCHNAME=Template patch
+#   Native build + unit tests:       make test / make check
+#   Web (emscripten, OwlServer):     make web / make libs
+#   FAUST patch:                     make PATCHSOURCE=<dir> FAUST=<Name> patch
+#   SOUL patch:                      make PATCHSOURCE=<dir> SOUL=<Name> patch
+#   Heavy / Pure Data patch:         make HEAVY=<Name> patch
 #
-#  FirmwareSender (make load/store/sysex to a real device):
-#     git clone https://github.com/pingdynasty/FirmwareSender \
-#       && make -C FirmwareSender/Builds/Linux \
-#       && cp FirmwareSender/Builds/Linux/build/FirmwareSender Tools/
-#     (device upload needs USB/MIDI passthrough into the container.)
+# Device upload with FirmwareSender (make load / store / sysex) needs the OWL
+# connected over USB-MIDI AND passed into the container, e.g.:
+#   docker run --rm -it --device=/dev/snd \
+#     -v /dev/bus/usb:/dev/bus/usb owlprogram:stable \
+#     make PATCHNAME=Template OWLDEVICE="OWL-*" load
 #
-# Already included: ARM cross build (patch), native build + unit tests, and
-# the emscripten web build (make web / make libs) used by OwlServer.
+# Installed compilers/tools:
+#   * host gcc/g++ 9        (native build + unit tests)
+#   * arm-none-eabi-gcc 9   (ARM cross build — the pinned old toolchain)
+#   * emscripten 2.0.10     (web build used by OwlServer)
+#   * faust 2.20.2          (FAUST DSP patches)
+#   * soul 1.0.82           (SOUL patches — prebuilt ROLI binary)
+#   * FirmwareSender        (MIDI sysex packaging + device upload)
+#   * hvcc / Heavy          (Pure Data patches)
 # ---------------------------------------------------------------------------
