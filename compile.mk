@@ -73,6 +73,8 @@ else ifeq ($(PLATFORM),OWL3)
 ARCH_FLAGS = -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-d16
 DEF_FLAGS = -DSTM32H7XX -DARM_MATH_CM7 -D__FPU_PRESENT=1 -D__FPU_USED=1U
 LDSCRIPT    ?= $(BUILDROOT)/Source/owl3.ld
+else
+$(error PLATFORM="$(PLATFORM)" not recognized. Known platforms: OWL0, OWL1, OWL2, OWL3. See README)
 endif
 
 ARCH_FLAGS += -fsingle-precision-constant -mthumb

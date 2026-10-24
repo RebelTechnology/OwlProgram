@@ -76,7 +76,7 @@ class MidiMessage {
     return data[3];
   }
   uint8_t getProgramChange(){
-    return data[1];
+    return data[2];
   }
   int16_t getPitchBend(){
     int16_t pb = (data[2] | (data[3]<<7)) - 8192;
@@ -112,24 +112,45 @@ class MidiMessage {
   bool isPitchBend(){
     return (data[1] & MIDI_STATUS_MASK) == PITCH_BEND_CHANGE;
   }
+  /**
+   * Construct a Control Change message.
+   */
   static MidiMessage cc(uint8_t ch, uint8_t cc, uint8_t value){
     return MidiMessage(USB_COMMAND_CONTROL_CHANGE, CONTROL_CHANGE|(ch&0xf), cc&0x7f, value&0x7f);
   }
+  /**
+   * Construct a Program Change message.
+   */
   static MidiMessage pc(uint8_t ch, uint8_t pc){
     return MidiMessage(USB_COMMAND_PROGRAM_CHANGE, PROGRAM_CHANGE|(ch&0xf), pc&0x7f, 0);
   }
+  /**
+   * Construct a Pitch Bend message. The bend value must be a signed integer between -8192 and 8191 inclusive.
+   */
   static MidiMessage pb(uint8_t ch, int16_t bend){
     bend += 8192;
     return MidiMessage(USB_COMMAND_PITCH_BEND_CHANGE, PITCH_BEND_CHANGE|(ch&0xf), bend&0x7f, (bend>>7)&0x7f);
   }
+  /**
+   * Construct a Note message. Use zero velocity for note off, non-zero for note on.
+   */
   static MidiMessage note(uint8_t ch, uint8_t note, uint8_t velocity){
     if(velocity == 0)
       return MidiMessage(USB_COMMAND_NOTE_OFF, NOTE_OFF|(ch&0xf), note&0x7f, velocity&0x7f);
     else
       return MidiMessage(USB_COMMAND_NOTE_ON, NOTE_ON|(ch&0xf), note&0x7f, velocity&0x7f);
   }
+  /**
+   * Construct a Channel Pressure (mono aftertouch) message.
+   */
   static MidiMessage cp(uint8_t ch, uint8_t value){
     return MidiMessage(USB_COMMAND_CHANNEL_PRESSURE, CHANNEL_PRESSURE|(ch&0xf), value&0x7f, 0);
+  }
+  /**
+   * Construct a Poly Key Pressure (polyphonic aftertouch) message.
+   */
+  static MidiMessage at(uint8_t ch, uint8_t note, uint8_t value){
+    return MidiMessage(USB_COMMAND_POLY_KEY_PRESSURE, POLY_KEY_PRESSURE|(ch&0xf), note&0x7f, value&0x7f);
   }
 };
 

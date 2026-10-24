@@ -301,7 +301,9 @@ void *pvReturn = NULL;
 
 	#if( configUSE_MALLOC_FAILED_HOOK == 1 )
 	{
-		if( pvReturn == NULL )
+	  // Don't call failed hook if requested amount of bytes is zero
+	  // See discussion at https://github.com/FreeRTOS/FreeRTOS-Kernel/issues/204
+		if( pvReturn == NULL && ( xWantedSize != ( size_t) 0 ) )
 		{
 			extern void vApplicationMallocFailedHook( void );
 			vApplicationMallocFailedHook();

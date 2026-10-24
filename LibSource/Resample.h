@@ -102,8 +102,10 @@ public:
     ASSERT(input.getSize()*factor==output.getSize(), "wrong size");
     float* p = output;
     output.clear();
-    for(size_t i=0; i<input.getSize(); i+= factor)
-      *p++ = input[i];
+    for (size_t i = 0; i < input.getSize(); ++i) {
+      *p = input[i];
+      p += factor;
+    }
     filter->process(output, output);
   }
 };
