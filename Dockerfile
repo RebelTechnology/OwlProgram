@@ -22,6 +22,12 @@
 FROM --platform=linux/amd64 ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Target OWL platform the baked-in libraries are built for. Override at build
+# time, e.g. `docker build --build-arg PLATFORM=OWL3 -t owlprogram:owl3-v3 .`.
+# The libs are platform-specific (Cortex-M4 vs M7), so each image is pinned to
+# ONE platform; build a separate image per target.
+ARG PLATFORM=OWL2
+
 # ---- Base prerequisites (24.04: python3 is default, host gcc is 13) --------
 # No python2 (axis 5 removes the py2.7 hvcc dependency). binutils/newlib come
 # from the pinned arm-gcc tarball below, not apt, so only host build deps here.
@@ -129,8 +135,14 @@ COPY . /owl
 RUN ln -sf /usr/local/bin/soul /owl/Tools/soul \
  && ln -sf /usr/local/bin/FirmwareSender /owl/Tools/FirmwareSender
 
+# Pre-build the patch libraries for the target platform so a later
+# `make PATCHNAME=X patch` links immediately (no separate `make libs` needed).
+# `make libs` needs only PLATFORM; the archives are platform-specific and live
+# at non-platform-keyed paths, so PLATFORM is fixed per image.
+RUN make PLATFORM=${PLATFORM} libs
+
 # Provenance.
-RUN echo "=== v3 toolchain versions ===" \
+RUN echo "=== v3 toolchain versions (PLATFORM=${PLATFORM}) ===" \
  && arm-none-eabi-gcc --version | head -1 \
  && gcc --version | head -1 \
  && (faust --version 2>&1 | head -1) \
