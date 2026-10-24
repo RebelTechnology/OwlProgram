@@ -1,3 +1,4 @@
+# check=skip=FromPlatformFlagConstDisallowed
 # OwlProgram — v3 MODERNIZATION image
 #
 # v3 brings every toolchain axis up to date on a modern base image. It descends
