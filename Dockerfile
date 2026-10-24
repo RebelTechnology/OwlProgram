@@ -33,6 +33,12 @@ FROM --platform=linux/amd64 ubuntu:20.04
 # Avoid interactive tzdata prompts during apt installs.
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Target OWL platform the baked-in libraries are built for. Override at build
+# time, e.g. `docker build --build-arg PLATFORM=OWL3 -t owlprogram:owl3-v1 .`.
+# The libs (libowlprg.a/libdaisysp.a) are platform-specific (Cortex-M4 vs M7),
+# so each image is pinned to ONE platform; build a separate image per target.
+ARG PLATFORM=OWL2
+
 # ---- Toolchain + build prerequisites -------------------------------------
 # build-essential  -> host gcc/g++/make (native build, unit tests)
 # gcc-arm-none-eabi -> ARM cross toolchain, 2019-q4 (the pinned old GCC)
@@ -146,14 +152,24 @@ ENV TOOLROOT=/usr/bin/
 # pinned deps have drifted — C++/native builds don't need them.
 RUN pip3 install --no-cache-dir -r Tools/hvcc/requirements.txt || true
 
+# Pre-build the patch libraries for the target platform so a later
+# `make PATCHNAME=X patch` links immediately (no separate `make libs` needed).
+# `make libs` needs only PLATFORM (no PATCHNAME) and produces the ARM archives
+# libowlprg.a/libdaisysp.a plus the web libs. These are Cortex-M4 (OWL1/2) or
+# Cortex-M7 (OWL3) specific, which is why PLATFORM is fixed per image: building
+# a patch for a DIFFERENT platform in this image would silently reuse the wrong
+# archives (the paths are not platform-keyed), so use the matching image.
+RUN make PLATFORM=${PLATFORM} libs
+
 # Record the toolchain versions in the image for provenance.
-RUN echo "=== Toolchain versions ===" \
+RUN echo "=== Toolchain versions (PLATFORM=${PLATFORM}) ===" \
  && arm-none-eabi-gcc --version | head -1 \
  && gcc --version | head -1 \
  && make --version | head -1 \
  && (faust --version 2>&1 | head -1) \
  && (soul --version 2>&1 | head -1) \
- && (echo "FirmwareSender: $(ls -1 /usr/local/bin/FirmwareSender)")
+ && (echo "FirmwareSender: $(ls -1 /usr/local/bin/FirmwareSender)") \
+ && (echo "Prebuilt libs: $(ls -1 Libraries/libowlprg.a Libraries/libdaisysp.a 2>/dev/null)")
 
 # Default: show the build help. Override with e.g.
 #   docker run --rm owlprogram:stable make PATCHNAME=Template patch
