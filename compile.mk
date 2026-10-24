@@ -144,8 +144,7 @@ DAISYSP_OBJS = $(addprefix $(BUILD)/, $(notdir $(DAISYSP_CPP_SRC:.cpp=.o)))
 vpath %.S $(sort $(dir $(S_SRC)))
 vpath %.s $(sort $(dir $(S_SRC) $(PATCH_S_SRC)))
 vpath %.c $(sort $(dir $(C_SRC) $(PATCH_C_SRC)))
-vpath %.cpp $(sort $(dir $(CPP_SRC) $(PATCH_CPP_SRC)))
-vpath %.cpp $(sort $(dir $(DAISYSP_CPP_SRC)))
+vpath %.cpp $(sort $(dir $(CPP_SRC) $(PATCH_CPP_SRC) $(DAISYSP_CPP_SRC)))
 
 .PHONY: libs as map compile size
 

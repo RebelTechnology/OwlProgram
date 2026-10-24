@@ -147,6 +147,13 @@ RUN git clone --depth 1 https://github.com/pingdynasty/FirmwareSender.git /opt/F
  && FirmwareSender --help >/dev/null 2>&1; echo "FirmwareSender installed"
 
 # ---- Source + live-server local edits --------------------------------------
+# IMPORTANT: this copies the build context as-is, INCLUDING git submodules.
+# The DaisySP submodule (Libraries/DaisySP) MUST be checked out in the context
+# before building — run `git submodule update --init --recursive` first.
+# If DaisySP is empty, `make libs` fails to find LibSource sources (the daisysp
+# source list collapses the C++ vpath). The portable clone populates submodules
+# at generation time, but switching branches locally needs another
+# `git submodule update`. (DaisySP is slated for removal in a future revision.)
 COPY . /owl
 
 # Live-host edit #1: owl.cpp FAUST-2.30.x API migration (new/delete instead of
