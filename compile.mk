@@ -43,7 +43,12 @@ LDFLAGS += -flto
 CXXFLAGS = -fno-rtti
 CXXFLAGS += -fno-exceptions
 ifdef HEAVY
-CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
+# Generated Heavy sources (mainline hvcc): force the scalar path. HvUtils.h only
+# forces HV_SIMD_NONE=1 if some HV_SIMD_* macro is already truthy; otherwise it
+# auto-detects from __ARM_NEON__/__SSE__ and leaves the scalar helpers out,
+# breaking the Cortex-M build (hv_shl_i/hv_rint_f undeclared). Define it =1.
+# NB: do NOT define __unix__ here — on ARM it skews HvUtils' host detection.
+CPPFLAGS    += -DHV_SIMD_NONE=1
 endif
 ifdef FAUST
 ifneq (,$(findstring soundfile,$(FAUSTOPTS)))
