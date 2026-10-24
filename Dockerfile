@@ -1,28 +1,30 @@
 # check=skip=FromPlatformFlagConstDisallowed
-# OwlProgram — reproducible build environment ("last stable state")
+# OwlProgram build image — v2 (live server toolchain)
+# Revision of the v1 Dockerfile: updated DSP library era — ARM GCC 9-2020-q2,
+# FAUST 2.30.5, owl.cpp new/delete. See git history for the v1->v2 delta.
 #
-# Why these versions:
-#   * Ubuntu 20.04 (focal) — period-appropriate userland for the OWL "last
-#     stable" era (the README targets Ubuntu 18.04; focal is the closest LTS
-#     that still carries the old ARM toolchain in apt and a C++17 host gcc).
-#   * arm-none-eabi-gcc 9-2019-q4 (apt: 15:9-2019-q4) — the ARM cross compiler
-#     from ~2019, i.e. the "right, now-outdated gcc from 4-5 years ago". This
-#     PRE-DATES the GCC 13 freestanding-mode breakage reported in upstream
-#     issue #120 ("Compiling anything fails on latest arm-none-eabi-gcc"),
-#     which is exactly why a pinned old toolchain is required. The project's
-#     own CI pins the neighbouring 10-2020-q4 release; both build green.
-#   * host gcc/g++ 9.3.0 — for the native build + unit tests (native.mk needs
-#     C++17; gcc 9 supports it).
-#   * Python + hvcc requirements — for Pure Data (HEAVY=) patches.
-#   * emscripten / emsdk 2.0.10 (the exact version the CI pins) — for the
-#     JavaScript/WASM `make web` build. This is what the OwlServer online
-#     compiler (https://github.com/RebelTechnology/OwlServer) uses to turn a
-#     patch into a browser-runnable build, so it is installed by default here.
+# This image reproduces the toolchain actually running on the production online
+# compiler host (bitnami@ip-172-31-2-241:/opt/OwlProgram) that serves
+# https://www.rebeltech.org/patch-library/patches/latest/ — captured
+# 2026-10-23 (see baseline/LIVE_SERVER.md).
 #
-# This image compiles ARM patches, builds the web (emscripten) patch, builds
-# FAUST and SOUL patches, runs the native unit tests, and bundles
-# FirmwareSender for MIDI sysex packaging / device upload. See the usage notes
-# at the bottom.
+# It differs from the pinned "last stable" baseline (./Dockerfile) in three
+# deliberate ways, each matching what the live host runs rather than what the
+# repo commits:
+#
+#   1. ARM GCC 9-2020-q2-update  (NOT apt 9-2019-q4). The live host unpacks the
+#      ARM-published toolchain into Tools/gcc-arm-none-eabi-9-2020-q2-update/
+#      and uncomments compile.mk's `TOOLROOT ?= Tools/.../bin/`.
+#   2. FAUST 2.30.5  (NOT apt 2.20.2). Built from source (LLVM 11). The live
+#      host's `faust --version` is 2.30.5 (2021, LLVM 11.0.1).
+#   3. FaustSource/owl.cpp patched to `new mydsp()` / `delete fDSP` — required
+#      because FAUST 2.30.x stopped emitting the static mydsp::create()/destroy()
+#      factory. The live host carries this as an uncommitted local edit.
+#
+# Build it on a feature/dsp-updates worktree (the live-server branch):
+#   docker build -f Dockerfile.live -t owlprogram:live <dsp-updates-worktree>
+#
+# NOTE: the FAUST-from-source layer is slow (~15-25 min). Everything else is fast.
 
 # The pinned toolchain (emsdk 2.0.10, and in v2 the ARM-published GCC) ships
 # ONLY x86_64 binaries, so we pin the platform to linux/amd64. On an arm64 host
@@ -35,30 +37,21 @@ FROM --platform=linux/amd64 ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Target OWL platform the baked-in libraries are built for. Override at build
-# time, e.g. `docker build --build-arg PLATFORM=OWL3 -t owlprogram:owl3-v1 .`.
+# time, e.g. `docker build --build-arg PLATFORM=OWL3 -t owlprogram:owl3-v2 .`.
 # The libs (libowlprg.a/libdaisysp.a) are platform-specific (Cortex-M4 vs M7),
 # so each image is pinned to ONE platform; build a separate image per target.
 ARG PLATFORM=OWL2
 
 # ---- Toolchain + build prerequisites -------------------------------------
-# build-essential  -> host gcc/g++/make (native build, unit tests)
-# gcc-arm-none-eabi -> ARM cross toolchain, 2019-q4 (the pinned old GCC)
-# binutils-arm-none-eabi + libnewlib -> assembler/linker + freestanding libc
-# python2 / python3 + pip -> Heavy (hvcc) PD compiler
-# libasound2-dev libcurl4-openssl-dev pkg-config -> FirmwareSender build deps
-# libfreetype6-dev libx11-dev libxext-dev libxinerama-dev libxrandr-dev
-# libxcursor-dev libgl1-mesa-dev -> JUCE module compile deps pulled in by
-#   FirmwareSender's juce_audio_devices/juce_events modules (even though the
-#   app itself is a headless ConsoleApp, the JUCE sources #include these).
-# faust -> FAUST DSP compiler for `make FAUST=...` patches (focal ships
-#          2.20.2, a 2019-era release that matches the "last stable" window).
-#          OwlProgram's faust.mk calls the `faust` binary directly with its
-#          own FaustSource/owl.cpp architecture file, so no faust2owl needed.
-# curl unzip -> fetch + unpack the SOUL compiler release (binary distribution)
+# Same base set as ./Dockerfile, PLUS the FAUST-2.30.5 build deps:
+#   cmake  -> FAUST build system (cmake-driven)
+# We build FAUST with the `light` backend set, which has LLVM_BACKEND=OFF, so
+# NO llvm/clang dev packages are needed — the faust CLI we need (CPP backend)
+# does not embed LLVM. We do NOT install apt `faust` — we build 2.30.5 below.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         make \
-        gcc-arm-none-eabi=15:9-2019-q4-0ubuntu1 \
+        cmake \
         binutils-arm-none-eabi \
         libnewlib-arm-none-eabi \
         libstdc++-arm-none-eabi-newlib \
@@ -70,9 +63,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libasound2-dev \
         libcurl4-openssl-dev \
         pkg-config \
-        faust \
         curl \
+        wget \
         unzip \
+        bzip2 \
+        xz-utils \
+        zlib1g-dev \
         libfreetype6-dev \
         libx11-dev \
         libxext-dev \
@@ -84,36 +80,46 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /owl
 
-# ---- Emscripten (emsdk) 2.0.10 — pinned to match OwlProgram CI --------------
-# Installed before copying the source so edits to the patch don't invalidate
-# this (slow) layer. emsdk 2.0.10 ships its own clang/node, no system node
-# needed. Shallow-clone the 2.0.10 TAG directly (--depth 1 --branch) so we pull
-# only that revision's tree, not the whole emsdk history. emsdk git tip now
-# requires Python 3.10+, but Ubuntu 20.04 ships Python 3.8, so the old tag is
-# what runs on this base image. `make web` finds emcc via the PATH set below.
-# (The base image is pinned to linux/amd64 above — emsdk 2.0.10 has no arm64
-# SDK bundle, so the build must be x86_64.)
-RUN git clone --depth 1 --branch 2.0.10 \
-      https://github.com/emscripten-core/emsdk.git /opt/emsdk \
- && cd /opt/emsdk \
- && ./emsdk install 2.0.10 \
- && ./emsdk activate 2.0.10
+# ---- ARM GCC 9-2020-q2-update (the live server's cross toolchain) ----------
+# Unpacked under /opt and ALSO linked into the source tree at
+# Tools/gcc-arm-none-eabi-9-2020-q2-update/ (where the live host keeps it and
+# where the uncommented compile.mk TOOLROOT points). Fetched from ARM's
+# published archive (developer.arm.com -> armkeil blob, verified reachable).
+RUN wget -q -O /tmp/arm.tar.bz2 \
+      "https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2" \
+ && mkdir -p /opt/arm \
+ && tar -xjf /tmp/arm.tar.bz2 -C /opt/arm \
+ && rm /tmp/arm.tar.bz2 \
+ && ls /opt/arm
+# the archive unpacks to /opt/arm/gcc-arm-none-eabi-9-2020-q2-update
+ENV ARMGCC=/opt/arm/gcc-arm-none-eabi-9-2020-q2-update
+ENV PATH=$ARMGCC/bin:$PATH
 
-# Put emcc et al. on PATH for every shell so plain `make web` / `make libs`
-# find emcc without a manual `source emsdk_env.sh`.
-ENV EMSDK=/opt/emsdk \
-    PATH=/opt/emsdk:/opt/emsdk/upstream/emscripten:/opt/emsdk/node/12.18.1_64bit/bin:$PATH
+# ---- FAUST 2.30.5 from source ----------------------------------------------
+# No prebuilt Linux binary exists for 2.30.5, so we build the `faust` CLI from
+# the source tarball (which bundles the stdfaust libraries). The top Makefile's
+# `compiler` target hardcodes BACKENDS=regular.cmake (which pulls LLVM), so we
+# invoke cmake DIRECTLY with the `light` backend set (CPP_BACKEND on,
+# LLVM_BACKEND off → no LLVM needed) and the `regular` target with
+# INCLUDE_EXECUTABLE=on (produces the faust CLI). HTTP/OSC/static/dynamic are
+# turned off — OwlProgram only needs the compiler binary. Builds in well under
+# a minute.
+RUN wget -q -O /tmp/faust.tar.gz \
+      "https://github.com/grame-cncm/faust/releases/download/2.30.5/faust-2.30.5.tar.gz" \
+ && mkdir -p /opt/faust-src \
+ && tar -xzf /tmp/faust.tar.gz -C /opt/faust-src --strip-components=1 \
+ && rm /tmp/faust.tar.gz \
+ && mkdir -p /opt/faust-src/build/faustdir \
+ && cd /opt/faust-src/build/faustdir \
+ && cmake -C ../backends/light.cmake -C ../targets/regular.cmake \
+      -DCMAKE_BUILD_TYPE=Release -DINCLUDE_HTTP=off -DINCLUDE_OSC=off \
+      -DINCLUDE_STATIC=off -DINCLUDE_DYNAMIC=off -DINCLUDE_EXECUTABLE=on \
+      -DWORKLET=off -DLIBSDIR=lib -G 'Unix Makefiles' .. 2>&1 | tail -5 \
+ && make -j"$(nproc)" 2>&1 | tail -6 \
+ && make install 2>&1 | tail -4 \
+ && faust --version | head -1
 
-# ---- SOUL compiler 1.0.82 — for `make SOUL=...` patches --------------------
-# ROLI/soul-lang shipped SOUL as a prebuilt binary (the compiler is not
-# open-source-buildable). 1.0.82 is the last 1.0.x release (2020), matching
-# the "last stable" era. The release zip (binaries-linux-combined.zip) carries
-# per-arch CLIs under linux/{x64,arm32,arm64,bela}/soul — we must pick the x64
-# one (a bare `find -name soul` can grab an ARM build that won't exec here).
-# OwlProgram's soul.mk invokes it as `Tools/soul generate --cpp ...`, so we
-# drop the binary at /usr/local/bin/soul AND symlink it into the source tree's
-# Tools/ after COPY (see below). Network fetch is confined to this layer so it
-# doesn't invalidate the source COPY layer.
+# ---- SOUL compiler 1.0.82 (same as baseline) ------------------------------
 RUN curl -sSLf -o /tmp/soul.zip \
         https://github.com/soul-lang/SOUL/releases/download/1.0.82/binaries-linux-combined.zip \
  && unzip -o /tmp/soul.zip -d /tmp/soul \
@@ -121,13 +127,18 @@ RUN curl -sSLf -o /tmp/soul.zip \
  && rm -rf /tmp/soul /tmp/soul.zip \
  && soul --version 2>&1 | head -1
 
-# ---- FirmwareSender — for `make load/store/sysex` device upload ------------
-# Built from pingdynasty/FirmwareSender (JUCE app). Needs ALSA + curl dev libs
-# (installed above). Produces a CLI that packs a patch .bin into MIDI sysex and
-# sends it to an attached OWL device over USB-MIDI. The OwlProgram Makefile
-# expects it at Tools/FirmwareSender; we build to /usr/local/bin/FirmwareSender
-# and symlink into Tools/ after COPY. Actual device upload also needs USB/MIDI
-# passthrough into the container (e.g. `docker run --device=/dev/snd ...`).
+# ---- Emscripten (emsdk) 2.0.10 (same as baseline, for make web/OwlServer) --
+# Base image is pinned to linux/amd64 (see FROM) — emsdk 2.0.10 has no arm64
+# SDK bundle, so the build must be x86_64.
+RUN git clone --depth 1 --branch 2.0.10 \
+      https://github.com/emscripten-core/emsdk.git /opt/emsdk \
+ && cd /opt/emsdk \
+ && ./emsdk install 2.0.10 \
+ && ./emsdk activate 2.0.10
+ENV EMSDK=/opt/emsdk \
+    PATH=/opt/emsdk:/opt/emsdk/upstream/emscripten:/opt/emsdk/node/12.18.1_64bit/bin:$PATH
+
+# ---- FirmwareSender (same as baseline) ------------------------------------
 RUN git clone --depth 1 https://github.com/pingdynasty/FirmwareSender.git /opt/FirmwareSender \
  && make -C /opt/FirmwareSender/Builds/Linux CONFIG=Release \
  && install -m 0755 \
@@ -135,70 +146,44 @@ RUN git clone --depth 1 https://github.com/pingdynasty/FirmwareSender.git /opt/F
         /usr/local/bin/FirmwareSender \
  && FirmwareSender --help >/dev/null 2>&1; echo "FirmwareSender installed"
 
-# Copy the already-checked-out source (submodules included) into the image.
+# ---- Source + live-server local edits --------------------------------------
 COPY . /owl
 
-# Wire the SOUL + FirmwareSender binaries into the paths OwlProgram's Makefiles
-# expect (Tools/soul and Tools/FirmwareSender), pointing at the versions
-# installed above. Symlinks keep the single source of truth in /usr/local/bin.
+# Live-host edit #1: owl.cpp FAUST-2.30.x API migration (new/delete instead of
+# the removed static create()/destroy() factory). Applied idempotently with sed
+# so the image reproduces the live host even if the worktree is the committed
+# (unpatched) tree.
+RUN sed -i 's@fDSP = mydsp::create();@fDSP = new mydsp(); // mydsp::create();@' FaustSource/owl.cpp \
+ && sed -i 's@mydsp::destroy(fDSP);@delete fDSP; // mydsp::destroy(fDSP);@' FaustSource/owl.cpp \
+ && grep -n 'new mydsp()\|delete fDSP' FaustSource/owl.cpp
+
+# Live-host edit #2: put the 9-2020-q2 toolchain where compile.mk's TOOLROOT
+# expects it, and uncomment that TOOLROOT line so the build uses it.
+RUN mkdir -p Tools \
+ && ln -sfn "$ARMGCC" Tools/gcc-arm-none-eabi-9-2020-q2-update \
+ && sed -i 's@^# *TOOLROOT ?= Tools/gcc-arm-none-eabi-9-2020-q2-update/bin/@TOOLROOT ?= Tools/gcc-arm-none-eabi-9-2020-q2-update/bin/@' compile.mk \
+ && grep -n '^TOOLROOT' compile.mk
+
+# Wire SOUL + FirmwareSender into Tools/ (same as baseline).
 RUN ln -sf /usr/local/bin/soul /owl/Tools/soul \
  && ln -sf /usr/local/bin/FirmwareSender /owl/Tools/FirmwareSender
 
-# Point the ARM Makefiles at the apt-installed cross toolchain. The apt
-# package puts arm-none-eabi-* on PATH under /usr/bin, so TOOLROOT is /usr/bin/
-# (trailing slash required by compile.mk: CC=$(TOOLROOT)arm-none-eabi-gcc).
-ENV TOOLROOT=/usr/bin/
-
-# Install the Heavy (hvcc) Python requirements so `make check` can build PD
-# patches. hvcc of this era runs under Python; use pip3. Non-fatal if the
-# pinned deps have drifted — C++/native builds don't need them.
+# hvcc deps (non-fatal).
 RUN pip3 install --no-cache-dir -r Tools/hvcc/requirements.txt || true
 
 # Pre-build the patch libraries for the target platform so a later
 # `make PATCHNAME=X patch` links immediately (no separate `make libs` needed).
-# `make libs` needs only PLATFORM (no PATCHNAME) and produces the ARM archives
-# libowlprg.a/libdaisysp.a plus the web libs. These are Cortex-M4 (OWL1/2) or
-# Cortex-M7 (OWL3) specific, which is why PLATFORM is fixed per image: building
-# a patch for a DIFFERENT platform in this image would silently reuse the wrong
-# archives (the paths are not platform-keyed), so use the matching image.
+# `make libs` needs only PLATFORM. The archives are platform-specific and live
+# at non-platform-keyed paths, so PLATFORM is fixed per image.
 RUN make PLATFORM=${PLATFORM} libs
 
-# Record the toolchain versions in the image for provenance.
-RUN echo "=== Toolchain versions (PLATFORM=${PLATFORM}) ===" \
+# Provenance.
+RUN echo "=== LIVE-SERVER toolchain versions (PLATFORM=${PLATFORM}) ===" \
  && arm-none-eabi-gcc --version | head -1 \
  && gcc --version | head -1 \
- && make --version | head -1 \
  && (faust --version 2>&1 | head -1) \
  && (soul --version 2>&1 | head -1) \
  && (echo "FirmwareSender: $(ls -1 /usr/local/bin/FirmwareSender)") \
- && (echo "Prebuilt libs: $(ls -1 Libraries/libowlprg.a Libraries/libdaisysp.a 2>/dev/null)")
+ && echo "TOOLROOT in compile.mk: $(grep '^TOOLROOT' compile.mk)"
 
-# Default: show the build help. Override with e.g.
-#   docker run --rm owlprogram:stable make PATCHNAME=Template patch
 CMD ["make", "help"]
-
-# ---------------------------------------------------------------------------
-# What this image can build:
-#
-#   ARM patch (default OWL2/OWL3):   make PATCHNAME=Template patch
-#   Native build + unit tests:       make test / make check
-#   Web (emscripten, OwlServer):     make web / make libs
-#   FAUST patch:                     make PATCHSOURCE=<dir> FAUST=<Name> patch
-#   SOUL patch:                      make PATCHSOURCE=<dir> SOUL=<Name> patch
-#   Heavy / Pure Data patch:         make HEAVY=<Name> patch
-#
-# Device upload with FirmwareSender (make load / store / sysex) needs the OWL
-# connected over USB-MIDI AND passed into the container, e.g.:
-#   docker run --rm -it --device=/dev/snd \
-#     -v /dev/bus/usb:/dev/bus/usb owlprogram:stable \
-#     make PATCHNAME=Template OWLDEVICE="OWL-*" load
-#
-# Installed compilers/tools:
-#   * host gcc/g++ 9        (native build + unit tests)
-#   * arm-none-eabi-gcc 9   (ARM cross build — the pinned old toolchain)
-#   * emscripten 2.0.10     (web build used by OwlServer)
-#   * faust 2.20.2          (FAUST DSP patches)
-#   * soul 1.0.82           (SOUL patches — prebuilt ROLI binary)
-#   * FirmwareSender        (MIDI sysex packaging + device upload)
-#   * hvcc / Heavy          (Pure Data patches)
-# ---------------------------------------------------------------------------
