@@ -92,7 +92,14 @@ CPPFLAGS += -I$(BUILDSOURCE)
 CPPFLAGS += -I$(TESTPATCHES)
 CPPFLAGS += -DARM_CORTEX
 CPPFLAGS += -DEXTERNAL_SRAM
-CPPFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
+# GCC 13: -ffreestanding forces __STDC_HOSTED__=0, which makes libstdc++'s
+# bits/requires_hosted.h hard-error on <cmath>/<algorithm> (and pull the tr1
+# special-function templates referencing the absent std::__throw_domain_error).
+# Neither -D_GLIBCXX_HOSTED=1 nor -fhosted override it. Dropping -ffreestanding
+# is safe: -nostdlib -nostartfiles -fno-builtin still produce the freestanding
+# binary the linker needs; -ffreestanding only set __STDC_HOSTED__ and main()
+# special-casing, neither of which this RAM-resident patch relies on.
+CPPFLAGS += -nostdlib -nostartfiles -fno-builtin
 CPPFLAGS += -mtune=cortex-m4
 # CPPFLAGS += -mtune=cortex-m7
 CPPFLAGS += -fpic
@@ -102,6 +109,10 @@ CPPFLAGS += -ffunction-sections
 CPPFLAGS += -mno-unaligned-access
 CPPFLAGS += -fno-omit-frame-pointer
 CPPFLAGS += -flto
+# GCC 13: the tr1 special-function math templates reference
+# std::__throw_domain_error, absent under -fno-exceptions. Disable the C++
+# special math functions so <cmath> does not pull them in.
+CPPFLAGS += -D_GLIBCXX_USE_STD_SPEC_FUNCS=0
 # CPPFLAGS += -munaligned-access
 # CPPFLAGS += -mlong-calls
 # CPPFLAGS += -mpic-data-is-text-relative

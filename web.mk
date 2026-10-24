@@ -21,9 +21,16 @@ CPPFLAGS += -ILibraries -ILibraries/KissFFT -DHV_SIMD_NONE
 CPPFLAGS += -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
 CPPFLAGS += -Wno-warn-absolute-paths
 CPPFLAGS += -Wno-unknown-warning-option
+# emscripten 6 / newer clang no longer leaks size_t transitively via <stdint.h>;
+# DaisySP headers (allpass.h etc.) use bare size_t. Force-include <stddef.h>
+# (C-compatible, unlike <cstddef>, so it works for .c and .cpp TUs alike).
+# Proper fix is an upstream DaisySP submodule bump (axis 7).
+CPPFLAGS += -include stddef.h
 CPPFLAGS += --memory-init-file 0 # don't create separate memory init file .mem
 CPPFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_getParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus','_WEB_getButtons','_WEB_setButton', '_WEB_processMidi', '_malloc']"
-CPPFLAGS += -s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']"
+# emscripten >=3.1: EXTRA_EXPORTED_RUNTIME_METHODS was removed; the runtime
+# methods go in EXPORTED_RUNTIME_METHODS (no "EXTRA_" prefix).
+CPPFLAGS += -s "EXPORTED_RUNTIME_METHODS=['cwrap']"
 CPPFLAGS += "-DPATCHNAME=\"$(PATCHNAME)\""
 
 include $(BUILDROOT)/sources.mk
