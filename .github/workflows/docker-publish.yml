@@ -1,0 +1,95 @@
+name: Publish Docker image
+
+# Build the OwlProgram build-environment image and publish it to the GitHub
+# Container Registry (GHCR) at ghcr.io/<owner>/owlprogram.
+#
+# Triggers on a push to develop that touches the Dockerfile (or the build
+# makefiles / sources it bakes in), and on manual dispatch. No secrets to
+# configure: the built-in GITHUB_TOKEN authenticates to GHCR for this repo.
+#
+# The image is platform-pinned per OWL target via the PLATFORM build-arg
+# (OWL1/OWL2/OWL3 produce Cortex-M4/M4/M7 libraries), so we publish one tagged
+# image per target plus a default `latest` (= OWL2). The base image is pinned
+# to linux/amd64 in the Dockerfile; the x86_64-only toolchain runs under
+# emulation on arm64 hosts.
+
+on:
+  push:
+    branches: [ develop ]
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'compile.mk'
+      - 'web.mk'
+      - 'daisysp.mk'
+      - 'sources.mk'
+      - 'libs.mk'
+      - '.github/workflows/docker-publish.yml'
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Space-separated OWL platforms to build (e.g. "OWL2 OWL3")'
+        required: false
+        default: 'OWL2 OWL3'
+
+env:
+  REGISTRY: ghcr.io
+  # ${{ github.repository }} is owner/repo; the image name is the lowercased repo.
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write          # required to push to GHCR
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ OWL1, OWL2, OWL3 ]
+
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive   # DaisySP must be present or `make libs` fails
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lowercase image name
+        id: img
+        run: echo "name=${IMAGE_NAME,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Compute tags
+        id: meta
+        run: |
+          P="${{ matrix.platform }}"
+          plc=$(echo "$P" | tr '[:upper:]' '[:lower:]')
+          base="${{ env.REGISTRY }}/${{ steps.img.outputs.name }}"
+          tags="${base}:${plc}"
+          # Tag OWL2 also as the default moving `latest`.
+          if [ "$P" = "OWL2" ]; then
+            tags="${tags},${base}:latest"
+          fi
+          echo "tags=${tags}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push ${{ matrix.platform }} image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          build-args: |
+            PLATFORM=${{ matrix.platform }}
+          tags: ${{ steps.meta.outputs.tags }}
+          # Cache layers across runs to speed up the slow FAUST/emsdk layers.
+          cache-from: type=gha,scope=${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
