@@ -1,3 +1,21 @@
+v23.0
+-----
+
+* Added Welch and Sine window types
+* Added WavetableOscillator NO_INTERPOLATION option
+* Added ScreenPatch::getScreenWidth() and getScreenHeight()
+* Fixed Up/Downsampler
+* Updated to CMSIS V5
+* Added InterpolatingWavetableOscillator
+* Added MovingAverage::process(FloatArray) and ::getAverage()
+* Added TakeoverValue
+* Added EnvelopeFollower
+* Added ExponentialMovingAverage and SimpleMovingAverage
+* Added KaiserWindow (from the Loris C++ Class Library)
+* Added LinearValue, ExponentialValue and LogarithmicValue
+* Refactored Smooth and StiffValue
+* Added InterpolatingSignalGenerator
+
 v22.2
 -----
 

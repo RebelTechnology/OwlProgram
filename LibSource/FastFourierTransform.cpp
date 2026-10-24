@@ -15,7 +15,8 @@ FastFourierTransform::~FastFourierTransform(){}
 void FastFourierTransform::init(size_t len){
   ASSERT(len==32 || len ==64 || len==128 || len==256 || len==512 || len==1024 || len==2048 || len==4096, "Unsupported FFT size");
   void* args[] = {(void*)&instance, (void*)&len};
-  getProgramVector()->serviceCall(OWL_SERVICE_ARM_RFFT_FAST_INIT_F32, args, 2);
+  int ret = getProgramVector()->serviceCall(OWL_SERVICE_ARM_RFFT_FAST_INIT_F32, args, 2);
+  ASSERT(ret == OWL_SERVICE_OK, "FFT init failed");
   // arm_rfft_fast_init_f32(&instance, len);
   // Supported FFT Lengths are 32, 64, 128, 256, 512, 1024, 2048, 4096.
 }
