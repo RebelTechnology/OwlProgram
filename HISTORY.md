@@ -1,3 +1,5 @@
+* Updated toolchain to Arm GNU 13.3.rel1, emscripten 6.0.13 and FAUST 2.88.0 (Docker image and CI)
+
 v23.1
 -----
 
