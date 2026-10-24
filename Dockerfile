@@ -1,3 +1,4 @@
+# check=skip=FromPlatformFlagConstDisallowed
 # OwlProgram — reproducible build environment ("last stable state")
 #
 # Why these versions:
