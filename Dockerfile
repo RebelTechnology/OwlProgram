@@ -127,6 +127,12 @@ RUN git clone --depth 1 https://github.com/pingdynasty/FirmwareSender.git /opt/F
  && echo "FirmwareSender installed"
 
 # ---- Source ----------------------------------------------------------------
+# IMPORTANT: copies the build context as-is, INCLUDING git submodules. The
+# DaisySP submodule (Libraries/DaisySP) MUST be checked out in the context
+# before building — run `git submodule update --init --recursive` first, or
+# `make libs` fails to find LibSource sources. The portable clone populates
+# submodules at generation time; switching branches locally needs another
+# `git submodule update`. (DaisySP is slated for removal in a future revision.)
 COPY . /owl
 
 # arm-gcc is on PATH via /opt/arm/bin, so compile.mk's default TOOLROOT (empty =>
