@@ -1,3 +1,8 @@
+* Added Welch and Sine window types
+* Added WavetableOscillator NO_INTERPOLATION option
+* Added ScreenPatch::getScreenWidth() and getScreenHeight()
+* Fixed Up/Downsampler
+* Updated to CMSIS V5
 * Added InterpolatingWavetableOscillator
 * Added MovingAverage::process(FloatArray) and ::getAverage()
 * Added TakeoverValue
