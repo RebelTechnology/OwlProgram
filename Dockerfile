@@ -15,7 +15,11 @@
 # This is WORK IN PROGRESS: it establishes the modern base so each axis can be
 # verified against the patch matrix. Build on the feature/v3-modernization tree.
 
-FROM ubuntu:24.04
+# The ARM GNU cross-compiler (13.3.rel1) and SOUL binaries are downloaded as
+# x86_64, so pin the platform to linux/amd64. On an arm64 host (Apple Silicon)
+# this builds under Docker Desktop's emulation; the cross-compiler emits ARM
+# Cortex-M code regardless of build-host arch.
+FROM --platform=linux/amd64 ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # ---- Base prerequisites (24.04: python3 is default, host gcc is 13) --------
