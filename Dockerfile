@@ -105,7 +105,8 @@ RUN curl -sSLf -o /tmp/soul.zip \
 # ---- Axis 4: Emscripten 3.1.x ---------------------------------------------
 # Big jump from 2.0.10. NOTE: web.mk emcc flags + JS glue need updating (STRICT,
 # EXPORTED_RUNTIME_METHODS syntax, Node floor). emsdk ships its own clang/node.
-RUN git clone https://github.com/emscripten-core/emsdk.git /opt/emsdk \
+RUN git clone --depth 1 --branch 6.0.13 \
+      https://github.com/emscripten-core/emsdk.git /opt/emsdk \
  && cd /opt/emsdk \
  && ./emsdk install 6.0.13 \
  && ./emsdk activate 6.0.13
