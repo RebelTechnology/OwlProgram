@@ -1,3 +1,6 @@
+v23.0
+-----
+
 * Added Welch and Sine window types
 * Added WavetableOscillator NO_INTERPOLATION option
 * Added ScreenPatch::getScreenWidth() and getScreenHeight()
