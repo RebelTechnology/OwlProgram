@@ -23,7 +23,12 @@
 # FirmwareSender for MIDI sysex packaging / device upload. See the usage notes
 # at the bottom.
 
-FROM ubuntu:20.04
+# The pinned toolchain (emsdk 2.0.10, and in v2 the ARM-published GCC) ships
+# ONLY x86_64 binaries, so we pin the platform to linux/amd64. On an arm64 host
+# (Apple Silicon) this builds under Docker Desktop's emulation; without the pin,
+# emsdk fails with "No tool or SDK found by name 'sdk-releases-upstream-...'"
+# because the 2.0.10 tag has no arm64 SDK bundle.
+FROM --platform=linux/amd64 ubuntu:20.04
 
 # Avoid interactive tzdata prompts during apt installs.
 ENV DEBIAN_FRONTEND=noninteractive
@@ -78,17 +83,12 @@ WORKDIR /owl
 # needed. We `git checkout 2.0.10` first: the emsdk git tip now requires
 # Python 3.10+, but Ubuntu 20.04 ships Python 3.8, so the old tag is what runs
 # on this base image. `make web` finds emcc via the PATH set below.
-#
-# We install by the explicit SDK *hash* rather than the `2.0.10` version alias.
-# The alias path resolves through emscripten-releases-tags and has intermittently
-# failed with "No tool or SDK found by name 'sdk-releases-upstream-...'" when the
-# release-tags lookup goes stale; installing the resolved SDK name directly skips
-# that indirection. 37fc7647... is the release hash the 2.0.10 tag maps to.
+# (The base image is pinned to linux/amd64 above — emsdk 2.0.10 has no arm64
+# SDK bundle, so the build must be x86_64.)
 RUN git clone https://github.com/emscripten-core/emsdk.git /opt/emsdk \
  && cd /opt/emsdk \
  && git checkout 2.0.10 \
- && EMSDK_HASH=sdk-releases-upstream-37fc7647c754ac9a28ad588c143b82286de0ef71-64bit \
- && ( ./emsdk install "$EMSDK_HASH" || ./emsdk install 2.0.10 ) \
+ && ./emsdk install 2.0.10 \
  && ./emsdk activate 2.0.10
 
 # Put emcc et al. on PATH for every shell so plain `make web` / `make libs`
