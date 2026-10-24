@@ -1,3 +1,4 @@
+# check=skip=FromPlatformFlagConstDisallowed
 # OwlProgram — v3 MODERNIZATION image
 #
 # v3 brings every toolchain axis up to date on a modern base image. It descends
@@ -15,8 +16,18 @@
 # This is WORK IN PROGRESS: it establishes the modern base so each axis can be
 # verified against the patch matrix. Build on the feature/v3-modernization tree.
 
-FROM ubuntu:24.04
+# The ARM GNU cross-compiler (13.3.rel1) and SOUL binaries are downloaded as
+# x86_64, so pin the platform to linux/amd64. On an arm64 host (Apple Silicon)
+# this builds under Docker Desktop's emulation; the cross-compiler emits ARM
+# Cortex-M code regardless of build-host arch.
+FROM --platform=linux/amd64 ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
+
+# Target OWL platform the baked-in libraries are built for. Override at build
+# time, e.g. `docker build --build-arg PLATFORM=OWL3 -t owlprogram:owl3-v3 .`.
+# The libs are platform-specific (Cortex-M4 vs M7), so each image is pinned to
+# ONE platform; build a separate image per target.
+ARG PLATFORM=OWL2
 
 # ---- Base prerequisites (24.04: python3 is default, host gcc is 13) --------
 # No python2 (axis 5 removes the py2.7 hvcc dependency). binutils/newlib come
@@ -94,7 +105,8 @@ RUN curl -sSLf -o /tmp/soul.zip \
 # ---- Axis 4: Emscripten 3.1.x ---------------------------------------------
 # Big jump from 2.0.10. NOTE: web.mk emcc flags + JS glue need updating (STRICT,
 # EXPORTED_RUNTIME_METHODS syntax, Node floor). emsdk ships its own clang/node.
-RUN git clone https://github.com/emscripten-core/emsdk.git /opt/emsdk \
+RUN git clone --depth 1 --branch 6.0.13 \
+      https://github.com/emscripten-core/emsdk.git /opt/emsdk \
  && cd /opt/emsdk \
  && ./emsdk install 6.0.13 \
  && ./emsdk activate 6.0.13
@@ -117,6 +129,12 @@ RUN git clone --depth 1 https://github.com/pingdynasty/FirmwareSender.git /opt/F
  && echo "FirmwareSender installed"
 
 # ---- Source ----------------------------------------------------------------
+# IMPORTANT: copies the build context as-is, INCLUDING git submodules. The
+# DaisySP submodule (Libraries/DaisySP) MUST be checked out in the context
+# before building — run `git submodule update --init --recursive` first, or
+# `make libs` fails to find LibSource sources. The portable clone populates
+# submodules at generation time; switching branches locally needs another
+# `git submodule update`. (DaisySP is slated for removal in a future revision.)
 COPY . /owl
 
 # arm-gcc is on PATH via /opt/arm/bin, so compile.mk's default TOOLROOT (empty =>
@@ -125,8 +143,14 @@ COPY . /owl
 RUN ln -sf /usr/local/bin/soul /owl/Tools/soul \
  && ln -sf /usr/local/bin/FirmwareSender /owl/Tools/FirmwareSender
 
+# Pre-build the patch libraries for the target platform so a later
+# `make PATCHNAME=X patch` links immediately (no separate `make libs` needed).
+# `make libs` needs only PLATFORM; the archives are platform-specific and live
+# at non-platform-keyed paths, so PLATFORM is fixed per image.
+RUN make PLATFORM=${PLATFORM} libs
+
 # Provenance.
-RUN echo "=== v3 toolchain versions ===" \
+RUN echo "=== v3 toolchain versions (PLATFORM=${PLATFORM}) ===" \
  && arm-none-eabi-gcc --version | head -1 \
  && gcc --version | head -1 \
  && (faust --version 2>&1 | head -1) \
