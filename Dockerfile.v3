@@ -69,7 +69,7 @@ ENV PATH=$ARMGCC/bin:$PATH
 # generated-class API may differ from 2.30.5 — FaustSource/owl.cpp is re-audited
 # on the branch (axis 3). Pin bumped from 2.30.5.
 RUN wget -q -O /tmp/faust.tar.gz \
-      "https://github.com/grame-cncm/faust/releases/download/2.74.6/faust-2.74.6.tar.gz" \
+      "https://github.com/grame-cncm/faust/releases/download/2.88.0/faust-2.88.0.tar.gz" \
  && mkdir -p /opt/faust-src \
  && tar -xzf /tmp/faust.tar.gz -C /opt/faust-src --strip-components=1 \
  && rm /tmp/faust.tar.gz \
@@ -96,8 +96,8 @@ RUN curl -sSLf -o /tmp/soul.zip \
 # EXPORTED_RUNTIME_METHODS syntax, Node floor). emsdk ships its own clang/node.
 RUN git clone https://github.com/emscripten-core/emsdk.git /opt/emsdk \
  && cd /opt/emsdk \
- && ./emsdk install 3.1.64 \
- && ./emsdk activate 3.1.64
+ && ./emsdk install 6.0.13 \
+ && ./emsdk activate 6.0.13
 ENV EMSDK=/opt/emsdk
 ENV PATH=/opt/emsdk:/opt/emsdk/upstream/emscripten:$PATH
 
