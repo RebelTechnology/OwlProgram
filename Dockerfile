@@ -87,14 +87,15 @@ WORKDIR /owl
 # ---- Emscripten (emsdk) 2.0.10 — pinned to match OwlProgram CI --------------
 # Installed before copying the source so edits to the patch don't invalidate
 # this (slow) layer. emsdk 2.0.10 ships its own clang/node, no system node
-# needed. We `git checkout 2.0.10` first: the emsdk git tip now requires
-# Python 3.10+, but Ubuntu 20.04 ships Python 3.8, so the old tag is what runs
-# on this base image. `make web` finds emcc via the PATH set below.
+# needed. Shallow-clone the 2.0.10 TAG directly (--depth 1 --branch) so we pull
+# only that revision's tree, not the whole emsdk history. emsdk git tip now
+# requires Python 3.10+, but Ubuntu 20.04 ships Python 3.8, so the old tag is
+# what runs on this base image. `make web` finds emcc via the PATH set below.
 # (The base image is pinned to linux/amd64 above — emsdk 2.0.10 has no arm64
 # SDK bundle, so the build must be x86_64.)
-RUN git clone https://github.com/emscripten-core/emsdk.git /opt/emsdk \
+RUN git clone --depth 1 --branch 2.0.10 \
+      https://github.com/emscripten-core/emsdk.git /opt/emsdk \
  && cd /opt/emsdk \
- && git checkout 2.0.10 \
  && ./emsdk install 2.0.10 \
  && ./emsdk activate 2.0.10
 
