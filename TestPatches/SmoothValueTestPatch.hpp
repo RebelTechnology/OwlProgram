@@ -23,24 +23,34 @@ public:
       CHECK_CLOSE(a, -1, DEFAULT_TOLERANCE); // arrives near target
     }
     {
-// typedef SmoothValue<int> SmoothInt;
       TEST("int");
       SmoothValue<float, SimpleValue<int>> a = 5;
       CHECK_CLOSE(a, 5, DEFAULT_TOLERANCE);
-      CHECK_CLOSE(a.lambda, 0.9, DEFAULT_TOLERANCE); // default lambda
-      a = 0;
+      CHECK_CLOSE(a.lambda, 0.9, DEFAULT_TOLERANCE);
       a.lambda = 0.6;
-      CHECK_CLOSE(a, 5*0.9, DEFAULT_TOLERANCE);
-      for(int i=0; i<32; ++i)
+      a = 0;
+      CHECK_CLOSE(a, 3, DEFAULT_TOLERANCE);
+      int prev = a;
+      for(int i=0; i<32; ++i){
 	a = -10;
-      CHECK_CLOSE(a, -10, DEFAULT_TOLERANCE);
+	CHECK((int)a <= prev);
+	prev = a;
+      }
+      CHECK_CLOSE(a, -8, DEFAULT_TOLERANCE);
     }
     {
       TEST("weirdint");
       SmoothInt a = 5;
       CHECK_CLOSE(a, 5, DEFAULT_TOLERANCE);
-      CHECK_CLOSE(a.lambda, 0.9, DEFAULT_TOLERANCE); // default lambda
-      a = 0;
+      CHECK_CLOSE(a.lambda, 0.9, DEFAULT_TOLERANCE);
+      a.lambda = 0.6;
+      int prev = a;
+      for(int i=0; i<32; ++i){
+	a = 100;
+	CHECK((int)a >= prev);
+	prev = a;
+      }
+      CHECK_CLOSE(a, 98, DEFAULT_TOLERANCE);
     }
   }
 };
