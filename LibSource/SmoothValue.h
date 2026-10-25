@@ -49,7 +49,9 @@ public:
   operator T(){
     return Value::get();
   }
-  static float normal(float lambda, int blocksize);
+  static float normal(float lambda, int blocksize){
+    return powf(lambda, blocksize/128.0f);
+  }
 };
 
 template class SmoothValue<int>;
@@ -96,7 +98,9 @@ public:
   operator T(){
     return Value::get();
   }
-  static T normal(float delta);
+  static float normal(float delta){
+    return delta;
+  }
 };
 
 template class StiffValue<int>;

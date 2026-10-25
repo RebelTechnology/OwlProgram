@@ -52,6 +52,14 @@ public:
       }
       CHECK_CLOSE(a, 98, DEFAULT_TOLERANCE);
     }
+    {
+      TEST("normal");
+      CHECK_CLOSE(SmoothFloat::normal(0.9, 128), 0.9, DEFAULT_TOLERANCE);
+      CHECK_CLOSE(SmoothFloat::normal(0.9, 64), sqrtf(0.9), DEFAULT_TOLERANCE);
+      CHECK_CLOSE(SmoothInt::normal(0.81, 256), 0.81*0.81, DEFAULT_TOLERANCE);
+      CHECK(SmoothFloat::normal(0.95, 16) < 1);
+      CHECK_CLOSE(StiffInt::normal(0.5), 0.5, DEFAULT_TOLERANCE);
+    }
   }
 };
 
