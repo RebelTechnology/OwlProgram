@@ -62,8 +62,10 @@ int main(int argc, char** argv){
     ASSERT(wav.getBitsPerSample() == 16, "Incorrect number of bits per sample in input file");
     ASSERT(wav.isValid(), "Invalid wav");
     int16_t* src = (int16_t*)wav.getData();
-    int16_t* end = src+wav.getNumberOfSamples();
-    while(src+BLOCKSIZE <= end){
+    // getNumberOfSamples() is frames per channel; the buffer holds
+    // frames*channels interleaved int16s.
+    int16_t* end = src+wav.getNumberOfSamples()*channels;
+    while(src+BLOCKSIZE*channels <= end){
       samples->split16(src, BLOCKSIZE);
       processor.patch->processAudio(*samples);
       samples->comb16(src);
