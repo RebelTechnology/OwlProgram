@@ -136,7 +136,7 @@ PatchParameter<T> PatchProcessor::getParameter(const char* name, T min, T max, T
     if(parameters[pid] != NULL)
       delete parameters[pid];
     ParameterUpdater* updater = NULL;
-    T l = SmoothValue<T>::normal(lambda, blocksize);
+    float l = SmoothValue<T>::normal(lambda, blocksize);
     T d = StiffValue<T>::normal(delta)*abs(max-min);
     if(skew == 1.0){
       if(lambda == 0.0 && delta == 0.0){

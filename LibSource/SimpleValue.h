@@ -48,7 +48,6 @@ public:
   operator T(){
     return get();
   }
-  static const T DEFAULT_LAMBDA;
   static const T DEFAULT_DELTA;
   static const T DEFAULT_EXP_C;
   static const T DEFAULT_EXP_K;
@@ -57,13 +56,11 @@ public:
 };
 
 // prevent -Wundefined-var-template warnings
-template<> const float SimpleValue<float>::DEFAULT_LAMBDA;
 template<> const float SimpleValue<float>::DEFAULT_DELTA;
 template<> const float SimpleValue<float>::DEFAULT_EXP_C;
 template<> const float SimpleValue<float>::DEFAULT_EXP_K;
 template<> const float SimpleValue<float>::DEFAULT_LOG_C;
 template<> const float SimpleValue<float>::DEFAULT_LOG_K;
-template<> const int SimpleValue<int>::DEFAULT_LAMBDA;
 template<> const int SimpleValue<int>::DEFAULT_DELTA;
 template<> const int SimpleValue<int>::DEFAULT_EXP_C;
 template<> const int SimpleValue<int>::DEFAULT_EXP_K;

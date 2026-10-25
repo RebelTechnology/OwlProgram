@@ -5,19 +5,23 @@
 
 /**
  * Applies exponential smoothing to a scalar value.
- * y(n) = lambda*y(n-1) + (1.0-lambda)*y(n) for floats
- * y(n) = (lambda*y(n-1) + y(n))/(lambda+1) for ints
+ * y(n) = lambda*y(n-1) + (1-lambda)*x(n), with 0 <= lambda < 1,
+ * where x(n) is the new input and y(n) the smoothed output.
  * Smoothing is applied when the value is written to, not when it is read.
- * todo: adjust for sampling frequency / blocksize (time delay of the response (mean) is 1/α data points)
+ *
+ * lambda is a dimensionless coefficient and is always a float, independent of
+ * the value type T.
+ * todo: adjust lambda for sample rate / blocksize; for input weight
+ * alpha = 1-lambda the mean lag of the response is lambda/(1-lambda) samples.
  * https://en.wikipedia.org/wiki/Exponential_smoothing
  */
 template<typename T, typename Value = SimpleValue<T>>
 class SmoothValue : public Value {
 public:
-  T lambda = Value::DEFAULT_LAMBDA;
+  float lambda = 0.9f;
   SmoothValue() {}
   SmoothValue(T value) : Value(value) {}
-  SmoothValue(T lambda, T init) : Value(init), lambda(lambda) {}
+  SmoothValue(float lambda, T init) : Value(init), lambda(lambda) {}
   SmoothValue(const SmoothValue<T, Value>& other) : Value(other), lambda(other.lambda) {}
   void update(T x){
     Value::update(Value::get()*lambda + x*(1.0f - lambda));
@@ -45,7 +49,9 @@ public:
   operator T(){
     return Value::get();
   }
-  static T normal(float lambda, int blocksize);
+  static float normal(float lambda, int blocksize){
+    return powf(lambda, blocksize/128.0f);
+  }
 };
 
 template class SmoothValue<int>;
@@ -92,7 +98,9 @@ public:
   operator T(){
     return Value::get();
   }
-  static T normal(float delta);
+  static float normal(float delta){
+    return delta;
+  }
 };
 
 template class StiffValue<int>;
