@@ -23,9 +23,11 @@ PATCHFILE   ?= FaustPatch.hpp
 DEPS        += faust
 else ifdef HEAVY
 # options for Heavy PD compilation
+# PATCHFILE is c2owl's native output name (hvcc -g owl emits HeavyOWL_owl.hpp),
+# consumed directly — no rename step in heavy.mk.
 PATCHNAME   ?= $(HEAVY)
 PATCHCLASS  ?= HeavyPatch
-PATCHFILE   ?= HeavyPatch.hpp
+PATCHFILE   ?= HeavyOWL_owl.hpp
 DEPS        += heavy
 else ifdef GEN
 # options for Max/MSP Gen compilation
@@ -198,7 +200,7 @@ check: tests ## run test patches and unit tests
 	@cp FaustSource/*.h TestPatches/FaustTest && unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/FaustTest PATCHNAME=Faust clean patch web run
 	# @unset PATCHNAME PATCHCLASS PATCHFILE SOULCLASS SOULFILE SOULHPP && $(MAKE) PATCHSOURCE=TestPatches/SoulTest SOUL=SineSynth clean patch web run # SOUL is not installed for CI
 	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/SoulTest PATCHNAME=Soul clean patch web run
-	@pip install -r Tools/hvcc/requirements.txt && unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/HeavyTest HEAVY=HeavyTest clean patch web run
+	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/HeavyTest HEAVY=HeavyTest clean patch web run
 
 help: ## show this help
 	@echo 'Usage: make [target] ...'

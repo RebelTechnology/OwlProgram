@@ -1,3 +1,4 @@
+* Heavy patches are built with mainline hvcc 0.17.3 (hvcc -g owl), replacing the Python 2.7 fork
 * Updated toolchain to Arm GNU 13.3.rel1, emscripten 6.0.13 and FAUST 2.88.0 (Docker image and CI)
 
 v23.1

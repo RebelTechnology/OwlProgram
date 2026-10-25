@@ -2,7 +2,3 @@
 	path = Libraries/DaisySP
 	url = https://github.com/electro-smith/DaisySP.git
 	branch = master
-[submodule "Tools/hvcc"]
-	path = Tools/hvcc
-	url = https://github.com/pingdynasty/hvcc.git
-	branch = develop
