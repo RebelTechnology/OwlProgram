@@ -175,8 +175,17 @@ RUN mkdir -p Tools \
 RUN ln -sf /usr/local/bin/soul /owl/Tools/soul \
  && ln -sf /usr/local/bin/FirmwareSender /owl/Tools/FirmwareSender
 
-# hvcc deps (non-fatal).
-RUN pip3 install --no-cache-dir -r Tools/hvcc/requirements.txt || true
+# hvcc deps. The pingdynasty hvcc fork runs under python2.7 (heavy.mk invokes
+# `python2.7 hvcc.py`), and its requirements (enum==0.4.4, Jinja2==2.7.3) are
+# python2 packages. ubuntu 20.04 ships `python2` WITHOUT pip, so bootstrap pip
+# for python2 first, then install the fork's requirements into python2 — not
+# python3 (a `pip3 install` here left python2.7 without `enum` and silently
+# broke every Heavy/PD build).
+RUN curl -fsSL https://bootstrap.pypa.io/pip/2.7/get-pip.py -o /tmp/get-pip.py \
+ && python2 /tmp/get-pip.py \
+ && python2 -m pip install --no-cache-dir -r Tools/hvcc/requirements.txt \
+ && rm -f /tmp/get-pip.py \
+ && python2 -c "import enum, jinja2; print('hvcc py2 deps OK')"
 
 # Pre-build the patch libraries for the target platform so a later
 # `make PATCHNAME=X patch` links immediately (no separate `make libs` needed).
