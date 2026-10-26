@@ -2,6 +2,7 @@
 #define __WavetableOscillator_h__
 
 #include "Oscillator.h"
+#include "InterpolatingCircularBuffer.h"
 
 class WavetableOscillator : public OscillatorTemplate<WavetableOscillator> {
 private:
