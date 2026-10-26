@@ -52,6 +52,15 @@ public:
   static float normal(float lambda, int blocksize){
     return powf(lambda, blocksize/128.0f);
   }
+  /**
+   * Rescale a smoothing coefficient for a different sample rate, preserving the
+   * smoothing time constant. If @param lambda was chosen at @param fromSampleRate,
+   * the returned value gives equivalent smoothing at @param toSampleRate.
+   * Smoothing more (higher sample rate) pushes lambda towards 1; less towards 0.
+   */
+  static float normalForSampleRate(float lambda, float fromSampleRate, float toSampleRate){
+    return powf(lambda, fromSampleRate/toSampleRate);
+  }
 };
 
 template class SmoothValue<int>;
