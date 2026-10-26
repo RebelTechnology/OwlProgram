@@ -13,7 +13,7 @@ private:
   float x1, y1;
   float R;
 public:
-  DcBlockingFilter(float R = 0.995): R(R), x1(0), y1(0) {}
+  DcBlockingFilter(float R = 0.995): x1(0), y1(0), R(R) {}
 
   /**
    * Get adaptation time constant in samples.

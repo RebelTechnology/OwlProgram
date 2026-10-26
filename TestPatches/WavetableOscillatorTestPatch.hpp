@@ -1,5 +1,4 @@
 #include "TestPatch.hpp"
-#include "InterpolatingCircularBuffer.h"
 #include "WavetableOscillator.h"
 #include "RampOscillator.h"
 
