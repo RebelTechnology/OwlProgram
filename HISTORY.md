@@ -1,3 +1,7 @@
+* Added unit tests for TapTempo and WavetableOscillator, and for SmoothValue::normalForSampleRate()
+* Added SmoothValue::normalForSampleRate() to rescale lambda between sample rates
+* Fixed TapTempo per-sample clock, WavetableOscillator out-of-bounds read and negative-FM phase wrap
+
 v24.0
 -----
 
