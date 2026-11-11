@@ -96,6 +96,9 @@ SECTIONS
   } >PATCHRAM /* AT>PATCHFLASH */
 
   /* used by the startup to initialize data */
+  /* align before taking the load address: .data is 8-aligned, so an unaligned
+     _sidata would make the startup copy overlap its own source */
+  . = ALIGN(8);
   _sidata = .;
 
   /* Initialized data sections goes into RAM, load LMA copy after code */
