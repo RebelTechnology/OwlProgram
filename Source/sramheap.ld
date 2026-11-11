@@ -98,10 +98,11 @@ SECTIONS
   } >PATCHRAM /* AT>PATCHFLASH */
 
   /* used by the startup to initialize data */
+  . = ALIGN(8);
   _sidata = .;
 
   /* Initialized data sections goes into RAM, load LMA copy after code */
-  .data : AT ( _sidata )
+  .data : AT ( _sidata ) ALIGN(8)
   {
     . = ALIGN(8);
     _sdata = .;        /* create a global symbol at data start */
