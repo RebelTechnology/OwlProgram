@@ -32,6 +32,28 @@ struct GenParameterMapping {
   GenParameterScale scale = GEN_SCALE_LINEAR;
   uint8_t steps = 0;
 };
+/* Optional map of the export's outputs, for an export with other than one output per audio channel (a
+ * trigger, an envelope, a counter). Define GEN_OUTPUT_MAP and, in GenParameterMap.h,
+ *   static const GenOutputMapping gen_output_map[] = {
+ *     {NULL, 0, GEN_OUTPUT_AUDIO, 0},                       // out1 to audio channel 0 (left)
+ *     {"env>", 3, GEN_OUTPUT_PARAMETER, PARAMETER_F},       // out4's block mean to output parameter F
+ *     {"count>", 1, GEN_OUTPUT_PARAMETER, PARAMETER_G, "occurrences"}, // out2 / occurrences, block mean
+ *     {NULL, 2, GEN_OUTPUT_BUTTON, PUSHBUTTON},             // out3 to the push gate: high for a block when
+ *   };                                                      // the block's maximum is over 0.5
+ * Then only the mapped outputs go anywhere (an output may be mapped more than once), and an audio channel no
+ * output is mapped to is silent. Without a map, the outputs beyond the audio channels go to F, G, ... */
+enum GenOutputKind {
+  GEN_OUTPUT_AUDIO = 0,
+  GEN_OUTPUT_PARAMETER = 1,
+  GEN_OUTPUT_BUTTON = 2
+};
+struct GenOutputMapping {
+  const char* name; // registered name of a GEN_OUTPUT_PARAMETER (ending with '>')
+  uint8_t output; // the export's output, 0 for out1
+  GenOutputKind kind;
+  uint16_t id; // the audio channel, PatchParameterId or PatchButtonId
+  const char* per = NULL; // GEN_OUTPUT_PARAMETER: the gen~ parameter the block mean is divided by
+};
 #if __has_include("GenParameterMap.h")
 #include "GenParameterMap.h"
 #define GEN_PARAMETER_MAP
@@ -233,6 +255,10 @@ private:
   float bend = 1.0;
   MonoVoiceAllocator allocator;
   float** buffers;
+#ifdef GEN_OUTPUT_MAP
+  float** outbuffers;
+  int outper[sizeof(gen_output_map)/sizeof(gen_output_map[0])]; // the index of each map entry's `per`, or -1
+#endif
 public:
   GenPatch() : allocator(freq, gain, gate, bend) {
     context = (CommonState*)gen::create(getSampleRate(), getBlockSize());
@@ -282,12 +308,32 @@ public:
 	params[param_count++] = new GenParameter(this, context, name, (PatchParameterId)index, i);
       }
     }
+#ifdef GEN_OUTPUT_MAP
+    // every output in a scratch buffer of its own, routed by gen_output_map in processAudio()
+    outbuffers = new float*[gen::num_outputs()];
+    for(int ch=0; ch<gen::num_outputs(); ++ch)
+      outbuffers[ch] = new float[getBlockSize()];
+    for(size_t m = 0; m < sizeof(gen_output_map)/sizeof(gen_output_map[0]); ++m){
+      const GenOutputMapping& o = gen_output_map[m];
+      outper[m] = -1;
+      if(o.kind == GEN_OUTPUT_PARAMETER){
+	registerParameter((PatchParameterId)o.id, o.name);
+	for(int i = 0; o.per != NULL && i < gen::num_params(); i++)
+	  if(strcmp(gen::getparametername(context, i), o.per) == 0)
+	    outper[m] = i;
+      }
+    }
+#endif
     buffers = new float*[gen::num_outputs()];
     size_t channels = getNumberOfChannels();
     for(int ch=channels; ch<gen::num_outputs(); ++ch)
       buffers[ch] = new float[getBlockSize()];
 
+#ifdef GEN_OUTPUT_MAP
+    size_t nof_outs = 0; // routed by gen_output_map instead
+#else
     size_t nof_outs = gen::num_outputs()-std::min((size_t)gen::num_outputs(), channels);
+#endif
     // debugMessage("outs", (int)channels, nof_outs, sizeof(OutputParameter[nof_outs]));
     if(nof_outs > 0)
       outputs = SimpleArray<OutputParameter>(new OutputParameter[nof_outs], nof_outs);
@@ -323,7 +369,7 @@ public:
     }
     if(outputindex != nof_outs)
       debugMessage("Output parameters not matching", (int)outputindex, nof_outs);
-#else
+#elif !defined(GEN_OUTPUT_MAP)
     char name[] = "Out0>";
     for(int ch=channels; ch<gen::num_outputs(); ++ch){
       name[3] = '1'+ch;
@@ -343,6 +389,11 @@ public:
       delete[] buffers[i];
     delete[] buffers;
     delete[] outputs.getData();
+#ifdef GEN_OUTPUT_MAP
+    for(int i=0; i<gen::num_outputs(); ++i)
+      delete[] outbuffers[i];
+    delete[] outbuffers;
+#endif
   }
 
   void processMidi(MidiMessage msg){
@@ -356,6 +407,33 @@ public:
     size_t ch;
     for(ch=0; ch<channels; ++ch)
       buffers[ch] = buffer.getSamples(ch);
+#ifdef GEN_OUTPUT_MAP
+    size_t len = buffer.getSize();
+    gen::perform(context, buffers, channels, outbuffers, gen::num_outputs(), len);
+    for(ch=0; ch<channels; ++ch)
+      buffer.getSamples(ch).clear();
+    for(size_t m = 0; m < sizeof(gen_output_map)/sizeof(gen_output_map[0]); ++m){
+      const GenOutputMapping& o = gen_output_map[m];
+      if(o.output >= gen::num_outputs())
+	continue;
+      FloatArray out(outbuffers[o.output], len);
+      if(o.kind == GEN_OUTPUT_AUDIO){
+	if(o.id < channels)
+	  buffer.getSamples(o.id).add(out);
+      }else if(o.kind == GEN_OUTPUT_BUTTON){
+	setButton((PatchButtonId)o.id, out.getMaxValue() > 0.5f);
+      }else{
+	float value = out.getMean();
+	if(outper[m] >= 0){
+	  float per;
+	  gen::getparameter(context, outper[m], &per);
+	  value = per != 0 ? value / per : 0;
+	}
+	setParameterValue((PatchParameterId)o.id, value);
+      }
+    }
+    return;
+#endif
     gen::perform(context, buffers, channels, buffers, gen::num_outputs(), buffer.getSize());
     for(size_t i=0; i<outputs.getSize(); ++i){
       if(outputs[i].id > 0x100){
