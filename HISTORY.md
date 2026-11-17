@@ -1,3 +1,4 @@
+* Fixed Gen parameter defaults set in gen~ units instead of 0..1
 * Added GenParameterMap.h: optional map of gen~ parameter names to OWL parameters
 * Fixed native, web and test builds on macOS
 * Added LibSource unit tests for DcBlockingFilter, ExponentialDecayEnvelope, IntArray, basic oscillators, NoiseGenerator, VelocityCurve, EnvelopeFollower, SmoothingFilter, DryWetProcessor, StateVariableFilter, VoltsPerOctave, AdsrEnvelope, SimpleValue and TakeoverValue
