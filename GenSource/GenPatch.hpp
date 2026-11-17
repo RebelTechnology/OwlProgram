@@ -133,6 +133,9 @@ public:
     }    
     float defaultvalue;
     gen::getparameter(context, index, &defaultvalue);
+    // the patch parameter is 0..1, mapped to min..max in update()
+    if(max != min)
+      defaultvalue = (defaultvalue - min) / (max - min);
     patch->setParameterValue(id, defaultvalue);
   }
   void update(Patch* patch, CommonState *context){
