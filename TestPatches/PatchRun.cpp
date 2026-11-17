@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 #include "heap.h"
 // define these before defining the malloc/free macros
@@ -42,7 +42,7 @@ void registerPatch(const char* name, uint8_t inputs, uint8_t outputs, Patch* pat
 int main(int argc, char** argv){
   errorcode = 0;
   programVector.serviceCall = serviceCall;
-  size_t parameters_size = 40;
+  const size_t parameters_size = 40;
   int16_t parameters[parameters_size] = {};
   programVector.parameters_size = parameters_size;
   programVector.parameters = parameters;

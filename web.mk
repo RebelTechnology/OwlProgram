@@ -26,7 +26,6 @@ CPPFLAGS += -Wno-unknown-warning-option
 # (C-compatible, unlike <cstddef>, so it works for .c and .cpp TUs alike).
 # Proper fix is an upstream DaisySP submodule bump (axis 7).
 CPPFLAGS += -include stddef.h
-CPPFLAGS += --memory-init-file 0 # don't create separate memory init file .mem
 CPPFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_getParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus','_WEB_getButtons','_WEB_setButton', '_WEB_processMidi', '_malloc']"
 # emscripten >=3.1: EXTRA_EXPORTED_RUNTIME_METHODS was removed; the runtime
 # methods go in EXPORTED_RUNTIME_METHODS (no "EXTRA_" prefix). emscripten >=3.1

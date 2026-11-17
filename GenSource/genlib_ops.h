@@ -722,7 +722,7 @@ struct Noise {
 		union {
 			uint32_t ui32;
 			float f;
-		} u = { 0x3f800000 | (0x007fffff & last) }; // type-punning
+		} u = { (uint32_t)(0x3f800000 | (0x007fffff & last)) }; // type-punning
 
 		return (u.f * 2.f) - 3.f;
 	}
