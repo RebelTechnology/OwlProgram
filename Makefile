@@ -29,6 +29,11 @@ PATCHNAME   ?= $(HEAVY)
 PATCHCLASS  ?= HeavyPatch
 PATCHFILE   ?= HeavyOWL_owl.hpp
 DEPS        += heavy
+else ifdef PDLANG
+# options for pdlang PD compilation (pdlang.mk)
+PATCHNAME   ?= $(PDLANG)
+PATCHCLASS  ?= PdlangPatch
+PATCHFILE   ?= PdlangPatch.hpp
 else ifdef GEN
 # options for Max/MSP Gen compilation
 PATCHNAME   ?= $(GEN)
@@ -82,13 +87,14 @@ export PATCHNAME PATCHCLASS PATCHSOURCE
 export PATCHFILE PATCHIN PATCHOUT
 export HEAVYTOKEN HEAVYSERVICETOKEN  HEAVY
 export SOUL SOULCLASS SOULFILE SOULHPP
+export PDLANG PDLANG_BIN PDLANGMODE PDLANGARGS
 export CONFIG PLATFORM
 
 DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/startup.s 
 
 all: libs patch web
 
-.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as native test run check tables resource size clean realclean sysex load store docs tests help
+.PHONY: .FORCE patch libs faust gen heavy pdlang soul maximilian web minify map as native test run check tables resource size clean realclean sysex load store docs tests help
 
 .FORCE:
 	@mkdir -p $(BUILD)/Source
@@ -127,6 +133,9 @@ faust: .FORCE
 
 heavy: .FORCE
 	@$(MAKE) -s -f heavy.mk heavy
+
+pdlang: .FORCE ## compile the PDLANG= patch with pdlang
+	@$(MAKE) -s -f compile.mk pdlang
 
 gen: .FORCE
 	@$(MAKE) -s -f gen.mk gen

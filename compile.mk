@@ -132,6 +132,14 @@ PATCH_CPP_SRC += $(wildcard $(BUILDSOURCE)/*.cpp)
 ifdef MAXIMILIAN
 PATCH_CPP_SRC := $(filter-out $(PATCHSOURCE)/$(MAXIMILIAN).cpp, $(PATCH_CPP_SRC))
 endif
+ifdef PDLANG
+# pdlang object (pdlang.mk) and its wrapper from PdlangSource
+PDLANGTARGET   = thumbv7em-none-eabihf
+PDLANGOBJ      = $(BUILD)/pdlang_patch.o
+PATCH_CPP_SRC += $(BUILDROOT)/PdlangSource/PdlangPatch.cpp
+CPPFLAGS      += -I$(BUILDROOT)/PdlangSource
+PATCH_OBJS    += $(PDLANGOBJ)
+endif
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_S_SRC:.s=.o)))
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_C_SRC:.c=.o)))
 PATCH_OBJS += $(addprefix $(BUILD)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
@@ -235,3 +243,7 @@ $(BUILD)/%.map: $(BUILD)/%.elf
 
 # pull in dependencies
 -include $(OBJS:.o=.d) $(SOLO_OBJS:.o=.d) $(MULTI_OBJS:.o=.d)
+
+ifdef PDLANG
+include $(BUILDROOT)/pdlang.mk
+endif

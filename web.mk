@@ -67,8 +67,19 @@ PATCH_CPP_SRC = $(SOURCE)/PatchProgram.cpp
 PATCH_CPP_SRC += $(wildcard $(BUILDSOURCE)/*.cpp)
 PATCH_CPP_SRC += $(wildcard $(PATCHSOURCE)/*.cpp)
 
+ifdef PDLANG
+# pdlang object for wasm32 (pdlang.mk) and its wrapper from PdlangSource
+PDLANGTARGET   = wasm32
+PDLANGOBJ      = $(WEBDIR)/pdlang_patch.o
+PATCH_CPP_SRC += $(BUILDROOT)/PdlangSource/PdlangPatch.cpp
+CPPFLAGS      += -I$(BUILDROOT)/PdlangSource
+endif
+
 PATCH_OBJS = $(addprefix $(WEBDIR)/, $(notdir $(PATCH_CPP_SRC:.cpp=.o)))
 PATCH_OBJS += $(addprefix $(WEBDIR)/, $(notdir $(PATCH_C_SRC:.c=.o)))
+ifdef PDLANG
+PATCH_OBJS += $(PDLANGOBJ)
+endif
 
 OBJS  = $(addprefix $(BUILD)/,$(notdir $(C_SRC:.c=.o)))
 OBJS += $(addprefix $(BUILD)/,$(notdir $(CPP_SRC:.cpp=.o)))
@@ -94,6 +105,7 @@ vpath %.cpp $(BUILDSOURCE)
 vpath %.c $(BUILDSOURCE)
 vpath %.s $(BUILDSOURCE)
 vpath %.cpp WebSource
+vpath %.cpp $(BUILDROOT)/PdlangSource
 vpath %.c Libraries/KissFFT
 
 ifeq ($(CONFIG),Debug)
@@ -137,3 +149,7 @@ $(WEBDIR)/%.o: %.cpp
 web: $(WEBDIR)/$(TARGET).js ;
 
 minify: $(WEBDIR)/$(TARGET).min.js ;
+
+ifdef PDLANG
+include $(BUILDROOT)/pdlang.mk
+endif

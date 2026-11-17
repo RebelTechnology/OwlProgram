@@ -63,10 +63,20 @@ CPP_SRC += $(wildcard $(DAISYSP)/*/*.cpp)
 ifdef MAXIMILIAN
 CPP_SRC := $(filter-out $(PATCHSOURCE)/$(MAXIMILIAN).cpp, $(CPP_SRC))
 endif
+ifdef PDLANG
+# pdlang object for the host (pdlang.mk) and its wrapper from PdlangSource
+PDLANGTARGET =
+PDLANGOBJ    = $(BUILD)/Test/pdlang_patch.o
+CPP_SRC     += $(BUILDROOT)/PdlangSource/PdlangPatch.cpp
+CPPFLAGS    += -I$(BUILDROOT)/PdlangSource
+endif
 
 # Set up search path
 OBJS = $(addprefix $(BUILD)/Test/,$(notdir $(C_SRC:.c=.o)))
 OBJS += $(addprefix $(BUILD)/Test/,$(notdir $(CPP_SRC:.cpp=.o)))
+ifdef PDLANG
+OBJS += $(PDLANGOBJ)
+endif
 
 vpath %.c $(sort $(dir $(C_SRC)))
 vpath %.cpp $(sort $(dir $(CPP_SRC)))
@@ -99,3 +109,7 @@ $(BUILD)/Test/%.o: %.cpp
 	@$(CXX) -MM -MT"$@" $(CPPFLAGS) $(CXXFLAGS) $< > $(@:.o=.d)
 
 -include $(OBJS:.o=.d) $(SOLO_OBJS:.o=.d) $(MULTI_OBJS:.o=.d)
+
+ifdef PDLANG
+include $(BUILDROOT)/pdlang.mk
+endif
