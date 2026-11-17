@@ -16,15 +16,21 @@
  * Mapped names take precedence over the name conventions below (A..H, AA..HH, Exp, Push...),
  * and keep their gen~ name when they are registered. The optional scale is the knob response:
  * GEN_SCALE_LINEAR (the default) maps the 0..1 parameter to min..max, GEN_SCALE_LOG to
- * min * (max/min)^v (when 0 < min < max), as Faust's [scale:log] does in FaustSource/owl.cpp. */
+ * min * (max/min)^v (when 0 < min < max), as Faust's [scale:log] does in FaustSource/owl.cpp.
+ * GEN_SCALE_INT makes a stepped parameter (a menu or a switch): {"shape", PARAMETER_E, GEN_SCALE_INT, 4}
+ * gives min + k * (max-min)/(steps-1) for k = floor(v * steps), so each of the steps values gets an equal
+ * share of the knob's travel and the top of the travel gives max. steps 0 (the default) takes
+ * max-min+1 steps, the integers of an integer range. */
 enum GenParameterScale {
   GEN_SCALE_LINEAR = 0,
-  GEN_SCALE_LOG = 1
+  GEN_SCALE_LOG = 1,
+  GEN_SCALE_INT = 2
 };
 struct GenParameterMapping {
   const char* name;
   PatchParameterId pid;
   GenParameterScale scale = GEN_SCALE_LINEAR;
+  uint8_t steps = 0;
 };
 #if __has_include("GenParameterMap.h")
 #include "GenParameterMap.h"
@@ -131,8 +137,9 @@ public:
   float min = 0.0f;
   float max = 1.0f;
   float logratio = 0.0f; // log(max/min) for GEN_SCALE_LOG, 0 for a linear response
+  int steps = 0; // the number of values for GEN_SCALE_INT, 0 for a continuous response
   GenParameter(Patch* patch, CommonState *context, const char* name, PatchParameterId id, int8_t idx,
-	       GenParameterScale scale = GEN_SCALE_LINEAR) : pid(id), index(idx) {
+	       GenParameterScale scale = GEN_SCALE_LINEAR, uint8_t nsteps = 0) : pid(id), index(idx) {
 #ifndef OWL_METADATA
     patch->registerParameter(id, name);
 #endif
@@ -142,10 +149,16 @@ public:
     }    
     if(scale == GEN_SCALE_LOG && min > 0 && max > min)
       logratio = logf(max / min);
+    if(scale == GEN_SCALE_INT && max > min)
+      steps = nsteps > 1 ? nsteps : (int)(max - min) + 1;
     float defaultvalue;
     gen::getparameter(context, index, &defaultvalue);
     // the patch parameter is 0..1, mapped to min..max in update()
-    if(logratio != 0 && defaultvalue > 0)
+    if(steps > 1){
+      // the default's step k at k/(steps-1), inside its share [k/steps, (k+1)/steps) of the travel
+      int k = (int)roundf((defaultvalue - min) * (steps - 1) / (max - min));
+      defaultvalue = k < 0 ? 0 : k > steps - 1 ? 1 : (float)k / (steps - 1);
+    }else if(logratio != 0 && defaultvalue > 0)
       defaultvalue = logf(defaultvalue / min) / logratio;
     else if(max != min)
       defaultvalue = (defaultvalue - min) / (max - min);
@@ -153,7 +166,11 @@ public:
   }
   void update(Patch* patch, CommonState *context){
     float value = patch->getParameterValue(pid);
-    if(logratio != 0)
+    if(steps > 1){
+      int k = (int)(value * steps);
+      k = k < 0 ? 0 : k > steps - 1 ? steps - 1 : k;
+      value = min + k * (max - min) / (steps - 1);
+    }else if(logratio != 0)
       value = min * expf(logratio * value);
     else
       value = value * (max-min) + min;
@@ -228,7 +245,7 @@ public:
       for(size_t m = 0; m < sizeof(gen_parameter_map)/sizeof(gen_parameter_map[0]); ++m){
 	if(strcmp(gen_parameter_map[m].name, name) == 0){
 	  params[param_count++] = new GenParameter(this, context, name, gen_parameter_map[m].pid, i,
-					       gen_parameter_map[m].scale);
+					       gen_parameter_map[m].scale, gen_parameter_map[m].steps);
 	  mapped = true;
 	  break;
 	}
