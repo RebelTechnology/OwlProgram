@@ -38,6 +38,56 @@ extern "C" {
 #endif
 }
 
+// Host maths for -fmath=host (pdlang.mk's default): the object calls pdlang_<libm name> for every transcendental
+// function it uses, float and double, and leaves the call undefined. On the device, the functions OWL has kernels
+// for go to them: OWL's table-based fast_* (tables installed by the firmware at patch start) and CMSIS's
+// arm_sin_f32 / arm_cos_f32, the double versions through float. Everything else, and every native and web build
+// (which have no OWL tables), is libm. --gc-sections drops the ones a patch doesn't use.
+#undef exp
+#undef expf
+#undef exp2
+#undef exp2f
+#undef log
+#undef logf
+#undef log2
+#undef log2f
+#undef log10
+#undef log10f
+#undef pow
+#undef powf
+#undef sin
+#undef sinf
+#undef cos
+#undef cosf
+#define PDLANG_LIBM1(n) \
+  float pdlang_##n##f(float x){ return ::n##f(x); } \
+  double pdlang_##n(double x){ return ::n(x); }
+#define PDLANG_LIBM2(n) \
+  float pdlang_##n##f(float x, float y){ return ::n##f(x, y); } \
+  double pdlang_##n(double x, double y){ return ::n(x, y); }
+#ifdef ARM_CORTEX
+#define PDLANG_OWL1(n, k) \
+  float pdlang_##n##f(float x){ return k(x); } \
+  double pdlang_##n(double x){ return k((float)x); }
+#define PDLANG_OWL2(n, k) \
+  float pdlang_##n##f(float x, float y){ return k(x, y); } \
+  double pdlang_##n(double x, double y){ return k((float)x, (float)y); }
+#else
+#define PDLANG_OWL1(n, k) PDLANG_LIBM1(n)
+#define PDLANG_OWL2(n, k) PDLANG_LIBM2(n)
+#endif
+extern "C" {
+  PDLANG_OWL1(exp, fast_expf) PDLANG_OWL1(exp2, fast_exp2f)
+  PDLANG_OWL1(log, fast_logf) PDLANG_OWL1(log2, fast_log2f) PDLANG_OWL1(log10, fast_log10f)
+  PDLANG_OWL2(pow, fast_powf)
+  PDLANG_OWL1(sin, arm_sin_f32) PDLANG_OWL1(cos, arm_cos_f32)
+  PDLANG_LIBM1(expm1) PDLANG_LIBM1(log1p) PDLANG_LIBM1(tan)
+  PDLANG_LIBM1(asin) PDLANG_LIBM1(acos) PDLANG_LIBM1(atan) PDLANG_LIBM2(atan2)
+  PDLANG_LIBM1(sinh) PDLANG_LIBM1(cosh) PDLANG_LIBM1(tanh)
+  PDLANG_LIBM1(asinh) PDLANG_LIBM1(acosh) PDLANG_LIBM1(atanh)
+  PDLANG_LIBM1(cbrt) PDLANG_LIBM1(erf) PDLANG_LIBM1(erfc)
+}
+
 static bool parseParam(const char* r, uint8_t* id){
   // A..H, AA..DH
   size_t len = strlen(r);

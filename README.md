@@ -129,6 +129,10 @@ wraps.
 * `make PDLANG=Foo PDLANG_BIN=<path to pdlang> load` (default: `pdlang` on the PATH)
 * `make PDLANG=Foo native`, `test`, `run` and `web` work too: the patch is compiled for the host or for wasm32
 
+By default the patch is compiled with `-fmath=host -fprecision=single`: single-precision maths, with `exp`, `log`,
+`pow`, `sin` and `cos` from OWL's fast kernels on the device (libm in native and web builds), as in C++ OWL patches.
+`PDLANGMATH=libm` and `PDLANGPRECISION=double` give pdlang's exact build instead.
+
 Options: `PDLANGMODE=pdlang|libpd|hvcc` (default `pdlang`), and `PDLANGARGS` for extra pdlang options such as
 `-I <dir>` (abstraction folders) or, in hvcc mode, `--noise-seed=...` / `--random-seed=...` (one per `noise~` /
 `random`). OWL parameters are mapped from `@owl` receives / sends (A..H, B1..B8, Push); a patch without them falls
