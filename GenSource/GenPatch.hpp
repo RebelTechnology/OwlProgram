@@ -10,6 +10,20 @@
 #include "metadata.h"
 #endif
 
+/* Optional per-patch map from gen~ parameter names to OWL parameter ids.
+ * Put a GenParameterMap.h next to the export (in PATCHSOURCE) that defines
+ *   static const GenParameterMapping gen_parameter_map[] = { {"cutoff", PARAMETER_A}, ... };
+ * Mapped names take precedence over the name conventions below (A..H, AA..HH, Exp, Push...),
+ * and keep their gen~ name when they are registered. */
+struct GenParameterMapping {
+  const char* name;
+  PatchParameterId pid;
+};
+#if __has_include("GenParameterMap.h")
+#include "GenParameterMap.h"
+#define GEN_PARAMETER_MAP
+#endif
+
 #define GEN_OWL_PARAM_FREQ "freq"
 #define GEN_OWL_PARAM_GAIN "gain"
 #define GEN_OWL_PARAM_GATE "gate"
@@ -190,6 +204,18 @@ public:
     params = new GenParameterBase*[numParams];
     for(int i = 0; i < numParams; i++){
       const char* name = gen::getparametername(context, i);
+#ifdef GEN_PARAMETER_MAP
+      bool mapped = false;
+      for(size_t m = 0; m < sizeof(gen_parameter_map)/sizeof(gen_parameter_map[0]); ++m){
+	if(strcmp(gen_parameter_map[m].name, name) == 0){
+	  params[param_count++] = new GenParameter(this, context, name, gen_parameter_map[m].pid, i);
+	  mapped = true;
+	  break;
+	}
+      }
+      if(mapped)
+	continue;
+#endif
       if(strcasecmp(GEN_OWL_PARAM_FREQ, name) == 0){
 	params[param_count++] = new GenVariableParameter(this, context, name, &freq, i);
       }else if(strcasecmp(GEN_OWL_PARAM_GAIN, name) == 0){
