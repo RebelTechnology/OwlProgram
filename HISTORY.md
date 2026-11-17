@@ -1,3 +1,4 @@
+* Added GenParameterMap.h: optional map of gen~ parameter names to OWL parameters
 * Fixed native, web and test builds on macOS
 * Added LibSource unit tests for DcBlockingFilter, ExponentialDecayEnvelope, IntArray, basic oscillators, NoiseGenerator, VelocityCurve, EnvelopeFollower, SmoothingFilter, DryWetProcessor, StateVariableFilter, VoltsPerOctave, AdsrEnvelope, SimpleValue and TakeoverValue
 * Heavy patches are built with mainline hvcc 0.17.3 (hvcc -g owl), replacing the Python 2.7 fork
