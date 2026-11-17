@@ -142,4 +142,10 @@ void* pvPortRealloc(void *pv, size_t xWantedSize);
 #define RAND_MAX UINT32_MAX
 #endif //ARM_CORTEX
 
+#if defined(__APPLE__) && !defined(exp10f)
+/* macOS libm only provides exp10 and exp10f as __exp10 and __exp10f */
+#define exp10(x) __exp10(x)
+#define exp10f(x) __exp10f(x)
+#endif
+
 #endif // __basicmaths_h__
