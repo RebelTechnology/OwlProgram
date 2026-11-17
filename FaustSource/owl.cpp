@@ -587,8 +587,9 @@ protected:
  *
  ***************************************************************************************/
 
-// The maximun number of mappings between owl parameters and faust widgets
-#define MAXOWLPARAMETERS 20
+// The maximun number of mappings between owl parameters and faust widgets: the 40 parameters of the
+// firmware (NOF_PARAMETERS) and the 8 buttons
+#define MAXOWLPARAMETERS 48
 #define NO_PARAMETER     ((PatchParameterId)-1)
 #define NO_BUTTON        ((PatchButtonId)-1)
 #define PATH_LEN         24

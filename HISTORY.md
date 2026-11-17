@@ -1,3 +1,4 @@
+* Faust patches map up to 48 widgets (was 20)
 * Added Gen stepped parameters (GEN_SCALE_INT in GenParameterMap.h)
 * Added exponential parameters: Faust [scale:log] widgets and GEN_SCALE_LOG in GenParameterMap.h
 * Fixed Gen parameter defaults set in gen~ units instead of 0..1
