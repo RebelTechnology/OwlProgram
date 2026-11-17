@@ -1,3 +1,7 @@
+* Added SmoothValue::normalForSampleRate() to rescale lambda between sample rates
+* Fixed TapTempo per-sample clock, WavetableOscillator out-of-bounds read and negative-FM phase wrap
+* Added LibSource unit tests for 17 classes
+
 v23.1
 -----
 

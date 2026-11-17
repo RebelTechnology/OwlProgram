@@ -109,6 +109,8 @@ public:
     phase += incr  + (T::end_phase - T::begin_phase)*fm;
     if(phase >= T::end_phase)
       phase -= (T::end_phase - T::begin_phase);
+    else if(phase < T::begin_phase) // negative FM can drive phase below begin_phase
+      phase += (T::end_phase - T::begin_phase);
     return sample;
   }  
   using BaseOscillator::generate;
