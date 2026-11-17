@@ -88,7 +88,7 @@ DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/star
 
 all: libs patch web
 
-.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as native test run check tables resource size clean realclean sysex load store docs help
+.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as native test run check tables resource size clean realclean sysex load store docs tests help
 
 .FORCE:
 	@mkdir -p $(BUILD)/Source

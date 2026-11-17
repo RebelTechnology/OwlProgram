@@ -47,6 +47,14 @@ namespace owl {
   inline float floor(float x){ return std::floor(x); }
   inline float fmod(float x, float y){ return std::fmod(x, y); }
 }
+// standard headers used by the generated soul code, included before '#define double float'
+// so the macro does not reach the C++ library's own declarations (e.g. strtold_l in <locale>)
+#include <array>
+#include <functional>
+#include <cmath>
+#include <cstddef>
+#include <limits>
+#include <cstring>
 #define double float
 #include "soul.hpp"
 
