@@ -1,3 +1,4 @@
+* Added Gen output map (GEN_OUTPUT_MAP in GenParameterMap.h) with optional bipolar outputs
 * Added genlib spline6_interp
 * Faust patches map up to 48 widgets (was 20)
 * Added Gen stepped parameters (GEN_SCALE_INT in GenParameterMap.h)

@@ -38,6 +38,7 @@ struct GenParameterMapping {
  *     {NULL, 0, GEN_OUTPUT_AUDIO, 0},                       // out1 to audio channel 0 (left)
  *     {"env>", 3, GEN_OUTPUT_PARAMETER, PARAMETER_F},       // out4's block mean to output parameter F
  *     {"count>", 1, GEN_OUTPUT_PARAMETER, PARAMETER_G, "occurrences"}, // out2 / occurrences, block mean
+ *     {"z>", 2, GEN_OUTPUT_PARAMETER, PARAMETER_G, NULL, true}, // out3, bipolar: (mean + 1) / 2 to G
  *     {NULL, 2, GEN_OUTPUT_BUTTON, PUSHBUTTON},             // out3 to the push gate: high for a block when
  *   };                                                      // the block's maximum is over 0.5
  * Then only the mapped outputs go anywhere (an output may be mapped more than once), and an audio channel no
@@ -53,6 +54,7 @@ struct GenOutputMapping {
   GenOutputKind kind;
   uint16_t id; // the audio channel, PatchParameterId or PatchButtonId
   const char* per = NULL; // GEN_OUTPUT_PARAMETER: the gen~ parameter the block mean is divided by
+  bool bipolar = false; // GEN_OUTPUT_PARAMETER: a -1..1 output, sent as (x + 1) / 2 in 0..1
 };
 #if __has_include("GenParameterMap.h")
 #include "GenParameterMap.h"
@@ -429,6 +431,8 @@ public:
 	  gen::getparameter(context, outper[m], &per);
 	  value = per != 0 ? value / per : 0;
 	}
+	if(o.bipolar)
+	  value = (value + 1) * 0.5f;
 	setParameterValue((PatchParameterId)o.id, value);
       }
     }
