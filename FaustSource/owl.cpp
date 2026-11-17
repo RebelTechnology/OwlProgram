@@ -296,21 +296,28 @@ protected:
     PatchParameterId fParameter; // OWL parameter code : PARAMETER_A,...
     float fMin; // Faust widget minimal value
     float fSpan; // Faust widget value span (max-min)
+    float fLogRatio; // log(max/min) for a [scale:log] input widget, 0 for a linear one
 
 public:
     OwlParameter(Patch* pp, PatchParameterId param, FAUSTFLOAT* z,
-        const char* l, float init, float lo, float hi, bool output = false)
+        const char* l, float init, float lo, float hi, bool output = false, bool log = false)
         : OwlParameterBase(pp, z, output)
         , fParameter(param)
         , fMin(lo)
-        , fSpan(hi - lo) {
+        , fSpan(hi - lo)
+        , fLogRatio(log && !output && lo > 0 && hi > lo ? logf(hi / lo) : 0) {
         fPatch->registerParameter(param, l);
-        fPatch->setParameterValue(fParameter, (init - lo) / fSpan);
+        if (fLogRatio != 0)
+            fPatch->setParameterValue(fParameter, logf(init / lo) / fLogRatio);
+        else
+            fPatch->setParameterValue(fParameter, (init - lo) / fSpan);
     }
     void update() {
         if (isOutput) {
             fPatch->setParameterValue(fParameter, (*fZone - fMin) / fSpan);
         }
+        else if (fLogRatio != 0)
+            *fZone = fMin * expf(fLogRatio * fPatch->getParameterValue(fParameter));
         else
             *fZone = fMin + fSpan * fPatch->getParameterValue(fParameter);
     }
@@ -604,6 +611,7 @@ class OwlUI : public UI {
     Soundfile* fSoundfiles[MAX_SOUNDFILES];
 #endif
     PatchButtonId fButton;
+    bool fScaleLog = false; // [scale:log] on the current widget: exponential knob response
     // check if the widget is an Owl parameter and, if so, add the corresponding OwlParameter
     void addInputOwlParameter(const char* label, FAUSTFLOAT* zone,
         FAUSTFLOAT init, FAUSTFLOAT lo, FAUSTFLOAT hi) {
@@ -626,11 +634,12 @@ class OwlUI : public UI {
             }
             else if (fParameter != NO_PARAMETER) {
                 fParameterTable[fParameterIndex++] =
-                    new OwlParameter(fPatch, fParameter, zone, label, init, lo, hi);
+                    new OwlParameter(fPatch, fParameter, zone, label, init, lo, hi, false, fScaleLog);
             }
         }
         fParameter = NO_PARAMETER; // clear current parameter ID
 	    fButton = NO_BUTTON;
+        fScaleLog = false;
     }
 
     void addOutputOwlParameter(
@@ -649,6 +658,7 @@ class OwlUI : public UI {
         }
         fParameter = NO_PARAMETER;
         fButton = NO_BUTTON;
+        fScaleLog = false;
     }
 
     void addOwlButton(const char* label, FAUSTFLOAT* zone) {
@@ -664,6 +674,7 @@ class OwlUI : public UI {
         }
         fParameter = NO_PARAMETER;
         fButton = NO_BUTTON; // clear current button ID
+        fScaleLog = false;
     }
 #ifdef SOUNDFILE
     void addOwlResources(const char** resource_names, int names_size, Soundfile** sf_zone){
@@ -692,12 +703,14 @@ class OwlUI : public UI {
         }
         fParameter = NO_PARAMETER;
         fButton = NO_BUTTON; // clear current button ID
+        fScaleLog = false;
     }
 
     // we dont want to create a widget but we clear the current parameter ID just in case
     void skip() {
         fParameter = NO_PARAMETER; // clear current parameter ID
         fButton = NO_BUTTON;
+        fScaleLog = false;
     }
 
 public:
@@ -920,6 +933,10 @@ public:
             else if (strcasecmp(id, "ButtonD") == 0)
                 fButton = BUTTON_D;
 	}
+        else if (strcasecmp(k, "scale") == 0) {
+            // [scale:log]: the 0..1 parameter maps to lo * (hi/lo)^v (lo > 0), as Faust's UIs do
+            fScaleLog = strcasecmp(id, "log") == 0;
+        }
         // else if (strcasecmp(k, "midi") == 0) {
 	//   if (strcasecmp(id, "pitchwheel") == 0){ // PB
 	//   }else if (strcasecmp(id, "ctrl") == 0){ // CC

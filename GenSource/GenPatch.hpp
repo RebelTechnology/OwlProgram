@@ -12,12 +12,19 @@
 
 /* Optional per-patch map from gen~ parameter names to OWL parameter ids.
  * Put a GenParameterMap.h next to the export (in PATCHSOURCE) that defines
- *   static const GenParameterMapping gen_parameter_map[] = { {"cutoff", PARAMETER_A}, ... };
+ *   static const GenParameterMapping gen_parameter_map[] = { {"cutoff", PARAMETER_A, GEN_SCALE_LOG}, ... };
  * Mapped names take precedence over the name conventions below (A..H, AA..HH, Exp, Push...),
- * and keep their gen~ name when they are registered. */
+ * and keep their gen~ name when they are registered. The optional scale is the knob response:
+ * GEN_SCALE_LINEAR (the default) maps the 0..1 parameter to min..max, GEN_SCALE_LOG to
+ * min * (max/min)^v (when 0 < min < max), as Faust's [scale:log] does in FaustSource/owl.cpp. */
+enum GenParameterScale {
+  GEN_SCALE_LINEAR = 0,
+  GEN_SCALE_LOG = 1
+};
 struct GenParameterMapping {
   const char* name;
   PatchParameterId pid;
+  GenParameterScale scale = GEN_SCALE_LINEAR;
 };
 #if __has_include("GenParameterMap.h")
 #include "GenParameterMap.h"
@@ -123,7 +130,9 @@ public:
   int8_t index;
   float min = 0.0f;
   float max = 1.0f;
-  GenParameter(Patch* patch, CommonState *context, const char* name, PatchParameterId id, int8_t idx) : pid(id), index(idx) {
+  float logratio = 0.0f; // log(max/min) for GEN_SCALE_LOG, 0 for a linear response
+  GenParameter(Patch* patch, CommonState *context, const char* name, PatchParameterId id, int8_t idx,
+	       GenParameterScale scale = GEN_SCALE_LINEAR) : pid(id), index(idx) {
 #ifndef OWL_METADATA
     patch->registerParameter(id, name);
 #endif
@@ -131,16 +140,23 @@ public:
       min = gen::getparametermin(context, index);
       max = gen::getparametermax(context, index);
     }    
+    if(scale == GEN_SCALE_LOG && min > 0 && max > min)
+      logratio = logf(max / min);
     float defaultvalue;
     gen::getparameter(context, index, &defaultvalue);
     // the patch parameter is 0..1, mapped to min..max in update()
-    if(max != min)
+    if(logratio != 0 && defaultvalue > 0)
+      defaultvalue = logf(defaultvalue / min) / logratio;
+    else if(max != min)
       defaultvalue = (defaultvalue - min) / (max - min);
     patch->setParameterValue(id, defaultvalue);
   }
   void update(Patch* patch, CommonState *context){
     float value = patch->getParameterValue(pid);
-    value = value * (max-min) + min;
+    if(logratio != 0)
+      value = min * expf(logratio * value);
+    else
+      value = value * (max-min) + min;
     gen::setparameter(context, index, value, NULL);
   }
 };
@@ -211,7 +227,8 @@ public:
       bool mapped = false;
       for(size_t m = 0; m < sizeof(gen_parameter_map)/sizeof(gen_parameter_map[0]); ++m){
 	if(strcmp(gen_parameter_map[m].name, name) == 0){
-	  params[param_count++] = new GenParameter(this, context, name, gen_parameter_map[m].pid, i);
+	  params[param_count++] = new GenParameter(this, context, name, gen_parameter_map[m].pid, i,
+					       gen_parameter_map[m].scale);
 	  mapped = true;
 	  break;
 	}
