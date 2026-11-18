@@ -24,6 +24,7 @@ on:
       - 'daisysp.mk'
       - 'sources.mk'
       - 'libs.mk'
+      - 'HISTORY.md'
       - '.github/workflows/docker-publish.yml'
   workflow_dispatch:
     inputs:
