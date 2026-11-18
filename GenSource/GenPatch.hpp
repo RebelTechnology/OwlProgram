@@ -42,7 +42,9 @@ struct GenParameterMapping {
  *     {NULL, 2, GEN_OUTPUT_BUTTON, PUSHBUTTON},             // out3 to the push gate: high for a block when
  *   };                                                      // the block's maximum is over 0.5
  * Then only the mapped outputs go anywhere (an output may be mapped more than once), and an audio channel no
- * output is mapped to is silent. Without a map, the outputs beyond the audio channels go to F, G, ... */
+ * output is mapped to is silent. Without a map, the outputs beyond the audio channels go to F, G, ...
+ * With a map and a metadata.h (OWL_METADATA, as the OWL server's patch builder writes it), the map still
+ * registers and routes the outputs: the metadata's output parameters and buttons are left out. */
 enum GenOutputKind {
   GEN_OUTPUT_AUDIO = 0,
   GEN_OUTPUT_PARAMETER = 1,
@@ -344,6 +346,10 @@ public:
     for(int i=0; i<PatchMetadata::parameter_count; ++i){
       const PatchMetadata::Control& ctrl = PatchMetadata::parameters[i];
       PatchParameterId pid = (PatchParameterId)ctrl.id;
+#ifdef GEN_OUTPUT_MAP
+      if(ctrl.flags & CONTROL_OUTPUT)
+	continue; // registered and routed by gen_output_map
+#endif
       if(ctrl.flags & CONTROL_OUTPUT){
 	if(outputindex < nof_outs)
 	  outputs[outputindex] = OutputParameter(pid, ctrl.name, FloatArray(buffers[channels+outputindex], getBlockSize()));
@@ -369,8 +375,10 @@ public:
 	outputindex++;
       }
     }
+#ifndef GEN_OUTPUT_MAP
     if(outputindex != nof_outs)
       debugMessage("Output parameters not matching", (int)outputindex, nof_outs);
+#endif
 #elif !defined(GEN_OUTPUT_MAP)
     char name[] = "Out0>";
     for(int ch=channels; ch<gen::num_outputs(); ++ch){
