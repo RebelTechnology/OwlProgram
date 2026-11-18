@@ -9,7 +9,7 @@
 #define CONTROL_BUTTON    4
 #define CONTROL_TOGGLE    8
 
-#define NOF_PARAMETERS    20
+#define NOF_PARAMETERS    40
 #define NOF_BUTTONS       20
 
 struct PatchMetadata {
