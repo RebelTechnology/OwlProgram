@@ -14,7 +14,14 @@ extern "C" {
   int32_t pdlang_send_message(void* ctx, uint32_t hash, double delay_ms, const float* atoms, int32_t n);
   int32_t pdlang_param_info(int32_t index, pdlang_param_info_t* info);
   void pdlang_host_send(void* ctx, uint32_t hash, uint32_t ts, const float* atoms, int32_t n);
+  // ctx blocks (STATE-ABI "Blocks")
+  typedef struct {
+    const char *name; uint32_t size; uint32_t align; int32_t access; uint32_t per_sample; uint32_t offset;
+  } pdlang_block_info_t;
+  int32_t pdlang_block_info(int32_t index, pdlang_block_info_t* info);
+  void pdlang_init_blocks(void* const* blocks, double sr);
 }
+enum { PDLANG_ACCESS_SAMPLE = 0, PDLANG_ACCESS_CONTROL = 1 };
 
 // Weak fallbacks for the entry points only some pdlang patches export. When the patch's object
 // defines one, its strong definition wins at link time; otherwise these are used. This keeps every
@@ -28,6 +35,10 @@ extern "C" {
   __attribute__((weak)) int32_t pdlang_num_inputs(void){ return 0; }
   __attribute__((weak)) int32_t pdlang_send_message(void* ctx, uint32_t hash, double delay_ms, const float* atoms, int32_t n){ return 0; }
   __attribute__((weak)) int32_t pdlang_param_info(int32_t index, pdlang_param_info_t* info){ return 0; }
+  // an object from a pdlang without ctx blocks: one flat allocation. -1, not 0: GCC 14's LTO identical code
+  // folding crashes (internal compiler error) when this fallback is identical to pdlang_param_info's.
+  __attribute__((weak)) int32_t pdlang_block_info(int32_t index, pdlang_block_info_t* info){ return -1; }
+  __attribute__((weak)) void pdlang_init_blocks(void* const* blocks, double sr){}
 
   // pdlang's ARM object carries .ARM.exidx entries referencing the EHABI personality routines.
   // OWL patches never unwind (-fno-exceptions), so satisfy them here instead of pulling libgcc's
@@ -130,21 +141,72 @@ PdlangPatch::PdlangPatch() : nmap(0), buttonsPending(0) {
   instance = this;
   addParameters();
   addLegacyParameters();
-  size_t sz = (size_t)pdlang_ctx_size();
-  raw = new uint8_t[sz + 15];
-  ctx = (void*)(((uintptr_t)raw + 15) & ~(uintptr_t)15);
-  pdlang_init(ctx, getSampleRate());
+  // the audio buffers are touched every sample: allocate them before the ctx's large blocks
   blocksize = getBlockSize();
   nin = pdlang_num_inputs();
   in = nin > 0 ? new float[nin * blocksize] : NULL;
   out = new float[2 * blocksize];
+  allocateContext();
 }
 
 PdlangPatch::~PdlangPatch() {
   instance = NULL;
   delete[] out;
   delete[] in;
-  delete[] raw;
+  for(int i = 0; i < nblocks; ++i)
+    delete[] blockmem[i];
+}
+
+static void* align16(uint8_t* p){
+  return (void*)(((uintptr_t)p + 15) & ~(uintptr_t)15);
+}
+
+// Allocate the ctx and initialise it. The OWL heap is first fit, fastest memory first (on the Genius: ITCM, DTCM,
+// D1, then SDRAM), so allocating in STATE-ABI's order puts the hot state in fast memory and lets only large,
+// rarely touched buffers spill to SDRAM: the hot block first, then the control blocks, then the per-sample blocks
+// smallest first. An object without blocks gets one flat allocation of pdlang_ctx_size() bytes.
+void PdlangPatch::allocateContext(){
+#ifdef PDLANG_FLAT_CTX
+  int n = 0; // -DPDLANG_FLAT_CTX: one allocation, for comparison
+#else
+  int n = pdlang_block_info(0, NULL);
+#endif
+  if(n < 1 || n > PDLANG_MAX_BLOCKS){
+    nblocks = 1;
+    blockmem[0] = new uint8_t[(size_t)pdlang_ctx_size() + 15];
+    ctx = align16(blockmem[0]);
+    pdlang_init(ctx, getSampleRate());
+    return;
+  }
+  pdlang_block_info_t info[PDLANG_MAX_BLOCKS];
+  int order[PDLANG_MAX_BLOCKS];
+  for(int i = 0; i < n; ++i){
+    pdlang_block_info(i, &info[i]);
+    order[i] = i;
+  }
+  // block 0 first; then CONTROL before SAMPLE, each smallest first (insertion sort over blocks 1..n-1)
+  for(int i = 2; i < n; ++i){
+    int b = order[i], j = i;
+    while(j > 1){
+      int a = order[j - 1];
+      bool before = info[b].access != info[a].access ? info[b].access == PDLANG_ACCESS_CONTROL
+                                                     : info[b].size < info[a].size;
+      if(!before)
+        break;
+      order[j] = a;
+      --j;
+    }
+    order[j] = b;
+  }
+  void* bases[PDLANG_MAX_BLOCKS];
+  for(int k = 0; k < n; ++k){
+    int i = order[k];
+    blockmem[k] = new uint8_t[info[i].size + 15];
+    bases[i] = align16(blockmem[k]);
+  }
+  nblocks = n;
+  ctx = bases[0];
+  pdlang_init_blocks(bases, getSampleRate());
 }
 
 // the @owl parameters and buttons the patch declares (pdlang_param_info)

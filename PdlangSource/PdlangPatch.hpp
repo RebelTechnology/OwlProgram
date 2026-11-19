@@ -11,6 +11,7 @@
 #include "Patch.h"
 
 #define PDLANG_MAX_PARAMS 48
+#define PDLANG_MAX_BLOCKS 32
 
 class PdlangPatch : public Patch {
   enum Kind { NONE, PARAM_IN, BUTTON_IN, PARAM_OUT, BUTTON_OUT };
@@ -18,8 +19,9 @@ class PdlangPatch : public Patch {
   Map map[PDLANG_MAX_PARAMS];
   int nmap;
   char outnames[PDLANG_MAX_PARAMS][24];
-  uint8_t* raw;
-  void* ctx;
+  uint8_t* blockmem[PDLANG_MAX_BLOCKS]; // the ctx blocks as allocated (unaligned)
+  int nblocks;
+  void* ctx;                            // the hot block, blocks[0]
   float* in;
   float* out;
   int blocksize;
@@ -28,6 +30,7 @@ class PdlangPatch : public Patch {
 
   void addParameters();
   void addLegacyParameters();
+  void allocateContext();
 
 public:
   static PdlangPatch* instance;
