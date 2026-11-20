@@ -1,3 +1,4 @@
+* Faust floorf, ceilf, sqrtf, rintf and roundf use FPU instructions on Cortex-M7
 * Fixed web build fast pow/exp/log lookup tables left empty
 * Added unit tests for TapTempo and WavetableOscillator, and for SmoothValue::normalForSampleRate()
 * Added SmoothValue::normalForSampleRate() to rescale lambda between sample rates
