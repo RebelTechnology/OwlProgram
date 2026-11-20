@@ -16,23 +16,37 @@
 #define fast_asinf(x) asinf(x)
 #define fast_atanf(x) atanf(x)
 #define fast_atan2f(x, y) atan2f(x, y) // Optimized for ARM
-#define fast_ceilf(x) ceilf(x)
 #define fast_cosf(x) cosf(x) // Optimized for ARM
 // fast_expf is defined in basicmath.h
 // fast_exp2f is defined in basicmath.h
 // fast_exp10f is defined in basicmath.h
-#define fast_floorf(x) floorf(x)
 #define fast_fmodf(x, y) fmodf(x, y)
 // fast_logf is defined in basicmath.h
 // fast_log2f is defined in basicmath.h
 // fast_log10f is defined in basicmath.h
 // fast_powf is defined in basicmath.h
 #define fast_remainderf(x, y) remainderf(x, y)
+#define fast_sinf(x) sinf(x) // Optimized for ARM
+#define fast_tanf(x) tanf(x)
+
+// Patches are compiled with -fno-builtin, which keeps floorf() etc. as newlib
+// calls. Where the FPU has the directed rounding instructions (FPv5: the
+// Cortex-M7 of OWL3, and hosts that have them), the builtins compile to single
+// instructions (vrintm, vrintp, vrintr, vrinta, vsqrt). The Cortex-M4 (FPv4,
+// OWL1/OWL2) has no vrint*, so it keeps the library calls.
+#if defined(__ARM_FEATURE_DIRECTED_ROUNDING) || (defined(__ARM_FP) && (__ARM_FP & 8))
+#define fast_ceilf(x) __builtin_ceilf(x)
+#define fast_floorf(x) __builtin_floorf(x)
+#define fast_rintf(x) __builtin_rintf(x)
+#define fast_roundf(x) __builtin_roundf(x)
+#define fast_sqrtf(x) __builtin_sqrtf(x)
+#else
+#define fast_ceilf(x) ceilf(x)
+#define fast_floorf(x) floorf(x)
 #define fast_rintf(x) rintf(x)
 #define fast_roundf(x) roundf(x)
-#define fast_sinf(x) sinf(x) // Optimized for ARM
 #define fast_sqrtf(x) sqrtf(x) // Optimized for ARM
-#define fast_tanf(x) tanf(x)
+#endif
 
 // Double versions
 
