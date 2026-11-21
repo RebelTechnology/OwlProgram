@@ -1,6 +1,17 @@
 * Added SmoothValue::normalForSampleRate() to rescale lambda between sample rates
 * Fixed TapTempo per-sample clock, WavetableOscillator out-of-bounds read and negative-FM phase wrap
 * Added LibSource unit tests for 17 classes
+* Added GenParameterMap.h: optional map of gen~ parameter names to OWL parameters, with scale and steps
+* Added Gen stepped (GEN_SCALE_INT) and exponential (GEN_SCALE_LOG) parameters
+* Added Faust [scale:log] exponential widget response
+* Added Gen output map (GEN_OUTPUT_MAP) with optional bipolar outputs
+* Added genlib spline6_interp
+* Fixed Gen parameter defaults set in gen~ units instead of 0..1
+* Fixed Faust patches mapping only the first 20 widgets (now 48)
+* Fixed PatchMetadata limited to 20 parameters (now 40)
+* Fixed Gen output parameters registered twice with OWL_METADATA and GEN_OUTPUT_MAP
+* Fixed web build fast pow/exp/log lookup tables left empty
+* Faust floorf, ceilf, sqrtf, rintf and roundf use FPU instructions on Cortex-M7
 
 v23.1
 -----
