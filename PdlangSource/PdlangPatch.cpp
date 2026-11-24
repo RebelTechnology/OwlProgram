@@ -320,6 +320,21 @@ void PdlangPatch::processAudio(AudioBuffer& buffer){
   }
 }
 
+// [print] and [print~], and the C externals shim's post / pd_error (STATE-ABI: host-defined, imported only by patches
+// that use them): to the OWL debug message
+extern "C" {
+  typedef struct { uint32_t type; float f; const char* s; } pdlang_atom; // type: 0 bang, 1 float, 2 symbol
+  void pdlang_host_print(void* ctx, const char* label, uint32_t ts, const pdlang_atom* atoms, int32_t n){
+    if(n > 0 && atoms[0].type == 1)
+      debugMessage(label, atoms[0].f);
+    else
+      debugMessage(n > 0 && atoms[0].type == 2 && atoms[0].s ? atoms[0].s : label);
+  }
+  void pdlang_host_print_str(void* ctx, uint32_t ts, const char* s){
+    debugMessage(s);
+  }
+}
+
 extern "C" void pdlang_host_send(void* ctx, uint32_t hash, uint32_t ts, const float* atoms, int32_t n){
   if(PdlangPatch::instance)
     PdlangPatch::instance->hostSend(hash, atoms, n);
