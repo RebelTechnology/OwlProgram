@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_quaternion_norm_f32.c
  * Description:  Floating-point quaternion Norm
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/quaternion_math_functions.h"
 #include <math.h>
@@ -49,7 +52,6 @@
   @param[in]     pInputQuaternions       points to the input vector of quaternions
   @param[out]    pNorms                  points to the output vector of norms
   @param[in]     nbQuaternions           number of quaternions in the input vector
-  @return        none
  */
 
 
@@ -57,7 +59,7 @@
 
 #include "arm_helium_utils.h"
 
-void arm_quaternion_norm_f32(const float32_t *pInputQuaternions, 
+ARM_DSP_ATTRIBUTE void arm_quaternion_norm_f32(const float32_t *pInputQuaternions, 
   float32_t *pNorms,
   uint32_t nbQuaternions)
 {
@@ -79,7 +81,7 @@ void arm_quaternion_norm_f32(const float32_t *pInputQuaternions,
 
 #else
 
-void arm_quaternion_norm_f32(const float32_t *pInputQuaternions, 
+ARM_DSP_ATTRIBUTE void arm_quaternion_norm_f32(const float32_t *pInputQuaternions, 
   float32_t *pNorms,
   uint32_t nbQuaternions)
 {
@@ -88,10 +90,10 @@ void arm_quaternion_norm_f32(const float32_t *pInputQuaternions,
 
    for(i=0; i < nbQuaternions; i++)
    {
-      temp = SQ(pInputQuaternions[4 * i + 0]) +
-             SQ(pInputQuaternions[4 * i + 1]) +
-             SQ(pInputQuaternions[4 * i + 2]) +
-             SQ(pInputQuaternions[4 * i + 3]);
+      temp = ARM_SQ(pInputQuaternions[4 * i + 0]) +
+             ARM_SQ(pInputQuaternions[4 * i + 1]) +
+             ARM_SQ(pInputQuaternions[4 * i + 2]) +
+             ARM_SQ(pInputQuaternions[4 * i + 3]);
       pNorms[i] = sqrtf(temp);
    }
 }

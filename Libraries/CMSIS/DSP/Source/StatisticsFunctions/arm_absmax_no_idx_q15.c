@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_absmax_no_idx_q15.c
  * Description:  Maximum value of absolute values of a Q15 vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions.h"
 
@@ -42,66 +45,49 @@
   @param[in]     pSrc       points to the input vector
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    maximum value returned here
-  @return        none
  */
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
 
-void arm_absmax_no_idx_q15(
+ARM_DSP_ATTRIBUTE void arm_absmax_no_idx_q15(
   const q15_t * pSrc,
         uint32_t blockSize,
         q15_t * pResult)
 {
-    uint16_t        blkCnt;           /* loop counters */
+    int32_t        blkCnt;           /* loop counters */
     q15x8_t       vecSrc;
     q15_t   const *pSrcVec;
-    uint16x8_t    curExtremValVec = vdupq_n_s16(Q15_ABSMIN);
-    q15_t           maxValue = Q15_ABSMIN;
-    mve_pred16_t    p0;
+    uint16x8_t    curExtremValVec = vdupq_n_u16(Q15_ABSMIN);
+    uint16_t           maxValue = Q15_ABSMIN;
 
 
     pSrcVec = (q15_t const *) pSrc;
-    blkCnt = blockSize >> 3;
-    while (blkCnt > 0U)
+    blkCnt = blockSize;
+    while (blkCnt > 0)
     {
-        vecSrc = vld1q(pSrcVec); 
+        mve_pred16_t    p = vctp16q(blkCnt);
+        vecSrc = vld1q_z_s16(pSrcVec,p); 
         pSrcVec += 8;
         /*
          * update per-lane max.
          */
-        curExtremValVec = vmaxaq(curExtremValVec, vecSrc);
+        curExtremValVec = vmaxaq_m(curExtremValVec, vecSrc,p);
         /*
          * Decrement the blockSize loop counter
          */
-        blkCnt--;
-    }
-    /*
-     * tail
-     * (will be merged thru tail predication)
-     */
-    blkCnt = blockSize & 7;
-    if (blkCnt > 0U)
-    {
-        vecSrc = vld1q(pSrcVec); 
-        pSrcVec += 8;
-        p0 = vctp16q(blkCnt);
-        /*
-         * Get current max per lane and current index per lane
-         * when a max is selected
-         */
-         curExtremValVec = vmaxaq_m(curExtremValVec, vecSrc, p0);
+        blkCnt -= 8;
     }
     /*
      * Get max value across the vector
      */
-    maxValue = vmaxavq(maxValue, (q15x8_t)curExtremValVec);
-    *pResult = maxValue;
+    maxValue = vmaxvq(maxValue, curExtremValVec);
+    *pResult = __USAT(maxValue, 15);
 }
 
 #else
 #if defined(ARM_MATH_DSP)
-void arm_absmax_no_idx_q15(
+ARM_DSP_ATTRIBUTE void arm_absmax_no_idx_q15(
   const q15_t * pSrc,
         uint32_t blockSize,
         q15_t * pResult)
@@ -110,7 +96,7 @@ void arm_absmax_no_idx_q15(
         uint32_t blkCnt;                     /* Loop counter */                                   \
                                                                                                             \
                                                                                             \
-  /* Load first input value that act as reference value for comparision */                                  \
+  /* Load first input value that act as reference value for comparison */                                  \
   out = *pSrc++;                                                                                            \
   out = (out > 0) ? out : (q15_t)__QSUB16(0, out);                                                                           \
                                                                                               \
@@ -177,7 +163,7 @@ void arm_absmax_no_idx_q15(
   *pResult = out;                                                                                           \
 }
 #else
-void arm_absmax_no_idx_q15(
+ARM_DSP_ATTRIBUTE void arm_absmax_no_idx_q15(
   const q15_t * pSrc,
         uint32_t blockSize,
         q15_t * pResult)
@@ -186,7 +172,7 @@ void arm_absmax_no_idx_q15(
         uint32_t blkCnt;                     /* Loop counter */
 
 
-  /* Load first input value that act as reference value for comparision */
+  /* Load first input value that act as reference value for comparison */
   out = (*pSrc > 0) ? *pSrc : ((*pSrc == (q15_t) 0x8000) ? 0x7fff : -*pSrc);
   pSrc++;
 

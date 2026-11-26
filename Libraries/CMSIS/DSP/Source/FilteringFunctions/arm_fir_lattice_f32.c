@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_lattice_f32.c
  * Description:  Processing function for floating-point FIR Lattice filter
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -35,6 +38,9 @@
 /**
   @defgroup FIR_Lattice Finite Impulse Response (FIR) Lattice Filters
 
+  @deprecated Those functions are no more tested nor maintained and will be removed in
+              a future version.
+              
   This set of functions implements Finite Impulse Response (FIR) lattice filters
   for Q15, Q31 and floating-point data types.  Lattice filters are used in a
   variety of adaptive filter applications. The filter structure is feedforward and
@@ -55,7 +61,7 @@
       y[n] = fM[n]
   </pre>
   @par
-                   <code>pCoeffs</code> points to tha array of reflection coefficients of size <code>numStages</code>.
+                   <code>pCoeffs</code> points to the array of reflection coefficients of size <code>numStages</code>.
                    Reflection Coefficients are stored in the following order.
   @par
   <pre>
@@ -115,10 +121,9 @@
   @param[in]     pSrc       points to the block of input data
   @param[out]    pDst       points to the block of output data
   @param[in]     blockSize  number of samples to process
-  @return        none
  */
 
-void arm_fir_lattice_f32(
+ARM_DSP_ATTRIBUTE void arm_fir_lattice_f32(
   const arm_fir_lattice_instance_f32 * S,
   const float32_t * pSrc,
         float32_t * pDst,

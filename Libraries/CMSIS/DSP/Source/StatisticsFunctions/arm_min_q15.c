@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_min_q15.c
  * Description:  Minimum value of a Q15 vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions.h"
 
@@ -44,13 +47,12 @@
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    minimum value returned here
   @param[out]    pIndex     index of minimum value returned here
-  @return        none
  */
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
 
-void arm_min_q15(
+ARM_DSP_ATTRIBUTE void arm_min_q15(
   const q15_t * pSrc,
         uint32_t blockSize,
         q15_t * pResult,
@@ -100,7 +102,7 @@ void arm_min_q15(
  
 }
 #else
-void arm_min_q15(
+ARM_DSP_ATTRIBUTE void arm_min_q15(
   const q15_t * pSrc,
         uint32_t blockSize,
         q15_t * pResult,
@@ -115,7 +117,7 @@ void arm_min_q15(
 
   /* Initialise index value to zero. */
   outIndex = 0U;
-  /* Load first input value that act as reference value for comparision */
+  /* Load first input value that act as reference value for comparison */
   out = *pSrc++;
 
 #if defined (ARM_MATH_LOOPUNROLL)

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_vlog_f16.c
  * Description:  Fast vectorized log
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/fast_math_functions_f16.h"
 #include "dsp/support_functions_f16.h"
@@ -61,18 +64,18 @@ coefs = Chop@Flatten[CoefficientList[lut, x]];
 
 */
 static float16_t lut_logf16[NB_LUT_LOGF16]={
-   0,0.125,-0.00781197,0.00063974,0.117783,
-   0.111111,-0.00617212,0.000447935,0.223144,
-   0.1,-0.00499952,0.000327193,0.318454,0.0909091,
-   -0.00413191,0.000246234,0.405465,0.0833333,
-   -0.00347199,0.000189928,0.485508,0.0769231,
-   -0.00295841,0.00014956,0.559616,0.0714286,
-   -0.0025509,0.000119868,0.628609,0.0666667,
-   -0.00222213,0.0000975436,0.693147,
-   0.0625,-0.00195305,0.0000804357};
+   0,(float16_t)0.125,(float16_t)-0.00781197,(float16_t)0.00063974,(float16_t)0.117783,(float16_t)
+   0.111111,(float16_t)-0.00617212,(float16_t)0.000447935,(float16_t)0.223144,(float16_t)
+   0.1,(float16_t)-0.00499952,(float16_t)0.000327193,(float16_t)0.318454,(float16_t)0.0909091,(float16_t)
+   -0.00413191,(float16_t)0.000246234,(float16_t)0.405465,(float16_t)0.0833333,(float16_t)
+   -0.00347199,(float16_t)0.000189928,(float16_t)0.485508,(float16_t)0.0769231,(float16_t)
+   -0.00295841,(float16_t)0.00014956,(float16_t)0.559616,(float16_t)0.0714286,(float16_t)
+   -0.0025509,(float16_t)0.000119868,(float16_t)0.628609,(float16_t)0.0666667,(float16_t)
+   -0.00222213,(float16_t)0.0000975436,(float16_t)0.693147,(float16_t)
+   0.0625,(float16_t)-0.00195305,(float16_t)0.0000804357};
 
 
-float16_t logf16_scalar(float16_t x)
+static float16_t logf16_scalar(float16_t x)
 {
     int16_t i =  arm_typecast_s16_f16(x);
 
@@ -108,7 +111,7 @@ float16_t logf16_scalar(float16_t x)
 #include "arm_vec_math_f16.h"
 
 
-float16x8_t vlogq_lut_f16(float16x8_t vecIn)
+static float16x8_t vlogq_lut_f16(float16x8_t vecIn)
 {
     int16x8_t i =  vreinterpretq_s16_f16(vecIn);
 
@@ -166,11 +169,10 @@ float16x8_t vlogq_lut_f16(float16x8_t vecIn)
   @param[in]     pSrc       points to the input vector
   @param[out]    pDst       points to the output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
  */
 
 
-void arm_vlog_f16(
+ARM_DSP_ATTRIBUTE void arm_vlog_f16(
   const float16_t * pSrc,
         float16_t * pDst,
         uint32_t blockSize)

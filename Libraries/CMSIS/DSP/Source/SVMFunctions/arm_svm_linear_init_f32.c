@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_svm_linear_init_f32.c
  * Description:  SVM Linear Instance Initialization
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/svm_functions.h"
 #include <limits.h>
@@ -64,12 +67,11 @@
  * @param[in]    dualCoefficients       Array of dual coefficients
  * @param[in]    supportVectors         Array of support vectors
  * @param[in]    classes                Array of 2 classes ID
- * @return none.
  *
  */
 
 
-void arm_svm_linear_init_f32(arm_svm_linear_instance_f32 *S, 
+ARM_DSP_ATTRIBUTE void arm_svm_linear_init_f32(arm_svm_linear_instance_f32 *S, 
   uint32_t nbOfSupportVectors,
   uint32_t vectorDimension,
   float32_t intercept,

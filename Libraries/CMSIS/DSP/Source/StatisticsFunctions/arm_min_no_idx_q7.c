@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_min_no_idx_q7.c
  * Description:  Minimum value of a q7 vector without returning the index
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions.h"
 
@@ -43,13 +46,12 @@
   @param[in]     pSrc       points to the input vector
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    minimum value returned here
-  @return        none
  */
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
 
-void arm_min_no_idx_q7(
+ARM_DSP_ATTRIBUTE void arm_min_no_idx_q7(
   const q7_t * pSrc,
         uint32_t blockSize,
         q7_t * pResult)
@@ -101,7 +103,7 @@ void arm_min_no_idx_q7(
 }
 
 #else
-void arm_min_no_idx_q7(
+ARM_DSP_ATTRIBUTE void arm_min_no_idx_q7(
   const q7_t * pSrc,
         uint32_t blockSize,
         q7_t * pResult)
@@ -109,7 +111,7 @@ void arm_min_no_idx_q7(
   q7_t minVal1, out;       /* Temporary variables to store the output value. */    
   uint32_t blkCnt;              /* loop counter */                                  
                                                                                     
-  /* Load first input value that act as reference value for comparision */          
+  /* Load first input value that act as reference value for comparison */          
   out = *pSrc++;                                                                    
                                                                                     
   blkCnt = (blockSize - 1U);                                                        

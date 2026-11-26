@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_absmin_no_idx_f32.c
  * Description:  Minimum value of absolute values of a floating-point vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,10 +26,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions.h"
 
-#if (defined(ARM_MATH_NEON) || defined(ARM_MATH_MVEF)) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON) || defined(ARM_MATH_MVEF)
 #include <limits.h>
 #endif
 
@@ -48,13 +51,12 @@
   @param[in]     pSrc       points to the input vector
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    minimum value returned here
-  @return        none
  */
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
-void arm_absmin_no_idx_f32(
+ARM_DSP_ATTRIBUTE void arm_absmin_no_idx_f32(
   const float32_t * pSrc,
         uint32_t blockSize,
         float32_t * pResult)
@@ -107,7 +109,7 @@ void arm_absmin_no_idx_f32(
 
 #else
 #if defined(ARM_MATH_LOOPUNROLL)
-void arm_absmin_no_idx_f32(
+ARM_DSP_ATTRIBUTE void arm_absmin_no_idx_f32(
   const float32_t * pSrc,
         uint32_t blockSize,
         float32_t * pResult)
@@ -116,7 +118,7 @@ void arm_absmin_no_idx_f32(
         uint32_t blkCnt;                     /* Loop counter */                                   \
                                                                                                             \
                                                                                            \
-  /* Load first input value that act as reference value for comparision */                                  \
+  /* Load first input value that act as reference value for comparison */                                  \
   out = *pSrc++;                                                                                            \
   out = (out > 0.0f) ? out : -out;                                                                             \
                                                                                               \
@@ -183,7 +185,7 @@ void arm_absmin_no_idx_f32(
   *pResult = out;                                                                                           \
 }
 #else
-void arm_absmin_no_idx_f32(
+ARM_DSP_ATTRIBUTE void arm_absmin_no_idx_f32(
   const float32_t * pSrc,
         uint32_t blockSize,
         float32_t * pResult)
@@ -193,7 +195,7 @@ void arm_absmin_no_idx_f32(
 
 
 
-  /* Load first input value that act as reference value for comparision */
+  /* Load first input value that act as reference value for comparison */
   out = fabsf(*pSrc++);
 
   /* Initialize blkCnt with number of samples */

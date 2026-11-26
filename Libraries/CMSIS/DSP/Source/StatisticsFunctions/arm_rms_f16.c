@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_rms_f16.c
  * Description:  Root mean square value of the elements of a floating-point vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions_f16.h"
 
@@ -35,18 +38,7 @@
   @ingroup groupStats
  */
 
-/**
-  @defgroup RMS Root mean square (RMS)
 
-  Calculates the Root Mean Square of the elements in the input vector.
-  The underlying algorithm is used:
-
-  <pre>
-      Result = sqrt(((pSrc[0] * pSrc[0] + pSrc[1] * pSrc[1] + ... + pSrc[blockSize-1] * pSrc[blockSize-1]) / blockSize));
-  </pre>
-
-  There are separate functions for floating point, Q31, and Q15 data types.
- */
 
 /**
   @addtogroup RMS
@@ -58,12 +50,11 @@
   @param[in]     pSrc       points to the input vector
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    root mean square value returned here
-  @return        none
  */
 
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
 
-void arm_rms_f16(
+ARM_DSP_ATTRIBUTE void arm_rms_f16(
   const float16_t * pSrc,
   uint32_t blockSize,
   float16_t * pResult)
@@ -77,7 +68,7 @@ void arm_rms_f16(
 }
 #else
 
-void arm_rms_f16(
+ARM_DSP_ATTRIBUTE void arm_rms_f16(
   const float16_t * pSrc,
         uint32_t blockSize,
         float16_t * pResult)

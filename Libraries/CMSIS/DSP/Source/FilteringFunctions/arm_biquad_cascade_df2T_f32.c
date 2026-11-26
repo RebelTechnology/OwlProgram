@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_biquad_cascade_df2T_f32.c
  * Description:  Processing function for floating-point transposed direct form II Biquad cascade filter
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -43,12 +46,11 @@
   @param[in]     pSrc      points to the block of input data
   @param[out]    pDst      points to the block of output data
   @param[in]     blockSize number of samples to process
-  @return        none
  */
 #if (defined(ARM_MATH_MVEF) && defined(ARM_MATH_HELIUM_EXPERIMENTAL)) && !defined(ARM_MATH_AUTOVECTORIZE)
 #include "arm_helium_utils.h"
 
-void arm_biquad_cascade_df2T_f32(
+ARM_DSP_ATTRIBUTE void arm_biquad_cascade_df2T_f32(
   const arm_biquad_cascade_df2T_instance_f32 * S,
   const float32_t * pSrc,
         float32_t * pDst,
@@ -180,9 +182,11 @@ void arm_biquad_cascade_df2T_f32(
     while (stage > 0U);
 }
 #else
-#if defined(ARM_MATH_NEON) 
+/* The Neon version is not passing the test so is disabled
+until the problem is corrected. Issue #186 */
+#if 0 //defined(ARM_MATH_NEON) 
 
-void arm_biquad_cascade_df2T_f32(
+ARM_DSP_ATTRIBUTE void arm_biquad_cascade_df2T_f32(
   const arm_biquad_cascade_df2T_instance_f32 * S,
   const float32_t * pSrc,
         float32_t * pDst,
@@ -344,7 +348,7 @@ void arm_biquad_cascade_df2T_f32(
 }
 #else
 
-void arm_biquad_cascade_df2T_f32(
+ARM_DSP_ATTRIBUTE void arm_biquad_cascade_df2T_f32(
   const arm_biquad_cascade_df2T_instance_f32 * S,
   const float32_t * pSrc,
         float32_t * pDst,

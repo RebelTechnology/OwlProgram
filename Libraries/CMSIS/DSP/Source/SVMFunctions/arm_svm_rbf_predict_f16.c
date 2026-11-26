@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_svm_rbf_predict_f16.c
  * Description:  SVM Radial Basis Function Classifier
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/svm_functions_f16.h"
 
@@ -45,7 +48,6 @@
  * @param[in]    S         Pointer to an instance of the rbf SVM structure.
  * @param[in]    in        Pointer to input vector
  * @param[out]   pResult   decision value
- * @return none.
  *
  */
 
@@ -54,7 +56,7 @@
 #include "arm_helium_utils.h"
 #include "arm_vec_math_f16.h"
 
-void arm_svm_rbf_predict_f16(
+ARM_DSP_ATTRIBUTE void arm_svm_rbf_predict_f16(
     const arm_svm_rbf_instance_f16 *S,
     const float16_t * in,
     int32_t * pResult)
@@ -75,7 +77,7 @@ void arm_svm_rbf_predict_f16(
     row = numRows;
 
     /*
-     * compute 4 rows in parrallel
+     * compute 4 rows in parallel
      */
     while (row >= 4) {
         const float16_t *pInA2, *pInA3;
@@ -180,7 +182,7 @@ void arm_svm_rbf_predict_f16(
     }
 
     /*
-     * compute 2 rows in parrallel
+     * compute 2 rows in parallel
      */
     if (row >= 2) {
         float16_t const *pSrcA0Vec, *pSrcA1Vec, *pInVec;
@@ -319,7 +321,7 @@ void arm_svm_rbf_predict_f16(
 }
 
 #else
-void arm_svm_rbf_predict_f16(
+ARM_DSP_ATTRIBUTE void arm_svm_rbf_predict_f16(
     const arm_svm_rbf_instance_f16 *S,
     const float16_t * in,
     int32_t * pResult)
@@ -334,7 +336,7 @@ void arm_svm_rbf_predict_f16(
         dot=0.0f16;
         for(j=0; j < S->vectorDimension; j++)
         {
-            dot = dot + SQ((_Float16)in[j] - (_Float16) *pSupport);
+            dot = dot + ARM_SQ((_Float16)in[j] - (_Float16) *pSupport);
             pSupport++;
         }
         sum += (_Float16)S->dualCoefficients[i] * (_Float16)expf((float32_t)(-(_Float16)S->gamma * (_Float16)dot));

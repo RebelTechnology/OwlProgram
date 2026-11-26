@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_scale_f64.c
  * Description:  Multiplies a floating-point vector by a scalar
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/basic_math_functions.h"
 
@@ -43,10 +46,9 @@
   @param[in]     scale      scale factor to be applied
   @param[out]    pDst       points to the output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
  */
 
-void arm_scale_f64(
+ARM_DSP_ATTRIBUTE void arm_scale_f64(
   const float64_t *pSrc,
         float64_t scale,
         float64_t *pDst,

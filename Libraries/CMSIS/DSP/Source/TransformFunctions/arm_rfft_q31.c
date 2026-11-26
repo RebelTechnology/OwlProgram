@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_rfft_q31.c
  * Description:  FFT & RIFFT Q31 process function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/transform_functions.h"
 
@@ -32,7 +35,8 @@
  * Internal functions prototypes
  * -------------------------------------------------------------------- */
 
-void arm_split_rfft_q31(
+#if !defined(ARM_MATH_NEON)
+ARM_DSP_ATTRIBUTE void arm_split_rfft_q31(
         q31_t * pSrc,
         uint32_t fftLen,
   const q31_t * pATable,
@@ -40,16 +44,16 @@ void arm_split_rfft_q31(
         q31_t * pDst,
         uint32_t modifier);
 
-void arm_split_rifft_q31(
+ARM_DSP_ATTRIBUTE void arm_split_rifft_q31(
         q31_t * pSrc,
         uint32_t fftLen,
   const q31_t * pATable,
   const q31_t * pBTable,
         q31_t * pDst,
         uint32_t modifier);
-
+#endif
 /**
-  @addtogroup RealFFT
+  @addtogroup RealFFTQ31
   @{
  */
 
@@ -58,29 +62,90 @@ void arm_split_rifft_q31(
   @param[in]     S     points to an instance of the Q31 RFFT/RIFFT structure
   @param[in]     pSrc  points to input buffer (Source buffer is modified by this function)
   @param[out]    pDst  points to output buffer
-  @return        none
 
   @par           Input an output formats
                    Internally input is downscaled by 2 for every stage to avoid saturations inside CFFT/CIFFT process.
                    Hence the output format is different for different RFFT sizes.
                    The input and output formats for different RFFT sizes and number of bits to upscale are mentioned in the tables below for RFFT and RIFFT:
-  @par
-                   \image html RFFTQ31.gif "Input and Output Formats for Q31 RFFT"
-  @par
-                   \image html RIFFTQ31.gif "Input and Output Formats for Q31 RIFFT"
-  @par
-                   If the input buffer is of length N, the output buffer must have length 2*N.
-                   The input buffer is modified by this function.
-  @par
-                   For the RIFFT, the source buffer must at least have length 
-                   fftLenReal + 2.
-                   The last two elements must be equal to what would be generated
-                   by the RFFT:
-                     (pSrc[0] - pSrc[1]) >> 1 and 0
+  @par             Input and Output formats for RFFT Q31
+
+| RFFT Size  | Input Format  | Output Format  | Number of bits to upscale |
+| ---------: | ------------: | -------------: | ------------------------: |
+| 32         | 1.31          | 6.26           | 5                         |
+| 64         | 1.31          | 7.25           | 6                         |
+| 128        | 1.31          | 8.24           | 7                         |
+| 256        | 1.31          | 9.23           | 8                         |
+| 512        | 1.31          | 10.22          | 9                         |
+| 1024       | 1.31          | 11.21          | 10                        |
+| 2048       | 1.31          | 12.20          | 11                        |
+| 4096       | 1.31          | 13.19          | 12                        |
+| 8192       | 1.31          | 14.18          | 13                        |
+             
+  @par             Input and Output formats for RIFFT Q31
+
+| RIFFT Size  | Input Format  | Output Format  | Number of bits to upscale |
+| ----------: | ------------: | -------------: | ------------------------: |
+| 32          | 1.31          | 6.26           | 0                         |
+| 64          | 1.31          | 7.25           | 0                         |
+| 128         | 1.31          | 8.24           | 0                         |
+| 256         | 1.31          | 9.23           | 0                         |
+| 512         | 1.31          | 10.22          | 0                         |
+| 1024        | 1.31          | 11.21          | 0                         |
+| 2048        | 1.31          | 12.20          | 0                         |
+| 4096        | 1.31          | 13.19          | 0                         |
+| 8192        | 1.31          | 14.18          | 0                         |
+
+                   
+  @par Neon implementation
+       A temporary buffer is needed
+
+  @code 
+       void arm_rfft_q31(
+  const arm_rfft_instance_q31 * S,
+        const q31_t * pSrc,
+        q31_t * pDst,
+        q31_t *tmp,
+        uint8_t ifftFlag
+        )
+  @endcode
+
+  @par Size of buffers according to the target architecture and datatype:
+       They are described on the page \ref transformbuffers "transform buffers".
 
  */
 
-void arm_rfft_q31(
+#if defined(ARM_MATH_NEON)
+#include "CMSIS_NE10_types.h"
+#include "CMSIS_NE10_fft.h"
+
+
+ARM_DSP_ATTRIBUTE void arm_rfft_q31(
+  const arm_rfft_instance_q31 * S,
+        const q31_t * pSrc,
+        q31_t * pDst,
+        q31_t *tmp,
+        uint8_t ifftFlag
+        )
+{
+    if (ifftFlag)
+    {
+        arm_ne10_fft_c2r_1d_int32_neon (pDst,
+                                 pSrc,
+                                 S,
+                                 1,
+                                 tmp);
+    }
+    else 
+    {
+        arm_ne10_fft_r2c_1d_int32_neon (pDst,
+                                 pSrc,
+                                 S,
+                                 1,
+                                 tmp);
+    }
+}
+#else
+ARM_DSP_ATTRIBUTE void arm_rfft_q31(
   const arm_rfft_instance_q31 * S,
         q31_t * pSrc,
         q31_t * pDst)
@@ -116,8 +181,9 @@ void arm_rfft_q31(
 
 }
 
+#endif
 /**
-  @} end of RealFFT group
+  @} end of RealFFTQ31 group
  */
 
 /**
@@ -128,7 +194,6 @@ void arm_rfft_q31(
   @param[in]     pBTable   points to twiddle Coef B buffer
   @param[out]    pDst      points to output buffer
   @param[in]     modifier  twiddle coefficient modifier that supports different size FFTs with the same twiddle factor table
-  @return        none
  */
 
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
@@ -136,14 +201,8 @@ void arm_rfft_q31(
 #include "arm_helium_utils.h"
 #include "arm_vec_fft.h"
 
-#if defined(__CMSIS_GCC_H)
 
-#define MVE_CMPLX_MULT_FX_AxB_S32(A,B)          vqdmladhxq_s32(vqdmlsdhq_s32((__typeof(A))vuninitializedq_s32(), A, B), A, B)
-#define MVE_CMPLX_MULT_FX_AxConjB_S32(A,B)      vqdmladhq_s32(vqdmlsdhxq_s32((__typeof(A))vuninitializedq_s32(), A, B), A, B)
-
-#endif 
-
-void arm_split_rfft_q31(
+ARM_DSP_ATTRIBUTE void arm_split_rfft_q31(
     q31_t       *pSrc,
     uint32_t     fftLen,
     const q31_t       *pATable,
@@ -178,12 +237,9 @@ void arm_split_rfft_q31(
         q31x4_t         in2 = vldrwq_gather_shifted_offset_s32(pSrc, offset);
         q31x4_t         coefA = vldrwq_gather_shifted_offset_s32(pCoefAb, offsetCoef);
         q31x4_t         coefB = vldrwq_gather_shifted_offset_s32(pCoefBb, offsetCoef);
-#if defined(__CMSIS_GCC_H)
-        q31x4_t         out = vhaddq_s32(MVE_CMPLX_MULT_FX_AxB_S32(in1, coefA),MVE_CMPLX_MULT_FX_AxConjB_S32(coefB, in2));
-#else
+
         q31x4_t         out = vhaddq_s32(MVE_CMPLX_MULT_FX_AxB(in1, coefA, q31x4_t),
                                          MVE_CMPLX_MULT_FX_AxConjB(coefB, in2, q31x4_t));
-#endif
         vst1q(pOut1, out);
         pOut1 += 4;
 
@@ -200,8 +256,8 @@ void arm_split_rfft_q31(
     pDst[0] = (pSrc[0] + pSrc[1]) >> 1U;
     pDst[1] = 0;
 }
-#else
-void arm_split_rfft_q31(
+#elif !defined(ARM_MATH_NEON)
+ARM_DSP_ATTRIBUTE void arm_split_rfft_q31(
         q31_t * pSrc,
         uint32_t fftLen,
   const q31_t * pATable,
@@ -296,12 +352,11 @@ void arm_split_rfft_q31(
   @param[in]     pBTable   points to twiddle Coef B buffer
   @param[out]    pDst      points to output buffer
   @param[in]     modifier  twiddle coefficient modifier that supports different size FFTs with the same twiddle factor table
-  @return        none
  */
 
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
 
-void arm_split_rifft_q31(
+ARM_DSP_ATTRIBUTE void arm_split_rifft_q31(
         q31_t * pSrc,
         uint32_t fftLen,
   const q31_t * pATable,
@@ -337,13 +392,9 @@ void arm_split_rifft_q31(
         q31x4_t         coefB = vldrwq_gather_shifted_offset_s32(pCoefBb, offsetCoef);
 
         /* can we avoid the conjugate here ? */
-#if defined(__CMSIS_GCC_H)
-        q31x4_t         out = vhaddq_s32(MVE_CMPLX_MULT_FX_AxConjB_S32(in1, coefA),
-                                     vmulq_s32(conj, MVE_CMPLX_MULT_FX_AxB_S32(in2, coefB)));
-#else
         q31x4_t         out = vhaddq_s32(MVE_CMPLX_MULT_FX_AxConjB(in1, coefA, q31x4_t),
                                          vmulq_s32(conj, MVE_CMPLX_MULT_FX_AxB(in2, coefB, q31x4_t)));
-#endif
+
         vst1q_s32(pDst, out);
         pDst += 4;
 
@@ -354,8 +405,8 @@ void arm_split_rifft_q31(
         i -= 1;
     }
 }
-#else
-void arm_split_rifft_q31(
+#elif !defined(ARM_MATH_NEON)
+ARM_DSP_ATTRIBUTE void arm_split_rifft_q31(
         q31_t * pSrc,
         uint32_t fftLen,
   const q31_t * pATable,

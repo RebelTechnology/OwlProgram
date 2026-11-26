@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_ldl_f64.c
  * Description:  Floating-point LDL decomposition
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,37 +26,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
+#include "dsp/matrix_utils.h"
+
 #include <math.h>
 
-
-
-/// @private
-#define SWAP_ROWS_F64(A,i,j) \
-{                            \
-  int w;                     \
-  for(w=0;w < n; w++)        \
-  {                          \
-     float64_t tmp;          \
-     tmp = A[i*n + w];       \
-     A[i*n + w] = A[j*n + w];\
-     A[j*n + w] = tmp;       \
-  }                          \
-}
-
-/// @private
-#define SWAP_COLS_F64(A,i,j) \
-{                            \
-  int w;                     \
-  for(w=0;w < n; w++)        \
-  {                          \
-     float64_t tmp;          \
-     tmp = A[w*n + i];       \
-     A[w*n + i] = A[w*n + j];\
-     A[w*n + j] = tmp;       \
-  }                          \
-}
 
 /**
   @ingroup groupMatrix
@@ -81,7 +59,7 @@
    *  Computes the LDL^t decomposition of a matrix A such that P A P^t = L D L^t.
    */
 
-arm_status arm_mat_ldlt_f64(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_ldlt_f64(
   const arm_matrix_instance_f64 * pSrc,
   arm_matrix_instance_f64 * pl,
   arm_matrix_instance_f64 * pd,
@@ -112,6 +90,8 @@ arm_status arm_mat_ldlt_f64(
     int fullRank = 1, diag,k;
     float64_t *pA;
 
+    memset(pd->pData,0,sizeof(float64_t)*n*n);
+
     memcpy(pl->pData,pSrc->pData,n*n*sizeof(float64_t));
     pA = pl->pData;
 
@@ -125,7 +105,7 @@ arm_status arm_mat_ldlt_f64(
     {
         /* Find pivot */
         float64_t m=F64_MIN,a;
-        int w,r,j=k; 
+        int r,j=k;
 
 
         for(r=k;r<n;r++)
@@ -139,8 +119,8 @@ arm_status arm_mat_ldlt_f64(
 
         if(j != k)
         {
-          SWAP_ROWS_F64(pA,k,j);
-          SWAP_COLS_F64(pA,k,j);
+          SWAP_ROWS_F64(pl,0,k,j);
+          SWAP_COLS_F64(pl,0,k,j);
         }
 
 
@@ -155,7 +135,7 @@ arm_status arm_mat_ldlt_f64(
             break;
         }
 
-        for(w=k+1;w<n;w++)
+        for(int w=k+1;w<n;w++)
         {
           int x;
           for(x=k+1;x<n;x++)
@@ -164,7 +144,7 @@ arm_status arm_mat_ldlt_f64(
           }
         }
 
-        for(w=k+1;w<n;w++)
+        for(int w=k+1;w<n;w++)
         {
                pA[w*n+k] = pA[w*n+k] / a;
         }

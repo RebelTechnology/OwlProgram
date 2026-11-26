@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_biquad_cascade_df2T_init_f64.c
  * Description:  Initialization function for floating-point transposed direct form II Biquad cascade filter
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -43,7 +46,6 @@
   @param[in]     numStages   number of 2nd order stages in the filter
   @param[in]     pCoeffs     points to the filter coefficients
   @param[in]     pState      points to the state buffer
-  @return        none
 
   @par           Coefficient and State Ordering
                    The coefficients are stored in the array <code>pCoeffs</code> in the following order:
@@ -62,23 +64,23 @@
                    The state variables are updated after each block of data is processed; the coefficients are untouched.
  */
 
-void arm_biquad_cascade_df2T_init_f64(
-        arm_biquad_cascade_df2T_instance_f64 * S,
-        uint8_t numStages,
-        const float64_t * pCoeffs,
-        float64_t * pState)
+ARM_DSP_ATTRIBUTE void arm_biquad_cascade_df2T_init_f64(
+    arm_biquad_cascade_df2T_instance_f64 * S,
+    uint8_t numStages,
+    const float64_t * pCoeffs,
+    float64_t * pState)
 {
-  /* Assign filter stages */
-  S->numStages = numStages;
-
-  /* Assign coefficient pointer */
-  S->pCoeffs = pCoeffs;
-
-  /* Clear state buffer and size is always 2 * numStages */
-  memset(pState, 0, (2U * (uint32_t) numStages) * sizeof(float64_t));
-
-  /* Assign state pointer */
-  S->pState = pState;
+    /* Assign filter stages */
+    S->numStages = numStages;
+    
+    /* Assign coefficient pointer */
+    S->pCoeffs = pCoeffs;
+    
+    /* Clear state buffer and size is always 2 * numStages */
+    memset(pState, 0, (2U * (uint32_t) numStages) * sizeof(float64_t));
+    
+    /* Assign state pointer */
+    S->pState = pState;
 }
 
 /**

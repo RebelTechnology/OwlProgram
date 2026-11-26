@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_const_structs_f16.c
  * Description:  Constant structs that are initialized for user convenience.
@@ -9,6 +9,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -26,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "arm_math_types_f16.h"
 
@@ -34,15 +37,10 @@
 #include "arm_const_structs_f16.h"
 
 
-/*
-ALLOW TABLE is true when config table is enabled and the Tramsform folder is included 
-for compilation.
-*/
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_FFT_ALLOW_TABLES)
 
 
 /* Floating-point structs */
-#if !defined(ARM_MATH_MVE_FLOAT16) || defined(ARM_MATH_AUTOVECTORIZE)
+#if !defined(ARM_MATH_MVE_FLOAT16)  && !defined(ARM_MATH_NEON_FLOAT16)
 
 
 /* 
@@ -57,63 +55,45 @@ For the MVE version, the new arm_cfft_init_f16 must be used.
 
 #if !defined(__CC_ARM)
  
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || (defined(ARM_TABLE_TWIDDLECOEF_F16_16) && defined(ARM_TABLE_BITREVIDX_FLT_16))
-const arm_cfft_instance_f16 arm_cfft_sR_f16_len16 = {
+const arm_cfft_instance_f16 arm_cfft_sR_f16_len16 ARM_DSP_TABLE_ATTRIBUTE = {
   16, twiddleCoefF16_16, armBitRevIndexTable_fixed_16, ARMBITREVINDEXTABLE_FIXED_16_TABLE_LENGTH
 };
-#endif
 
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || (defined(ARM_TABLE_TWIDDLECOEF_F16_32) && defined(ARM_TABLE_BITREVIDX_FLT_32))
-const arm_cfft_instance_f16 arm_cfft_sR_f16_len32 = {
+const arm_cfft_instance_f16 arm_cfft_sR_f16_len32 ARM_DSP_TABLE_ATTRIBUTE = {
   32, twiddleCoefF16_32, armBitRevIndexTable_fixed_32, ARMBITREVINDEXTABLE_FIXED_32_TABLE_LENGTH
 };
-#endif
 
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || (defined(ARM_TABLE_TWIDDLECOEF_F16_64) && defined(ARM_TABLE_BITREVIDX_FLT_64))
-const arm_cfft_instance_f16 arm_cfft_sR_f16_len64 = {
+const arm_cfft_instance_f16 arm_cfft_sR_f16_len64 ARM_DSP_TABLE_ATTRIBUTE = {
   64, twiddleCoefF16_64, armBitRevIndexTable_fixed_64, ARMBITREVINDEXTABLE_FIXED_64_TABLE_LENGTH
 };
-#endif
 
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || (defined(ARM_TABLE_TWIDDLECOEF_F16_128) && defined(ARM_TABLE_BITREVIDX_FLT_128))
-const arm_cfft_instance_f16 arm_cfft_sR_f16_len128 = {
+const arm_cfft_instance_f16 arm_cfft_sR_f16_len128 ARM_DSP_TABLE_ATTRIBUTE = {
   128, twiddleCoefF16_128, armBitRevIndexTable_fixed_128, ARMBITREVINDEXTABLE_FIXED_128_TABLE_LENGTH
 };
-#endif
 
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || (defined(ARM_TABLE_TWIDDLECOEF_F16_256) && defined(ARM_TABLE_BITREVIDX_FLT_256))
-const arm_cfft_instance_f16 arm_cfft_sR_f16_len256 = {
+const arm_cfft_instance_f16 arm_cfft_sR_f16_len256 ARM_DSP_TABLE_ATTRIBUTE = {
   256, twiddleCoefF16_256, armBitRevIndexTable_fixed_256, ARMBITREVINDEXTABLE_FIXED_256_TABLE_LENGTH
 };
-#endif
 
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || (defined(ARM_TABLE_TWIDDLECOEF_F16_512) && defined(ARM_TABLE_BITREVIDX_FLT_512))
-const arm_cfft_instance_f16 arm_cfft_sR_f16_len512 = {
+const arm_cfft_instance_f16 arm_cfft_sR_f16_len512 ARM_DSP_TABLE_ATTRIBUTE = {
   512, twiddleCoefF16_512, armBitRevIndexTable_fixed_512, ARMBITREVINDEXTABLE_FIXED_512_TABLE_LENGTH
 };
-#endif
 
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || (defined(ARM_TABLE_TWIDDLECOEF_F16_1024) && defined(ARM_TABLE_BITREVIDX_FLT_1024))
-const arm_cfft_instance_f16 arm_cfft_sR_f16_len1024 = {
+const arm_cfft_instance_f16 arm_cfft_sR_f16_len1024 ARM_DSP_TABLE_ATTRIBUTE = {
   1024, twiddleCoefF16_1024, armBitRevIndexTable_fixed_1024, ARMBITREVINDEXTABLE_FIXED_1024_TABLE_LENGTH
 };
-#endif
 
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || (defined(ARM_TABLE_TWIDDLECOEF_F16_2048) && defined(ARM_TABLE_BITREVIDX_FLT_2048))
-const arm_cfft_instance_f16 arm_cfft_sR_f16_len2048 = {
+const arm_cfft_instance_f16 arm_cfft_sR_f16_len2048 ARM_DSP_TABLE_ATTRIBUTE = {
   2048, twiddleCoefF16_2048, armBitRevIndexTable_fixed_2048, ARMBITREVINDEXTABLE_FIXED_2048_TABLE_LENGTH
 };
-#endif
 
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || (defined(ARM_TABLE_TWIDDLECOEF_F16_4096) && defined(ARM_TABLE_BITREVIDX_FLT_4096))
-const arm_cfft_instance_f16 arm_cfft_sR_f16_len4096 = {
+const arm_cfft_instance_f16 arm_cfft_sR_f16_len4096 ARM_DSP_TABLE_ATTRIBUTE = {
   4096, twiddleCoefF16_4096, armBitRevIndexTable_fixed_4096, ARMBITREVINDEXTABLE_FIXED_4096_TABLE_LENGTH
 };
+
+
+
 #endif
-#endif 
-
-#endif /* !defined(ARM_MATH_MVEF) || defined(ARM_MATH_AUTOVECTORIZE) */
-
 
 #endif
 

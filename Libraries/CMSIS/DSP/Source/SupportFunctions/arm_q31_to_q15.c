@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_q31_to_q15.c
  * Description:  Converts the elements of the Q31 vector to Q15 vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/support_functions.h"
 
@@ -42,7 +45,6 @@
   @param[in]     pSrc       points to the Q31 input vector
   @param[out]    pDst       points to the Q15 output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
 
   @par           Details
                    The equation used for the conversion process is:
@@ -51,14 +53,14 @@
   </pre>
  */
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
-void arm_q31_to_q15(
+ARM_DSP_ATTRIBUTE void arm_q31_to_q15(
   const q31_t * pSrc,
         q15_t * pDst,
         uint32_t blockSize)
 {
     uint32_t  blkCnt;           /* loop counters */
     q31x4x2_t tmp;
-    q15x8_t vecDst;
+    q15x8_t vecDst = { 0 };
     q31_t const *pSrcVec;
 
 
@@ -97,7 +99,7 @@ void arm_q31_to_q15(
 }
 
 #else
-void arm_q31_to_q15(
+ARM_DSP_ATTRIBUTE void arm_q31_to_q15(
   const q31_t * pSrc,
         q15_t * pDst,
         uint32_t blockSize)

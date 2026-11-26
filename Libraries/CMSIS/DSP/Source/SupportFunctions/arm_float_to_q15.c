@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_float_to_q15.c
  * Description:  Converts the elements of the floating-point vector to Q15 vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/support_functions.h"
 
@@ -42,7 +45,6 @@
   @param[in]     pSrc       points to the floating-point input vector
   @param[out]    pDst       points to the Q15 output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
 
   @par           Details
                    The equation used for the conversion process is:
@@ -60,15 +62,15 @@
  */
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
-void arm_float_to_q15(
+ARM_DSP_ATTRIBUTE void arm_float_to_q15(
   const float32_t * pSrc,
   q15_t * pDst,
   uint32_t blockSize)
 {
     uint32_t         blkCnt;
-    float32_t       maxQ = (float32_t) Q15_MAX;
+    float32_t       maxQ = (float32_t) (Q15_MAX) + 1.0f;
     f32x4x2_t       tmp;
-    q15x8_t         vecDst;
+    q15x8_t         vecDst = { 0 };
 #ifdef ARM_MATH_ROUNDING
     float32_t in;
 #endif
@@ -122,7 +124,7 @@ void arm_float_to_q15(
 
 #else
 #if defined(ARM_MATH_NEON_EXPERIMENTAL)
-void arm_float_to_q15(
+ARM_DSP_ATTRIBUTE void arm_float_to_q15(
   const float32_t * pSrc,
   q15_t * pDst,
   uint32_t blockSize)
@@ -213,7 +215,7 @@ void arm_float_to_q15(
   }
 }
 #else
-void arm_float_to_q15(
+ARM_DSP_ATTRIBUTE void arm_float_to_q15(
   const float32_t * pSrc,
         q15_t * pDst,
         uint32_t blockSize)

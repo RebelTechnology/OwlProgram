@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_solve_upper_triangular_f32.c
  * Description:  Solve linear system UT X = A with UT upper triangular matrix
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
 
@@ -147,7 +150,7 @@ arm_status status;                             /* status of matrix inverse */
 }
 
 #else
-#if defined(ARM_MATH_NEON) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON)
   arm_status arm_mat_solve_upper_triangular_f32(
   const arm_matrix_instance_f32 * ut,
   const arm_matrix_instance_f32 * a,
@@ -197,7 +200,11 @@ arm_status status;                             /* status of matrix inverse */
             for(k=n-1; k > i; k--)
             {
                 vecX = vld1q_f32(&pX[cols*k+j]);          
+#if defined(__ARM_FEATURE_FMA)
                 vecA = vfmsq_f32(vecA,vdupq_n_f32(pUT[n*i + k]),vecX);
+#else
+                vecA = vmlsq_f32(vecA,vdupq_n_f32(pUT[n*i + k]),vecX);
+#endif
             }
 
             if (pUT[n*i + i]==0.0f)

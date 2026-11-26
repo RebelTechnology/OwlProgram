@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_conv_partial_q15.c
  * Description:  Partial convolution of Q15 sequences
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -56,7 +59,7 @@
                    Refer to \ref arm_conv_partial_opt_q15() for a faster implementation of this function using scratch buffers.
  */
 
-arm_status arm_conv_partial_q15(
+ARM_DSP_ATTRIBUTE arm_status arm_conv_partial_q15(
   const q15_t * pSrcA,
         uint32_t srcALen,
   const q15_t * pSrcB,
@@ -453,13 +456,19 @@ arm_status arm_conv_partial_q15(
         }
 
         /* Store the results in the accumulators in the destination buffer. */
-#ifndef ARM_MATH_BIG_ENDIAN
-        write_q15x2_ia (&pOut, __PKHBT(__SSAT((acc0 >> 15), 16), __SSAT((acc1 >> 15), 16), 16));
-        write_q15x2_ia (&pOut, __PKHBT(__SSAT((acc2 >> 15), 16), __SSAT((acc3 >> 15), 16), 16));
+        {
+          int32_t sat0 = __SSAT((acc0 >> 15), 16);
+          int32_t sat1 = __SSAT((acc1 >> 15), 16);
+          int32_t sat2 = __SSAT((acc2 >> 15), 16);
+          int32_t sat3 = __SSAT((acc3 >> 15), 16);
+#ifndef  ARM_MATH_BIG_ENDIAN
+          write_q15x2_ia (&pOut, __PKHBT(sat0, sat1, 16));
+          write_q15x2_ia (&pOut, __PKHBT(sat2, sat3, 16));
 #else
-        write_q15x2_ia (&pOut, __PKHBT(__SSAT((acc1 >> 15), 16), __SSAT((acc0 >> 15), 16), 16));
-        write_q15x2_ia (&pOut, __PKHBT(__SSAT((acc3 >> 15), 16), __SSAT((acc2 >> 15), 16), 16));
-#endif /* #ifndef  ARM_MATH_BIG_ENDIAN */
+          write_q15x2_ia (&pOut, __PKHBT(sat1, sat0, 16));
+          write_q15x2_ia (&pOut, __PKHBT(sat3, sat2, 16));
+#endif /*      #ifndef  ARM_MATH_BIG_ENDIAN    */
+        }
 
         /* Increment the pointer pIn1 index, count by 4 */
         count += 4U;

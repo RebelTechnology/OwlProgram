@@ -1,3 +1,4 @@
+﻿
 
 /* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
@@ -26,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/distance_functions_f16.h"
 
@@ -63,7 +66,7 @@
  *
  */
 
-float16_t arm_correlation_distance_f16(float16_t *pA,float16_t *pB, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float16_t arm_correlation_distance_f16(float16_t *pA,float16_t *pB, uint32_t blockSize)
 {
     float16_t ma,mb,pwra,pwrb,dot,tmp;
 

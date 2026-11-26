@@ -32,8 +32,10 @@
 #include "arm_mat_cmplx_mult_f32.c"
 #include "arm_mat_cmplx_mult_q15.c"
 #include "arm_mat_cmplx_mult_q31.c"
+#include "arm_mat_init_f64.c"
 #include "arm_mat_init_f32.c"
 #include "arm_mat_init_q15.c"
+#include "arm_mat_init_q7.c"
 #include "arm_mat_init_q31.c"
 #include "arm_mat_inverse_f32.c"
 #include "arm_mat_inverse_f64.c"
@@ -72,3 +74,10 @@
 #include "arm_mat_solve_lower_triangular_f64.c"
 #include "arm_mat_ldlt_f32.c"
 #include "arm_mat_ldlt_f64.c"
+#include "arm_mat_qr_f32.c"
+#include "arm_mat_qr_f64.c"
+#include "arm_householder_f64.c"
+#include "arm_householder_f32.c"
+#if defined(ARM_MATH_NEON)
+#include "_arm_mat_mult_neon_buffers.c"
+#endif

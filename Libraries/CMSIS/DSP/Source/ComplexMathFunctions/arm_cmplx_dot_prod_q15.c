@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cmplx_dot_prod_q15.c
  * Description:  Processing function for the Q15 Complex Dot product
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/complex_math_functions.h"
 
@@ -44,7 +47,6 @@
   @param[in]     numSamples  number of samples in each vector
   @param[out]    realResult  real part of the result returned here
   @param[out]    imagResult  imaginary part of the result returned her
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function is implemented using an internal 64-bit accumulator.
@@ -55,7 +57,7 @@
  */
 
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
-void arm_cmplx_dot_prod_q15(
+ARM_DSP_ATTRIBUTE void arm_cmplx_dot_prod_q15(
   const q15_t * pSrcA,
   const q15_t * pSrcB,
         uint32_t numSamples,
@@ -156,7 +158,7 @@ void arm_cmplx_dot_prod_q15(
     *imagResult = asrl(accImag, (14 - 8));
 }
 #else
-void arm_cmplx_dot_prod_q15(
+ARM_DSP_ATTRIBUTE void arm_cmplx_dot_prod_q15(
   const q15_t * pSrcA,
   const q15_t * pSrcB,
         uint32_t numSamples,

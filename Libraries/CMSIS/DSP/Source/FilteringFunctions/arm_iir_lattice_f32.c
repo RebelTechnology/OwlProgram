@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_iir_lattice_f32.c
  * Description:  Floating-point IIR Lattice filter processing function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -115,10 +118,9 @@
   @param[in]     pSrc       points to the block of input data
   @param[out]    pDst       points to the block of output data
   @param[in]     blockSize  number of samples to process
-  @return        none
  */
 
-void arm_iir_lattice_f32(
+ARM_DSP_ATTRIBUTE void arm_iir_lattice_f32(
   const arm_iir_lattice_instance_f32 * S,
   const float32_t * pSrc,
         float32_t * pDst,
@@ -126,7 +128,7 @@ void arm_iir_lattice_f32(
 {       
         float32_t *pState = S->pState;                   /* State pointer */
         float32_t *pStateCur;                            /* State current pointer */
-        float32_t acc;                                   /* Accumlator */
+        float32_t acc;                                   /* Accumulator */
         float32_t fnext1, fnext2, gcurr1, gnext;         /* Temporary variables for lattice stages */
         float32_t *px1, *px2, *pk, *pv;                  /* Temporary pointers for state and coef */
         uint32_t numStages = S->numStages;               /* Number of stages */
@@ -306,7 +308,7 @@ void arm_iir_lattice_f32(
   }
 
   /* Processing is complete. Now copy last S->numStages samples to start of the buffer
-     for the preperation of next frame process */
+     for the preparation of next frame process */
 
   /* Points to the start of the state buffer */
   pStateCur = &S->pState[0];

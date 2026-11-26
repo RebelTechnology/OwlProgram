@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_xor_u16.c
  * Description:  uint16_t bitwise exclusive OR
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/basic_math_functions.h"
 
@@ -51,10 +54,9 @@
   @param[in]     pSrcB      points to input vector B
   @param[out]    pDst       points to output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
  */
 
-void arm_xor_u16(
+ARM_DSP_ATTRIBUTE void arm_xor_u16(
     const uint16_t * pSrcA,
     const uint16_t * pSrcB,
           uint16_t * pDst,
@@ -94,7 +96,7 @@ void arm_xor_u16(
         vstrhq_p(pDst, veorq_u16(vecSrcA, vecSrcB), p0);
     }
 #else
-#if defined(ARM_MATH_NEON) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON)
     uint16x8_t vecA, vecB;
 
     /* Compute 8 outputs at a time */

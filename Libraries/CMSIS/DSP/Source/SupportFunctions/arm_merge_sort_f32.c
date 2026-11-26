@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_merge_sort_f32.c
  * Description:  Floating point merge sort
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/support_functions.h"
 #include "arm_sorting.h"
@@ -100,7 +103,7 @@ static void arm_merge_sort_core_f32(float32_t * pB, uint32_t begin, uint32_t end
    */
 
 
-void arm_merge_sort_f32(
+ARM_DSP_ATTRIBUTE void arm_merge_sort_f32(
   const arm_merge_sort_instance_f32 * S, 
         float32_t *pSrc, 
         float32_t *pDst, 

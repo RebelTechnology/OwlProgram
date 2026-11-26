@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cos_q15.c
  * Description:  Fast cosine calculation for Q15 values
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/fast_math_functions.h"
 #include "arm_common_tables.h"
@@ -57,7 +60,7 @@
   to the saturated negative or positive value.
  */
 
-arm_status arm_divide_q15(q15_t numerator,
+ARM_DSP_ATTRIBUTE arm_status arm_divide_q15(q15_t numerator,
   q15_t denominator,
   q15_t *quotient,
   int16_t *shift)
@@ -68,23 +71,23 @@ arm_status arm_divide_q15(q15_t numerator,
 
   *shift = 0;
 
-  sign = (numerator>>15) ^ (denominator>>15);
+  sign = (numerator<0) ^ (denominator<0);
 
   if (denominator == 0)
   {
      if (sign)
      {
-        *quotient = 0x8000;
+        *quotient = -32768;
      }
      else
      {
-        *quotient = 0x7FFF;
+        *quotient = 32767;
      }
      return(ARM_MATH_NANINF);
   }
 
-  numerator = abs(numerator);
-  denominator = abs(denominator);
+  arm_abs_q15(&numerator,&numerator,1);
+  arm_abs_q15(&denominator,&denominator,1);
   
   temp = ((q31_t)numerator << 15) / ((q31_t)denominator);
 

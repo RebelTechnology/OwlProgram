@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_copy_f32.c
  * Description:  Copies the elements of a floating-point vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/support_functions.h"
 
@@ -54,11 +57,10 @@
   @param[in]     pSrc       points to input vector
   @param[out]    pDst       points to output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
  */
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
 
-void arm_copy_f32(
+ARM_DSP_ATTRIBUTE void arm_copy_f32(
   const float32_t * pSrc,
   float32_t * pDst,
   uint32_t blockSize)
@@ -95,8 +97,8 @@ void arm_copy_f32(
 }
 
 #else
-#if defined(ARM_MATH_NEON_EXPERIMENTAL)
-void arm_copy_f32(
+#if defined(ARM_MATH_NEON_EXPERIMENTAL) 
+ARM_DSP_ATTRIBUTE void arm_copy_f32(
   const float32_t * pSrc,
   float32_t * pDst,
   uint32_t blockSize)
@@ -137,7 +139,7 @@ void arm_copy_f32(
   }
 }
 #else
-void arm_copy_f32(
+ARM_DSP_ATTRIBUTE void arm_copy_f32(
   const float32_t * pSrc,
         float32_t * pDst,
         uint32_t blockSize)

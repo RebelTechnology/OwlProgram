@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_vec_mult_f32.c
  * Description:  Floating-point matrix and vector multiplication
@@ -9,6 +9,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -26,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
 
@@ -56,7 +59,7 @@
 
 #include "arm_helium_utils.h"
 
-void arm_mat_vec_mult_f32(
+ARM_DSP_ATTRIBUTE void arm_mat_vec_mult_f32(
     const arm_matrix_instance_f32   *pSrcMat,
     const float32_t                 *pSrcVec,
     float32_t                       *pDstVec)
@@ -165,7 +168,7 @@ void arm_mat_vec_mult_f32(
     }
 
     /*
-     * compute 2 rows in parrallel
+     * compute 2 rows in parallel
      */
     if (row >= 2)
     {
@@ -287,7 +290,66 @@ void arm_mat_vec_mult_f32(
 }
 #else
 
-void arm_mat_vec_mult_f32(const arm_matrix_instance_f32 *pSrcMat, const float32_t *pVec, float32_t *pDst)
+#if defined(ARM_MATH_NEON)
+
+#if defined(__aarch64__)
+#define TMP_DEFINE_AND_INIT(acc)
+
+#define REDUCE(sum,accum) \
+    sum = vpadds_f32(vpadd_f32(vget_low_f32(accum), vget_high_f32(accum)));
+#else
+#define TMP_DEFINE_AND_INIT(tmp) \
+    float32x2_t tmp = vdup_n_f32(0.0f);
+    
+#define REDUCE(sum,accum)                                \
+    tmp = vpadd_f32(vget_low_f32(accum), vget_high_f32(accum)); \
+    sum = vget_lane_f32(tmp, 0) + vget_lane_f32(tmp, 1);
+#endif 
+
+// No need of bigger temporary variable for
+// reducing the accumulated value
+#define BIG_TMP_DEFINE_AND_INIT(TMP)
+
+#define MAT_SCALAR_DT float32_t 
+#define VEC_SCALAR_DT float32_t 
+#define VECTOR_ACC float32x4_t
+#define VECTOR_DT float32x4_t
+#define SCALAR_ACC float32_t
+#define HALF_VECTOR_ACC float32x2_t
+#define NBLANE 4
+#define NBLANE_SHIFT 2
+
+#define VECTOR_ACC_INIT(acc) \
+    acc = vdupq_n_f32(0.0f) 
+
+#define SCALAR_ACC_INIT(acc) \
+    acc = 0.0f
+  
+#define VEC_LOAD(v,p) \
+    v = vld1q_f32((p))
+
+
+#if defined(__ARM_FEATURE_FMA)
+#define VMAC(ACC,VA,VB) ACC = vfmaq_f32(ACC,(VA),(VB))
+#else
+#define VMAC(ACC,VA,VB) ACC = vmlaq_f32(ACC,(VA),(VB))
+#endif
+
+#define SCALAR_MAC(ACC,MAT,VEC) \
+    ACC = ACC + (MAT) * (VEC)
+
+#define STORE_SCALAR_ACC(DST,ACC) \
+  DST = ACC
+
+#define FUNCNAME arm_mat_vec_mult_f32
+#define MATRIX_TYPE arm_matrix_instance_f32
+
+#include "_arm_mat_vec_mult_neon.c"
+
+
+
+#else
+ARM_DSP_ATTRIBUTE void arm_mat_vec_mult_f32(const arm_matrix_instance_f32 *pSrcMat, const float32_t *pVec, float32_t *pDst)
 {
     uint32_t numRows = pSrcMat->numRows;
     uint32_t numCols = pSrcMat->numCols;
@@ -298,7 +360,8 @@ void arm_mat_vec_mult_f32(const arm_matrix_instance_f32 *pSrcMat, const float32_
     const float32_t *pInA4;      /* input data matrix pointer A of Q31 type */
     const float32_t *pInVec;     /* input data matrix pointer B of Q31 type */
     float32_t *px;               /* Temporary output data matrix pointer */
-    uint16_t i, row, colCnt; /* loop counters */
+    uint32_t i;
+    uint16_t row, colCnt; /* loop counters */
     float32_t matData, matData2, vecData, vecData2;
 
 
@@ -392,6 +455,7 @@ void arm_mat_vec_mult_f32(const arm_matrix_instance_f32 *pSrcMat, const float32_
         row--;
     }
 }
+#endif /* defined(ARM_MATH_NEON) */
 #endif /* defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE) */
 
 /**

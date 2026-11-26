@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_clip_f32.c
  * Description:  Floating-point vector addition
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/basic_math_functions.h"
 
@@ -54,13 +57,12 @@
   @param[in]     low           lower bound
   @param[in]     high          higher bound
   @param[in]     numSamples    number of samples to clip
-  @return        none
  */
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
 
-void arm_clip_f32(const float32_t * pSrc, 
+ARM_DSP_ATTRIBUTE void arm_clip_f32(const float32_t * pSrc, 
   float32_t * pDst, 
   float32_t low, 
   float32_t high, 
@@ -120,7 +122,7 @@ void arm_clip_f32(const float32_t * pSrc,
 }
 
 #else
-void arm_clip_f32(const float32_t * pSrc, 
+ARM_DSP_ATTRIBUTE void arm_clip_f32(const float32_t * pSrc, 
   float32_t * pDst, 
   float32_t low, 
   float32_t high, 

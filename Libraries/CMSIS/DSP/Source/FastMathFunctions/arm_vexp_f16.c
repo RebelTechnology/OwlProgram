@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_vlog_f16.c
  * Description:  Fast vectorized log
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/fast_math_functions_f16.h"
 
@@ -34,8 +37,18 @@
 
 #include "arm_vec_math_f16.h"
 
+/**
+  @addtogroup vexp
+  @{
+ */
 
-void arm_vexp_f16(
+/**
+  @brief         Floating-point vector of exp values.
+  @param[in]     pSrc       points to the input vector
+  @param[out]    pDst       points to the output vector
+  @param[in]     blockSize  number of samples in each vector
+ */
+ARM_DSP_ATTRIBUTE void arm_vexp_f16(
   const float16_t * pSrc,
         float16_t * pDst,
         uint32_t blockSize)
@@ -80,3 +93,6 @@ void arm_vexp_f16(
 
 #endif /* #if defined(ARM_FLOAT16_SUPPORTED) */ 
 
+/**
+  @} end of vexp group
+ */

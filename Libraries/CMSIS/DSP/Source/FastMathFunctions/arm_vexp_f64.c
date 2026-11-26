@@ -1,13 +1,14 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_vlog_f64.c
  * Description:  Fast vectorized log
  *
- * $Date:        13 September 2021
- * $Revision:    V1.10.0
+ * $Date:        10 August 2022
+ * $Revision:    V1.10.1
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,27 +26,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/fast_math_functions.h"
 #include "arm_common_tables.h"
 
-void arm_vexp_f64(
-  const float64_t * pSrc,
-        float64_t * pDst,
-        uint32_t blockSize)
+
+ARM_DSP_ATTRIBUTE void arm_vexp_f64(
+    const float64_t * pSrc,
+    float64_t * pDst,
+    uint32_t blockSize)
 {
-   uint32_t blkCnt; 
+    uint32_t blkCnt;
 
-   blkCnt = blockSize;
+    blkCnt = blockSize;
 
-   while (blkCnt > 0U)
-   {
-      /* C = log(A) */
-  
-      /* Calculate log and store result in destination buffer. */
-      *pDst++ = exp(*pSrc++);
-  
-      /* Decrement loop counter */
-      blkCnt--;
-   }
+    while (blkCnt > 0U)
+    {
+        /* C = log(A) */
+        
+        
+        /* Calculate log and store result in destination buffer. */
+        *pDst++ = exp(*pSrc++);
+        
+        /* Decrement loop counter */
+        blkCnt--;
+    }
 }

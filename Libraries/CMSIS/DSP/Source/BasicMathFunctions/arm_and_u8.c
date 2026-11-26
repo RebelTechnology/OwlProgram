@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_and_u8.c
  * Description:  uint8_t bitwise AND
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/basic_math_functions.h"
 
@@ -44,10 +47,9 @@
   @param[in]     pSrcB      points to input vector B
   @param[out]    pDst       points to output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
  */
 
-void arm_and_u8(
+ARM_DSP_ATTRIBUTE void arm_and_u8(
     const uint8_t * pSrcA,
     const uint8_t * pSrcB,
           uint8_t * pDst,
@@ -87,7 +89,7 @@ void arm_and_u8(
         vstrbq_p(pDst, vandq_u8(vecSrcA, vecSrcB), p0);
     }
 #else
-#if defined(ARM_MATH_NEON) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON)
     uint8x16_t vecA, vecB;
 
     /* Compute 16 outputs at a time */

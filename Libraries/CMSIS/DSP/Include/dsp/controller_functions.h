@@ -24,8 +24,8 @@
  */
 
  
-#ifndef _CONTROLLER_FUNCTIONS_H_
-#define _CONTROLLER_FUNCTIONS_H_
+#ifndef CONTROLLER_FUNCTIONS_H_
+#define CONTROLLER_FUNCTIONS_H_
 
 #include "arm_math_types.h"
 #include "arm_math_memory.h"
@@ -52,15 +52,35 @@ extern "C"
  */
 
 
- /**
-   * @ingroup groupController
-   */
+/**
+  @ingroup groupController
+ */
 
-  /**
-   * @addtogroup SinCos
-   * @{
-   */
+/**
+  @defgroup SinCos Sine Cosine
 
+  Computes the trigonometric sine and cosine values using a combination of table lookup
+  and linear interpolation.
+  There are separate functions for Q31 and floating-point data types.
+  The input to the floating-point version is in degrees while the
+  fixed-point Q31 have a scaled input with the range
+  [-1 0.9999] mapping to [-180 +180] degrees.
+
+  The floating point function also allows values that are out of the usual range. When this happens, the function will
+  take extra time to adjust the input value to the range of [-180 180].
+
+  The result is accurate to 5 digits after the decimal point.
+
+  The implementation is based on table lookup using 360 values together with linear interpolation.
+  The steps used are:
+   -# Calculation of the nearest integer table index.
+   -# Compute the fractional portion (fract) of the input.
+   -# Fetch the value corresponding to \c index from sine table to \c y0 and also value from \c index+1 to \c y1.
+   -# Sine value is computed as <code> *psinVal = y0 + (fract * (y1 - y0))</code>.
+   -# Fetch the value corresponding to \c index from cosine table to \c y0 and also value from \c index+1 to \c y1.
+   -# Cosine value is computed as <code> *pcosVal = y0 + (fract * (y1 - y0))</code>.
+ */
+ 
 /**
    * @brief  Floating-point sin_cos function.
    * @param[in]  theta   input value in degrees
@@ -84,14 +104,11 @@ extern "C"
         q31_t * pSinVal,
         q31_t * pCosVal);
 
-  /**
-   * @} end of SinCos group
-   */
 
- /**
-   * @ingroup groupController
-   */
-
+/**
+  @ingroup groupController
+ */
+  
 /**
    * @defgroup PID PID Motor Control
    *
@@ -152,6 +169,7 @@ extern "C"
 
 
   /**
+   * @ingroup PID
    * @brief Instance structure for the Q15 PID Control.
    */
   typedef struct
@@ -170,6 +188,7 @@ extern "C"
   } arm_pid_instance_q15;
 
   /**
+   * @ingroup PID
    * @brief Instance structure for the Q31 PID Control.
    */
   typedef struct
@@ -184,6 +203,7 @@ extern "C"
   } arm_pid_instance_q31;
 
   /**
+   * @ingroup PID
    * @brief Instance structure for the floating-point PID Control.
    */
   typedef struct
@@ -255,12 +275,10 @@ extern "C"
 
 
 
-  /**
-   * @addtogroup PID
-   * @{
-   */
+
 
   /**
+   * @ingroup PID
    * @brief         Process function for the floating-point PID Control.
    * @param[in,out] S   is an instance of the floating-point PID Control structure
    * @param[in]     in  input sample to process
@@ -287,6 +305,7 @@ extern "C"
   }
 
 /**
+  @ingroup PID
   @brief         Process function for the Q31 PID Control.
   @param[in,out] S  points to an instance of the Q31 PID Control structure
   @param[in]     in  input sample to process
@@ -297,7 +316,8 @@ extern "C"
          The accumulator has a 2.62 format and maintains full precision of the intermediate multiplication results but provides only a single guard bit.
          Thus, if the accumulator result overflows it wraps around rather than clip.
          In order to avoid overflows completely the input signal must be scaled down by 2 bits as there are four additions.
-         After all multiply-accumulates are performed, the 2.62 accumulator is truncated to 1.32 format and then saturated to 1.31 format.
+         After all multiply-accumulates are performed, the 2.62 accumulator is truncated to 1.32 format and then converted to 1.31 format.
+         Neither this conversion nor the following addition of y[n-1] is saturating.
  */
 __STATIC_FORCEINLINE q31_t arm_pid_q31(
   arm_pid_instance_q31 * S,
@@ -332,6 +352,7 @@ __STATIC_FORCEINLINE q31_t arm_pid_q31(
 
 
 /**
+  @ingroup PID
   @brief         Process function for the Q15 PID Control.
   @param[in,out] S   points to an instance of the Q15 PID Control structure
   @param[in]     in  input sample to process
@@ -384,9 +405,7 @@ __STATIC_FORCEINLINE q15_t arm_pid_q15(
     return (out);
   }
 
-  /**
-   * @} end of PID group
-   */
+
 
   /**
    * @ingroup groupController
@@ -416,12 +435,10 @@ __STATIC_FORCEINLINE q15_t arm_pid_q15(
    * Refer to the function specific documentation below for usage guidelines.
    */
 
-  /**
-   * @addtogroup park
-   * @{
-   */
+ 
 
   /**
+   * @ingroup park
    * @brief Floating-point Park transform
    * @param[in]  Ialpha  input two-phase vector coordinate alpha
    * @param[in]  Ibeta   input two-phase vector coordinate beta
@@ -429,7 +446,6 @@ __STATIC_FORCEINLINE q15_t arm_pid_q15(
    * @param[out] pIq     points to output   rotor reference frame q
    * @param[in]  sinVal  sine value of rotation angle theta
    * @param[in]  cosVal  cosine value of rotation angle theta
-   * @return     none
    *
    * The function implements the forward Park transform.
    *
@@ -451,6 +467,7 @@ __STATIC_FORCEINLINE q15_t arm_pid_q15(
 
 
 /**
+  @ingroup park
   @brief  Park transform for Q31 version
   @param[in]  Ialpha  input two-phase vector coordinate alpha
   @param[in]  Ibeta   input two-phase vector coordinate beta
@@ -458,7 +475,6 @@ __STATIC_FORCEINLINE q15_t arm_pid_q15(
   @param[out] pIq     points to output rotor reference frame q
   @param[in]  sinVal  sine value of rotation angle theta
   @param[in]  cosVal  cosine value of rotation angle theta
-  @return     none
 
   \par Scaling and Overflow Behavior
          The function is implemented using an internal 32-bit accumulator.
@@ -496,9 +512,6 @@ __STATIC_FORCEINLINE void arm_park_q31(
     *pIq = __QSUB(product4, product3);
   }
 
-  /**
-   * @} end of park group
-   */
 
 
   /**
@@ -522,12 +535,10 @@ __STATIC_FORCEINLINE void arm_park_q31(
    * Refer to the function specific documentation below for usage guidelines.
    */
 
-  /**
-   * @addtogroup inv_park
-   * @{
-   */
+  
 
    /**
+   * @ingroup inv_park
    * @brief  Floating-point Inverse Park transform
    * @param[in]  Id       input coordinate of rotor reference frame d
    * @param[in]  Iq       input coordinate of rotor reference frame q
@@ -535,7 +546,6 @@ __STATIC_FORCEINLINE void arm_park_q31(
    * @param[out] pIbeta   points to output two-phase orthogonal vector axis beta
    * @param[in]  sinVal   sine value of rotation angle theta
    * @param[in]  cosVal   cosine value of rotation angle theta
-   * @return     none
    */
   __STATIC_FORCEINLINE void arm_inv_park_f32(
   float32_t Id,
@@ -554,6 +564,7 @@ __STATIC_FORCEINLINE void arm_park_q31(
 
 
 /**
+  @ingroup inv_park
   @brief  Inverse Park transform for   Q31 version
   @param[in]  Id       input coordinate of rotor reference frame d
   @param[in]  Iq       input coordinate of rotor reference frame q
@@ -561,7 +572,6 @@ __STATIC_FORCEINLINE void arm_park_q31(
   @param[out] pIbeta   points to output two-phase orthogonal vector axis beta
   @param[in]  sinVal   sine value of rotation angle theta
   @param[in]  cosVal   cosine value of rotation angle theta
-  @return     none
 
   @par Scaling and Overflow Behavior
          The function is implemented using an internal 32-bit accumulator.
@@ -599,9 +609,6 @@ __STATIC_FORCEINLINE void arm_inv_park_q31(
     *pIbeta = __QADD(product4, product3);
   }
 
-  /**
-   * @} end of Inverse park group
-   */
 
 /**
    * @ingroup groupController
@@ -629,19 +636,15 @@ __STATIC_FORCEINLINE void arm_inv_park_q31(
    * Refer to the function specific documentation below for usage guidelines.
    */
 
-  /**
-   * @addtogroup clarke
-   * @{
-   */
 
   /**
    *
+   * @ingroup clarke
    * @brief  Floating-point Clarke transform
    * @param[in]  Ia       input three-phase coordinate <code>a</code>
    * @param[in]  Ib       input three-phase coordinate <code>b</code>
    * @param[out] pIalpha  points to output two-phase orthogonal vector axis alpha
    * @param[out] pIbeta   points to output two-phase orthogonal vector axis beta
-   * @return        none
    */
   __STATIC_FORCEINLINE void arm_clarke_f32(
   float32_t Ia,
@@ -658,12 +661,12 @@ __STATIC_FORCEINLINE void arm_inv_park_q31(
 
 
 /**
+  @ingroup clarke
   @brief  Clarke transform for Q31 version
   @param[in]  Ia       input three-phase coordinate <code>a</code>
   @param[in]  Ib       input three-phase coordinate <code>b</code>
   @param[out] pIalpha  points to output two-phase orthogonal vector axis alpha
   @param[out] pIbeta   points to output two-phase orthogonal vector axis beta
-  @return     none
 
   \par Scaling and Overflow Behavior
          The function is implemented using an internal 32-bit accumulator.
@@ -691,9 +694,6 @@ __STATIC_FORCEINLINE void arm_clarke_q31(
     *pIbeta = __QADD(product1, product2);
   }
 
-  /**
-   * @} end of clarke group
-   */
 
 
   /**
@@ -716,18 +716,15 @@ __STATIC_FORCEINLINE void arm_clarke_q31(
    * Refer to the function specific documentation below for usage guidelines.
    */
 
-  /**
-   * @addtogroup inv_clarke
-   * @{
-   */
+ 
 
    /**
+   * @ingroup inv_clarke
    * @brief  Floating-point Inverse Clarke transform
    * @param[in]  Ialpha  input two-phase orthogonal vector axis alpha
    * @param[in]  Ibeta   input two-phase orthogonal vector axis beta
    * @param[out] pIa     points to output three-phase coordinate <code>a</code>
    * @param[out] pIb     points to output three-phase coordinate <code>b</code>
-   * @return     none
    */
   __STATIC_FORCEINLINE void arm_inv_clarke_f32(
   float32_t Ialpha,
@@ -744,12 +741,12 @@ __STATIC_FORCEINLINE void arm_clarke_q31(
 
 
 /**
+  @ingroup inv_clarke
   @brief  Inverse Clarke transform for Q31 version
   @param[in]  Ialpha  input two-phase orthogonal vector axis alpha
   @param[in]  Ibeta   input two-phase orthogonal vector axis beta
   @param[out] pIa     points to output three-phase coordinate <code>a</code>
   @param[out] pIb     points to output three-phase coordinate <code>b</code>
-  @return     none
 
   \par Scaling and Overflow Behavior
          The function is implemented using an internal 32-bit accumulator.
@@ -777,9 +774,7 @@ __STATIC_FORCEINLINE void arm_inv_clarke_q31(
     *pIb = __QSUB(product2, product1);
   }
 
-  /**
-   * @} end of inv_clarke group
-   */
+
 
 
 

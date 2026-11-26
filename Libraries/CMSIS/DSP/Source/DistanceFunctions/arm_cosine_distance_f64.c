@@ -1,3 +1,4 @@
+﻿
 
 /* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
@@ -26,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/distance_functions.h"
 #include <limits.h>
@@ -49,7 +52,7 @@
  *
  */
 
-float64_t arm_cosine_distance_f64(const float64_t *pA,const float64_t *pB, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float64_t arm_cosine_distance_f64(const float64_t *pA,const float64_t *pB, uint32_t blockSize)
 {
     float64_t pwra,pwrb,dot,tmp;
 
@@ -59,7 +62,7 @@ float64_t arm_cosine_distance_f64(const float64_t *pA,const float64_t *pB, uint3
     arm_dot_prod_f64(pA,pB,blockSize,&dot);
 
     tmp = sqrt(pwra * pwrb);
-    return(1. - dot / tmp);
+    return(1.0 - dot / tmp);
 
 }
 

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_init_f64.c
  * Description:  Floating-point FIR filter initialization function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -40,11 +43,10 @@
 /**
   @brief         Initialization function for the floating-point FIR filter.
   @param[in,out] S          points to an instance of the floating-point FIR filter structure
-  @param[in] 	 numTaps    number of filter coefficients in the filter
+  @param[in]     numTaps    number of filter coefficients in the filter
   @param[in]     pCoeffs    points to the filter coefficients buffer
   @param[in]     pState     points to the state buffer
   @param[in]     blockSize  number of samples processed per call
-  @return        none
 
   @par           Details
                    <code>pCoeffs</code> points to the array of filter coefficients stored in time reversed order:
@@ -52,42 +54,31 @@
       {b[numTaps-1], b[numTaps-2], b[N-2], ..., b[1], b[0]}
   </pre>
   @par
-                   <code>pState</code> points to the array of state variables and some working memory for the Helium version.
-                   <code>pState</code> is of length <code>numTaps+blockSize-1</code> samples (except for Helium - see below), where <code>blockSize</code> is the number of input samples processed by each call to <code>arm_fir_f32()</code>.
-  @par          Initialization of Helium version
-                 For Helium version the array of coefficients must be a multiple of 4 (4a) even if less
-                 then 4a coefficients are defined in the FIR. The additional coefficients 
-                 (4a - numTaps) must be set to 0.
-                 numTaps is still set to its right value in the init function. It means that
-                 the implementation may require to read more coefficients due to the vectorization and
-                 to avoid having to manage too many different cases in the code.
-
-  @par          Helium state buffer
-                 The state buffer must contain some additional temporary data
-                 used during the computation but which is not the state of the FIR.
-                 The first blockSize samples are temporary data.
-                 The remaining samples are the state of the FIR filter.
-                 So the state buffer has size <code> numTaps + 2 * blockSize - 1 </code>
+                   <code>pState</code> points to the array of state variables.
+                   <code>pState</code> is of length <code>numTaps+blockSize-1</code> samples, where <code>blockSize</code> is the number of input samples processed by each call to <code>arm_fir_f64()</code>.
+  
+  @par
+                   There is no Helium version of the fir F64.
 
  */
 
-void arm_fir_init_f64(
-        arm_fir_instance_f64 * S,
-        uint16_t numTaps,
-  const float64_t * pCoeffs,
-        float64_t * pState,
-        uint32_t blockSize)
+ARM_DSP_ATTRIBUTE void arm_fir_init_f64(
+    arm_fir_instance_f64 * S,
+    uint16_t numTaps,
+    const float64_t * pCoeffs,
+    float64_t * pState,
+    uint32_t blockSize)
 {
-  /* Assign filter taps */
-  S->numTaps = numTaps;
-
-  /* Assign coefficient pointer */
-  S->pCoeffs = pCoeffs;
-
-  /* Clear state buffer. The size is always (blockSize + numTaps - 1) */
-  memset(pState, 0, (numTaps + (blockSize - 1U)) * sizeof(float64_t));
-  /* Assign state pointer */
-  S->pState = pState;
+    /* Assign filter taps */
+    S->numTaps = numTaps;
+    
+    /* Assign coefficient pointer */
+    S->pCoeffs = pCoeffs;
+    
+    /* Clear state buffer. The size is always (blockSize + numTaps - 1) */
+    memset(pState, 0, (numTaps + (blockSize - 1U)) * sizeof(float64_t));
+    /* Assign state pointer */
+    S->pState = pState;
 }
 
 /**

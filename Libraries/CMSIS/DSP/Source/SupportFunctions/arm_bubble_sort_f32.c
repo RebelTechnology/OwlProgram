@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_bubble_sort_f32.c
  * Description:  Floating point bubble sort
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/support_functions.h"
 #include "arm_sorting.h"
@@ -57,7 +60,7 @@
    *               function, a memcpy of the source vector is performed
    */
 
-void arm_bubble_sort_f32(
+ARM_DSP_ATTRIBUTE void arm_bubble_sort_f32(
   const arm_sort_instance_f32 * S, 
         float32_t * pSrc, 
         float32_t * pDst, 

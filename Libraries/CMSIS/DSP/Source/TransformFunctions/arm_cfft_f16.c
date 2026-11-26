@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cfft_f32.c
  * Description:  Combined Radix Decimation in Frequency CFFT Floating point processing function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/transform_functions_f16.h"
 #include "arm_common_tables_f16.h"
@@ -507,25 +510,44 @@ static void arm_cfft_radix4by2_inverse_f16_mve(const arm_cfft_instance_f16 * S,f
 
 
 /**
-  @addtogroup ComplexFFT
+  @addtogroup ComplexFFTF16
   @{
  */
 
 /**
   @brief         Processing function for the floating-point complex FFT.
   @param[in]     S              points to an instance of the floating-point CFFT structure
-  @param[in,out] p1             points to the complex data buffer of size <code>2*fftLen</code>. Processing occurs in-place
+  @param[in,out] p1             points to the complex data buffer. Processing occurs in-place
   @param[in]     ifftFlag       flag that selects transform direction
                    - value = 0: forward transform
                    - value = 1: inverse transform
   @param[in]     bitReverseFlag flag that enables / disables bit reversal of output
                    - value = 0: disables bit reversal of output
                    - value = 1: enables bit reversal of output
-  @return        none
+
+@par Neon version
+                     The neon version has a different API.
+                     The input and output buffers must be
+                     different.
+                     There is a temporary buffer.
+                     The bit reverse flag is not more 
+                     available in Neon version.
+
+  @code
+        void arm_cfft_f16(
+                const arm_cfft_instance_f16 * S,
+                      const float16_t * pIn,
+                      float16_t * pOut,
+                      float16_t * pBuffer, 
+                      uint8_t ifftFlag);
+  @endcode
+
+  @par Size of buffers according to the target architecture and datatype:
+       They are described on the page \ref transformbuffers "transform buffers".
  */
 
 
-void arm_cfft_f16(
+ARM_DSP_ATTRIBUTE void arm_cfft_f16(
   const arm_cfft_instance_f16 * S,
         float16_t * pSrc,
         uint8_t ifftFlag,
@@ -578,7 +600,54 @@ void arm_cfft_f16(
 
         }
 }
+#elif defined(ARM_MATH_NEON_FLOAT16) && defined(ARM_FLOAT16_SUPPORTED)
+#include "CMSIS_NE10_types.h"
+#include "CMSIS_NE10_fft.h"
 
+
+
+ARM_DSP_ATTRIBUTE void arm_cfft_f16(
+  const arm_cfft_instance_f16 * S,
+        const float16_t * pIn,
+        float16_t * pOut,
+        float16_t * pBuffer, /* When used, in is not modified */
+        uint8_t ifftFlag)
+{
+    if (S->algorithm_flag == ARM_MIXED_RADIX_FFT)
+    {
+        if (ifftFlag)
+        {
+            arm_ne10_mixed_radix_generic_butterfly_inverse_float16_neon (S,
+                (ne10_fft_cpx_float16_t *)pIn, 
+                (ne10_fft_cpx_float16_t *)pOut,
+                (ne10_fft_cpx_float16_t *)pBuffer);
+        }
+        else
+        {
+            arm_ne10_mixed_radix_generic_butterfly_float16_neon (S,
+                (ne10_fft_cpx_float16_t *)pIn, 
+                (ne10_fft_cpx_float16_t *)pOut,
+                (ne10_fft_cpx_float16_t *)pBuffer);
+        }
+    }
+    else 
+    {
+        if (ifftFlag == 0)
+        {
+               arm_ne10_mixed_radix_fft_forward_float16_neon (S,
+                   (ne10_fft_cpx_float16_t *)pIn,
+                   (ne10_fft_cpx_float16_t *)pOut,
+                   (ne10_fft_cpx_float16_t *)pBuffer);
+        }
+        else 
+        {
+                arm_ne10_mixed_radix_fft_backward_float16_neon (S,
+                    (ne10_fft_cpx_float16_t *)pIn,
+                    (ne10_fft_cpx_float16_t *)pOut,
+                    (ne10_fft_cpx_float16_t *)pBuffer);
+        }
+    }
+}
 #else
 
 #if defined(ARM_FLOAT16_SUPPORTED)
@@ -601,184 +670,26 @@ extern void arm_radix4_butterfly_f16(
         uint16_t twidCoefModifier);
 
 /**
-  @ingroup groupTransforms
- */
-
-/**
-  @defgroup ComplexFFT Complex FFT Functions
-
-  @par
-                   The Fast Fourier Transform (FFT) is an efficient algorithm for computing the
-                   Discrete Fourier Transform (DFT).  The FFT can be orders of magnitude faster
-                   than the DFT, especially for long lengths.
-                   The algorithms described in this section
-                   operate on complex data.  A separate set of functions is devoted to handling
-                   of real sequences.
-  @par
-                   There are separate algorithms for handling floating-point, Q15, and Q31 data
-                   types.  The algorithms available for each data type are described next.
-  @par
-                   The FFT functions operate in-place.  That is, the array holding the input data
-                   will also be used to hold the corresponding result.  The input data is complex
-                   and contains <code>2*fftLen</code> interleaved values as shown below.
-                   <pre>{real[0], imag[0], real[1], imag[1], ...} </pre>
-                   The FFT result will be contained in the same array and the frequency domain
-                   values will have the same interleaving.
-
-  @par Floating-point
-                   The floating-point complex FFT uses a mixed-radix algorithm.  Multiple radix-8
-                   stages are performed along with a single radix-2 or radix-4 stage, as needed.
-                   The algorithm supports lengths of [16, 32, 64, ..., 4096] and each length uses
-                   a different twiddle factor table.
-  @par
-                   The function uses the standard FFT definition and output values may grow by a
-                   factor of <code>fftLen</code> when computing the forward transform.  The
-                   inverse transform includes a scale of <code>1/fftLen</code> as part of the
-                   calculation and this matches the textbook definition of the inverse FFT.
-  @par
-                   For the MVE version, the new arm_cfft_init_f32 initialization function is
-                   <b>mandatory</b>. <b>Compilation flags are available to include only the required tables for the
-                   needed FFTs.</b> Other FFT versions can continue to be initialized as
-                   explained below.
-  @par
-                   For not MVE versions, pre-initialized data structures containing twiddle factors
-                   and bit reversal tables are provided and defined in <code>arm_const_structs.h</code>.  Include
-                   this header in your function and then pass one of the constant structures as
-                   an argument to arm_cfft_f32.  For example:
-  @par
-                   <code>arm_cfft_f32(arm_cfft_sR_f32_len64, pSrc, 1, 1)</code>
-  @par
-                   computes a 64-point inverse complex FFT including bit reversal.
-                   The data structures are treated as constant data and not modified during the
-                   calculation.  The same data structure can be reused for multiple transforms
-                   including mixing forward and inverse transforms.
-  @par
-                   Earlier releases of the library provided separate radix-2 and radix-4
-                   algorithms that operated on floating-point data.  These functions are still
-                   provided but are deprecated.  The older functions are slower and less general
-                   than the new functions.
-  @par
-                   An example of initialization of the constants for the arm_cfft_f32 function follows:
-  @code
-                   const static arm_cfft_instance_f32 *S;
-                   ...
-                     switch (length) {
-                       case 16:
-                         S = &arm_cfft_sR_f32_len16;
-                         break;
-                       case 32:
-                         S = &arm_cfft_sR_f32_len32;
-                         break;
-                       case 64:
-                         S = &arm_cfft_sR_f32_len64;
-                         break;
-                       case 128:
-                         S = &arm_cfft_sR_f32_len128;
-                         break;
-                       case 256:
-                         S = &arm_cfft_sR_f32_len256;
-                         break;
-                       case 512:
-                         S = &arm_cfft_sR_f32_len512;
-                         break;
-                       case 1024:
-                         S = &arm_cfft_sR_f32_len1024;
-                         break;
-                       case 2048:
-                         S = &arm_cfft_sR_f32_len2048;
-                         break;
-                       case 4096:
-                         S = &arm_cfft_sR_f32_len4096;
-                         break;
-                     }
-  @endcode
-  @par
-                   The new arm_cfft_init_f32 can also be used.
-  @par Q15 and Q31
-                   The floating-point complex FFT uses a mixed-radix algorithm.  Multiple radix-4
-                   stages are performed along with a single radix-2 stage, as needed.
-                   The algorithm supports lengths of [16, 32, 64, ..., 4096] and each length uses
-                   a different twiddle factor table.
-  @par
-                   The function uses the standard FFT definition and output values may grow by a
-                   factor of <code>fftLen</code> when computing the forward transform.  The
-                   inverse transform includes a scale of <code>1/fftLen</code> as part of the
-                   calculation and this matches the textbook definition of the inverse FFT.
-  @par
-                   Pre-initialized data structures containing twiddle factors and bit reversal
-                   tables are provided and defined in <code>arm_const_structs.h</code>.  Include
-                   this header in your function and then pass one of the constant structures as
-                   an argument to arm_cfft_q31. For example:
-  @par
-                   <code>arm_cfft_q31(arm_cfft_sR_q31_len64, pSrc, 1, 1)</code>
-  @par
-                   computes a 64-point inverse complex FFT including bit reversal.
-                   The data structures are treated as constant data and not modified during the
-                   calculation.  The same data structure can be reused for multiple transforms
-                   including mixing forward and inverse transforms.
-  @par
-                   Earlier releases of the library provided separate radix-2 and radix-4
-                   algorithms that operated on floating-point data.  These functions are still
-                   provided but are deprecated.  The older functions are slower and less general
-                   than the new functions.
-  @par
-                   An example of initialization of the constants for the arm_cfft_q31 function follows:
-  @code
-                   const static arm_cfft_instance_q31 *S;
-                   ...
-                     switch (length) {
-                       case 16:
-                         S = &arm_cfft_sR_q31_len16;
-                         break;
-                       case 32:
-                         S = &arm_cfft_sR_q31_len32;
-                         break;
-                       case 64:
-                         S = &arm_cfft_sR_q31_len64;
-                         break;
-                       case 128:
-                         S = &arm_cfft_sR_q31_len128;
-                         break;
-                       case 256:
-                         S = &arm_cfft_sR_q31_len256;
-                         break;
-                       case 512:
-                         S = &arm_cfft_sR_q31_len512;
-                         break;
-                       case 1024:
-                         S = &arm_cfft_sR_q31_len1024;
-                         break;
-                       case 2048:
-                         S = &arm_cfft_sR_q31_len2048;
-                         break;
-                       case 4096:
-                         S = &arm_cfft_sR_q31_len4096;
-                         break;
-                     }
-  @endcode
-
- */
-
-
-/**
-  @addtogroup ComplexFFT
+  @addtogroup ComplexFFTF16
   @{
  */
 
 /**
   @brief         Processing function for the floating-point complex FFT.
   @param[in]     S              points to an instance of the floating-point CFFT structure
-  @param[in,out] p1             points to the complex data buffer of size <code>2*fftLen</code>. Processing occurs in-place
+  @param[in,out] p1             points to the complex data buffer. Processing occurs in-place
   @param[in]     ifftFlag       flag that selects transform direction
                    - value = 0: forward transform
                    - value = 1: inverse transform
   @param[in]     bitReverseFlag flag that enables / disables bit reversal of output
                    - value = 0: disables bit reversal of output
                    - value = 1: enables bit reversal of output
-  @return        none
+
+  @par Size of buffers according to the target architecture and datatype:
+       They are described on the page \ref transformbuffers "transform buffers".
  */
 
-void arm_cfft_f16(
+ARM_DSP_ATTRIBUTE void arm_cfft_f16(
     const arm_cfft_instance_f16 * S,
     float16_t * p1,
     uint8_t ifftFlag,
@@ -838,5 +749,5 @@ void arm_cfft_f16(
 #endif /* defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE) */
 
 /**
-  @} end of ComplexFFT group
+  @} end of ComplexFFTF16 group
  */

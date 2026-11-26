@@ -1,13 +1,14 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_logsumexp_f64.c
  * Description:  LogSumExp
  *
- * $Date:        23 April 2021
- * $Revision:    V1.9.0
+ * $Date:        10 August 2022
+ * $Revision:    V1.9.1
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions.h"
 #include <limits.h>
@@ -45,7 +48,8 @@
  *
  */
 
-float64_t arm_kullback_leibler_f64(const float64_t * pSrcA, const float64_t * pSrcB, uint32_t blockSize)
+
+ARM_DSP_ATTRIBUTE float64_t arm_kullback_leibler_f64(const float64_t * pSrcA, const float64_t * pSrcB, uint32_t blockSize)
 {
     const float64_t *pInA, *pInB;
     uint32_t blkCnt;
@@ -69,7 +73,6 @@ float64_t arm_kullback_leibler_f64(const float64_t * pSrcA, const float64_t * pS
 
     return(-accum);
 }
-
 /**
  * @} end of Kullback-Leibler group
  */

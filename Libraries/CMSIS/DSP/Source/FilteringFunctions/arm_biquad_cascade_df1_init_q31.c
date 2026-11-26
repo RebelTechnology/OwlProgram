@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_biquad_cascade_df1_init_q31.c
  * Description:  Q31 Biquad cascade DirectFormI(DF1) filter initialization function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -44,7 +47,6 @@
   @param[in]     pCoeffs     points to the filter coefficients.
   @param[in]     pState      points to the state buffer.
   @param[in]     postShift   Shift to be applied after the accumulator.  Varies according to the coefficients format
-  @return        none
 
   @par           Coefficient and State Ordering
                    The coefficients are stored in the array <code>pCoeffs</code> in the following order:
@@ -67,7 +69,7 @@
                    The state variables are updated after each block of data is processed; the coefficients are untouched.
  */
 
-void arm_biquad_cascade_df1_init_q31(
+ARM_DSP_ATTRIBUTE void arm_biquad_cascade_df1_init_q31(
         arm_biquad_casd_df1_inst_q31 * S,
         uint8_t numStages,
   const q31_t * pCoeffs,

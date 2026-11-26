@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_svm_linear_predict_f32.c
  * Description:  SVM Linear Classifier
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/svm_functions.h"
 #include <limits.h>
@@ -42,14 +45,13 @@
  * @param[in]    S          Pointer to an instance of the linear SVM structure.
  * @param[in]    in         Pointer to input vector
  * @param[out]   pResult    Decision value
- * @return none.
  *
  */
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
 
-void arm_svm_linear_predict_f32(
+ARM_DSP_ATTRIBUTE void arm_svm_linear_predict_f32(
     const arm_svm_linear_instance_f32 *S,
     const float32_t * in,
     int32_t * pResult)
@@ -68,7 +70,7 @@ void arm_svm_linear_predict_f32(
     row = numRows;
 
     /*
-     * compute 4 rows in parrallel
+     * compute 4 rows in parallel
      */
     while (row >= 4) 
     {
@@ -283,7 +285,7 @@ void arm_svm_linear_predict_f32(
 
 #else
 #if defined(ARM_MATH_NEON)
-void arm_svm_linear_predict_f32(
+ARM_DSP_ATTRIBUTE void arm_svm_linear_predict_f32(
     const arm_svm_linear_instance_f32 *S,
     const float32_t * in,
     int32_t * pResult)
@@ -291,7 +293,7 @@ void arm_svm_linear_predict_f32(
     float32_t sum = S->intercept;
    
     float32_t dot;
-    float32x4_t dotV; 
+    float32x4_t dotV=vdupq_n_f32(0.0f);
 
     float32x4_t accuma,accumb,accumc,accumd,accum;
     float32x2_t accum2;
@@ -432,7 +434,7 @@ void arm_svm_linear_predict_f32(
     *pResult=S->classes[STEP(sum)];
 }
 #else
-void arm_svm_linear_predict_f32(
+ARM_DSP_ATTRIBUTE void arm_svm_linear_predict_f32(
     const arm_svm_linear_instance_f32 *S,
     const float32_t * in,
     int32_t * pResult)

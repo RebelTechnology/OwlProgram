@@ -85,7 +85,7 @@ DEF_FLAGS +=  -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
 DEF_FLAGS += "-DPATCHNAME=\"$(PATCHNAME)\""
 # DEF_FLAGS = -DSTM32F745xx -DARM_MATH_CM7 -D__FPU_PRESENT=1 -D__FPU_USED=1U
 INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(PERIPH_FILE)/inc -I$(SOURCE)
-INC_FLAGS += -I$(CMSIS)/Include -I$(CMSIS)/Core/Include -I$(CMSIS)/DSP/Include
+INC_FLAGS += -I$(CMSIS)/Include -I$(CMSIS)/Core/Include -I$(CMSIS)/DSP/Include -I$(CMSIS)/DSP/PrivateInclude
 CPPFLAGS += $(ARCH_FLAGS) $(INC_FLAGS) $(DEF_FLAGS)
 CPPFLAGS += -D__PROGRAM_START=1 # prevent compilation of __cmsis_start function
 CFLAGS   += -std=gnu11
