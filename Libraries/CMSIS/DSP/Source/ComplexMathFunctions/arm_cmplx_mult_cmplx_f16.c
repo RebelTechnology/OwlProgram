@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cmplx_mult_cmplx_f16.c
  * Description:  Floating-point complex-by-complex multiplication
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/complex_math_functions_f16.h"
 
@@ -34,27 +37,7 @@
   @ingroup groupCmplxMath
  */
 
-/**
-  @defgroup CmplxByCmplxMult Complex-by-Complex Multiplication
 
-  Multiplies a complex vector by another complex vector and generates a complex result.
-  The data in the complex arrays is stored in an interleaved fashion
-  (real, imag, real, imag, ...).
-  The parameter <code>numSamples</code> represents the number of complex
-  samples processed.  The complex arrays have a total of <code>2*numSamples</code>
-  real values.
-
-  The underlying algorithm is used:
-
-  <pre>
-  for (n = 0; n < numSamples; n++) {
-      pDst[(2*n)+0] = pSrcA[(2*n)+0] * pSrcB[(2*n)+0] - pSrcA[(2*n)+1] * pSrcB[(2*n)+1];
-      pDst[(2*n)+1] = pSrcA[(2*n)+0] * pSrcB[(2*n)+1] + pSrcA[(2*n)+1] * pSrcB[(2*n)+0];
-  }
-  </pre>
-
-  There are separate functions for floating-point, Q15, and Q31 data types.
- */
 
 /**
   @addtogroup CmplxByCmplxMult
@@ -67,12 +50,11 @@
   @param[in]     pSrcB       points to second input vector
   @param[out]    pDst        points to output vector
   @param[in]     numSamples  number of samples in each vector
-  @return        none
  */
 
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
 
-void arm_cmplx_mult_cmplx_f16(
+ARM_DSP_ATTRIBUTE void arm_cmplx_mult_cmplx_f16(
   const float16_t * pSrcA,
   const float16_t * pSrcB,
         float16_t * pDst,
@@ -181,7 +163,7 @@ void arm_cmplx_mult_cmplx_f16(
 
 
 #else
-void arm_cmplx_mult_cmplx_f16(
+ARM_DSP_ATTRIBUTE void arm_cmplx_mult_cmplx_f16(
   const float16_t * pSrcA,
   const float16_t * pSrcB,
         float16_t * pDst,

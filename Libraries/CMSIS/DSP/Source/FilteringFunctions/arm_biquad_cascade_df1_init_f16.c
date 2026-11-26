@@ -1,3 +1,5 @@
+﻿
+
 /* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_biquad_cascade_df1_init_f16.c
@@ -25,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions_f16.h"
 
@@ -44,7 +48,6 @@
   @param[in]     numStages   number of 2nd order stages in the filter.
   @param[in]     pCoeffs     points to the filter coefficients.
   @param[in]     pState      points to the state buffer.
-  @return        none
 
   @par           Coefficient and State Ordering
                    The coefficients are stored in the array <code>pCoeffs</code> in the following order:
@@ -75,7 +78,7 @@
  */
 
 
-void arm_biquad_cascade_df1_init_f16(
+ARM_DSP_ATTRIBUTE void arm_biquad_cascade_df1_init_f16(
         arm_biquad_casd_df1_inst_f16 * S,
         uint8_t numStages,
   const float16_t * pCoeffs,
@@ -141,7 +144,7 @@ static void generateCoefsFastBiquadF16(float16_t b0, float16_t b1, float16_t b2,
     }
 }
 
-void arm_biquad_cascade_df1_mve_init_f16(arm_biquad_casd_df1_inst_f16 * S,
+ARM_DSP_ATTRIBUTE void arm_biquad_cascade_df1_mve_init_f16(arm_biquad_casd_df1_inst_f16 * S,
                                          uint8_t numStages,
                                          const float16_t * pCoeffs, 
                                          arm_biquad_mod_coef_f16 * pCoeffsMod, 

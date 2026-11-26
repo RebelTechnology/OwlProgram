@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_q7.c
  * Description:  Q7 FIR filter processing function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -43,7 +46,6 @@
   @param[in]     pSrc       points to the block of input data
   @param[out]    pDst       points to the block of output data
   @param[in]     blockSize  number of samples to process
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function is implemented using a 32-bit internal accumulator.
@@ -153,7 +155,7 @@ static void arm_fir_q7_49_64_mve(const arm_fir_instance_q7 * S,
 }
 
 
-void arm_fir_q7_33_48_mve(const arm_fir_instance_q7 * S,
+static void arm_fir_q7_33_48_mve(const arm_fir_instance_q7 * S,
   const q7_t * __restrict pSrc,
   q7_t * __restrict pDst, uint32_t blockSize)
 {
@@ -176,7 +178,7 @@ static void arm_fir_q7_17_32_mve(const arm_fir_instance_q7 * S,
 }
 
 
-void arm_fir_q7_1_16_mve(const arm_fir_instance_q7 * S,
+static void arm_fir_q7_1_16_mve(const arm_fir_instance_q7 * S,
   const q7_t * __restrict pSrc,
   q7_t * __restrict pDst, uint32_t blockSize)
 {
@@ -187,7 +189,7 @@ void arm_fir_q7_1_16_mve(const arm_fir_instance_q7 * S,
     #undef NBTAPS
 }
 
-void arm_fir_q7(
+ARM_DSP_ATTRIBUTE void arm_fir_q7(
   const arm_fir_instance_q7 * S,
   const q7_t * pSrc,
         q7_t * pDst,
@@ -444,7 +446,7 @@ void arm_fir_q7(
     }
 }
 #else
-void arm_fir_q7(
+ARM_DSP_ATTRIBUTE void arm_fir_q7(
   const arm_fir_instance_q7 * S,
   const q7_t * pSrc,
         q7_t * pDst,

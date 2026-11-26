@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_ldl_f32.c
  * Description:  Floating-point LDL decomposition
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,45 +26,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
-
-
+#include "dsp/matrix_utils.h"
 
 
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
-
-
-/// @private
-#define SWAP_ROWS_F32(A,i,j)                 \
-  {                                      \
-    int cnt = n;                         \
-                                         \
-    for(int w=0;w < n; w+=4)             \
-    {                                    \
-       f32x4_t tmpa,tmpb;                \
-       mve_pred16_t p0 = vctp32q(cnt);   \
-                                         \
-       tmpa=vldrwq_z_f32(&A[i*n + w],p0);\
-       tmpb=vldrwq_z_f32(&A[j*n + w],p0);\
-                                         \
-       vstrwq_p(&A[i*n + w], tmpb, p0);  \
-       vstrwq_p(&A[j*n + w], tmpa, p0);  \
-                                         \
-       cnt -= 4;                         \
-    }                                    \
-  }
-
-/// @private
-#define SWAP_COLS_F32(A,i,j)     \
-  for(int w=0;w < n; w++)    \
-  {                          \
-     float32_t tmp;          \
-     tmp = A[w*n + i];       \
-     A[w*n + i] = A[w*n + j];\
-     A[w*n + j] = tmp;       \
-  }
 
 /**
   @ingroup groupMatrix
@@ -88,7 +59,7 @@
    * @par
    *  Computes the LDL^t decomposition of a matrix A such that P A P^t = L D L^t.
    */
-arm_status arm_mat_ldlt_f32(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_ldlt_f32(
   const arm_matrix_instance_f32 * pSrc,
   arm_matrix_instance_f32 * pl,
   arm_matrix_instance_f32 * pd,
@@ -119,6 +90,7 @@ arm_status arm_mat_ldlt_f32(
     int fullRank = 1, diag,k;
     float32_t *pA;
 
+    memset(pd->pData,0,sizeof(float32_t)*n*n);
     memcpy(pl->pData,pSrc->pData,n*n*sizeof(float32_t));
     pA = pl->pData;
 
@@ -156,8 +128,8 @@ arm_status arm_mat_ldlt_f32(
 
         if(j != k)
         {
-          SWAP_ROWS_F32(pA,k,j);
-          SWAP_COLS_F32(pA,k,j);
+          SWAP_ROWS_F32(pl,0,k,j);
+          SWAP_COLS_F32(pl,0,k,j);
         }
 
 
@@ -178,7 +150,7 @@ arm_status arm_mat_ldlt_f32(
 
         int32x4_t vecOffs;
         int w;
-        vecOffs = vidupq_u32((uint32_t)0, 1);
+        vecOffs = (int32x4_t)vidupq_u32((uint32_t)0, 1);
         vecOffs = vmulq_n_s32(vecOffs,n);
 
         for(w=k+1; w<n; w+=4)
@@ -322,25 +294,6 @@ arm_status arm_mat_ldlt_f32(
 }
 #else
 
-/// @private
-#define SWAP_ROWS_F32(A,i,j)     \
-  for(w=0;w < n; w++)    \
-  {                          \
-     float32_t tmp;          \
-     tmp = A[i*n + w];       \
-     A[i*n + w] = A[j*n + w];\
-     A[j*n + w] = tmp;       \
-  }
-
-/// @private
-#define SWAP_COLS_F32(A,i,j)     \
-  for(w=0;w < n; w++)    \
-  {                          \
-     float32_t tmp;          \
-     tmp = A[w*n + i];       \
-     A[w*n + i] = A[w*n + j];\
-     A[w*n + j] = tmp;       \
-  }
 
 /**
   @ingroup groupMatrix
@@ -365,7 +318,7 @@ arm_status arm_mat_ldlt_f32(
    * @par
    *  Computes the LDL^t decomposition of a matrix A such that P A P^t = L D L^t.
    */
-arm_status arm_mat_ldlt_f32(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_ldlt_f32(
   const arm_matrix_instance_f32 * pSrc,
   arm_matrix_instance_f32 * pl,
   arm_matrix_instance_f32 * pd,
@@ -397,6 +350,7 @@ arm_status arm_mat_ldlt_f32(
     float32_t *pA;
     int row,d;
 
+    memset(pd->pData,0,sizeof(float32_t)*n*n);
     memcpy(pl->pData,pSrc->pData,n*n*sizeof(float32_t));
     pA = pl->pData;
 
@@ -414,7 +368,6 @@ arm_status arm_mat_ldlt_f32(
 
 
         int r;
-        int w;
 
         for(r=k;r<n;r++)
         {
@@ -427,8 +380,8 @@ arm_status arm_mat_ldlt_f32(
 
         if(j != k)
         {
-          SWAP_ROWS_F32(pA,k,j);
-          SWAP_COLS_F32(pA,k,j);
+          SWAP_ROWS_F32(pl,0,k,j);
+          SWAP_COLS_F32(pl,0,k,j);
         }
 
 
@@ -443,7 +396,7 @@ arm_status arm_mat_ldlt_f32(
             break;
         }
 
-        for(w=k+1;w<n;w++)
+        for(int w=k+1;w<n;w++)
         {
           int x;
           for(x=k+1;x<n;x++)
@@ -452,7 +405,7 @@ arm_status arm_mat_ldlt_f32(
           }
         }
 
-        for(w=k+1;w<n;w++)
+        for(int w=k+1;w<n;w++)
         {
                pA[w*n+k] = pA[w*n+k] / a;
         }

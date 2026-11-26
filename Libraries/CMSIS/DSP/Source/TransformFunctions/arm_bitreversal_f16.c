@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_bitreversal_f16.c
  * Description:  Bitreversal functions
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,8 +26,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/transform_functions_f16.h"
+
+
 
 /*
 * @brief  In-place bit reversal function.
@@ -34,12 +39,17 @@
 * @param[in]      fftSize      length of the FFT.
 * @param[in]      bitRevFactor bit reversal modifier that supports different size FFTs with the same bit reversal table.
 * @param[in]      *pBitRevTab  points to the bit reversal table.
-* @return none.
 */
 
 #if defined(ARM_FLOAT16_SUPPORTED)
 
 void arm_bitreversal_f16(
+float16_t * pSrc,
+uint16_t fftSize,
+uint16_t bitRevFactor,
+const uint16_t * pBitRevTab);
+
+ARM_DSP_ATTRIBUTE void arm_bitreversal_f16(
 float16_t * pSrc,
 uint16_t fftSize,
 uint16_t bitRevFactor,

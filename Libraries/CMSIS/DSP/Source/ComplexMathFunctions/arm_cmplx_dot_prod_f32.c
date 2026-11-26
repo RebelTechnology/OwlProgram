@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cmplx_dot_prod_f32.c
  * Description:  Floating-point complex dot product
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/complex_math_functions.h"
 
@@ -71,12 +74,11 @@
   @param[in]     numSamples  number of samples in each vector
   @param[out]    realResult  real part of the result returned here
   @param[out]    imagResult  imaginary part of the result returned here
-  @return        none
  */
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
 
-void arm_cmplx_dot_prod_f32(
+ARM_DSP_ATTRIBUTE void arm_cmplx_dot_prod_f32(
     const float32_t * pSrcA,
     const float32_t * pSrcB,
     uint32_t numSamples,
@@ -180,7 +182,7 @@ void arm_cmplx_dot_prod_f32(
 }
 
 #else
-void arm_cmplx_dot_prod_f32(
+ARM_DSP_ATTRIBUTE void arm_cmplx_dot_prod_f32(
   const float32_t * pSrcA,
   const float32_t * pSrcB,
         uint32_t numSamples,
@@ -191,7 +193,7 @@ void arm_cmplx_dot_prod_f32(
         float32_t real_sum = 0.0f, imag_sum = 0.0f;    /* Temporary result variables */
         float32_t a0,b0,c0,d0;
 
-#if defined(ARM_MATH_NEON) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON) 
     float32x4x2_t vec1,vec2,vec3,vec4;
     float32x4_t accR,accI;
     float32x2_t accum = vdup_n_f32(0);

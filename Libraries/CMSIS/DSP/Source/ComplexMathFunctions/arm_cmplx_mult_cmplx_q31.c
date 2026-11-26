@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cmplx_mult_cmplx_q31.c
  * Description:  Q31 complex-by-complex multiplication
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/complex_math_functions.h"
 
@@ -43,7 +46,6 @@
   @param[in]     pSrcB       points to second input vector
   @param[out]    pDst        points to output vector
   @param[in]     numSamples  number of samples in each vector
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function implements 1.31 by 1.31 multiplications and finally output is converted into 3.29 format.
@@ -51,7 +53,7 @@
  */
 
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
-void arm_cmplx_mult_cmplx_q31(
+ARM_DSP_ATTRIBUTE void arm_cmplx_mult_cmplx_q31(
   const q31_t * pSrcA,
   const q31_t * pSrcB,
         q31_t * pDst,
@@ -165,7 +167,7 @@ void arm_cmplx_mult_cmplx_q31(
     }
 }
 #else
-void arm_cmplx_mult_cmplx_q31(
+ARM_DSP_ATTRIBUTE void arm_cmplx_mult_cmplx_q31(
   const q31_t * pSrcA,
   const q31_t * pSrcB,
         q31_t * pDst,

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_svm_polynomial_predict_f16.c
  * Description:  SVM Polynomial Classifier
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/svm_functions_f16.h"
 
@@ -74,10 +77,9 @@ __STATIC_INLINE float16_t arm_exponent_f16(float16_t x, int32_t nb)
  * @param[in]    S          Pointer to an instance of the polynomial SVM structure.
  * @param[in]    in         Pointer to input vector
  * @param[out]   pResult    Decision value
- * @return none.
  *
  */
-void arm_svm_polynomial_predict_f16(
+ARM_DSP_ATTRIBUTE void arm_svm_polynomial_predict_f16(
     const arm_svm_polynomial_instance_f16 *S,
     const float16_t * in,
     int32_t * pResult)
@@ -98,7 +100,7 @@ void arm_svm_polynomial_predict_f16(
     row = numRows;
 
     /*
-     * compute 4 rows in parrallel
+     * compute 4 rows in parallel
      */
     while (row >= 4) {
         const float16_t *pInA2, *pInA3;
@@ -194,7 +196,7 @@ void arm_svm_polynomial_predict_f16(
     }
 
     /*
-     * compute 2 rows in parrallel
+     * compute 2 rows in parallel
      */
     if (row >= 2) {
         float16_t const *pSrcA0Vec, *pSrcA1Vec, *pInVec;
@@ -333,10 +335,9 @@ void arm_svm_polynomial_predict_f16(
  * @param[in]    S          Pointer to an instance of the polynomial SVM structure.
  * @param[in]    in         Pointer to input vector
  * @param[out]   pResult    Decision value
- * @return none.
  *
  */
-void arm_svm_polynomial_predict_f16(
+ARM_DSP_ATTRIBUTE void arm_svm_polynomial_predict_f16(
     const arm_svm_polynomial_instance_f16 *S,
     const float16_t * in,
     int32_t * pResult)

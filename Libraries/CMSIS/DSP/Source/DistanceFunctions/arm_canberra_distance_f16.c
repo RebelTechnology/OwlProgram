@@ -1,3 +1,4 @@
+﻿
 
 /* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
@@ -26,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/distance_functions_f16.h"
 
@@ -70,7 +73,7 @@
 #include "arm_helium_utils.h"
 #include "arm_vec_math_f16.h"
 
-float16_t arm_canberra_distance_f16(const float16_t *pA,const float16_t *pB, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float16_t arm_canberra_distance_f16(const float16_t *pA,const float16_t *pB, uint32_t blockSize)
 {
     _Float16       accum = 0.0f16;
     uint32_t         blkCnt;
@@ -141,7 +144,7 @@ float16_t arm_canberra_distance_f16(const float16_t *pA,const float16_t *pB, uin
 
 
 #else
-float16_t arm_canberra_distance_f16(const float16_t *pA,const float16_t *pB, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float16_t arm_canberra_distance_f16(const float16_t *pA,const float16_t *pB, uint32_t blockSize)
 {
    _Float16 accum=0.0f, tmpA, tmpB,diff,sum;
 
@@ -150,7 +153,7 @@ float16_t arm_canberra_distance_f16(const float16_t *pA,const float16_t *pB, uin
       tmpA = *pA++;
       tmpB = *pB++;
 
-      diff = fabsf((float32_t)((_Float16)tmpA - (_Float16)tmpB));
+      diff = (float16_t)fabsf((float32_t)((_Float16)tmpA - (_Float16)tmpB));
       sum = (_Float16)fabsf((float32_t)tmpA) + (_Float16)fabsf((float32_t)tmpB);
       if (((_Float16)tmpA != 0.0f16) || ((_Float16)tmpB != 0.0f16))
       {

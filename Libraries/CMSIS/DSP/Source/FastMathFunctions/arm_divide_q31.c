@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cos_q31.c
  * Description:  Fast cosine calculation for Q31 values
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/fast_math_functions.h"
 #include "arm_common_tables.h"
@@ -33,11 +36,6 @@
 
 /**
   @ingroup groupFastMath
- */
-
-/**
-  @defgroup divide Fixed point division
-
  */
 
 /**
@@ -57,7 +55,7 @@
   to the saturated negative or positive value.
  */
 
-arm_status arm_divide_q31(q31_t numerator,
+ARM_DSP_ATTRIBUTE arm_status arm_divide_q31(q31_t numerator,
   q31_t denominator,
   q31_t *quotient,
   int16_t *shift)
@@ -68,7 +66,7 @@ arm_status arm_divide_q31(q31_t numerator,
 
   *shift = 0;
 
-  sign = (numerator>>31) ^ (denominator>>31);
+  sign = (numerator<0) ^ (denominator<0);
 
   if (denominator == 0)
   {
@@ -83,8 +81,8 @@ arm_status arm_divide_q31(q31_t numerator,
      return(ARM_MATH_NANINF);
   }
 
-  numerator = abs(numerator);
-  denominator = abs(denominator);
+  arm_abs_q31(&numerator,&numerator,1);
+  arm_abs_q31(&denominator,&denominator,1);
 
   temp = ((q63_t)numerator << 31) / ((q63_t)denominator);
 

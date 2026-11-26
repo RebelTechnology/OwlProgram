@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_lms_q15.c
  * Description:  Processing function for Q15 LMS filter
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -45,7 +48,6 @@
   @param[out]    pOut      points to the block of output data
   @param[out]    pErr      points to the block of error data
   @param[in]     blockSize number of samples to process
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function is implemented using an internal 64-bit accumulator.
@@ -56,10 +58,10 @@
                    Lastly, the accumulator is saturated to yield a result in 1.15 format.
   @par
                    In this filter, filter coefficients are updated for each sample and
-                   the updation of filter cofficients are saturted.
+                   the updation of filter coefficients are saturted.
  */
 
-void arm_lms_q15(
+ARM_DSP_ATTRIBUTE void arm_lms_q15(
   const arm_lms_instance_q15 * S,
   const q15_t * pSrc,
         q15_t * pRef,

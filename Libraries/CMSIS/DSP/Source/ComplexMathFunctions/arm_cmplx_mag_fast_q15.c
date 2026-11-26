@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cmplx_mag_fast_q15.c
  * Description:  Q15 complex magnitude
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/complex_math_functions.h"
 
@@ -42,7 +45,6 @@
   @param[in]     pSrc        points to input vector
   @param[out]    pDst        points to output vector
   @param[in]     numSamples  number of samples in each vector
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function implements 1.15 by 1.15 multiplications and finally output is converted into 2.14 format.
@@ -53,7 +55,7 @@
 
 #include "arm_helium_utils.h"
 
-void arm_cmplx_mag_fast_q15(
+ARM_DSP_ATTRIBUTE void arm_cmplx_mag_fast_q15(
   const q15_t * pSrc,
         q15_t * pDst,
         uint32_t numSamples)
@@ -108,7 +110,7 @@ void arm_cmplx_mag_fast_q15(
 }
 
 #else
-void arm_cmplx_mag_fast_q15(
+ARM_DSP_ATTRIBUTE void arm_cmplx_mag_fast_q15(
   const q15_t * pSrc,
         q15_t * pDst,
         uint32_t numSamples)
@@ -133,20 +135,20 @@ void arm_cmplx_mag_fast_q15(
     /* C[0] = sqrt(A[0] * A[0] + A[1] * A[1]) */
 
 #if defined (ARM_MATH_DSP)
-    in = read_q15x2_ia ((q15_t **) &pSrc);
+    in = read_q15x2_ia (&pSrc);
     acc0 = __SMUAD(in, in);
     /* store result in 2.14 format in destination buffer. */
     arm_sqrt_q15((q15_t) (acc0 >> 17), pDst++);
 
-    in = read_q15x2_ia ((q15_t **) &pSrc);
+    in = read_q15x2_ia (&pSrc);
     acc0 = __SMUAD(in, in);
     arm_sqrt_q15((q15_t) (acc0 >> 17), pDst++);
 
-    in = read_q15x2_ia ((q15_t **) &pSrc);
+    in = read_q15x2_ia (&pSrc);
     acc0 = __SMUAD(in, in);
     arm_sqrt_q15((q15_t) (acc0 >> 17), pDst++);
 
-    in = read_q15x2_ia ((q15_t **) &pSrc);
+    in = read_q15x2_ia (&pSrc);
     acc0 = __SMUAD(in, in);
     arm_sqrt_q15((q15_t) (acc0 >> 17), pDst++);
 #else
@@ -196,7 +198,7 @@ void arm_cmplx_mag_fast_q15(
     /* C[0] = sqrt(A[0] * A[0] + A[1] * A[1]) */
 
 #if defined (ARM_MATH_DSP)
-    in = read_q15x2_ia ((q15_t **) &pSrc);
+    in = read_q15x2_ia (&pSrc);
     acc0 = __SMUAD(in, in);
 
     /* store result in 2.14 format in destination buffer. */

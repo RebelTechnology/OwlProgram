@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_copy_f16.c
  * Description:  Copies the elements of a floating-point vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/support_functions_f16.h"
 
@@ -46,11 +49,10 @@
   @param[in]     pSrc       points to input vector
   @param[out]    pDst       points to output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
  */
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
 
-void arm_copy_f16(
+ARM_DSP_ATTRIBUTE void arm_copy_f16(
   const float16_t * pSrc,
   float16_t * pDst,
   uint32_t blockSize)
@@ -73,7 +75,7 @@ void arm_copy_f16(
 
 #else
 
-void arm_copy_f16(
+ARM_DSP_ATTRIBUTE void arm_copy_f16(
   const float16_t * pSrc,
         float16_t * pDst,
         uint32_t blockSize)

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_vec_mult_q31.c
  * Description:  Q31 matrix and vector multiplication
@@ -9,6 +9,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -26,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
 
@@ -47,7 +50,7 @@
  * @param[out]      *pDst points to the output vector
  */
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
-void arm_mat_vec_mult_q31(
+ARM_DSP_ATTRIBUTE void arm_mat_vec_mult_q31(
     const arm_matrix_instance_q31 * pSrcMat,
     const q31_t     *pSrcVec,
     q31_t           *pDstVec)
@@ -263,7 +266,58 @@ void arm_mat_vec_mult_q31(
     }
 }
 #else
-void arm_mat_vec_mult_q31(const arm_matrix_instance_q31 *pSrcMat, const q31_t *pVec, q31_t *pDst)
+
+#if defined(ARM_MATH_NEON)
+
+#define TMP_DEFINE_AND_INIT(acc)
+#define BIG_TMP_DEFINE_AND_INIT(TMP)
+
+#define REDUCE(sum,accum)                                                        \
+    sum = vgetq_lane_s64(accum.val[0],0) +   vgetq_lane_s64(accum.val[0],1);       \
+    sum = sum + vgetq_lane_s64(accum.val[1],0) +   vgetq_lane_s64(accum.val[1],1); 
+
+
+#define MAT_SCALAR_DT q31_t 
+#define VEC_SCALAR_DT q31_t 
+#define VECTOR_ACC struct { \
+    int64x2_t val[2];       \
+}
+
+#define VECTOR_DT int32x4_t
+#define SCALAR_ACC int64_t
+#define HALF_VECTOR_ACC int32x2_t
+#define NBLANE 4
+#define NBLANE_SHIFT 2
+
+#define VECTOR_ACC_INIT(acc)     \
+    acc.val[0] = vdupq_n_s64(0) ; \
+    acc.val[1] = vdupq_n_s64(0) ;
+
+#define SCALAR_ACC_INIT(acc) \
+    acc = 0
+  
+#define VEC_LOAD(v,p) \
+    v = vld1q_s32((p))
+
+
+#define VMAC(ACC,VA,VB) ACC.val[0] = vmlal_s32(ACC.val[0],vget_low_s32(VA),vget_low_s32(VB)); \
+ACC.val[1] = vmlal_s32(ACC.val[1],vget_high_s32(VA),vget_high_s32(VB));
+
+
+#define SCALAR_MAC(ACC,MAT,VEC) \
+    ACC = ACC + (int64_t)(MAT) * (int64_t)(VEC)
+
+#define STORE_SCALAR_ACC(DST,ACC) \
+  DST = __SSAT(ACC>>32,31)<<1U
+
+#define FUNCNAME arm_mat_vec_mult_q31
+#define MATRIX_TYPE arm_matrix_instance_q31
+
+#include "_arm_mat_vec_mult_neon.c"
+
+
+#else
+ARM_DSP_ATTRIBUTE void arm_mat_vec_mult_q31(const arm_matrix_instance_q31 *pSrcMat, const q31_t *pVec, q31_t *pDst)
 {
     uint32_t numRows = pSrcMat->numRows;
     uint32_t numCols = pSrcMat->numCols;
@@ -369,6 +423,7 @@ void arm_mat_vec_mult_q31(const arm_matrix_instance_q31 *pSrcMat, const q31_t *p
         row--;
     }
 }
+#endif /* ARM_MATH_NEON */
 #endif /* defined(ARM_MATH_MVEI) */
 
 /**

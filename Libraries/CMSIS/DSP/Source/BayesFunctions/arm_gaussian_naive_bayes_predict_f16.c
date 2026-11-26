@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_naive_gaussian_bayes_predict_f16
  * Description:  Naive Gaussian Bayesian Estimator
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/bayes_functions_f16.h"
 
@@ -56,7 +59,7 @@
 #include "arm_helium_utils.h"
 #include "arm_vec_math_f16.h"
 
-uint32_t arm_gaussian_naive_bayes_predict_f16(const arm_gaussian_naive_bayes_instance_f16 *S, 
+ARM_DSP_ATTRIBUTE uint32_t arm_gaussian_naive_bayes_predict_f16(const arm_gaussian_naive_bayes_instance_f16 *S, 
    const float16_t * in, 
    float16_t *pOutputProbabilities,
    float16_t *pBufferB
@@ -142,7 +145,7 @@ uint32_t arm_gaussian_naive_bayes_predict_f16(const arm_gaussian_naive_bayes_ins
 
 #else
 
-uint32_t arm_gaussian_naive_bayes_predict_f16(const arm_gaussian_naive_bayes_instance_f16 *S, 
+ARM_DSP_ATTRIBUTE uint32_t arm_gaussian_naive_bayes_predict_f16(const arm_gaussian_naive_bayes_instance_f16 *S, 
    const float16_t * in, 
    float16_t *pOutputProbabilities,
    float16_t *pBufferB)

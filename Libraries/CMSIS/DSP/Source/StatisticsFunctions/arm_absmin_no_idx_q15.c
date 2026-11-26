@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_absmin_no_idx_q15.c
  * Description:  Minimum value of absolute values of a Q15 vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions.h"
 
@@ -43,13 +46,12 @@
   @param[in]     pSrc       points to the input vector
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    minimum value returned here
-  @return        none
  */
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
 
-void arm_absmin_no_idx_q15(
+ARM_DSP_ATTRIBUTE void arm_absmin_no_idx_q15(
   const q15_t * pSrc,
         uint32_t blockSize,
         q15_t * pResult)
@@ -57,8 +59,8 @@ void arm_absmin_no_idx_q15(
     uint16_t        blkCnt;           /* loop counters */
     q15x8_t       vecSrc;
     q15_t   const *pSrcVec;
-    uint16x8_t    curExtremValVec = vdupq_n_s16(Q15_ABSMAX);
-    q15_t           minValue = Q15_ABSMAX;
+    uint16x8_t    curExtremValVec = vdupq_n_u16(Q15_ABSMAX);
+    uint16_t           minValue = Q15_ABSMAX;
     mve_pred16_t    p0;
 
 
@@ -96,13 +98,13 @@ void arm_absmin_no_idx_q15(
     /*
      * Get min value across the vector
      */
-    minValue = vminavq(minValue, (q15x8_t)curExtremValVec);
-    *pResult = minValue;
+    minValue = vminvq(minValue, curExtremValVec);
+    *pResult = __USAT(minValue, 15);
 }
 
 #else
 #if defined(ARM_MATH_DSP)
-void arm_absmin_no_idx_q15(
+ARM_DSP_ATTRIBUTE void arm_absmin_no_idx_q15(
   const q15_t * pSrc,
         uint32_t blockSize,
         q15_t * pResult)
@@ -111,7 +113,7 @@ void arm_absmin_no_idx_q15(
         uint32_t blkCnt;                     /* Loop counter */                                   \
                                                                                                             \
                                                                                            \
-  /* Load first input value that act as reference value for comparision */                                  \
+  /* Load first input value that act as reference value for comparison */                                  \
   out = *pSrc++;                                                                                            \
   out = (out > 0) ? out : (q15_t)__QSUB16(0, out);                                                                           \
                                                                                              \
@@ -178,7 +180,7 @@ void arm_absmin_no_idx_q15(
   *pResult = out;                                                                                           \
 }
 #else
-void arm_absmin_no_idx_q15(
+ARM_DSP_ATTRIBUTE void arm_absmin_no_idx_q15(
   const q15_t * pSrc,
         uint32_t blockSize,
         q15_t * pResult)
@@ -188,7 +190,7 @@ void arm_absmin_no_idx_q15(
 
 
 
-  /* Load first input value that act as reference value for comparision */
+  /* Load first input value that act as reference value for comparison */
   out = (*pSrc > 0) ? *pSrc : ((*pSrc == (q15_t) 0x8000) ? 0x7fff : -*pSrc);
   pSrc++;
 

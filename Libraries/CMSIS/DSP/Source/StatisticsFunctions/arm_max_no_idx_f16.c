@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_max_no_idx_f16.c
  * Description:  Maximum value of a floating-point vector without returning the index
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,12 +26,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions_f16.h"
 
 #if defined(ARM_FLOAT16_SUPPORTED)
 
-#if (defined(ARM_MATH_NEON) || defined(ARM_MATH_MVEF)) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON) || defined(ARM_MATH_MVEF)
 #include <limits.h>
 #endif
 
@@ -49,12 +52,11 @@
   @param[in]     pSrc       points to the input vector
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    maximum value returned here
-  @return        none
  */
 
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
 
-void arm_max_no_idx_f16(
+ARM_DSP_ATTRIBUTE void arm_max_no_idx_f16(
     const float16_t *pSrc,
     uint32_t   blockSize,
     float16_t *pResult)
@@ -109,7 +111,7 @@ void arm_max_no_idx_f16(
 
 #else
 
-void arm_max_no_idx_f16(
+ARM_DSP_ATTRIBUTE void arm_max_no_idx_f16(
     const float16_t *pSrc,
     uint32_t   blockSize,
     float16_t *pResult)

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_iir_lattice_init_q15.c
  * Description:  Q15 IIR lattice filter initialization function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -45,10 +48,9 @@
   @param[in] pvCoeffs   points to ladder coefficient buffer.  The array is of length numStages+1
   @param[in] pState     points to state buffer.  The array is of length numStages+blockSize
   @param[in] blockSize  number of samples to process
-  @return        none
  */
 
-void arm_iir_lattice_init_q15(
+ARM_DSP_ATTRIBUTE void arm_iir_lattice_init_q15(
   arm_iir_lattice_instance_q15 * S,
   uint16_t numStages,
   q15_t * pkCoeffs,

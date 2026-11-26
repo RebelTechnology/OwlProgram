@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_trans_q7.c
  * Description:  Q7 matrix transpose
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
 
@@ -46,7 +49,7 @@
                    - \ref ARM_MATH_SIZE_MISMATCH : Matrix size check failed
  */
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
-arm_status arm_mat_trans_q7(const arm_matrix_instance_q7 *pSrc, arm_matrix_instance_q7 *pDst)
+ARM_DSP_ATTRIBUTE arm_status arm_mat_trans_q7(const arm_matrix_instance_q7 *pSrc, arm_matrix_instance_q7 *pDst)
 {
 
     uint16x8_t    vecOffs;
@@ -110,7 +113,48 @@ arm_status arm_mat_trans_q7(const arm_matrix_instance_q7 *pSrc, arm_matrix_insta
     return (ARM_MATH_SUCCESS);
 }
 #else
-arm_status arm_mat_trans_q7(const arm_matrix_instance_q7 *pSrc, arm_matrix_instance_q7 *pDst)
+#if defined(ARM_MATH_NEON)
+
+#define BLOCK_ROWS 16
+#define BLOCK_ROWS_SHIFT 4
+#define LANE 16
+#define LANE_SHIFT 4
+
+#include "_arm_mat_trans_neon.c"
+
+
+ARM_DSP_ATTRIBUTE arm_status arm_mat_trans_q7(const arm_matrix_instance_q7 *pSrc, 
+                                                    arm_matrix_instance_q7 *pDst)
+
+{
+  ARM_MAT_TRANS_NEON_INIT_U8
+
+#ifdef ARM_MATH_MATRIX_CHECK
+
+  /* Check for matrix mismatch condition */
+  if ((pSrc->numRows != pDst->numCols) || (pSrc->numCols != pDst->numRows))
+  {
+    /* Set status as ARM_MATH_SIZE_MISMATCH */
+    status = ARM_MATH_SIZE_MISMATCH;
+  }
+  else
+#endif /*    #ifdef ARM_MATH_MATRIX_CHECK    */
+
+  {
+    ARM_MAT_TRANS_NEON_U8
+
+    /* Set status as ARM_MATH_SUCCESS */
+    status = ARM_MATH_SUCCESS;
+  }
+
+  /* Return to application */
+  return (status);
+}
+
+#include "_arm_mat_trans_undef_neon.c"
+
+#else
+ARM_DSP_ATTRIBUTE arm_status arm_mat_trans_q7(const arm_matrix_instance_q7 *pSrc, arm_matrix_instance_q7 *pDst)
 {
     q7_t *pSrcA = pSrc->pData;         /* input data matrix pointer */
     q7_t *pOut = pDst->pData;          /* output data matrix pointer */
@@ -163,6 +207,7 @@ arm_status arm_mat_trans_q7(const arm_matrix_instance_q7 *pSrc, arm_matrix_insta
     /* Return to application */
     return (status);
 }
+#endif /* defined(ARM_MATH_NEON) */
 #endif /* defined(ARM_MATH_MVEI) */
 
 

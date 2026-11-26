@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_init_q7.c
  * Description:  Q7 FIR filter initialization function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -40,11 +43,10 @@
 /**
   @brief         Initialization function for the Q7 FIR filter.
   @param[in,out] S          points to an instance of the Q7 FIR filter structure
-  @param[in] 	 numTaps    number of filter coefficients in the filter
+  @param[in]     numTaps    number of filter coefficients in the filter
   @param[in]     pCoeffs    points to the filter coefficients buffer
   @param[in]     pState     points to the state buffer
   @param[in]     blockSize  number of samples processed
-  @return        none
 
   @par           Details
                    <code>pCoeffs</code> points to the array of filter coefficients stored in time reversed order:
@@ -65,7 +67,7 @@
 
  */
 
-void arm_fir_init_q7(
+ARM_DSP_ATTRIBUTE void arm_fir_init_q7(
         arm_fir_instance_q7 * S,
         uint16_t numTaps,
   const q7_t * pCoeffs,

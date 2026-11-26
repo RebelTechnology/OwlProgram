@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cmplx_mag_squared_f32.c
  * Description:  Floating-point complex magnitude squared
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/complex_math_functions.h"
 
@@ -66,12 +69,11 @@
   @param[in]     pSrc        points to input vector
   @param[out]    pDst        points to output vector
   @param[in]     numSamples  number of samples in each vector
-  @return        none
  */
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
 
-void arm_cmplx_mag_squared_f32(
+ARM_DSP_ATTRIBUTE void arm_cmplx_mag_squared_f32(
   const float32_t * pSrc,
         float32_t * pDst,
         uint32_t numSamples)
@@ -119,7 +121,7 @@ void arm_cmplx_mag_squared_f32(
 }
 
 #else
-void arm_cmplx_mag_squared_f32(
+ARM_DSP_ATTRIBUTE void arm_cmplx_mag_squared_f32(
   const float32_t * pSrc,
         float32_t * pDst,
         uint32_t numSamples)
@@ -127,7 +129,7 @@ void arm_cmplx_mag_squared_f32(
         uint32_t blkCnt;                               /* Loop counter */
         float32_t real, imag;                          /* Temporary input variables */
 
-#if defined(ARM_MATH_NEON) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON) 
   float32x4x2_t vecA;
   float32x4_t vRealA;
   float32x4_t vImagA;

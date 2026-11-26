@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_interpolate_init_q15.c
  * Description:  Q15 FIR interpolator initialization function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -62,7 +65,7 @@
                    where <code>blockSize</code> is the number of input samples processed by each call to <code>arm_fir_interpolate_q15()</code>.
  */
 
-arm_status arm_fir_interpolate_init_q15(
+ARM_DSP_ATTRIBUTE arm_status arm_fir_interpolate_init_q15(
         arm_fir_interpolate_instance_q15 * S,
         uint8_t L,
         uint16_t numTaps,

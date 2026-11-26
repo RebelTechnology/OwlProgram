@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_abs_q31.c
  * Description:  Q31 vector absolute value
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/basic_math_functions.h"
 
@@ -42,7 +45,6 @@
   @param[in]     pSrc       points to the input vector
   @param[out]    pDst       points to the output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function uses saturating arithmetic.
@@ -53,7 +55,7 @@
 
 #include "arm_helium_utils.h"
 
-void arm_abs_q31(
+ARM_DSP_ATTRIBUTE void arm_abs_q31(
     const q31_t * pSrc,
     q31_t * pDst,
     uint32_t blockSize)
@@ -96,7 +98,7 @@ void arm_abs_q31(
 }
 
 #else
-void arm_abs_q31(
+ARM_DSP_ATTRIBUTE void arm_abs_q31(
   const q31_t * pSrc,
         q31_t * pDst,
         uint32_t blockSize)

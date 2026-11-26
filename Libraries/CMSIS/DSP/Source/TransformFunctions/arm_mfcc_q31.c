@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mfcc_q31.c
  * Description:  MFCC function for the q31 version
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 
 
@@ -40,22 +43,13 @@
 #define MICRO_Q31 0x08637BD0
 #define SHIFT_MELFILTER_SATURATION_Q31 10
 /**
-  @ingroup groupTransforms
- */
-
-
-/**
-  @defgroup MFCC MFCC
-
-  MFCC Transform
-
-  There are separate functions for floating-point, Q31, and Q31 data types.
+  @ingroup MFCC
  */
 
 
 
 /**
-  @addtogroup MFCC
+  @addtogroup MFCCQ31
   @{
  */
 
@@ -65,14 +59,11 @@
   @param[in]     pSrc points to the input samples in Q31
   @param[out]     pDst  points to the output MFCC values in q8.23 format
   @param[inout]     pTmp  points to a temporary buffer of complex
-
-  @return        none
-
+  @return        error status
+  
   @par           Description
                    The number of input samples is the FFT length used
                    when initializing the instance data structure.
-
-                   The temporary buffer has a 2*fft length.
 
                    The source buffer is modified by this function.
 
@@ -80,15 +71,40 @@
                    big and the number of MEL filters too small then the fixed
                    point computations may saturate.
 
+  @par Neon implementation
+       There is an additional temporary buffer used for the RFFT.
+
+
+  @code 
+      arm_status arm_mfcc_q31(
+  const arm_mfcc_instance_q31 * S,
+  q31_t *pSrc,
+  q31_t *pDst,
+  q31_t *pTmp,
+  q31_t *pTmp_rfft
+  )
+  @endcode
+
+  @par Size of buffers according to the target architecture and datatype:
+       They are described on the page \ref transformbuffers "transform buffers".
+
  */
-
-
-arm_status arm_mfcc_q31(
+#if defined(ARM_MATH_NEON) 
+ARM_DSP_ATTRIBUTE arm_status arm_mfcc_q31(
+  const arm_mfcc_instance_q31 * S,
+  q31_t *pSrc,
+  q31_t *pDst,
+  q31_t *pTmp,
+  q31_t *pTmp_rfft
+  )
+#else
+ARM_DSP_ATTRIBUTE arm_status arm_mfcc_q31(
   const arm_mfcc_instance_q31 * S,
   q31_t *pSrc,
   q31_t *pDst,
   q31_t *pTmp
   )
+#endif
 {
     q31_t m;
     uint32_t index;
@@ -106,7 +122,7 @@ arm_status arm_mfcc_q31(
     // q31
     arm_absmax_q31(pSrc,S->fftLen,&m,&index);
 
-    if (m !=0)
+    if ((m != 0) && (m != 0x7FFFFFFF))
     {
        q31_t quotient;
        int16_t shift;
@@ -128,10 +144,14 @@ arm_status arm_mfcc_q31(
     /* Compute spectrum magnitude 
     */
     fftShift = 31 - __CLZ(S->fftLen);
-#if defined(ARM_MFCC_CFFT_BASED)
+#if defined(ARM_MATH_NEON) 
+    /* Default RFFT based implementation */
+    arm_rfft_q31(&(S->rfft),pSrc,pTmp2,pTmp_rfft,0);
+#else
+#if defined(ARM_MFCC_USE_CFFT)
     /* some HW accelerator for CMSIS-DSP used in some boards
        are only providing acceleration for CFFT.
-       With ARM_MFCC_CFFT_BASED enabled, CFFT is used and the MFCC
+       With ARM_MFCC_USE_CFFT enabled, CFFT is used and the MFCC
        will be accelerated on those boards.
  
        The default is to use RFFT
@@ -146,6 +166,7 @@ arm_status arm_mfcc_q31(
 #else
     /* Default RFFT based implementation */
     arm_rfft_q31(&(S->rfft),pSrc,pTmp2);
+#endif
 #endif
     filterLimit = 1 + (S->fftLen >> 1);
 
@@ -164,6 +185,7 @@ arm_status arm_mfcc_q31(
         S->filterLengths[i],
         &result);
 
+
       coefsPos += S->filterLengths[i];
 
       // q16.48 - fftShift
@@ -174,7 +196,11 @@ arm_status arm_mfcc_q31(
 
     }
 
-
+    if ((m != 0) && (m != 0x7FFFFFFF))
+    {
+      arm_scale_q31(pTmp,m,0,pTmp,S->nbMelFilters);
+    }
+   
     // q16.29 - fftShift - satShift
     /* Compute the log */
     arm_vlog_q31(pTmp,pTmp,S->nbMelFilters);
@@ -203,5 +229,5 @@ arm_status arm_mfcc_q31(
 }
 
 /**
-  @} end of MFCC group
+  @} end of MFCCQ31 group
  */

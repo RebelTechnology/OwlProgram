@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_lms_f32.c
  * Description:  Processing function for the floating-point LMS filter
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -39,7 +42,7 @@
   LMS filters use a gradient descent method in which the filter coefficients are updated based on the instantaneous error signal.
   Adaptive filters are often used in communication systems, equalizers, and noise removal.
   The CMSIS DSP Library contains LMS filter functions that operate on Q15, Q31, and floating-point data types.
-  The library also contains normalized LMS filters in which the filter coefficient adaptation is indepedent of the level of the input signal.
+  The library also contains normalized LMS filters in which the filter coefficient adaptation is independent of the level of the input signal.
 
   An LMS filter consists of two components as shown below.
   The first component is a standard transversal or FIR filter.
@@ -160,10 +163,9 @@
   @param[out]    pOut       points to the block of output data
   @param[out]    pErr       points to the block of error data
   @param[in]     blockSize  number of samples to process
-  @return        none
  */
 #if defined(ARM_MATH_NEON)
-void arm_lms_f32(
+ARM_DSP_ATTRIBUTE void arm_lms_f32(
   const arm_lms_instance_f32 * S,
   const float32_t * pSrc,
   float32_t * pRef,
@@ -335,7 +337,7 @@ void arm_lms_f32(
 
 }
 #else
-void arm_lms_f32(
+ARM_DSP_ATTRIBUTE void arm_lms_f32(
   const arm_lms_instance_f32 * S,
   const float32_t * pSrc,
         float32_t * pRef,

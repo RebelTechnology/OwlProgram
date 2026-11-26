@@ -1,3 +1,5 @@
+﻿
+
 /* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_f16.c
@@ -25,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions_f16.h"
 
@@ -45,7 +49,6 @@
   @param[in]     pSrc       points to the block of input data
   @param[out]    pDst       points to the block of output data
   @param[in]     blockSize  number of samples to process
-  @return        none
  */
 
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
@@ -239,12 +242,12 @@ __STATIC_INLINE void arm_fir_f16_5_8_mve(const arm_fir_instance_f16 * S,
 }
 #undef NB_TAPS
 
-void arm_fir_f16(const arm_fir_instance_f16 * S, 
+ARM_DSP_ATTRIBUTE void arm_fir_f16(const arm_fir_instance_f16 * S, 
   const float16_t * pSrc, 
   float16_t * pDst, 
   uint32_t blockSize)
 {
-    float16_t *pRefStatePtr = S->pState + ROUND_UP(blockSize, 8);
+    float16_t *pRefStatePtr = S->pState + ARM_ROUND_UP(blockSize, 8);
     float16_t *pState = pRefStatePtr ;      /* State pointer */
     const float16_t *pCoeffs = S->pCoeffs;      /* Coefficient pointer */
     const float16_t *pSamples;  /* Temporary pointer to the sample buffer */
@@ -561,7 +564,7 @@ void arm_fir_f16(const arm_fir_instance_f16 * S,
 
 #else
 
-void arm_fir_f16(
+ARM_DSP_ATTRIBUTE void arm_fir_f16(
   const arm_fir_instance_f16 * S,
   const float16_t * pSrc,
         float16_t * pDst,

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_levinson_durbin_f16.c
  * Description:  f16 version of Levinson Durbin algorithm
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions_f16.h"
 
@@ -32,10 +35,7 @@
   @ingroup groupFilters
  */
 
-/**
-  @defgroup LD Levinson Durbin Algorithm
 
- */
 
 /**
   @addtogroup LD
@@ -48,20 +48,19 @@
   @param[out]    a        autoregressive coefficients
   @param[out]    err      prediction error (variance)
   @param[in]     nbCoefs  number of autoregressive coefficients
-  @return        none
  */
 
-#if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE) && defined(__CMSIS_GCC_H)
-#pragma GCC warning "Scalar version of arm_levinson_durbin_f16 built. Helium version has build issues with gcc."
-#endif 
+//#if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE) && defined(ARM_DSP_BUILT_WITH_GCC)
+//#pragma GCC warning "Scalar version of arm_levinson_durbin_f16 built. Helium version has build issues with gcc."
+//#endif 
 
-#if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE) &&  !defined(__CMSIS_GCC_H)
+#if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE) &&  !defined(ARM_DSP_BUILT_WITH_GCC)
 
 #include "arm_helium_utils.h"
 
 #define LANE4567_MASK 0xFF00
 
-void arm_levinson_durbin_f16(const float16_t *phi,
+ARM_DSP_ATTRIBUTE void arm_levinson_durbin_f16(const float16_t *phi,
   float16_t *a, 
   float16_t *err,
   int nbCoefs)
@@ -134,6 +133,7 @@ void arm_levinson_durbin_f16(const float16_t *phi,
 
       uint16x8_t offset,offsetInc,vecTmp;
 
+      vecRevA = vdupq_n_f16(0.0f16);
 
       offset = vld1q_u16((uint16_t*)orgOffsetArray);
       vecTmp = vdupq_n_u16(p);
@@ -215,7 +215,7 @@ void arm_levinson_durbin_f16(const float16_t *phi,
 
 #if defined(ARM_FLOAT16_SUPPORTED)
 
-void arm_levinson_durbin_f16(const float16_t *phi,
+ARM_DSP_ATTRIBUTE void arm_levinson_durbin_f16(const float16_t *phi,
   float16_t *a, 
   float16_t *err,
   int nbCoefs)

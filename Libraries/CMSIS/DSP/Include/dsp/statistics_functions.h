@@ -1,8 +1,8 @@
 /******************************************************************************
  * @file     statistics_functions.h
  * @brief    Public header file for CMSIS DSP Library
- * @version  V1.10.0
- * @date     08 July 2021
+ * @version  V1.10.1
+ * @date     14 July 2022
  * Target Processor: Cortex-M and Cortex-A cores
  ******************************************************************************/
 /*
@@ -24,8 +24,8 @@
  */
 
  
-#ifndef _STATISTICS_FUNCTIONS_H_
-#define _STATISTICS_FUNCTIONS_H_
+#ifndef STATISTICS_FUNCTIONS_H_
+#define STATISTICS_FUNCTIONS_H_
 
 #include "arm_math_types.h"
 #include "arm_math_memory.h"
@@ -403,38 +403,38 @@ float64_t arm_kullback_leibler_f64(const float64_t * pSrcA,
    * @brief  Minimum value of a Q7 vector.
    * @param[in]  pSrc       is input pointer
    * @param[in]  blockSize  is the number of samples to process
-   * @param[out] result     is output pointer
-   * @param[in]  index      is the array index of the minimum value in the input buffer.
+   * @param[out] pResult     is output pointer
+   * @param[in]  pIndex      is the array index of the minimum value in the input buffer.
    */
   void arm_min_q7(
   const q7_t * pSrc,
         uint32_t blockSize,
-        q7_t * result,
-        uint32_t * index);
+        q7_t * pResult,
+        uint32_t * pIndex);
 
   /**
    * @brief  Minimum value of absolute values of a Q7 vector.
    * @param[in]  pSrc       is input pointer
    * @param[in]  blockSize  is the number of samples to process
-   * @param[out] result     is output pointer
-   * @param[in]  index      is the array index of the minimum value in the input buffer.
+   * @param[out] pResult    is output pointer
+   * @param[in]  pIndex     is the array index of the minimum value in the input buffer.
    */
   void arm_absmin_q7(
   const q7_t * pSrc,
         uint32_t blockSize,
-        q7_t * result,
-        uint32_t * index);
+        q7_t * pResult,
+        uint32_t * pIndex);
 
     /**
    * @brief  Minimum value of absolute values of a Q7 vector.
    * @param[in]  pSrc       is input pointer
    * @param[in]  blockSize  is the number of samples to process
-   * @param[out] result     is output pointer
+   * @param[out] pResult    is output pointer
    */
   void arm_absmin_no_idx_q7(
   const q7_t * pSrc,
         uint32_t blockSize,
-        q7_t * result);
+        q7_t * pResult);
 
 
   /**
@@ -780,7 +780,6 @@ float64_t arm_kullback_leibler_f64(const float64_t * pSrcA,
     @param[in]     pSrc       points to the input vector
     @param[in]     blockSize  number of samples in input vector
     @param[out]    pResult    maximum value returned here
-    @return        none
    */
   void arm_max_no_idx_f32(
       const float32_t *pSrc,
@@ -792,7 +791,6 @@ float64_t arm_kullback_leibler_f64(const float64_t * pSrcA,
     @param[in]     pSrc       points to the input vector
     @param[in]     blockSize  number of samples in input vector
     @param[out]    pResult    minimum value returned here
-    @return        none
    */
   void arm_min_no_idx_f32(
       const float32_t *pSrc,
@@ -804,7 +802,6 @@ float64_t arm_kullback_leibler_f64(const float64_t * pSrcA,
     @param[in]     pSrc       points to the input vector
     @param[in]     blockSize  number of samples in input vector
     @param[out]    pResult    maximum value returned here
-    @return        none
    */
   void arm_max_no_idx_f64(
       const float64_t *pSrc,
@@ -816,7 +813,6 @@ float64_t arm_kullback_leibler_f64(const float64_t * pSrcA,
     @param[in]     pSrc       points to the input vector
     @param[in]     blockSize  number of samples in input vector
     @param[out]    pResult    maximum value returned here
-    @return        none
    */
   void arm_max_no_idx_q31(
       const q31_t *pSrc,
@@ -828,7 +824,6 @@ float64_t arm_kullback_leibler_f64(const float64_t * pSrcA,
     @param[in]     pSrc       points to the input vector
     @param[in]     blockSize  number of samples in input vector
     @param[out]    pResult    maximum value returned here
-    @return        none
    */
   void arm_max_no_idx_q15(
       const q15_t *pSrc,
@@ -840,7 +835,6 @@ float64_t arm_kullback_leibler_f64(const float64_t * pSrcA,
     @param[in]     pSrc       points to the input vector
     @param[in]     blockSize  number of samples in input vector
     @param[out]    pResult    maximum value returned here
-    @return        none
    */
   void arm_max_no_idx_q7(
       const q7_t *pSrc,
@@ -852,7 +846,6 @@ float64_t arm_kullback_leibler_f64(const float64_t * pSrcA,
     @param[in]     pSrc       points to the input vector
     @param[in]     blockSize  number of samples in input vector
     @param[out]    pResult    minimum value returned here
-    @return        none
    */
   void arm_min_no_idx_f64(
       const float64_t *pSrc,
@@ -864,7 +857,6 @@ float64_t arm_kullback_leibler_f64(const float64_t * pSrcA,
     @param[in]     pSrc       points to the input vector
     @param[in]     blockSize  number of samples in input vector
     @param[out]    pResult    minimum value returned here
-    @return        none
    */
   void arm_min_no_idx_q31(
       const q31_t *pSrc,
@@ -876,7 +868,6 @@ float64_t arm_kullback_leibler_f64(const float64_t * pSrcA,
     @param[in]     pSrc       points to the input vector
     @param[in]     blockSize  number of samples in input vector
     @param[out]    pResult    minimum value returned here
-    @return        none
    */
   void arm_min_no_idx_q15(
       const q15_t *pSrc,
@@ -888,13 +879,106 @@ float64_t arm_kullback_leibler_f64(const float64_t * pSrcA,
     @param[in]     pSrc       points to the input vector
     @param[in]     blockSize  number of samples in input vector
     @param[out]    pResult    minimum value returned here
-    @return        none
    */
-  void arm_min_no_idx_q7(
-      const q7_t *pSrc,
+void arm_min_no_idx_q7(
+     const q7_t *pSrc,
       uint32_t   blockSize,
       q7_t *pResult);
 
+/**
+  @brief         Mean square error between two Q7 vectors.
+  @param[in]     pSrcA       points to the first input vector
+  @param[in]     pSrcB       points to the second input vector
+  @param[in]     blockSize  number of samples in input vector
+  @param[out]    pResult    mean square error
+*/
+  
+void arm_mse_q7(
+  const q7_t * pSrcA,
+  const q7_t * pSrcB,
+        uint32_t blockSize,
+        q7_t * pResult);
+
+/**
+  @brief         Mean square error between two Q15 vectors.
+  @param[in]     pSrcA       points to the first input vector
+  @param[in]     pSrcB       points to the second input vector
+  @param[in]     blockSize  number of samples in input vector
+  @param[out]    pResult    mean square error
+*/
+  
+void arm_mse_q15(
+  const q15_t * pSrcA,
+  const q15_t * pSrcB,
+        uint32_t blockSize,
+        q15_t * pResult);
+
+/**
+  @brief         Mean square error between two Q31 vectors.
+  @param[in]     pSrcA       points to the first input vector
+  @param[in]     pSrcB       points to the second input vector
+  @param[in]     blockSize  number of samples in input vector
+  @param[out]    pResult    mean square error
+*/
+  
+void arm_mse_q31(
+  const q31_t * pSrcA,
+  const q31_t * pSrcB,
+        uint32_t blockSize,
+        q31_t * pResult);
+
+/**
+  @brief         Mean square error between two single precision float vectors.
+  @param[in]     pSrcA       points to the first input vector
+  @param[in]     pSrcB       points to the second input vector
+  @param[in]     blockSize  number of samples in input vector
+  @param[out]    pResult    mean square error
+*/
+  
+void arm_mse_f32(
+  const float32_t * pSrcA,
+  const float32_t * pSrcB,
+        uint32_t blockSize,
+        float32_t * pResult);
+
+/**
+  @brief         Mean square error between two double precision float vectors.
+  @param[in]     pSrcA       points to the first input vector
+  @param[in]     pSrcB       points to the second input vector
+  @param[in]     blockSize  number of samples in input vector
+  @param[out]    pResult    mean square error
+*/
+  
+void arm_mse_f64(
+  const float64_t * pSrcA,
+  const float64_t * pSrcB,
+        uint32_t blockSize,
+        float64_t * pResult);
+
+
+/**
+ * @brief  Accumulation value of a floating-point vector.
+ * @param[in]  pSrc       is input pointer
+ * @param[in]  blockSize  is the number of samples to process
+ * @param[out] pResult    is output value.
+ */
+
+void arm_accumulate_f32(
+const float32_t * pSrc,
+      uint32_t blockSize,
+      float32_t * pResult);
+
+/**
+ * @brief  Accumulation value of a floating-point vector.
+ * @param[in]  pSrc       is input pointer
+ * @param[in]  blockSize  is the number of samples to process
+ * @param[out] pResult    is output value.
+ */
+
+void arm_accumulate_f64(
+const float64_t * pSrc,
+      uint32_t blockSize,
+      float64_t * pResult);
 
 
 #ifdef   __cplusplus

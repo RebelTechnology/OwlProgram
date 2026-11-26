@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_float_to_q15.c
  * Description:  Converts the elements of the floating-point vector to Q15 vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/support_functions_f16.h"
 
@@ -45,17 +48,15 @@
   @param[in]     pSrc       points to the f32 input vector
   @param[out]    pDst       points to the f16 output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
-
  */
 
-#if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE) && defined(__CMSIS_GCC_H)
-#pragma GCC warning "Scalar version of arm_float_to_f16 built. Helium version has build issues with gcc."
-#endif 
+//#if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE) && defined(ARM_DSP_BUILT_WITH_GCC)
+//pragma GCC warning "Scalar version of arm_float_to_f16 built. Helium version has build issues with gcc."
+//#endif 
 
-#if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE) &&  !defined(__CMSIS_GCC_H)
+#if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE) &&  !defined(ARM_DSP_BUILT_WITH_GCC)
 
-void arm_float_to_f16(
+ARM_DSP_ATTRIBUTE void arm_float_to_f16(
   const float32_t * pSrc,
         float16_t * pDst,
         uint32_t blockSize)
@@ -98,7 +99,7 @@ void arm_float_to_f16(
 
 #else
 
-void arm_float_to_f16(
+ARM_DSP_ATTRIBUTE void arm_float_to_f16(
   const float32_t * pSrc,
         float16_t * pDst,
         uint32_t blockSize)

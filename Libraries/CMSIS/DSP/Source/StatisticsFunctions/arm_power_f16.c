@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_power_f16.c
  * Description:  Sum of the squares of the elements of a floating-point vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions_f16.h"
 
@@ -47,13 +50,12 @@
   @param[in]     pSrc       points to the input vector
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    sum of the squares value returned here
-  @return        none
  */
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
 
-void arm_power_f16(
+ARM_DSP_ATTRIBUTE void arm_power_f16(
   const float16_t * pSrc,
   uint32_t blockSize,
   float16_t * pResult)
@@ -82,7 +84,7 @@ void arm_power_f16(
 }
 #else
 
-void arm_power_f16(
+ARM_DSP_ATTRIBUTE void arm_power_f16(
   const float16_t * pSrc,
         uint32_t blockSize,
         float16_t * pResult)

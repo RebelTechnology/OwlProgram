@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_init_f16.c
  * Description:  Floating-point FIR filter initialization function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions_f16.h"
 
@@ -42,11 +45,10 @@
 /**
   @brief         Initialization function for the floating-point FIR filter.
   @param[in,out] S          points to an instance of the floating-point FIR filter structure
-  @param[in] 	 numTaps    number of filter coefficients in the filter
+  @param[in]     numTaps    number of filter coefficients in the filter
   @param[in]     pCoeffs    points to the filter coefficients buffer
   @param[in]     pState     points to the state buffer
   @param[in]     blockSize  number of samples processed per call
-  @return        none
 
   @par           Details
                    <code>pCoeffs</code> points to the array of filter coefficients stored in time reversed order:
@@ -74,7 +76,7 @@
 
  */
 
-void arm_fir_init_f16(
+ARM_DSP_ATTRIBUTE void arm_fir_init_f16(
         arm_fir_instance_f16 * S,
         uint16_t numTaps,
   const float16_t * pCoeffs,
@@ -89,7 +91,7 @@ void arm_fir_init_f16(
 
   /* Clear state buffer. The size is always (blockSize + numTaps - 1) */
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
-  memset(pState, 0, (numTaps + (blockSize - 1U) + ROUND_UP(blockSize, 8)) * sizeof(float16_t));
+  memset(pState, 0, (numTaps + (blockSize - 1U) + ARM_ROUND_UP(blockSize, 8)) * sizeof(float16_t));
 #else
   memset(pState, 0, (numTaps + (blockSize - 1U)) * sizeof(float16_t));
 #endif 

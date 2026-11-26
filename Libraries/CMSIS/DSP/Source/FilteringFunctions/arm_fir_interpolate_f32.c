@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_interpolate_f32.c
  * Description:  Floating-point FIR interpolation sequences
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -125,8 +128,7 @@
   @param[in]     S          points to an instance of the floating-point FIR interpolator structure
   @param[in]     pSrc       points to the block of input data
   @param[out]    pDst       points to the block of output data
-  @param[in]     blockSize  number of samples to process
-  @return        none
+  @param[in]     blockSize  number of input samples to process
  */
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
@@ -157,7 +159,7 @@ static void arm_fir_interpolate2_f32_mve(
      */
     pStateCurnt = S->pState + (phaseLen - 1U);
     /*
-     * Total number of intput samples
+     * Total number of input samples
      */
     blkCnt = blockSize;
     /*
@@ -256,7 +258,7 @@ static void arm_fir_interpolate2_f32_mve(
     }
 }
 
-void arm_fir_interpolate_f32(
+ARM_DSP_ATTRIBUTE void arm_fir_interpolate_f32(
   const arm_fir_interpolate_instance_f32 * S,
   const float32_t * pSrc,
   float32_t * pDst,
@@ -289,7 +291,7 @@ void arm_fir_interpolate_f32(
      */
     pStateCurnt = S->pState + (phaseLen - 1U);
     /*
-     * Total number of intput samples
+     * Total number of input samples
      */
     blkCnt = blockSize;
     /*
@@ -355,32 +357,18 @@ void arm_fir_interpolate_f32(
                 }
 
                 tapCnt = phaseLen & 3;
-                if (tapCnt > 0U)
+                while (tapCnt > 0U)
                 {
-                    mve_pred16_t p0 = vctp32q(tapCnt);
                     f32x4_t vecCoef;
-                    const float32_t *pCoef = ptr2;
 
-                    state0 = ptr1[0];
-                    state1 = ptr1[1];
-                    state2 = ptr1[2];
-                    state3 = ptr1[3];
+                    state0 = *ptr1++;
 
-                    vecCoef = vldrwq_gather_shifted_offset_z_f32(pCoef, vec_stridesM, p0);
-                    pCoef += S->L;
+                    vecCoef = vldrwq_gather_shifted_offset_f32(ptr2, vec_stridesM);
+                    ptr2 += S->L;
                     acc = vfmaq_n_f32(acc, vecCoef, state0);
+                    tapCnt--;
 
-                    vecCoef = vldrwq_gather_shifted_offset_z_f32(pCoef, vec_stridesM, p0);
-                    pCoef += S->L;
-                    acc = vfmaq_n_f32(acc, vecCoef, state1);
-
-                    vecCoef = vldrwq_gather_shifted_offset_z_f32(pCoef, vec_stridesM, p0);
-                    pCoef += S->L;
-                    acc = vfmaq_n_f32(acc, vecCoef, state2);
-
-                    vecCoef = vldrwq_gather_shifted_offset_z_f32(pCoef, vec_stridesM, p0);
-                    pCoef += S->L;
-                    acc = vfmaq_n_f32(acc, vecCoef, state3);
+                   
                 }
 
                 vst1q(pDst,  acc);
@@ -469,8 +457,8 @@ void arm_fir_interpolate_f32(
 }
 
 #else
-#if defined(ARM_MATH_NEON)
-void arm_fir_interpolate_f32(
+#if defined(ARM_MATH_NEON) 
+ARM_DSP_ATTRIBUTE void arm_fir_interpolate_f32(
   const arm_fir_interpolate_instance_f32 * S,
   const float32_t * pSrc,
   float32_t * pDst,
@@ -490,7 +478,7 @@ void arm_fir_interpolate_f32(
 
   float32x4_t sum0v;
   float32x4_t accV0,accV1;
-  float32x4_t x0v,x1v,x2v,xa,xb;
+  float32x4_t x0v,x1v = { 0 },x2v,xa,xb;
   float32x2_t tempV;
 
   /* S->pState buffer contains previous frame (phaseLen - 1) samples */
@@ -822,7 +810,7 @@ void arm_fir_interpolate_f32(
 }
 #else
 
-void arm_fir_interpolate_f32(
+ARM_DSP_ATTRIBUTE void arm_fir_interpolate_f32(
   const arm_fir_interpolate_instance_f32 * S,
   const float32_t * pSrc,
         float32_t * pDst,
@@ -1170,7 +1158,7 @@ void arm_fir_interpolate_f32(
   /* pStateCur points to the location where the new input data should be written */
   pStateCur = S->pState + (phaseLen - 1U);
 
-  /* Total number of intput samples */
+  /* Total number of input samples */
   blkCnt = blockSize;
 
   /* Loop over the blockSize. */

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_scale_q31.c
  * Description:  Multiplies a Q31 vector by a scalar
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/basic_math_functions.h"
 
@@ -44,18 +47,22 @@
   @param[in]     shift      number of bits to shift the result by
   @param[out]    pDst       points to the output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The input data <code>*pSrc</code> and <code>scaleFract</code> are in 1.31 format.
-                   These are multiplied to yield a 2.62 intermediate result and this is shifted with saturation to 1.31 format.
+                   These are multiplied to yield a 2.62 intermediate result and this is shifted 
+                   with saturation to 1.31 format.
+                   There is an intermediate shift by 32 to go from the
+                   2.62 to 1.31 format. 
+                   The shift argument is applied on the 1.31 result and not to the intermediate
+                   2.62 format. 
  */
 
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
 
-void arm_scale_q31(
+ARM_DSP_ATTRIBUTE void arm_scale_q31(
     const q31_t * pSrc,
     q31_t   scaleFract,
     int8_t  shift,
@@ -103,7 +110,7 @@ void arm_scale_q31(
 }
 
 #else
-void arm_scale_q31(
+ARM_DSP_ATTRIBUTE void arm_scale_q31(
   const q31_t *pSrc,
         q31_t scaleFract,
         int8_t shift,

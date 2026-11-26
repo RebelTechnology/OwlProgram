@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_merge_sort_init_f32.c
  * Description:  Floating point merge sort initialization function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/support_functions.h"
 
@@ -43,7 +46,7 @@
    * @param[in]      dir          Sorting order.
    * @param[in]      buffer       Working buffer.
    */
-void arm_merge_sort_init_f32(arm_merge_sort_instance_f32 * S, arm_sort_dir dir, float32_t * buffer)
+ARM_DSP_ATTRIBUTE void arm_merge_sort_init_f32(arm_merge_sort_instance_f32 * S, arm_sort_dir dir, float32_t * buffer)
 {
     S->dir    = dir;
     S->buffer = buffer;

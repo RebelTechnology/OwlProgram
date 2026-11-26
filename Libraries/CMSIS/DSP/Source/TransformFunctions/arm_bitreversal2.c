@@ -29,21 +29,26 @@
 #include "dsp/transform_functions.h"
 #include "arm_common_tables.h"
 
+void arm_bitreversal_64(
+        uint64_t *pSrc,
+  const uint16_t bitRevLen,
+  const uint16_t *pBitRevTab);
+
 
 /**
   @brief         In-place 64 bit reversal function.
   @param[in,out] pSrc        points to in-place buffer of unknown 64-bit data type
   @param[in]     bitRevLen   bit reversal table length
   @param[in]     pBitRevTab  points to bit reversal table
-  @return        none
 */
 
-void arm_bitreversal_64(
+ARM_DSP_ATTRIBUTE void arm_bitreversal_64(
         uint64_t *pSrc,
   const uint16_t bitRevLen,
   const uint16_t *pBitRevTab)
 {
-  uint64_t a, b, i, tmp;
+  uint64_t a, b, tmp;
+  uint32_t i;
 
   for (i = 0; i < bitRevLen; )
   {
@@ -64,15 +69,19 @@ void arm_bitreversal_64(
   }
 }
 
+void arm_bitreversal_32(
+        uint32_t *pSrc,
+  const uint16_t bitRevLen,
+  const uint16_t *pBitRevTab);
+
 /**
   @brief         In-place 32 bit reversal function.
   @param[in,out] pSrc        points to in-place buffer of unknown 32-bit data type
   @param[in]     bitRevLen   bit reversal table length
   @param[in]     pBitRevTab  points to bit reversal table
-  @return        none
 */
 
-void arm_bitreversal_32(
+ARM_DSP_ATTRIBUTE void arm_bitreversal_32(
         uint32_t *pSrc,
   const uint16_t bitRevLen,
   const uint16_t *pBitRevTab)
@@ -98,21 +107,26 @@ void arm_bitreversal_32(
   }
 }
 
+void arm_bitreversal_16(
+        uint16_t *pSrc,
+  const uint16_t bitRevLen,
+  const uint16_t *pBitRevTab);
+
 
 /**
   @brief         In-place 16 bit reversal function.
   @param[in,out] pSrc        points to in-place buffer of unknown 16-bit data type
   @param[in]     bitRevLen   bit reversal table length
   @param[in]     pBitRevTab  points to bit reversal table
-  @return        none
 */
 
-void arm_bitreversal_16(
+ARM_DSP_ATTRIBUTE void arm_bitreversal_16(
         uint16_t *pSrc,
   const uint16_t bitRevLen,
   const uint16_t *pBitRevTab)
 {
-  uint16_t a, b, i, tmp;
+  uint16_t a, b, tmp;
+  uint32_t i;
 
   for (i = 0; i < bitRevLen; )
   {

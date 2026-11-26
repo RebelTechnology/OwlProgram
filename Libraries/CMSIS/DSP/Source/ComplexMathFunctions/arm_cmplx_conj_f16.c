@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cmplx_conj_f16.c
  * Description:  Floating-point complex conjugate
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/complex_math_functions_f16.h"
 
@@ -33,28 +36,6 @@
   @ingroup groupCmplxMath
  */
 
-/**
-  @defgroup cmplx_conj Complex Conjugate
-
-  Conjugates the elements of a complex data vector.
-
-  The <code>pSrc</code> points to the source data and
-  <code>pDst</code> points to the destination data where the result should be written.
-  <code>numSamples</code> specifies the number of complex samples
-  and the data in each array is stored in an interleaved fashion
-  (real, imag, real, imag, ...).
-  Each array has a total of <code>2*numSamples</code> values.
-
-  The underlying algorithm is used:
-  <pre>
-  for (n = 0; n < numSamples; n++) {
-      pDst[(2*n)  ] =  pSrc[(2*n)  ];    // real part
-      pDst[(2*n)+1] = -pSrc[(2*n)+1];    // imag part
-  }
-  </pre>
-
-  There are separate functions for floating-point, Q15, and Q31 data types.
- */
 
 /**
   @addtogroup cmplx_conj
@@ -66,12 +47,11 @@
   @param[in]     pSrc        points to the input vector
   @param[out]    pDst        points to the output vector
   @param[in]     numSamples  number of samples in each vector
-  @return        none
  */
 
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
 
-void arm_cmplx_conj_f16(
+ARM_DSP_ATTRIBUTE void arm_cmplx_conj_f16(
     const float16_t * pSrc,
     float16_t * pDst,
     uint32_t numSamples)
@@ -121,7 +101,7 @@ void arm_cmplx_conj_f16(
 }
 
 #else
-void arm_cmplx_conj_f16(
+ARM_DSP_ATTRIBUTE void arm_cmplx_conj_f16(
   const float16_t * pSrc,
         float16_t * pDst,
         uint32_t numSamples)

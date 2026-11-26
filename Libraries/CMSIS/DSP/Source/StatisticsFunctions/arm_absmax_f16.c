@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_absmax_f16.c
  * Description:  Maximum value of a absolute values of a floating-point vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,12 +26,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions_f16.h"
 
 #if defined(ARM_FLOAT16_SUPPORTED)
 
-#if (defined(ARM_MATH_NEON) || defined(ARM_MATH_MVEF)) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON) || defined(ARM_MATH_MVEF)
 #include <limits.h>
 #endif
 
@@ -50,13 +53,12 @@
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    maximum value returned here
   @param[out]    pIndex     index of maximum value returned here
-  @return        none
  */
 
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
-void arm_absmax_f16(
+ARM_DSP_ATTRIBUTE void arm_absmax_f16(
   const float16_t * pSrc,
         uint32_t blockSize,
         float16_t * pResult,
@@ -138,19 +140,19 @@ void arm_absmax_f16(
 }
 #else
 #if defined(ARM_MATH_LOOPUNROLL)
-void arm_absmax_f16(
+ARM_DSP_ATTRIBUTE void arm_absmax_f16(
   const float16_t * pSrc,
         uint32_t blockSize,
         float16_t * pResult,
         uint32_t * pIndex)
 {
-        float16_t cur_absmax, out;                     /* Temporary variables to store the output value. */\
+        _Float16 cur_absmax, out;                     /* Temporary variables to store the output value. */\
         uint32_t blkCnt, outIndex;                     /* Loop counter */                                   \
         uint32_t index;                                /* index of maximum value */                         \
                                                                                                             \
   /* Initialize index value to zero. */                                                                     \
   outIndex = 0U;                                                                                            \
-  /* Load first input value that act as reference value for comparision */                                  \
+  /* Load first input value that act as reference value for comparison */                                  \
   out = *pSrc++;                                                                                            \
   out = ((_Float16)out > 0.0f16) ? out : -(_Float16)out;                                                                             \
   /* Initialize index of extrema value. */                                                                  \
@@ -225,7 +227,7 @@ void arm_absmax_f16(
   *pIndex = outIndex;  
 }
 #else
-void arm_absmax_f16(
+ARM_DSP_ATTRIBUTE void arm_absmax_f16(
   const float16_t * pSrc,
         uint32_t blockSize,
         float16_t * pResult,
@@ -237,7 +239,7 @@ void arm_absmax_f16(
   /* Initialise index value to zero. */
   outIndex = 0U;
 
-  /* Load first input value that act as reference value for comparision */
+  /* Load first input value that act as reference value for comparison */
   out = (_Float16)fabsf((float32_t)*pSrc++);
 
   /* Initialize blkCnt with number of samples */

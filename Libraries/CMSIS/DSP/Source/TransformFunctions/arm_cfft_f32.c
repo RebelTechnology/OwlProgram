@@ -1,15 +1,14 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cfft_f32.c
  * Description:  Combined Radix Decimation in Frequency CFFT Floating point processing function
  *
- * $Date:        23 April 2021
- * $Revision:    V1.9.0
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
- * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
+ * Copyright (C) 2010-2024 ARM Limited or its affiliates. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,9 +24,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/transform_functions.h"
 #include "arm_common_tables.h"
+
+//#include <stdio.h>
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
 
@@ -510,25 +513,27 @@ static void arm_cfft_radix4by2_inverse_f32_mve(const arm_cfft_instance_f32 * S,f
 
 
 /**
-  @addtogroup ComplexFFT
+  @addtogroup ComplexFFTF32
   @{
  */
 
 /**
   @brief         Processing function for the floating-point complex FFT.
   @param[in]     S              points to an instance of the floating-point CFFT structure
-  @param[in,out] p1             points to the complex data buffer of size <code>2*fftLen</code>. Processing occurs in-place
+  @param[in,out] p1             points to the complex data buffer. Processing occurs in-place
   @param[in]     ifftFlag       flag that selects transform direction
                    - value = 0: forward transform
                    - value = 1: inverse transform
   @param[in]     bitReverseFlag flag that enables / disables bit reversal of output
                    - value = 0: disables bit reversal of output
                    - value = 1: enables bit reversal of output
-  @return        none
+
+  @par Size of buffers according to the target architecture and datatype:
+       They are described on the page \ref transformbuffers "transform buffers".
  */
 
 
-void arm_cfft_f32(
+ARM_DSP_ATTRIBUTE void arm_cfft_f32(
   const arm_cfft_instance_f32 * S,
         float32_t * pSrc,
         uint8_t ifftFlag,
@@ -583,6 +588,73 @@ void arm_cfft_f32(
 }
 
 
+#elif defined(ARM_MATH_NEON)
+#include "CMSIS_NE10_types.h"
+#include "CMSIS_NE10_fft.h"
+
+
+
+ARM_DSP_ATTRIBUTE void arm_cfft_f32(
+  const arm_cfft_instance_f32 * S,
+        const float32_t * pIn,
+        float32_t * pOut,
+        float32_t * pBuffer, /* When used, in is not modified */
+        uint8_t ifftFlag)
+{
+    if (S->algorithm_flag == ARM_MIXED_RADIX_FFT)
+    {
+        if (ifftFlag)
+        {
+            arm_ne10_mixed_radix_generic_butterfly_inverse_float32_neon (S,
+                (ne10_fft_cpx_float32_t *)pIn, 
+                (ne10_fft_cpx_float32_t *)pOut,
+                (ne10_fft_cpx_float32_t *)pBuffer);
+        }
+        else
+        {
+            arm_ne10_mixed_radix_generic_butterfly_float32_neon (S,
+                (ne10_fft_cpx_float32_t *)pIn, 
+                (ne10_fft_cpx_float32_t *)pOut,
+                (ne10_fft_cpx_float32_t *)pBuffer);
+        }
+    }
+    else 
+    {
+        if (ifftFlag == 0)
+        {
+            if (S->fftLen==16)
+            {
+                arm_ne10_fft16_forward_float32_neon (S,
+                   (ne10_fft_cpx_float32_t *)pIn,
+                   (ne10_fft_cpx_float32_t *)pOut
+                   );
+            }
+            else 
+            {
+               arm_ne10_mixed_radix_fft_forward_float32_neon (S,
+                   (ne10_fft_cpx_float32_t *)pIn,
+                   (ne10_fft_cpx_float32_t *)pOut,
+                   (ne10_fft_cpx_float32_t *)pBuffer);
+            }
+        }
+        else 
+        {
+            if (S->fftLen==16)
+            {
+                arm_ne10_fft16_backward_float32_neon(S,
+                   (ne10_fft_cpx_float32_t *)pIn,
+                   (ne10_fft_cpx_float32_t *)pOut);
+            }
+            else 
+            {
+                arm_ne10_mixed_radix_fft_backward_float32_neon (S,
+                    (ne10_fft_cpx_float32_t *)pIn,
+                    (ne10_fft_cpx_float32_t *)pOut,
+                    (ne10_fft_cpx_float32_t *)pBuffer);
+            }
+        }
+    }
+}
 #else
 extern void arm_radix8_butterfly_f32(
         float32_t * pSrc,
@@ -636,7 +708,7 @@ extern void arm_bitreversal_32(
                    needed FFTs.</b> Other FFT versions can continue to be initialized as
                    explained below.
   @par
-                   For not MVE versions, pre-initialized data structures containing twiddle factors
+                   For versions not targeting Helium or Neon, pre-initialized data structures containing twiddle factors
                    and bit reversal tables are provided and defined in <code>arm_const_structs.h</code>.  Include
                    this header in your function and then pass one of the constant structures as
                    an argument to arm_cfft_f32.  For example:
@@ -657,36 +729,37 @@ extern void arm_bitreversal_32(
   @code
                    const static arm_cfft_instance_f32 *S;
                    ...
-                     switch (length) {
-                       case 16:
-                         S = &arm_cfft_sR_f32_len16;
-                         break;
-                       case 32:
-                         S = &arm_cfft_sR_f32_len32;
-                         break;
-                       case 64:
-                         S = &arm_cfft_sR_f32_len64;
-                         break;
-                       case 128:
-                         S = &arm_cfft_sR_f32_len128;
-                         break;
-                       case 256:
-                         S = &arm_cfft_sR_f32_len256;
-                         break;
-                       case 512:
-                         S = &arm_cfft_sR_f32_len512;
-                         break;
-                       case 1024:
-                         S = &arm_cfft_sR_f32_len1024;
-                         break;
-                       case 2048:
-                         S = &arm_cfft_sR_f32_len2048;
-                         break;
-                       case 4096:
-                         S = &arm_cfft_sR_f32_len4096;
-                         break;
-                     }
+                   switch (length) {
+                     case 16:
+                       S = &arm_cfft_sR_f32_len16;
+                       break;
+                     case 32:
+                       S = &arm_cfft_sR_f32_len32;
+                       break;
+                     case 64:
+                       S = &arm_cfft_sR_f32_len64;
+                       break;
+                     case 128:
+                       S = &arm_cfft_sR_f32_len128;
+                       break;
+                     case 256:
+                       S = &arm_cfft_sR_f32_len256;
+                       break;
+                     case 512:
+                       S = &arm_cfft_sR_f32_len512;
+                       break;
+                     case 1024:
+                       S = &arm_cfft_sR_f32_len1024;
+                       break;
+                     case 2048:
+                       S = &arm_cfft_sR_f32_len2048;
+                       break;
+                     case 4096:
+                       S = &arm_cfft_sR_f32_len4096;
+                       break;
+                   }
   @endcode
+
   @par
                    The new arm_cfft_init_f32 can also be used.
   @par Q15 and Q31
@@ -703,7 +776,7 @@ extern void arm_bitreversal_32(
                    Pre-initialized data structures containing twiddle factors and bit reversal
                    tables are provided and defined in <code>arm_const_structs.h</code>.  Include
                    this header in your function and then pass one of the constant structures as
-                   an argument to arm_cfft_q31. For example:
+                   an argument to arm_cfft_q31 (except if you are targeting Helium or Neon). For example:
   @par
                    <code>arm_cfft_q31(arm_cfft_sR_q31_len64, pSrc, 1, 1)</code>
   @par
@@ -752,9 +825,28 @@ extern void arm_bitreversal_32(
                      }
   @endcode
 
+  @par Neon version
+                     The neon version has a different API.
+                     The input and output buffers must be
+                     different.
+                     There is a temporary buffer.
+                     The bit reverse flag is not more 
+                     available in Neon version.
+
+  @code
+        void arm_cfft_f32(
+                const arm_cfft_instance_f32 * S,
+                      const float32_t * pIn,
+                      float32_t * pOut,
+                      float32_t * pBuffer, 
+                      uint8_t ifftFlag);
+  @endcode
+
+  @par Size of buffers according to the target architecture and datatype:
+       They are described on the page \ref transformbuffers "transform buffers".
  */
 
-void arm_cfft_radix8by2_f32 (arm_cfft_instance_f32 * S, float32_t * p1)
+static void arm_cfft_radix8by2_f32 (arm_cfft_instance_f32 * S, float32_t * p1)
 {
   uint32_t    L  = S->fftLen;
   float32_t * pCol1, * pCol2, * pMid1, * pMid2;
@@ -868,7 +960,7 @@ void arm_cfft_radix8by2_f32 (arm_cfft_instance_f32 * S, float32_t * p1)
   arm_radix8_butterfly_f32 (pCol2, L, (float32_t *) S->pTwiddle, 2U);
 }
 
-void arm_cfft_radix8by4_f32 (arm_cfft_instance_f32 * S, float32_t * p1)
+static void arm_cfft_radix8by4_f32 (arm_cfft_instance_f32 * S, float32_t * p1)
 {
     uint32_t    L  = S->fftLen >> 1;
     float32_t * pCol1, *pCol2, *pCol3, *pCol4, *pEnd1, *pEnd2, *pEnd3, *pEnd4;
@@ -1112,24 +1204,46 @@ void arm_cfft_radix8by4_f32 (arm_cfft_instance_f32 * S, float32_t * p1)
 }
 
 /**
-  @addtogroup ComplexFFT
+  @addtogroup ComplexFFTF32
   @{
  */
 
 /**
   @brief         Processing function for the floating-point complex FFT.
   @param[in]     S              points to an instance of the floating-point CFFT structure
-  @param[in,out] p1             points to the complex data buffer of size <code>2*fftLen</code>. Processing occurs in-place
+  @param[in,out] p1             points to the complex data buffer. Processing occurs in-place
   @param[in]     ifftFlag       flag that selects transform direction
                    - value = 0: forward transform
                    - value = 1: inverse transform
   @param[in]     bitReverseFlag flag that enables / disables bit reversal of output
                    - value = 0: disables bit reversal of output
                    - value = 1: enables bit reversal of output
-  @return        none
+  @par Neon version
+                     The neon version has a different API.
+                     The input and output buffers must be
+                     different.
+                     There is an optional temporary buffer.
+                     If the temporary buffer is not used, the
+                     input buffer is modified.
+                     The bit reverse flag is not more 
+                     available in Neon version.
+
+  @par
+   @code
+        void arm_cfft_f32(
+                const arm_cfft_instance_f32 * S,
+                      float32_t * pIn,
+                      float32_t * pOut,
+                      float32_t * pBuffer, 
+                      uint8_t ifftFlag);
+  @endcode
+
+  @par Size of buffers according to the target architecture and datatype:
+       They are described on the page \ref transformbuffers "transform buffers".
+
  */
 
-void arm_cfft_f32(
+ARM_DSP_ATTRIBUTE void arm_cfft_f32(
   const arm_cfft_instance_f32 * S,
         float32_t * p1,
         uint8_t ifftFlag,
@@ -1188,5 +1302,5 @@ void arm_cfft_f32(
 #endif /* defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE) */
 
 /**
-  @} end of ComplexFFT group
+  @} end of ComplexFFTF32 group
  */

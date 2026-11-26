@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_float_to_q15.c
  * Description:  Converts the elements of the floating-point vector to Q15 vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/support_functions_f16.h"
 
@@ -45,7 +48,6 @@
   @param[in]     pSrc       points to the f16 input vector
   @param[out]    pDst       points to the Q15 output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
 
   @par           Details
                    The equation used for the conversion process is:
@@ -64,7 +66,7 @@
 
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
 
-void arm_f16_to_q15(
+ARM_DSP_ATTRIBUTE void arm_f16_to_q15(
   const float16_t * pSrc,
   q15_t * pDst,
   uint32_t blockSize)
@@ -96,7 +98,7 @@ void arm_f16_to_q15(
 
 #else
 
-void arm_f16_to_q15(
+ARM_DSP_ATTRIBUTE void arm_f16_to_q15(
   const float16_t * pSrc,
         q15_t * pDst,
         uint32_t blockSize)
@@ -124,8 +126,8 @@ void arm_f16_to_q15(
          * convert from float to Q31 and then store the results in the destination buffer
          */
         in = *pIn++;
-        in = (in * 32768.0);
-        in += in > 0.0 ? 0.5 : -0.5;
+        in = ((_Float16)in * (_Float16)32768.0f16);
+        in += (_Float16)in > 0.0f16 ? 0.5f16 : -0.5f16;
         *pDst++ = clip_q31_to_q15((q31_t) (in));
 
 #else

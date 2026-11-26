@@ -1,3 +1,4 @@
+﻿
 
 /* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
@@ -26,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/distance_functions.h"
 #include <limits.h>
@@ -73,7 +76,7 @@ __attribute__((weak)) float __powisf2(float a, int b)
 #include "arm_helium_utils.h"
 #include "arm_vec_math.h"
 
-float32_t arm_minkowski_distance_f32(const float32_t *pA,const float32_t *pB, int32_t order, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float32_t arm_minkowski_distance_f32(const float32_t *pA,const float32_t *pB, int32_t order, uint32_t blockSize)
 {
     uint32_t        blkCnt;
     f32x4_t         a, b, tmpV, sumV;
@@ -114,11 +117,11 @@ float32_t arm_minkowski_distance_f32(const float32_t *pA,const float32_t *pB, in
 }
 
 #else
-#if defined(ARM_MATH_NEON)
+#if defined(ARM_MATH_NEON) 
 
 #include "NEMath.h"
 
-float32_t arm_minkowski_distance_f32(const float32_t *pA,const float32_t *pB, int32_t order, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float32_t arm_minkowski_distance_f32(const float32_t *pA,const float32_t *pB, int32_t order, uint32_t blockSize)
 {
     float32_t sum;
     uint32_t blkCnt;
@@ -164,7 +167,7 @@ float32_t arm_minkowski_distance_f32(const float32_t *pA,const float32_t *pB, in
 #else
 
 
-float32_t arm_minkowski_distance_f32(const float32_t *pA,const float32_t *pB, int32_t order, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float32_t arm_minkowski_distance_f32(const float32_t *pA,const float32_t *pB, int32_t order, uint32_t blockSize)
 {
     float32_t sum;
     uint32_t i;

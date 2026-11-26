@@ -26,8 +26,8 @@
  * limitations under the License.
  */
 
-#ifndef _ARM_UTILS_HELIUM_H_
-#define _ARM_UTILS_HELIUM_H_
+#ifndef ARM_UTILS_HELIUM_H_
+#define ARM_UTILS_HELIUM_H_
 
 
 #ifdef   __cplusplus
@@ -105,17 +105,17 @@ __STATIC_FORCEINLINE float16_t vecAddAcrossF16Mve(float16x8_t in)
     in = vaddq_f16(tmpVec, in);
     acc = (_Float16)vgetq_lane_f16(in, 0) + (_Float16)vgetq_lane_f16(in, 4);
 
-    return acc;
+    return (float16_t)acc;
 }
 
 __STATIC_FORCEINLINE float16x8_t __mve_cmplx_sum_intra_vec_f16(
     float16x8_t   vecIn)
 {
     float16x8_t   vecTmp, vecOut;
-    uint32_t    tmp;
+    uint32_t    tmp = 0;
 
     vecTmp = (float16x8_t) vrev64q_s32((int32x4_t) vecIn);
-    // TO TRACK : using canonical addition leads to unefficient code generation for f16
+    // TO TRACK : using canonical addition leads to inefficient code generation for f16
     // vecTmp = vecTmp + vecAccCpx0;
     /*
      * Compute
@@ -135,7 +135,7 @@ __STATIC_FORCEINLINE float16x8_t __mve_cmplx_sum_intra_vec_f16(
      */
     vecOut = vaddq_f16(vecOut, vecTmp);
     /*
-     * Cmplx sum is in 4rd & 5th f16 elt
+     * Cmplx sum is in 4th & 5th f16 elt
      * return full vector
      */
     return vecOut;
@@ -155,7 +155,7 @@ __STATIC_FORCEINLINE void mve_cmplx_sum_intra_vec_f16(
 {
     float16x8_t   vecOut = __mve_cmplx_sum_intra_vec_f16(vecIn);
     /*
-     * Cmplx sum is in 4rd & 5th f16 elt
+     * Cmplx sum is in 4th & 5th f16 elt
      * use 32-bit extraction
      */
     *(float32_t *) pOut = ((float32x4_t) vecOut)[2];
@@ -364,7 +364,7 @@ __STATIC_INLINE arm_status arm_mat_cmplx_trans_32bit(
             vecIn = vldrwq_gather_shifted_offset(pDataC, vecOffsCur);
             vstrwq(pDataDestR, vecIn); 
             pDataDestR += 4;
-            vecOffsCur = vaddq(vecOffsCur, (srcCols << 2));
+            vecOffsCur = vaddq_n_u32(vecOffsCur, (srcCols << 2));
             /*
              * Decrement the blockSize loop counter
              */
@@ -551,7 +551,7 @@ __STATIC_INLINE arm_status arm_mat_cmplx_trans_16bit(
      * build  [0, 1, 2xcol, 2xcol+1, 4xcol, 4xcol+1, 6xcol, 6xcol+1]
      */
     vecOffsRef = vldrhq_u16((uint16_t const *) loadCmplxCol);
-    vecOffsRef = vmulq(vecOffsRef, (uint16_t) (srcCols * CMPLX_DIM))
+    vecOffsRef = vmulq_n_u16(vecOffsRef, (uint16_t) (srcCols * CMPLX_DIM))
                     + viwdupq_u16((uint32_t)0, (uint16_t) 2, 1);
 
     pDataRow = pDataSrc;
@@ -569,7 +569,7 @@ __STATIC_INLINE arm_status arm_mat_cmplx_trans_16bit(
             vecIn = vldrhq_gather_shifted_offset(pDataC, vecOffsCur);
             vstrhq(pDataDestR, vecIn);  
             pDataDestR+= 8; // VEC_LANES_U16
-            vecOffsCur = vaddq(vecOffsCur, (srcCols << 3));
+            vecOffsCur = vaddq_n_u16(vecOffsCur, (srcCols << 3));
             /*
              * Decrement the blockSize loop counter
              */
@@ -609,7 +609,6 @@ Definitions available for MVEI only
 #define MVE_ASRL_SAT32(acc, shift)          ((sqrshrl(acc, -(32-shift)) >> 32) & 0xffffffff)
 
 
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FAST_TABLES) || defined(ARM_TABLE_FAST_SQRT_Q31_MVE)
 __STATIC_INLINE q31x4_t FAST_VSQRT_Q31(q31x4_t vecIn)
 {
     q63x2_t         vecTmpLL;
@@ -675,9 +674,7 @@ __STATIC_INLINE q31x4_t FAST_VSQRT_Q31(q31x4_t vecIn)
 
     return vecDst;
 }
-#endif
 
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FAST_TABLES) || defined(ARM_TABLE_FAST_SQRT_Q15_MVE)
 __STATIC_INLINE q15x8_t FAST_VSQRT_Q15(q15x8_t vecIn)
 {
     q31x4_t         vecTmpLev, vecTmpLodd, vecSignL;
@@ -742,7 +739,6 @@ __STATIC_INLINE q15x8_t FAST_VSQRT_Q15(q15x8_t vecIn)
 
     return vecDst;
 }
-#endif
 
 #endif /* defined (ARM_MATH_HELIUM) || defined(ARM_MATH_MVEI) */
 

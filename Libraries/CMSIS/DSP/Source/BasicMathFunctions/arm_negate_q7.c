@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_negate_q7.c
  * Description:  Negates Q7 vectors
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/basic_math_functions.h"
 
@@ -42,8 +45,7 @@
   @param[in]     pSrc       points to the input vector.
   @param[out]    pDst       points to the output vector.
   @param[in]     blockSize   number of samples in each vector.
-  @return        none
-
+  
   @par           Scaling and Overflow Behavior
                    The function uses saturating arithmetic.
                    The Q7 value -1 (0x80) is saturated to the maximum allowable positive value 0x7F.
@@ -52,7 +54,7 @@
 
 #include "arm_helium_utils.h"
 
-void arm_negate_q7(
+ARM_DSP_ATTRIBUTE void arm_negate_q7(
     const q7_t   * pSrc,
     q7_t   * pDst,
     uint32_t blockSize)
@@ -93,7 +95,7 @@ void arm_negate_q7(
 }
 
 #else
-void arm_negate_q7(
+ARM_DSP_ATTRIBUTE void arm_negate_q7(
   const q7_t * pSrc,
         q7_t * pDst,
         uint32_t blockSize)
@@ -116,7 +118,7 @@ void arm_negate_q7(
 
 #if defined (ARM_MATH_DSP)
     /* Negate and store result in destination buffer (4 samples at a time). */
-    in1 = read_q7x4_ia ((q7_t **) &pSrc);
+    in1 = read_q7x4_ia (&pSrc);
     write_q7x4_ia (&pDst, __QSUB8(0, in1));
 #else
     in = *pSrc++;

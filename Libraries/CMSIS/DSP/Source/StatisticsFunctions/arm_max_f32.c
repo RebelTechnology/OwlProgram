@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_max_f32.c
  * Description:  Maximum value of a floating-point vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,9 +26,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions.h"
-#if (defined(ARM_MATH_NEON) || defined(ARM_MATH_MVEF)) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON) || defined(ARM_MATH_MVEF) 
 #include <limits.h>
 #endif
 
@@ -54,11 +57,10 @@
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    maximum value returned here
   @param[out]    pIndex     index of maximum value returned here
-  @return        none
  */
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
-void arm_max_f32(
+ARM_DSP_ATTRIBUTE void arm_max_f32(
   const float32_t * pSrc,
   uint32_t blockSize,
   float32_t * pResult,
@@ -142,8 +144,8 @@ void arm_max_f32(
 }
 
 #else
-#if defined(ARM_MATH_NEON) && !defined(ARM_MATH_AUTOVECTORIZE)
-void arm_max_f32(
+#if defined(ARM_MATH_NEON) 
+ARM_DSP_ATTRIBUTE void arm_max_f32(
   const float32_t * pSrc,
   uint32_t blockSize,
   float32_t * pResult,
@@ -165,7 +167,7 @@ void arm_max_f32(
   uint32x4_t countV;
   uint32x2_t countV2;
 
-  maxIdx = vdupq_n_u32(ULONG_MAX);
+  maxIdx = vdupq_n_u32(UINT_MAX);
   delta = vdupq_n_u32(4);
   index = vld1q_u32(indexInit);
   countV = vld1q_u32(countVInit);
@@ -260,7 +262,7 @@ void arm_max_f32(
   *pIndex = outIndex;
 }
 #else
-void arm_max_f32(
+ARM_DSP_ATTRIBUTE void arm_max_f32(
   const float32_t * pSrc,
         uint32_t blockSize,
         float32_t * pResult,
@@ -276,7 +278,7 @@ void arm_max_f32(
   /* Initialise index value to zero. */
   outIndex = 0U;
 
-  /* Load first input value that act as reference value for comparision */
+  /* Load first input value that act as reference value for comparison */
   out = *pSrc++;
 
 #if defined (ARM_MATH_LOOPUNROLL) && !defined(ARM_MATH_AUTOVECTORIZE)
