@@ -196,11 +196,9 @@ check: tests ## run test patches and unit tests
 	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/CppTest PATCHNAME=CppTest clean patch web run
 	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/DaisySPTest PATCHNAME=DaisySPTest clean patch web run
 	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/GenTest GEN=MIDItestMinMax clean patch web run
-	# @unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/FaustTest FAUST=FaustTest clean patch web run # FAUST is not installed for CI
 	@cp FaustSource/*.h TestPatches/FaustTest && unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/FaustTest PATCHNAME=Faust clean patch web run
-	# @unset PATCHNAME PATCHCLASS PATCHFILE SOULCLASS SOULFILE SOULHPP && $(MAKE) PATCHSOURCE=TestPatches/SoulTest SOUL=SineSynth clean patch web run # SOUL is not installed for CI
 	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/SoulTest PATCHNAME=Soul clean patch web run
-	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/HeavyTest HEAVY=HeavyTest clean patch web run
+	# hvcc segfaulting in CI @unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/HeavyTest HEAVY=HeavyTest clean patch web run
 
 help: ## show this help
 	@echo 'Usage: make [target] ...'
