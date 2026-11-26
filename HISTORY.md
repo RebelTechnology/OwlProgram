@@ -1,3 +1,4 @@
+* CMSIS-DSP built with ARM_MATH_LOOPUNROLL: biquad and vector functions up to 30% faster
 * Added AdsrEnvelope block generate() and process(), up to 33% faster than per-sample
 * Faster block processing (state kept in registers) in StateVariableFilter, SmoothingFilter, DcBlockingFilter, EnvelopeFollower, InterpolatingSignalGenerator and Sine, AntialiasedRamp, AntialiasedSquareWave and Vosim oscillators
 * Patches built without -fno-builtin and -mtune=cortex-m4: fminf, fmaxf, fabsf, sqrtf and friends compile to FPU instructions
