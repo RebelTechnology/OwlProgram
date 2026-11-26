@@ -1,3 +1,4 @@
+* Patches built without -fno-builtin and -mtune=cortex-m4: fminf, fmaxf, fabsf, sqrtf and friends compile to FPU instructions
 * Faust floorf, ceilf, sqrtf, rintf and roundf use FPU instructions on Cortex-M7
 * Fixed web build fast pow/exp/log lookup tables left empty
 * Added unit tests for TapTempo and WavetableOscillator, and for SmoothValue::normalForSampleRate()
