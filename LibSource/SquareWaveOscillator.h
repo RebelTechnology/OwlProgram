@@ -76,6 +76,9 @@ public:
     }
     size_t len = output.getSize();
     float* dest = output.getData();
+    const float incr = this->incr;
+    const float pw = this->pw;
+    float phase = this->phase;
     while(len--){
       phase += incr;
       if(phase >= pw){
@@ -108,6 +111,7 @@ public:
 	sample = 1;
       }
     }
+    this->phase = phase;
   }
   using OscillatorTemplate<AntialiasedSquareWaveOscillator>::generate;  
 };

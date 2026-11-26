@@ -94,10 +94,13 @@ void InterpolatingSignalGenerator<LINEAR_INTERPOLATION>::generate(FloatArray out
   points->read(pts, 2);
   size_t len = output.getSize();
   float* out = output.getData();
+  const float inc = this->inc;
+  float mu = this->mu;
   while(len--){
     *out++ = Interpolator::linear(pts[0], pts[1], mu);
     mu += inc;
   }
+  this->mu = mu;
 }
 
 template<>
@@ -123,10 +126,13 @@ void InterpolatingSignalGenerator<COSINE_INTERPOLATION>::generate(FloatArray out
   points->read(pts, 2);
   size_t len = output.getSize();
   float* out = output.getData();
+  const float inc = this->inc;
+  float mu = this->mu;
   while(len--){
     *out++ = Interpolator::cosine(pts[0], pts[1], mu);
     mu += inc;
   }
+  this->mu = mu;
 }
 
 template<>
@@ -152,10 +158,13 @@ void InterpolatingSignalGenerator<CUBIC_3P_INTERPOLATION>::generate(FloatArray o
   points->read(pts, 3);
   size_t len = output.getSize();
   float* out = output.getData();
+  const float inc = this->inc;
+  float mu = this->mu;
   while(len--){
     *out++ = Interpolator::cubic(pts[0], pts[1], pts[2], mu);
     mu += inc;
   }
+  this->mu = mu;
 }
 
 template<>
@@ -181,10 +190,13 @@ void InterpolatingSignalGenerator<CUBIC_4P_INTERPOLATION>::generate(FloatArray o
   points->read(pts, 4);
   size_t len = output.getSize();
   float* out = output.getData();
+  const float inc = this->inc;
+  float mu = this->mu;
   while(len--){
     *out++ = Interpolator::cubic(pts[0], pts[1], pts[2], pts[3], mu);
     mu += inc;
   }
+  this->mu = mu;
 }
 
 template<>
@@ -210,10 +222,13 @@ void InterpolatingSignalGenerator<CUBIC_4P_SMOOTH_INTERPOLATION>::generate(Float
   points->read(pts, 4);
   size_t len = output.getSize();
   float* out = output.getData();
+  const float inc = this->inc;
+  float mu = this->mu;
   while(len--){
     *out++ = Interpolator::cubicSmooth(pts[0], pts[1], pts[2], pts[3], mu);
     mu += inc;
   }
+  this->mu = mu;
 }
 
 template<>
@@ -239,10 +254,13 @@ void InterpolatingSignalGenerator<HERMITE_INTERPOLATION>::generate(FloatArray ou
   points->read(pts, 4);
   size_t len = output.getSize();
   float* out = output.getData();
+  const float inc = this->inc;
+  float mu = this->mu;
   while(len--){
     *out++ = Interpolator::hermite(pts[0], pts[1], pts[2], pts[3], mu);
     mu += inc;
   }
+  this->mu = mu;
 }
 
 template<>

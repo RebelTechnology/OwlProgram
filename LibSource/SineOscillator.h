@@ -16,20 +16,27 @@ public:
   }
   void generate(FloatArray output){
     size_t len = output.getSize();
+    float* out = output.getData();
+    const float incr = this->incr;
+    float phase = this->phase;
     for(size_t i=0; i<len; ++i){
-      output[i] = sinf(phase);
+      out[i] = sinf(phase);
       phase += incr; // allow phase to overrun
     }
-    phase = fmodf(phase, end_phase);
+    this->phase = fmodf(phase, end_phase);
   }
   void generate(FloatArray output, FloatArray fm){
     size_t len = output.getSize();
+    float* out = output.getData();
+    const float* fmd = fm.getData();
+    const float incr = this->incr;
+    float phase = this->phase;
     for(size_t i=0; i<len; ++i){
-      output[i] = sinf(phase);
-      phase += incr * (1 + fm[i]);
+      out[i] = sinf(phase);
+      phase += incr * (1 + fmd[i]);
       // allow phase to overrun
     }
-    phase = fmodf(phase, end_phase);
+    this->phase = fmodf(phase, end_phase);
   }
   using OscillatorTemplate<SineOscillator>::generate;  
 };

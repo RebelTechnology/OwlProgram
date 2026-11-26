@@ -134,10 +134,19 @@ public:
   }
 
   void process(FloatArray input, FloatArray output){
-    size_t nFrames = input.getSize();
+    const size_t nFrames = input.getSize();
+    const float* in = input.getData();
+    float* out = output.getData();
+#ifdef SVF_COMPUTE_BOUNDED
+    const float a1 = this->a1, a2 = this->a2, a3 = this->a3;
+#else
+    const float a1 = this->a1, a2 = this->a2, g = this->g;
+#endif
+    const float m0 = this->m0, m1 = this->m1, m2 = this->m2;
+    float ic1eq = this->ic1eq, ic2eq = this->ic2eq;
     float v0, v1, v2, v3;
     for(size_t s = 0; s < nFrames; s++){
-      v0 = input[s];
+      v0 = in[s];
 #ifdef SVF_COMPUTE_BOUNDED
       v3 = v0 - ic2eq;
       v1 = a1 * ic1eq + a2*v3;
@@ -148,8 +157,10 @@ public:
 #endif
       ic1eq = 2. * v1 - ic1eq;
       ic2eq = 2. * v2 - ic2eq;
-      output[s] = m0 * v0 + m1 * v1 + m2 * v2;
+      out[s] = m0 * v0 + m1 * v1 + m2 * v2;
     }
+    this->ic1eq = ic1eq;
+    this->ic2eq = ic2eq;
   }
 
   void processLowPass(FloatArray in, FloatArray fc, float q, FloatArray out){
@@ -176,10 +187,21 @@ public:
   /**
    * Simultaneously process lowpass, bandpass and highpass filtered output
    */
-  void processLowBandHighPass(FloatArray in, float fc, float q, FloatArray low, FloatArray band, FloatArray high){
-    size_t nFrames = in.getSize();
+  void processLowBandHighPass(FloatArray input, float fc, float q, FloatArray lowout, FloatArray bandout, FloatArray highout){
+    size_t nFrames = input.getSize();
     float v0, v1, v2, v3;
     setCutoff(fc, q);
+    const float* in = input.getData();
+    float* low = lowout.getData();
+    float* band = bandout.getData();
+    float* high = highout.getData();
+#ifdef SVF_COMPUTE_BOUNDED
+    const float a1 = this->a1, a2 = this->a2, a3 = this->a3;
+#else
+    const float a1 = this->a1, a2 = this->a2, g = this->g;
+#endif
+    const float m0 = this->m0;
+    float ic1eq = this->ic1eq, ic2eq = this->ic2eq;
     for(size_t s = 0; s < nFrames; s++){
       v0 = in[s];
 #ifdef SVF_COMPUTE_BOUNDED
@@ -199,6 +221,8 @@ public:
       // peak = low - high = v0 - k*v1 - 2*v2;
       // all = low + high - k*band = v0 - 2*k*v1;
     }
+    this->ic1eq = ic1eq;
+    this->ic2eq = ic2eq;
   }
 
   void processLowBandHighPass(FloatArray in, FloatArray fc, float q,
@@ -270,6 +294,12 @@ public:
       float v0, v1, v2, v3;
       float ic1eq = state[0];
       float ic2eq = state[1];
+#ifdef SVF_COMPUTE_BOUNDED
+      const float a1 = this->a1, a2 = this->a2, a3 = this->a3;
+#else
+      const float a1 = this->a1, a2 = this->a2, g = this->g;
+#endif
+      const float m0 = this->m0, m1 = this->m1, m2 = this->m2;
       for(size_t s = 0; s < nFrames; s++){
 	v0 = in[s];
 #ifdef SVF_COMPUTE_BOUNDED
