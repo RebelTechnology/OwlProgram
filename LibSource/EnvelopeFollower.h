@@ -21,10 +21,13 @@ public:
     float* input = in.getData();
     float* output = out.getData();
     size_t len = in.getSize();
+    const float lambda = this->lambda;
+    float y = this->y;
     while(len--){
       y = y*lambda + abs(*input++)*(1.0f - lambda);
       *output++ = y;
     }
+    this->y = y;
   }
   static EnvelopeFollower* create(float lambda){
     return new EnvelopeFollower(lambda);

@@ -64,6 +64,9 @@ public:
    */
   void generate(FloatArray output){
     size_t len = output.getSize();
+    float* out = output.getData();
+    const float incr = this->incr;
+    float phase = this->phase;
     float blep = lastblep;
     for(size_t i=0; i<len; ++i){
       float sample = 2*phase-1;
@@ -81,8 +84,9 @@ public:
       }else{
 	blep = 0;
       }
-      output[i] = sample;
+      out[i] = sample;
     }
+    this->phase = phase;
     lastblep = blep; // carry over polyblep correction
   }
   using OscillatorTemplate<AntialiasedRampOscillator>::generate;  
