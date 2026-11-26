@@ -33,7 +33,11 @@ ifeq ($(shell command -v $(PDLANG_BIN) 2>/dev/null),)
 $(error pdlang compiler not found: '$(PDLANG_BIN)'. Build it (cargo build --release in the pdlang checkout) and set PDLANG_BIN to the binary, or put it on the PATH)
 endif
 
+# The OWL parameter and button receives PdlangPatch.cpp sends to (plain receives are internal to the patch otherwise)
+PDLANG_HOST_RECEIVES = Channel-A,Channel-B,Channel-C,Channel-D,Channel-E,Channel-Push
+
 PDLANGFLAGS  = -c -O2 -fcompat=$(PDLANGMODE) -fmath=$(PDLANGMATH) -fprecision=$(PDLANGPRECISION) -I $(PATCHSOURCE)
+PDLANGFLAGS += --host-receive=$(PDLANG_HOST_RECEIVES) -Wno-unused-host-receive
 ifneq ($(PDLANGTARGET),)
 PDLANGFLAGS += --target=$(PDLANGTARGET)
 endif
