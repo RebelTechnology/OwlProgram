@@ -72,17 +72,20 @@ public:
   }
   void comb(int32_t* output){
     const float mul = MULTIPLIER_23B;
-    for(size_t j=0; j<channels; ++j){
+    // locals: stores through int32_t* may alias the size_t members
+    const size_t nch = channels;
+    const size_t blk = blocksize;
+    for(size_t j=0; j<nch; ++j){
       float* src = buffers[j];
       int32_t* dst = output+j;
-      size_t len = blocksize;
+      size_t len = blk;
       while(len--){
 #ifdef AUDIO_SATURATE_SAMPLES
 	*dst = __SSAT((q31_t)(*src++ * mul), 24);
 #else
 	*dst = ((int32_t)(*src++ * mul));
 #endif
-	dst += channels;
+	dst += nch;
       }
     }
   }
