@@ -22,8 +22,9 @@ class PdlangPatch : public Patch {
   uint8_t* blockmem[PDLANG_MAX_BLOCKS]; // the ctx blocks as allocated (unaligned)
   int nblocks;
   void* ctx;                            // the hot block, blocks[0]
-  float* in;
-  float* out;
+  float* zeros;                         // the inputs beyond the device's channels
+  float* discard;                       // the right output on a mono device
+  const float** inputs;                 // pdlang_process_in's channel pointers, one per pdlang_num_inputs()
   int blocksize;
   int nin;
   volatile uint32_t buttonsPending; // bit per OWL button id, set in buttonChanged

@@ -8,8 +8,8 @@ extern "C" {
   } pdlang_param_info_t;
   int32_t pdlang_ctx_size(void);
   void pdlang_init(void* ctx, double sr);
-  void pdlang_process(void* ctx, float* out, int32_t n);
-  void pdlang_process_in(void* ctx, const float* in, float* out, int32_t n);
+  void pdlang_process(void* ctx, float* const* out, int32_t n);
+  void pdlang_process_in(void* ctx, const float* const* in, float* const* out, int32_t n);
   int32_t pdlang_num_inputs(void);
   int32_t pdlang_send_message(void* ctx, uint32_t hash, double delay_ms, const float* atoms, int32_t n);
   int32_t pdlang_param_info(int32_t index, pdlang_param_info_t* info);
@@ -30,8 +30,8 @@ enum { PDLANG_ACCESS_SAMPLE = 0, PDLANG_ACCESS_CONTROL = 1 };
 //  - a patch with adc~ exports pdlang_process_in and pdlang_num_inputs, and no pdlang_process;
 //  - a patch without host parameters exports neither pdlang_param_info nor pdlang_send_message.
 extern "C" {
-  __attribute__((weak)) void pdlang_process(void* ctx, float* out, int32_t n){}
-  __attribute__((weak)) void pdlang_process_in(void* ctx, const float* in, float* out, int32_t n){}
+  __attribute__((weak)) void pdlang_process(void* ctx, float* const* out, int32_t n){}
+  __attribute__((weak)) void pdlang_process_in(void* ctx, const float* const* in, float* const* out, int32_t n){}
   __attribute__((weak)) int32_t pdlang_num_inputs(void){ return 0; }
   __attribute__((weak)) int32_t pdlang_send_message(void* ctx, uint32_t hash, double delay_ms, const float* atoms, int32_t n){ return 0; }
   __attribute__((weak)) int32_t pdlang_param_info(int32_t index, pdlang_param_info_t* info){ return 0; }
@@ -119,21 +119,28 @@ static bool parseButton(const char* r, uint8_t* id){
 
 PdlangPatch* PdlangPatch::instance = NULL;
 
-PdlangPatch::PdlangPatch() : nmap(0), buttonsPending(0) {
+PdlangPatch::PdlangPatch() : nmap(0), zeros(NULL), discard(NULL), inputs(NULL), buttonsPending(0) {
   instance = this;
   addParameters();
-  // the audio buffers are touched every sample: allocate them before the ctx's large blocks
   blocksize = getBlockSize();
   nin = pdlang_num_inputs();
-  in = nin > 0 ? new float[nin * blocksize] : NULL;
-  out = new float[2 * blocksize];
+  // pdlang reads and writes the AudioBuffer's channels in place. For the channels the device does not have, the
+  // inputs read zeros and the right output goes to a discarded buffer. Allocated before the ctx's large blocks.
+  int channels = getNumberOfChannels();
+  if(nin > channels)
+    zeros = new float[blocksize]();
+  if(channels < 2)
+    discard = new float[blocksize];
+  if(nin > 0)
+    inputs = new const float*[nin];
   allocateContext();
 }
 
 PdlangPatch::~PdlangPatch() {
   instance = NULL;
-  delete[] out;
-  delete[] in;
+  delete[] inputs;
+  delete[] discard;
+  delete[] zeros;
   for(int i = 0; i < nblocks; ++i)
     delete[] blockmem[i];
 }
@@ -268,21 +275,14 @@ void PdlangPatch::processAudio(AudioBuffer& buffer){
   int n = buffer.getSize();
   if(n > blocksize)
     n = blocksize;
-  float* left = buffer.getSamples(LEFT_CHANNEL);
-  float* right = buffer.getSamples(RIGHT_CHANNEL);
+  int channels = buffer.getChannels();
+  float* out[2] = {buffer.getSamples(0), channels > 1 ? buffer.getSamples(1) : discard};
   if(nin > 0){
-    for(int c = 0; c < nin; ++c){
-      const float* src = c == 0 ? left : c == 1 ? right : NULL;
-      for(int i = 0; i < n; ++i)
-        in[c * n + i] = src ? src[i] : 0.0f;
-    }
-    pdlang_process_in(ctx, in, out, n);
+    for(int c = 0; c < nin; ++c)
+      inputs[c] = c < channels ? (const float*)buffer.getSamples(c) : zeros;
+    pdlang_process_in(ctx, inputs, out, n);
   }else{
     pdlang_process(ctx, out, n);
-  }
-  for(int i = 0; i < n; ++i){
-    left[i] = out[i];
-    right[i] = out[n + i];
   }
 }
 
