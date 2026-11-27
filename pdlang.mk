@@ -3,7 +3,7 @@
 # compiles $(PATCHSOURCE)/<patch>.pd for the build's target, wrapped by PdlangSource/PdlangPatch.cpp.
 # Options:
 #   PDLANG_BIN    compiler path (default: pdlang on PATH)
-#   PDLANGMODE    -fcompat mode: pdlang (default), libpd or hvcc
+#   PDLANGMODE    -fcompat mode: hvcc (default: fastest on the device), pdlang or libpd (closest to vanilla Pd)
 #   PDLANGMATH    -fmath: host (default: the maths come from PdlangPatch.cpp, OWL's fast kernels on the device)
 #                 or libm
 #   PDLANGPRECISION -fprecision: single (default) or double (the pd modes only)
@@ -21,7 +21,7 @@ ifeq ($(PDLANG_BIN),)
 PDLANG_BIN   = pdlang
 endif
 ifeq ($(PDLANGMODE),)
-PDLANGMODE   = pdlang
+PDLANGMODE   = hvcc
 endif
 ifeq ($(PDLANGMATH),)
 PDLANGMATH   = host
