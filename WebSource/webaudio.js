@@ -77,7 +77,7 @@ owl.initPatchAudio = function () {
 
     that.compute = function (e) {
 	var dspOutChans = Module.HEAP32.subarray(that.outs >> 2, (that.outs + that.numOut * that.ptrsize) >> 2);
-	var dspInChans = Module.HEAP32.subarray(that.ins >> 2, (that.ins + that.ins * that.ptrsize) >> 2);
+	var dspInChans = Module.HEAP32.subarray(that.ins >> 2, (that.ins + that.numIn * that.ptrsize) >> 2);
 	for (var i = 0; i < that.numIn; i++)
 	{
 	    var input = e.inputBuffer.getChannelData(i);
