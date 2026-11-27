@@ -14,6 +14,7 @@ endif
 
 DEPS = .FORCE
 TARGET ?= patch
+NODE ?= $(or $(EMSDK_NODE),node)
 
 ifdef FAUST
 # options for FAUST compilation
@@ -120,7 +121,7 @@ web: $(DEPS) ## build Javascript patch
 	@echo Built javascript $(PATCHNAME) in $(BUILD)/web/$(TARGET).js
 
 webtest: web ## build Javascript patch and run it headless in node
-	@node Tools/webtest.js $(BUILD)/web/$(TARGET).js
+	@$(NODE) Tools/webtest.js $(BUILD)/web/$(TARGET).js
 
 minify: $(DEPS)
 	@$(MAKE) -s -f web.mk minify
