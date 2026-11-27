@@ -10,7 +10,7 @@ name: Publish Docker image
 # The image is platform-pinned per OWL target via the PLATFORM build-arg
 # (OWL1/OWL2/OWL3 produce Cortex-M4/M4/M7 libraries), so we publish one tagged
 # image per target plus a default `latest` (= OWL2). The base image is pinned
-# to linux/amd64 in the Dockerfile; the x86_64-only toolchain runs under
+# to linux/amd64 in the Dockerfile (SOUL is x86_64-only) and runs under
 # emulation on arm64 hosts.
 
 on:
@@ -51,12 +51,12 @@ jobs:
 
     steps:
       - name: Checkout (with submodules)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: recursive   # DaisySP must be present or `make libs` fails
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -80,10 +80,10 @@ jobs:
           echo "tags=${tags}" >> "$GITHUB_OUTPUT"
 
       - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build and push ${{ matrix.platform }} image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true

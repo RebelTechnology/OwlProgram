@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_f32.c
  * Description:  Floating-point FIR filter processing function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -63,6 +66,7 @@
   <pre>
       {x[n-numTaps+1], x[n-numTaps], x[n-numTaps-1], x[n-numTaps-2]....x[n](==pSrc[0]), x[n+1](==pSrc[1]), ..., x[n+blockSize-1](==pSrc[blockSize-1])}
   </pre>
+
   @par
                    Note that the length of the state buffer exceeds the length of the coefficient array by <code>blockSize-1</code>.
                    The increased state buffer length allows circular addressing, which is traditionally used in the FIR filters,
@@ -82,20 +86,24 @@
                    - Zeros out the values in the state buffer.
                    To do this manually without calling the init function, assign the follow subfields of the instance structure:
                    numTaps, pCoeffs, pState. Also set all of the values in pState to zero.
+
   @par
                    Use of the initialization function is optional.
                    However, if the initialization function is used, then the instance structure cannot be placed into a const data section.
                    To place an instance structure into a const data section, the instance structure must be manually initialized.
                    Set the values in the state buffer to zeros before static initialization.
-                   The code below statically initializes each of the 4 different data type filter instance structures
+                   The code below statically initializes each of the 6 different data type filter instance structures
   <pre>
+      arm_fir_instance_f64 S = {numTaps, pState, pCoeffs};
       arm_fir_instance_f32 S = {numTaps, pState, pCoeffs};
+      arm_fir_instance_f16 S = {numTaps, pState, pCoeffs};
       arm_fir_instance_q31 S = {numTaps, pState, pCoeffs};
       arm_fir_instance_q15 S = {numTaps, pState, pCoeffs};
       arm_fir_instance_q7 S =  {numTaps, pState, pCoeffs};
   </pre>
                    where <code>numTaps</code> is the number of filter coefficients in the filter; <code>pState</code> is the address of the state buffer;
                    <code>pCoeffs</code> is the address of the coefficient buffer.
+
   @par          Initialization of Helium version
                  For Helium version the array of coefficients must be padded with zero to contain
                  a full number of lanes.
@@ -113,19 +121,18 @@
                  the implementation may require to read more coefficients due to the vectorization and
                  to avoid having to manage too many different cases in the code.
 
-                
   @par          Helium state buffer
                  The state buffer must contain some additional temporary data
                  used during the computation but which is not the state of the FIR.
                  The first A samples are temporary data.
                  The remaining samples are the state of the FIR filter.
-  @par                 
+
+  @par
                  So the state buffer has size <code> numTaps + A + blockSize - 1 </code> :
                  - A is blockSize for f32
                  - A is 8*ceil(blockSize/8) for f16
                  - A is 8*ceil(blockSize/4) for q31
                  - A is 0 for other datatypes (q15 and q7)
-
 
   @par           Fixed-Point Behavior
                    Care must be taken when using the fixed-point versions of the FIR filter functions.
@@ -145,7 +152,6 @@
   @param[in]     pSrc       points to the block of input data
   @param[out]    pDst       points to the block of output data
   @param[in]     blockSize  number of samples to process
-  @return        none
  */
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
@@ -346,7 +352,7 @@ __STATIC_INLINE void arm_fir_f32_5_8_mve(const arm_fir_instance_f32 * S,
     pTempSrc = &pState[blockSize];
     pTempDest = pState;
     blkCnt = numTaps;
-    while (blkCnt > 0)
+    while (blkCnt > 1)
     {
         *pTempDest++ = *pTempSrc++;
         blkCnt--;
@@ -355,7 +361,7 @@ __STATIC_INLINE void arm_fir_f32_5_8_mve(const arm_fir_instance_f32 * S,
 
 
 
-void arm_fir_f32(
+ARM_DSP_ATTRIBUTE void arm_fir_f32(
 const arm_fir_instance_f32 * S,
 const float32_t * pSrc,
 float32_t * pDst,
@@ -668,6 +674,7 @@ uint32_t blockSize)
     pTempSrc = &pRefStatePtr[blockSize];
     pTempDest = pRefStatePtr;
 
+    numTaps--;
     blkCnt = numTaps >> 2;
     while (blkCnt > 0)
     {
@@ -685,9 +692,9 @@ uint32_t blockSize)
 }
 
 #else
-#if defined(ARM_MATH_NEON)
+#if defined(ARM_MATH_NEON) 
 
-void arm_fir_f32(
+ARM_DSP_ATTRIBUTE void arm_fir_f32(
 const arm_fir_instance_f32 * S,
 const float32_t * pSrc,
 float32_t * pDst,
@@ -906,7 +913,7 @@ uint32_t blockSize)
 
 }
 #else
-void arm_fir_f32(
+ARM_DSP_ATTRIBUTE void arm_fir_f32(
   const arm_fir_instance_f32 * S,
   const float32_t * pSrc,
         float32_t * pDst,

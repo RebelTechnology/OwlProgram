@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_dot_prod_f32.c
  * Description:  Floating-point dot product
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/basic_math_functions.h"
 
@@ -56,7 +59,6 @@
   @param[in]     pSrcB      points to the second input vector.
   @param[in]     blockSize  number of samples in each vector.
   @param[out]    result     output result returned here.
-  @return        none
  */
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
@@ -64,7 +66,7 @@
 #include "arm_helium_utils.h"
 
 
-void arm_dot_prod_f32(
+ARM_DSP_ATTRIBUTE void arm_dot_prod_f32(
     const float32_t * pSrcA,
     const float32_t * pSrcB,
     uint32_t    blockSize,
@@ -119,7 +121,7 @@ void arm_dot_prod_f32(
 
 #else
 
-void arm_dot_prod_f32(
+ARM_DSP_ATTRIBUTE void arm_dot_prod_f32(
   const float32_t * pSrcA,
   const float32_t * pSrcB,
         uint32_t blockSize,
@@ -128,7 +130,7 @@ void arm_dot_prod_f32(
         uint32_t blkCnt;                               /* Loop counter */
         float32_t sum = 0.0f;                          /* Temporary return variable */
 
-#if defined(ARM_MATH_NEON) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON)
     f32x4_t vec1;
     f32x4_t vec2;
     f32x4_t accum = vdupq_n_f32(0);   

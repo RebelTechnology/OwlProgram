@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_shift_q7.c
  * Description:  Processing function for the Q7 Shifting
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/basic_math_functions.h"
 
@@ -43,7 +46,6 @@
   @param[in]     shiftBits  number of bits to shift.  A positive value shifts left; a negative value shifts right.
   @param[out]    pDst       points to the output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
 
   @par           onditions for optimum performance
                    Input and output buffers should be aligned by 32-bit
@@ -56,7 +58,7 @@
 
 #include "arm_helium_utils.h"
 
-void arm_shift_q7(
+ARM_DSP_ATTRIBUTE void arm_shift_q7(
     const q7_t * pSrc,
     int8_t shiftBits,
     q7_t * pDst,
@@ -101,7 +103,7 @@ void arm_shift_q7(
 }
 
 #else
-void arm_shift_q7(
+ARM_DSP_ATTRIBUTE void arm_shift_q7(
   const q7_t * pSrc,
         int8_t shiftBits,
         q7_t * pDst,

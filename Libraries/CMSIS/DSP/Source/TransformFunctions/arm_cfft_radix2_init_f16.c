@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cfft_radix2_init_f16.c
  * Description:  Radix-2 Decimation in Frequency Floating-point CFFT & CIFFT Initialization function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,17 +26,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/transform_functions_f16.h"
 #include "arm_common_tables.h"
 #include "arm_common_tables_f16.h"
 
-/**
-  @ingroup groupTransforms
- */
 
 /**
-  @addtogroup ComplexFFT
+  @addtogroup ComplexFFTDeprecated
   @{
  */
 
@@ -68,7 +68,7 @@
 
 #if defined(ARM_FLOAT16_SUPPORTED)
 
-arm_status arm_cfft_radix2_init_f16(
+ARM_DSP_ATTRIBUTE arm_status arm_cfft_radix2_init_f16(
   arm_cfft_radix2_instance_f16 * S,
   uint16_t fftLen,
   uint8_t ifftFlag,
@@ -77,10 +77,6 @@ arm_status arm_cfft_radix2_init_f16(
    /*  Initialise the default arm status */
   arm_status status = ARM_MATH_ARGUMENT_ERROR;
   
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_FFT_ALLOW_TABLES)
-
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || defined(ARM_TABLE_TWIDDLECOEF_F16_4096)
-
 
   /*  Initialise the default arm status */
   status = ARM_MATH_SUCCESS;
@@ -97,7 +93,6 @@ arm_status arm_cfft_radix2_init_f16(
   /*  Initialise the Flag for calculation Bit reversal or not */
   S->bitReverseFlag = bitReverseFlag;
 
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || defined(ARM_TABLE_BITREV_1024)
 
   /*  Initializations of structure parameters depending on the FFT length */
   switch (S->fftLen)
@@ -202,13 +197,11 @@ arm_status arm_cfft_radix2_init_f16(
     break;
   }
 
-#endif
-#endif
-#endif
+
   return (status);
 }
 
 #endif /* #if defined(ARM_FLOAT16_SUPPORTED) */
 /**
-  @} end of ComplexFFT group
+  @} end of ComplexFFTDeprecated group
  */

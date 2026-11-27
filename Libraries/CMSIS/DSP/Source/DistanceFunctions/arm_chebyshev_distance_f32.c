@@ -1,3 +1,4 @@
+﻿
 
 /* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
@@ -26,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/distance_functions.h"
 #include <limits.h>
@@ -52,7 +55,7 @@
 #include "arm_helium_utils.h"
 #include "arm_vec_math.h"
 
-float32_t arm_chebyshev_distance_f32(const float32_t *pA,const float32_t *pB, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float32_t arm_chebyshev_distance_f32(const float32_t *pA,const float32_t *pB, uint32_t blockSize)
 {
     uint32_t        blkCnt;     /* loop counters */
     f32x4_t         vecA, vecB;
@@ -99,11 +102,11 @@ float32_t arm_chebyshev_distance_f32(const float32_t *pA,const float32_t *pB, ui
 }
 
 #else
-#if defined(ARM_MATH_NEON)
+#if defined(ARM_MATH_NEON) 
 
 #include "NEMath.h"
 
-float32_t arm_chebyshev_distance_f32(const float32_t *pA,const float32_t *pB, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float32_t arm_chebyshev_distance_f32(const float32_t *pA,const float32_t *pB, uint32_t blockSize)
 {
    float32_t diff=0.0f, maxVal=0.0f, tmpA, tmpB;
    uint32_t blkCnt;
@@ -180,7 +183,7 @@ float32_t arm_chebyshev_distance_f32(const float32_t *pA,const float32_t *pB, ui
 }
 
 #else
-float32_t arm_chebyshev_distance_f32(const float32_t *pA,const float32_t *pB, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float32_t arm_chebyshev_distance_f32(const float32_t *pA,const float32_t *pB, uint32_t blockSize)
 {
    float32_t diff=0.0f,  maxVal,tmpA, tmpB;
 

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_decimate_q15.c
  * Description:  Q15 FIR Decimator
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -43,7 +46,6 @@
   @param[in]     pSrc       points to the block of input data
   @param[out]    pDst       points to the block of output data
   @param[in]     blockSize  number of input samples to process per call
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function is implemented using a 64-bit internal accumulator.
@@ -61,7 +63,7 @@
 
 #include "arm_helium_utils.h"
 
-void arm_fir_decimate_q15(
+ARM_DSP_ATTRIBUTE void arm_fir_decimate_q15(
   const arm_fir_decimate_instance_q15 * S,
   const q15_t * pSrc,
         q15_t * pDst,
@@ -316,7 +318,7 @@ void arm_fir_decimate_q15(
 #else
 #if defined (ARM_MATH_DSP)
 
-void arm_fir_decimate_q15(
+ARM_DSP_ATTRIBUTE void arm_fir_decimate_q15(
   const arm_fir_decimate_instance_q15 * S,
   const q15_t * pSrc,
         q15_t * pDst,
@@ -561,7 +563,7 @@ void arm_fir_decimate_q15(
 
 #else /* #if defined (ARM_MATH_DSP) */
 
-void arm_fir_decimate_q15(
+ARM_DSP_ATTRIBUTE void arm_fir_decimate_q15(
   const arm_fir_decimate_instance_q15 * S,
   const q15_t * pSrc,
         q15_t * pDst,

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_conv_partial_opt_q7.c
  * Description:  Partial convolution of Q7 sequences
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -53,7 +56,7 @@
                    - \ref ARM_MATH_ARGUMENT_ERROR : requested subset is not in the range [0 srcALen+srcBLen-2]
  */
 
-arm_status arm_conv_partial_opt_q7(
+ARM_DSP_ATTRIBUTE arm_status arm_conv_partial_opt_q7(
   const q7_t * pSrcA,
         uint32_t srcALen,
   const q7_t * pSrcB,
@@ -150,7 +153,7 @@ arm_status arm_conv_partial_opt_q7(
       k--;
     }
 
-    /* Initialze temporary scratch pointer */
+    /* Initialize temporary scratch pointer */
     pScr1 = pScratch1;
 
     /* Fill (srcBLen - 1U) zeros in scratch buffer */
@@ -331,10 +334,10 @@ arm_status arm_conv_partial_opt_q7(
     /* Calculate convolution for remaining samples of Bigger length sequence */
     while (blkCnt > 0)
     {
-      /* Initialze temporary scratch pointer as scratch1 */
+      /* Initialize temporary scratch pointer as scratch1 */
       pScr1 = pScratch1;
 
-      /* Clear Accumlators */
+      /* Clear Accumulators */
       acc0 = 0;
 
       tapCnt = (srcBLen) >> 1U;

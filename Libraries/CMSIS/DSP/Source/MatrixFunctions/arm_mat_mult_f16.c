@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_mult_f16.c
  * Description:  Floating-point matrix multiplication
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions_f16.h"
 
@@ -379,7 +382,7 @@ __STATIC_FORCEINLINE arm_status arm_mat_mult_f16_4x4_mve(
 }
 
 
-arm_status arm_mat_mult_f16(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_mult_f16(
   const arm_matrix_instance_f16 * pSrcA,
   const arm_matrix_instance_f16 * pSrcB,
   arm_matrix_instance_f16 * pDst)
@@ -620,8 +623,57 @@ arm_status arm_mat_mult_f16(
 }
 #else
 
+#if defined(ARM_MATH_NEON_FLOAT16)
 
-arm_status arm_mat_mult_f16(
+/**
+ * @brief Floating-point matrix multiplication.
+ * @param[in]       *pSrcA points to the first input matrix structure
+ * @param[in]       *pSrcB points to the second input matrix structure
+ * @param[out]      *pDst points to output matrix structure
+ * @return          The function returns either
+ * <code>ARM_MATH_SIZE_MISMATCH</code> or <code>ARM_MATH_SUCCESS</code> based on the outcome of size checking.
+ */
+
+ #define LANE 8
+ #define DTYPE float16_t
+ #define HEADERTYPE DTYPE
+ #define VEC float16x8_t
+ #define VECACC float16x8_t
+ #define FLOATALGO
+
+ #define CLEAR_ACC(tmp) tmp = vdupq_n_f16(0.0f16)
+
+ #define TMPLD
+ #define TMPMAC
+ #define TMPST
+
+ #define SCALARACC float16_t 
+ #define SCALAR_LOAD_AND_WIDEN(DST,PTR) DST = (SCALARACC)(*(PTR))
+ #define SCALAR_STORE_AND_NARROW(PTR,VAL) *(PTR) = (VAL)
+ #define SCALAR_MAC_N(ACC,VEC,SCALAR) ACC = (_Float16)ACC + (_Float16)(VEC) * (_Float16)(SCALAR)
+
+ #define HVEC float16x4_t
+ #define VLOAD(DST,PTR) DST = vld1q_f16((PTR))
+ #define VSTORE(PTR,VAL) vst1q_f16((PTR),(VAL))
+
+ #define VLOAD_ACC(DST,PTR) DST = vld1q_f16((PTR))
+ #define VSTORE_ACC(PTR,VAL) vst1q_f16((PTR),(VAL))
+
+ #define VLOAD_AND_WIDEN(DST,PTR) DST = vld1q_f16((PTR))
+ #define VSTORE_AND_NARROW(PTR,VAL) vst1q_f16((PTR),(VAL))
+
+
+ #define VMAC_N(ACC,VEC,SCALAR) ACC = vfmaq_n_f16(ACC,(VEC),(SCALAR))
+ #define MATTYPE arm_matrix_instance_f16
+ #define EXT(A) A##_f16
+
+ #define FUNCNAME arm_mat_mult_f16
+
+ 
+ #include "_arm_mat_mult_neon.c"
+
+#else
+ARM_DSP_ATTRIBUTE arm_status arm_mat_mult_f16(
   const arm_matrix_instance_f16 * pSrcA,
   const arm_matrix_instance_f16 * pSrcB,
         arm_matrix_instance_f16 * pDst)
@@ -758,6 +810,6 @@ arm_status arm_mat_mult_f16(
 /**
  * @} end of MatrixMult group
  */
-
+ #endif /* #if defined(ARM_MATH_NEON) */
 #endif /* #if defined(ARM_FLOAT16_SUPPORTED) */ 
 

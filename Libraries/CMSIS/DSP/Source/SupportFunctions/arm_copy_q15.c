@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_copy_q15.c
  * Description:  Copies the elements of a Q15 vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/support_functions.h"
 
@@ -42,10 +45,9 @@
   @param[in]     pSrc       points to input vector
   @param[out]    pDst       points to output vector
   @param[in]     blockSize  number of samples in each vector
-  @return        none
  */
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
-void arm_copy_q15(
+ARM_DSP_ATTRIBUTE void arm_copy_q15(
   const q15_t * pSrc,
         q15_t * pDst,
         uint32_t blockSize)
@@ -78,7 +80,7 @@ void arm_copy_q15(
   }
 }
 #else
-void arm_copy_q15(
+ARM_DSP_ATTRIBUTE void arm_copy_q15(
   const q15_t * pSrc,
         q15_t * pDst,
         uint32_t blockSize)
@@ -95,8 +97,8 @@ void arm_copy_q15(
     /* C = A */
 
     /* read 2 times 2 samples at a time */
-    write_q15x2_ia (&pDst, read_q15x2_ia ((q15_t **) &pSrc));
-    write_q15x2_ia (&pDst, read_q15x2_ia ((q15_t **) &pSrc));
+    write_q15x2_ia (&pDst, read_q15x2_ia (&pSrc));
+    write_q15x2_ia (&pDst, read_q15x2_ia (&pSrc));
 
     /* Decrement loop counter */
     blkCnt--;

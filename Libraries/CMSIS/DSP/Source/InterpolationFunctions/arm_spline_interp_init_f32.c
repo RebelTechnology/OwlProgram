@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_spline_interp_init_f32.c
  * Description:  Floating-point cubic spline initialization function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/interpolation_functions.h"
 
@@ -62,7 +65,7 @@
  *
  */
 
-void arm_spline_init_f32(
+ARM_DSP_ATTRIBUTE void arm_spline_init_f32(
         arm_spline_instance_f32 * S,
         arm_spline_type type,
   const float32_t * x,

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_conv_opt_q15.c
  * Description:  Convolution of Q15 sequences
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -46,7 +49,6 @@
   @param[out]    pDst       points to the location where the output result is written.  Length srcALen+srcBLen-1.
   @param[in]     pScratch1  points to scratch buffer of size max(srcALen, srcBLen) + 2*min(srcALen, srcBLen) - 2.
   @param[in]     pScratch2  points to scratch buffer of size min(srcALen, srcBLen).
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function is implemented using a 64-bit internal accumulator.
@@ -58,7 +60,7 @@
                    Refer to \ref arm_conv_fast_q15() for a faster but less precise version of this function.
  */
 
-void arm_conv_opt_q15(
+ARM_DSP_ATTRIBUTE void arm_conv_opt_q15(
   const q15_t * pSrcA,
         uint32_t srcALen,
   const q15_t * pSrcB,
@@ -153,7 +155,7 @@ void arm_conv_opt_q15(
     k--;
   }
 
-  /* Initialze temporary scratch pointer */
+  /* Initialize temporary scratch pointer */
   pScr1 = pScratch1;
 
   /* Assuming scratch1 buffer is aligned by 32-bit */
@@ -192,10 +194,10 @@ void arm_conv_opt_q15(
 
   while (blkCnt > 0)
   {
-    /* Initialze temporary scratch pointer as scratch1 */
+    /* Initialize temporary scratch pointer as scratch1 */
     pScr1 = pScratch1;
 
-    /* Clear Accumlators */
+    /* Clear Accumulators */
     acc0 = 0;
     acc1 = 0;
     acc2 = 0;
@@ -311,10 +313,10 @@ void arm_conv_opt_q15(
   /* Calculate convolution for remaining samples of Bigger length sequence */
   while (blkCnt > 0)
   {
-    /* Initialze temporary scratch pointer as scratch1 */
+    /* Initialize temporary scratch pointer as scratch1 */
     pScr1 = pScratch1;
 
-    /* Clear Accumlators */
+    /* Clear Accumulators */
     acc0 = 0;
 
     tapCnt = (srcBLen) >> 1U;

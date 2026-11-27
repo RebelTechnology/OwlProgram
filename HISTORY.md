@@ -1,6 +1,22 @@
+* Updated CMSIS-Core to v6.4.0 (CMSIS 6)
+* Updated CMSIS-DSP to v1.18.0
+* PatchMetadata holds up to 40 parameters (was 20)
+* Added Gen output map (GEN_OUTPUT_MAP in GenParameterMap.h) with optional bipolar outputs
+* Added genlib spline6_interp
+* Faust patches map up to 48 widgets (was 20)
+* Added Gen stepped parameters (GEN_SCALE_INT in GenParameterMap.h)
+* Added exponential parameters: Faust [scale:log] widgets and GEN_SCALE_LOG in GenParameterMap.h
+* Fixed Gen parameter defaults set in gen~ units instead of 0..1
+* Added GenParameterMap.h: optional map of gen~ parameter names to OWL parameters
+* Fixed native, web and test builds on macOS
+* Added LibSource unit tests for DcBlockingFilter, ExponentialDecayEnvelope, IntArray, basic oscillators, NoiseGenerator, VelocityCurve, EnvelopeFollower, SmoothingFilter, DryWetProcessor, StateVariableFilter, VoltsPerOctave, AdsrEnvelope, SimpleValue and TakeoverValue
+* Heavy patches are built with mainline hvcc 0.17.3 (hvcc -g owl), replacing the Python 2.7 fork
+* Updated toolchain to Arm GNU 13.3.rel1, emscripten 7.0.1 and FAUST 2.88.0 (Docker image and CI)
+
 v23.1
 -----
 
+* Added MidiMessage::at() for polyphonic aftertouch
 * Fixed missing SmoothValue and StiffValue::normal definitions
 * Fixed SmoothValue<int> to use float lambda
 * Fixed Dockerfile hvcc build

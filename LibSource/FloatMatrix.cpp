@@ -102,8 +102,10 @@ void FloatMatrix::softmax(FloatMatrix destination){
   float* src = getData();
   float* dest = destination.getData();
   size_t size = getSize();
-  float m = -INFINITY;
-  for(size_t i = 0; i < size; i++) {
+  if(size == 0)
+    return;
+  float m = src[0];
+  for(size_t i = 1; i < size; i++) {
       if(src[i] > m)
 	m = src[i];
   }

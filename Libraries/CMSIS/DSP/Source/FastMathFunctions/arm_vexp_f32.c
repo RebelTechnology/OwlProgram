@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_vlog_f32.c
  * Description:  Fast vectorized log
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,15 +26,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/fast_math_functions.h"
 #include "arm_common_tables.h"
 
-#if (defined(ARM_MATH_MVEF) || defined(ARM_MATH_HELIUM) || defined(ARM_MATH_NEON) || defined(ARM_MATH_NEON_EXPERIMENTAL)) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if ((defined(ARM_MATH_MVEF) || defined(ARM_MATH_HELIUM)) && !defined(ARM_MATH_AUTOVECTORIZE)) || defined(ARM_MATH_NEON) || defined(ARM_MATH_NEON_EXPERIMENTAL)
 #include "arm_vec_math.h"
 #endif
 
-void arm_vexp_f32(
+/**
+  @ingroup groupFastMath
+ */
+
+/**
+   @defgroup vexp Vector Exponential
+
+   Compute the exp values of a vector of samples.
+*/
+
+/**
+  @addtogroup vexp
+  @{
+ */
+
+/**
+  @brief         Floating-point vector of exp values.
+  @param[in]     pSrc       points to the input vector
+  @param[out]    pDst       points to the output vector
+  @param[in]     blockSize  number of samples in each vector
+ */
+ARM_DSP_ATTRIBUTE void arm_vexp_f32(
   const float32_t * pSrc,
         float32_t * pDst,
         uint32_t blockSize)
@@ -60,7 +84,7 @@ void arm_vexp_f32(
 
    blkCnt = blockSize & 3;
 #else
-#if (defined(ARM_MATH_NEON) || defined(ARM_MATH_NEON_EXPERIMENTAL)) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON) || defined(ARM_MATH_NEON_EXPERIMENTAL)
    f32x4_t src;
    f32x4_t dst;
 
@@ -95,3 +119,7 @@ void arm_vexp_f32(
       blkCnt--;
    }
 }
+
+/**
+  @} end of vexp group
+ */

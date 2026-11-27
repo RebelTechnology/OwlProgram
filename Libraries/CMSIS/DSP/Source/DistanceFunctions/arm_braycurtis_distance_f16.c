@@ -1,3 +1,4 @@
+﻿
 
 /* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
@@ -26,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/distance_functions_f16.h"
 
@@ -72,7 +75,7 @@
 
 #include "arm_helium_utils.h"
 
-float16_t arm_braycurtis_distance_f16(const float16_t *pA,const float16_t *pB, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float16_t arm_braycurtis_distance_f16(const float16_t *pA,const float16_t *pB, uint32_t blockSize)
 {
     _Float16        accumDiff = 0.0f, accumSum = 0.0f;
     uint32_t        blkCnt;
@@ -88,11 +91,11 @@ float16_t arm_braycurtis_distance_f16(const float16_t *pA,const float16_t *pB, u
         b = vld1q(pB);
 
         c = vabdq(a, b);
-        accumDiffV = vaddq(accumDiffV, c);
+        accumDiffV = vaddq_f16(accumDiffV, c);
 
         c = vaddq_f16(a, b);
         c = vabsq_f16(c);
-        accumSumV = vaddq(accumSumV, c);
+        accumSumV = vaddq_f16(accumSumV, c);
 
         pA += 8;
         pB += 8;
@@ -107,11 +110,11 @@ float16_t arm_braycurtis_distance_f16(const float16_t *pA,const float16_t *pB, u
         b = vldrhq_z_f16(pB, p0);
 
         c = vabdq(a, b);
-        accumDiffV = vaddq_m(accumDiffV, accumDiffV, c, p0);
+        accumDiffV = vaddq_m_f16(accumDiffV, accumDiffV, c, p0);
 
         c = vaddq_f16(a, b);
         c = vabsq_f16(c);
-        accumSumV = vaddq_m(accumSumV, accumSumV, c, p0);
+        accumSumV = vaddq_m_f16(accumSumV, accumSumV, c, p0);
     }
 
     accumDiff = vecAddAcrossF16Mve(accumDiffV);
@@ -125,7 +128,7 @@ float16_t arm_braycurtis_distance_f16(const float16_t *pA,const float16_t *pB, u
 }
 #else
 
-float16_t arm_braycurtis_distance_f16(const float16_t *pA,const float16_t *pB, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float16_t arm_braycurtis_distance_f16(const float16_t *pA,const float16_t *pB, uint32_t blockSize)
 {
    _Float16 accumDiff=0.0f16, accumSum=0.0f16, tmpA, tmpB;
 

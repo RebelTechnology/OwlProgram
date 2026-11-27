@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_conv_partial_opt_q15.c
  * Description:  Partial convolution of Q15 sequences
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -56,7 +59,7 @@
                    Refer to \ref arm_conv_partial_fast_q15() for a faster but less precise version of this function.
  */
 
-arm_status arm_conv_partial_opt_q15(
+ARM_DSP_ATTRIBUTE arm_status arm_conv_partial_opt_q15(
   const q15_t * pSrcA,
         uint32_t srcALen,
   const q15_t * pSrcB,
@@ -167,7 +170,7 @@ arm_status arm_conv_partial_opt_q15(
       k--;
     }
 
-    /* Initialze temporary scratch pointer */
+    /* Initialize temporary scratch pointer */
     pScr1 = pScratch1;
 
     /* Assuming scratch1 buffer is aligned by 32-bit */
@@ -207,10 +210,10 @@ arm_status arm_conv_partial_opt_q15(
 
     while (blkCnt > 0)
     {
-      /* Initialze temporary scratch pointer as scratch1 */
+      /* Initialize temporary scratch pointer as scratch1 */
       pScr1 = pScratch1;
 
-      /* Clear Accumlators */
+      /* Clear Accumulators */
       acc0 = 0;
       acc1 = 0;
       acc2 = 0;
@@ -326,10 +329,10 @@ arm_status arm_conv_partial_opt_q15(
     /* Calculate convolution for remaining samples of Bigger length sequence */
     while (blkCnt > 0)
     {
-      /* Initialze temporary scratch pointer as scratch1 */
+      /* Initialize temporary scratch pointer as scratch1 */
       pScr1 = pScratch1;
 
-      /* Clear Accumlators */
+      /* Clear Accumulators */
       acc0 = 0;
 
       tapCnt = (srcBLen) >> 1U;

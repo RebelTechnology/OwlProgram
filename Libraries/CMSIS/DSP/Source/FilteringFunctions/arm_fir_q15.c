@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_q15.c
  * Description:  Q15 FIR filter processing function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -43,7 +46,6 @@
   @param[in]     pSrc       points to the block of input data
   @param[out]    pDst       points to the block of output data
   @param[in]     blockSize  number of samples to process
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function is implemented using a 64-bit internal accumulator.
@@ -196,7 +198,7 @@ static void arm_fir_q15_1_8_mve(const arm_fir_instance_q15 * S,
 }
 
 
-void arm_fir_q15(
+ARM_DSP_ATTRIBUTE void arm_fir_q15(
   const arm_fir_instance_q15 * S,
   const q15_t * pSrc,
         q15_t * pDst,
@@ -456,7 +458,7 @@ switch(nbTaps) {
 }
 
 #else
-void arm_fir_q15(
+ARM_DSP_ATTRIBUTE void arm_fir_q15(
   const arm_fir_instance_q15 * S,
   const q15_t * pSrc,
         q15_t * pDst,
@@ -525,7 +527,7 @@ void arm_fir_q15(
     while (tapCnt > 0U)
     {
       /* Read the first two coefficients using SIMD:  b[N] and b[N-1] coefficients */
-      c0 = read_q15x2_ia ((q15_t **) &pb);
+      c0 = read_q15x2_ia (&pb);
 
       /* acc0 +=  b[N] * x[n-N] + b[N-1] * x[n-N-1] */
       acc0 = __SMLALD(x0, c0, acc0);
@@ -557,7 +559,7 @@ void arm_fir_q15(
       acc3 = __SMLALDX(x1, c0, acc3);
 
       /* Read coefficients b[N-2], b[N-3] */
-      c0 = read_q15x2_ia ((q15_t **) &pb);
+      c0 = read_q15x2_ia (&pb);
 
       /* acc0 +=  b[N-2] * x[n-N-2] + b[N-3] * x[n-N-3] */
       acc0 = __SMLALD(x2, c0, acc0);
@@ -590,7 +592,7 @@ void arm_fir_q15(
     if ((numTaps & 0x3U) != 0U)
     {
       /* Read last two coefficients */
-      c0 = read_q15x2_ia ((q15_t **) &pb);
+      c0 = read_q15x2_ia (&pb);
 
       /* Perform the multiply-accumulates */
       acc0 = __SMLALD(x0, c0, acc0);

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_fast_q15.c
  * Description:  Q15 Fast FIR filter processing function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -43,7 +46,6 @@
   @param[in]     pSrc       points to the block of input data
   @param[out]    pDst       points to the block of output data
   @param[in]     blockSize  number of samples to process
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    This fast version uses a 32-bit accumulator with 2.30 format.
@@ -57,7 +59,7 @@
                    Use function \ref arm_fir_init_q15() to initialize the filter structure.
  */
 
-void arm_fir_fast_q15(
+ARM_DSP_ATTRIBUTE void arm_fir_fast_q15(
   const arm_fir_instance_q15 * S,
   const q15_t * pSrc,
         q15_t * pDst,

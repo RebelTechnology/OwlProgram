@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_negate_f32.c
  * Description:  Negates floating-point vectors
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/basic_math_functions.h"
 
@@ -56,14 +59,13 @@
   @param[in]     pSrc       points to input vector.
   @param[out]    pDst       points to output vector.
   @param[in]     blockSize  number of samples in each vector.
-  @return        none
  */
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
 
-void arm_negate_f32(
+ARM_DSP_ATTRIBUTE void arm_negate_f32(
   const float32_t * pSrc,
         float32_t * pDst,
         uint32_t blockSize)
@@ -105,14 +107,14 @@ void arm_negate_f32(
 }
 
 #else
-void arm_negate_f32(
+ARM_DSP_ATTRIBUTE void arm_negate_f32(
   const float32_t * pSrc,
         float32_t * pDst,
         uint32_t blockSize)
 {
         uint32_t blkCnt;                               /* Loop counter */
 
-#if defined(ARM_MATH_NEON_EXPERIMENTAL) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON_EXPERIMENTAL)
     f32x4_t vec1;
     f32x4_t res;
 

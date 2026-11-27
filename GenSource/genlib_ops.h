@@ -499,6 +499,24 @@ inline t_sample spline_interp(t_sample a, t_sample w, t_sample x, t_sample y, t_
 	return(f0*a*a2 + f1*a2 + f2*a + x);
 }
 
+// 6-point, 5th-order B-spline (from Max 9's genlib_ops.h, for exports that use interp mode "spline6")
+inline t_sample spline6_interp(t_sample a, t_sample y0, t_sample y1, t_sample y2, t_sample y3, t_sample y4, t_sample y5) {
+	// http://yehar.com/blog/wp-content/uploads/2009/08/deip.pdf
+	// 6-point, 5th-order B-spline (x-form)
+	const t_sample ym2py2 = y0+y4;
+	const t_sample ym1py1 = y1+y3;
+	const t_sample y2mym2 = y4-y0;
+	const t_sample y1mym1 = y3-y1;
+	const t_sample sixthym1py1 = 1/6.0*ym1py1;
+	const t_sample c0 = 1/120.0*ym2py2 + 13/60.0*ym1py1 + 11/20.0*y2;
+	const t_sample c1 = 1/24.0*y2mym2 + 5/12.0*y1mym1;
+	const t_sample c2 = 1/12.0*ym2py2 + sixthym1py1 - 1/2.0*y2;
+	const t_sample c3 = 1/12.0*y2mym2 - 1/6.0*y1mym1;
+	const t_sample c4 = 1/24.0*ym2py2 - sixthym1py1 + 1/4.0*y2;
+	const t_sample c5 = 1/120.0*(y5-y0) + 1/24.0*(y1-y4) + 1/12.0*(y3-y2);
+	return ((((c5*a+c4)*a+c3)*a+c2)*a+c1)*a+c0;
+}
+
 template<typename T1, typename T2>
 inline T1 neqp(T1 x, T2 y) {
 	return ((((x) != T1(y))) ? (x) : T1(0));
@@ -722,7 +740,7 @@ struct Noise {
 		union {
 			uint32_t ui32;
 			float f;
-		} u = { 0x3f800000 | (0x007fffff & last) }; // type-punning
+		} u = { (uint32_t)(0x3f800000 | (0x007fffff & last)) }; // type-punning
 
 		return (u.f * 2.f) - 3.f;
 	}

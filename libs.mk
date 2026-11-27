@@ -1,4 +1,4 @@
-S_SRC += $(DSPLIB)/TransformFunctions/arm_bitreversal2.S
+C_SRC += $(DSPLIB)/TransformFunctions/arm_bitreversal2.c
 
 C_SRC += $(DSPLIB)/FastMathFunctions/arm_sin_f32.c
 C_SRC += $(DSPLIB)/FastMathFunctions/arm_cos_f32.c

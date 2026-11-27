@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_decimate_init_q15.c
  * Description:  Initialization function for the Q15 FIR Decimator
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -61,7 +64,7 @@
                    <code>M</code> is the decimation factor.
  */
 
-arm_status arm_fir_decimate_init_q15(
+ARM_DSP_ATTRIBUTE arm_status arm_fir_decimate_init_q15(
         arm_fir_decimate_instance_q15 * S,
         uint16_t numTaps,
         uint8_t M,

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_sqrt_q15.c
  * Description:  Q15 square root function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,9 +26,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/fast_math_functions.h"
 #include "arm_common_tables.h"
+
+#define Q12QUARTER 0x2000
 
 /**
   @ingroup groupFastMath
@@ -47,8 +52,7 @@
                    - \ref ARM_MATH_ARGUMENT_ERROR : input value is negative; *pOut is set to 0
  */
 
-#define Q12QUARTER 0x2000
-arm_status arm_sqrt_q15(
+ARM_DSP_ATTRIBUTE arm_status arm_sqrt_q15(
   q15_t in,
   q15_t * pOut)
 {
@@ -114,7 +118,14 @@ arm_status arm_sqrt_q15(
   {
     *pOut = 0;
 
-    return (ARM_MATH_ARGUMENT_ERROR);
+    if (number==0)
+    {
+       return (ARM_MATH_SUCCESS);
+    }
+    else
+    {
+       return (ARM_MATH_ARGUMENT_ERROR);
+    }
   }
 }
 

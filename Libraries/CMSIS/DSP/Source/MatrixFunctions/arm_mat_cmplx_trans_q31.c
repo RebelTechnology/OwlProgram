@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_cmplx_trans_q31.c
  * Description:  Q31 complex matrix transpose
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
 
@@ -52,15 +55,54 @@
 #include "arm_helium_utils.h"
 
 
-arm_status arm_mat_cmplx_trans_q31(const arm_matrix_instance_q31 * pSrc, arm_matrix_instance_q31 * pDst)
+ARM_DSP_ATTRIBUTE arm_status arm_mat_cmplx_trans_q31(const arm_matrix_instance_q31 * pSrc, arm_matrix_instance_q31 * pDst)
 {
     return arm_mat_cmplx_trans_32bit(pSrc->numRows, pSrc->numCols, (uint32_t *) pSrc->pData,
                                    pDst->numRows, pDst->numCols, (uint32_t *) pDst->pData);
 }
 
+#else
+#if defined(ARM_MATH_NEON)
+
+#define BLOCK_ROWS 4
+#define BLOCK_ROWS_SHIFT 2
+#define LANE 4
+#define LANE_SHIFT 2
+
+#include "_arm_mat_trans_neon.c"
+
+ARM_DSP_ATTRIBUTE arm_status arm_mat_cmplx_trans_q31(
+  const arm_matrix_instance_q31 * pSrc,
+  arm_matrix_instance_q31 * pDst)
+{
+  ARM_MAT_TRANS_NEON_INIT_COMPLEX_U32
+
+#ifdef ARM_MATH_MATRIX_CHECK
+
+  /* Check for matrix mismatch condition */
+  if ((pSrc->numRows != pDst->numCols) || (pSrc->numCols != pDst->numRows))
+  {
+    /* Set status as ARM_MATH_SIZE_MISMATCH */
+    status = ARM_MATH_SIZE_MISMATCH;
+  }
+  else
+#endif /*    #ifdef ARM_MATH_MATRIX_CHECK    */
+
+  {
+    ARM_MAT_TRANS_NEON_COMPLEX_U32
+
+    /* Set status as ARM_MATH_SUCCESS */
+    status = ARM_MATH_SUCCESS;
+  }
+
+  /* Return to application */
+  return (status);
+}
+
+#include "_arm_mat_trans_undef_neon.c"
 
 #else
-arm_status arm_mat_cmplx_trans_q31(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_cmplx_trans_q31(
   const arm_matrix_instance_q31 * pSrc,
   arm_matrix_instance_q31 * pDst)
 {
@@ -122,6 +164,7 @@ arm_status arm_mat_cmplx_trans_q31(
   /* Return to application */
   return (status);
 }
+#endif /* defined(ARM_MATH_NEON) */
 #endif /* defined(ARM_MATH_MVEI) */
 
 /**

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cfft_q31.c
  * Description:  Combined Radix Decimation in Frequency CFFT fixed point processing function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/transform_functions.h"
 
@@ -543,28 +546,8 @@ static void arm_cfft_radix4by2_inverse_q31_mve(const arm_cfft_instance_q31 *S, q
 
 }
 
-/**
-  @ingroup groupTransforms
- */
 
-/**
-  @addtogroup ComplexFFT
-  @{
- */
-
-/**
-  @brief         Processing function for the Q31 complex FFT.
-  @param[in]     S               points to an instance of the fixed-point CFFT structure
-  @param[in,out] p1              points to the complex data buffer of size <code>2*fftLen</code>. Processing occurs in-place
-  @param[in]     ifftFlag       flag that selects transform direction
-                   - value = 0: forward transform
-                   - value = 1: inverse transform
-  @param[in]     bitReverseFlag flag that enables / disables bit reversal of output
-                   - value = 0: disables bit reversal of output
-                   - value = 1: enables bit reversal of output
-  @return        none
- */
-void arm_cfft_q31(
+ARM_DSP_ATTRIBUTE void arm_cfft_q31(
   const arm_cfft_instance_q31 * S,
         q31_t * pSrc,
         uint8_t ifftFlag,
@@ -619,6 +602,7 @@ void arm_cfft_q31(
 }
 #else
 
+#if !defined(ARM_MATH_NEON)
 extern void arm_radix4_butterfly_q31(
         q31_t * pSrc,
         uint32_t fftLen,
@@ -636,39 +620,91 @@ extern void arm_bitreversal_32(
   const uint16_t bitRevLen,
   const uint16_t * pBitRevTable);
 
-void arm_cfft_radix4by2_q31(
+ARM_DSP_ATTRIBUTE void arm_cfft_radix4by2_q31(
         q31_t * pSrc,
         uint32_t fftLen,
   const q31_t * pCoef);
 
-void arm_cfft_radix4by2_inverse_q31(
+ARM_DSP_ATTRIBUTE void arm_cfft_radix4by2_inverse_q31(
         q31_t * pSrc,
         uint32_t fftLen,
   const q31_t * pCoef);
-
-
-/**
-  @ingroup groupTransforms
- */
+#endif
 
 /**
-  @addtogroup ComplexFFT
+  @addtogroup ComplexFFTQ31
   @{
  */
 
 /**
   @brief         Processing function for the Q31 complex FFT.
   @param[in]     S               points to an instance of the fixed-point CFFT structure
-  @param[in,out] p1              points to the complex data buffer of size <code>2*fftLen</code>. Processing occurs in-place
+  @param[in,out] p1              points to the complex data buffer. Processing occurs in-place
   @param[in]     ifftFlag       flag that selects transform direction
                    - value = 0: forward transform
                    - value = 1: inverse transform
   @param[in]     bitReverseFlag flag that enables / disables bit reversal of output
                    - value = 0: disables bit reversal of output
                    - value = 1: enables bit reversal of output
-  @return        none
+
+@par             Input and Output formats for CFFT Q31
+
+| CFFT Size  | Input Format  | Output Format  | Number of bits to upscale |
+| ---------: | ------------: | -------------: | ------------------------: |
+| 16         | 1.31          | 5.27           | 4        
+| 64         | 1.31          | 7.25           | 6      
+| 256        | 1.31          | 9.23           | 8     
+| 1024       | 1.31          | 11.21          | 10      
+
+@par             Input and Output formats for CIFFT Q31
+
+| CIFFT Size  | Input Format  | Output Format  | Number of bits to upscale |
+| ----------: | ------------: | -------------: | ------------------------: |
+| 16          | 1.31          | 5.27           | 0        
+| 64          | 1.31          | 7.25           | 0      
+| 256         | 1.31          | 9.23           | 0     
+| 1024        | 1.31          | 11.21          | 0      
+
+
+  @par Neon version
+                     The neon version has a different API.
+                     The input and output buffers must be
+                     different.
+                     There is a temporary buffer.
+                     The bit reverse flag is not more 
+                     available in Neon version.
+
+  @code
+        void arm_cfft_q31(
+  const arm_cfft_instance_q31 * S,
+        const q31_t * src,
+        q31_t * dst,
+        q31_t *buffer,
+        uint8_t ifftFlag
+        )
+  @endcode
+
+  @par Size of buffers according to the target architecture and datatype:
+       They are described on the page \ref transformbuffers "transform buffers".
+  
  */
-void arm_cfft_q31(
+#if defined(ARM_MATH_NEON) 
+#include "CMSIS_NE10_types.h"
+#include "CMSIS_NE10_fft.h"
+
+ARM_DSP_ATTRIBUTE void arm_cfft_q31(
+  const arm_cfft_instance_q31 * S,
+        const q31_t * src,
+        q31_t * dst,
+        q31_t *buffer,
+        uint8_t ifftFlag
+        )
+{
+   arm_ne10_fft_c2c_1d_int32_neon (dst,src,S,ifftFlag,1,buffer);
+}
+
+#else
+ARM_DSP_ATTRIBUTE void arm_cfft_q31(
   const arm_cfft_instance_q31 * S,
         q31_t * p1,
         uint8_t ifftFlag,
@@ -720,12 +756,14 @@ void arm_cfft_q31(
   if ( bitReverseFlag )
     arm_bitreversal_32 ((uint32_t*) p1, S->bitRevLength, S->pBitRevTable);
 }
+#endif
 
 /**
-  @} end of ComplexFFT group
+  @} end of ComplexFFTQ31 group
  */
 
-void arm_cfft_radix4by2_q31(
+#if !defined(ARM_MATH_NEON)
+ARM_DSP_ATTRIBUTE void arm_cfft_radix4by2_q31(
         q31_t * pSrc,
         uint32_t fftLen,
   const q31_t * pCoef)
@@ -786,7 +824,7 @@ void arm_cfft_radix4by2_q31(
 
 }
 
-void arm_cfft_radix4by2_inverse_q31(
+ARM_DSP_ATTRIBUTE void arm_cfft_radix4by2_inverse_q31(
         q31_t * pSrc,
         uint32_t fftLen,
   const q31_t * pCoef)
@@ -844,4 +882,5 @@ void arm_cfft_radix4by2_inverse_q31(
      pSrc[4 * i + 3] = yt;
   }
 }
+#endif /* defined NEON */
 #endif /* defined(ARM_MATH_MVEI) */

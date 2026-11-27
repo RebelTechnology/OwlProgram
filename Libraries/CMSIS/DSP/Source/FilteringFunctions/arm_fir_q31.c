@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_q31.c
  * Description:  Q31 FIR filter processing function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -44,7 +47,6 @@
   @param[in]     pSrc       points to the block of input data
   @param[out]    pDst       points to the block of output data
   @param[in]     blockSize  number of samples to process
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function is implemented using an internal 64-bit accumulator.
@@ -107,7 +109,7 @@
                       
 #define FIR_Q31_MAIN_CORE()                                                              \
 {                                                                                        \
-    q31_t *pRefStatePtr = S->pState + 2*ROUND_UP(blockSize, 4);                          \
+    q31_t *pRefStatePtr = S->pState + 2*ARM_ROUND_UP(blockSize, 4);                          \
     q31_t      *pState = pRefStatePtr; /* State pointer */                               \
     const q31_t *pCoeffs = S->pCoeffs;  /* Coefficient pointer */                        \
     q31_t       *pStateCur;             /* Points to the current sample of the state */  \
@@ -210,7 +212,7 @@ static void arm_fir_q31_1_4_mve(const arm_fir_instance_q31 * S,
     const q31_t * __restrict pSrc, 
     q31_t * __restrict pDst, uint32_t blockSize)
 {
-    q31_t *pRefStatePtr = S->pState + 2*ROUND_UP(blockSize, 4);
+    q31_t *pRefStatePtr = S->pState + 2*ARM_ROUND_UP(blockSize, 4);
     q31_t      *pState = pRefStatePtr; /* State pointer */
     const q31_t    *pCoeffs = S->pCoeffs; /* Coefficient pointer */
     q31_t    *pStateCur;        /* Points to the current sample of the state */
@@ -452,7 +454,7 @@ static void arm_fir_q31_29_32_mve(const arm_fir_instance_q31 * S,
     q31_t * __restrict pDst,
                                uint32_t blockSize)
 {
-    q31_t *pRefStatePtr = S->pState + 2*ROUND_UP(blockSize, 4);
+    q31_t *pRefStatePtr = S->pState + 2*ARM_ROUND_UP(blockSize, 4);
     q31_t      *pState = pRefStatePtr; /* State pointer */
     const q31_t    *pCoeffs = S->pCoeffs;       /* Coefficient pointer */
     q31_t          *pStateCur;  /* Points to the current sample of the state */
@@ -646,13 +648,13 @@ static void arm_fir_q31_29_32_mve(const arm_fir_instance_q31 * S,
 
 
 
-void arm_fir_q31(
+ARM_DSP_ATTRIBUTE void arm_fir_q31(
   const arm_fir_instance_q31 * S,
   const q31_t * pSrc,
         q31_t * pDst,
         uint32_t blockSize)
 {
-    q31_t *pRefStatePtr = S->pState + 2*ROUND_UP(blockSize, 4);
+    q31_t *pRefStatePtr = S->pState + 2*ARM_ROUND_UP(blockSize, 4);
     q31_t      *pState = pRefStatePtr; /* State pointer */
     const q31_t    *pCoeffs = S->pCoeffs; /* Coefficient pointer */
     q31_t    *pStateCur;        /* Points to the current sample of the state */
@@ -929,7 +931,7 @@ void arm_fir_q31(
 }
 
 #else
-void arm_fir_q31(
+ARM_DSP_ATTRIBUTE void arm_fir_q31(
   const arm_fir_instance_q31 * S,
   const q31_t * pSrc,
         q31_t * pDst,

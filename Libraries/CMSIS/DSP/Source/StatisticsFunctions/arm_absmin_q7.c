@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_absmin_q7.c
  * Description:  Minimum value of absolute values of a Q7 vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions.h"
 
@@ -44,7 +47,6 @@
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    minimum value returned here
   @param[out]    pIndex     index of minimum value returned here
-  @return        none
  */
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
 
@@ -132,7 +134,7 @@ static void arm_small_blk_absmin_q7(
 }
 
 
-void arm_absmin_q7(
+ARM_DSP_ATTRIBUTE void arm_absmin_q7(
   const q7_t * pSrc,
         uint32_t blockSize,
         q7_t * pResult,
@@ -188,7 +190,7 @@ void arm_absmin_q7(
 
 #else
 #if defined(ARM_MATH_DSP)
-void arm_absmin_q7(
+ARM_DSP_ATTRIBUTE void arm_absmin_q7(
   const q7_t * pSrc,
         uint32_t blockSize,
         q7_t * pResult,
@@ -200,7 +202,7 @@ void arm_absmin_q7(
                                                                                                             \
   /* Initialize index value to zero. */                                                                     \
   outIndex = 0U;                                                                                            \
-  /* Load first input value that act as reference value for comparision */                                  \
+  /* Load first input value that act as reference value for comparison */                                  \
   out = *pSrc++;                                                                                            \
   out = (out > 0) ? out : (q7_t)__QSUB8(0, out);                                                                           \
   /* Initialize index of extrema value. */                                                                  \
@@ -275,7 +277,7 @@ void arm_absmin_q7(
   *pIndex = outIndex;  
 }
 #else
-void arm_absmin_q7(
+ARM_DSP_ATTRIBUTE void arm_absmin_q7(
   const q7_t * pSrc,
         uint32_t blockSize,
         q7_t * pResult,
@@ -286,7 +288,7 @@ void arm_absmin_q7(
 
   /* Initialise index value to zero. */
   outIndex = 0U;
-  /* Load first input value that act as reference value for comparision */
+  /* Load first input value that act as reference value for comparison */
   out = (*pSrc > 0) ? *pSrc : ((*pSrc == (q7_t) 0x80) ? (q7_t) 0x7f : -*pSrc);
   pSrc++;
 

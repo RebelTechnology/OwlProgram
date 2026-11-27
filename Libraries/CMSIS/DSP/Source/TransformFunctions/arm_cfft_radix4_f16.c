@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cfft_radix4_f16.c
  * Description:  Radix-4 Decimation in Frequency CFFT & CIFFT Floating point processing function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/transform_functions_f16.h"
 
@@ -36,13 +39,13 @@ extern void arm_bitreversal_f16(
         uint16_t bitRevFactor,
   const uint16_t * pBitRevTab);
 
-void arm_radix4_butterfly_f16(
+ARM_DSP_ATTRIBUTE void arm_radix4_butterfly_f16(
         float16_t * pSrc,
         uint16_t fftLen,
   const float16_t * pCoef,
         uint16_t twidCoefModifier);
 
-void arm_radix4_butterfly_inverse_f16(
+ARM_DSP_ATTRIBUTE void arm_radix4_butterfly_inverse_f16(
         float16_t * pSrc,
         uint16_t fftLen,
   const float16_t * pCoef,
@@ -50,18 +53,14 @@ void arm_radix4_butterfly_inverse_f16(
         float16_t onebyfftLen);
 
 
-void arm_cfft_radix4by2_f16(
+ARM_DSP_ATTRIBUTE void arm_cfft_radix4by2_f16(
     float16_t * pSrc,
     uint32_t fftLen,
     const float16_t * pCoef);
 
 
 /**
-  @ingroup groupTransforms
- */
-
-/**
-  @addtogroup ComplexFFT
+  @addtogroup ComplexFFTDeprecated
   @{
  */
 
@@ -71,10 +70,9 @@ void arm_cfft_radix4by2_f16(
 * @param[in]      fftLen           length of the FFT.
 * @param[in]      *pCoef           points to the twiddle coefficient buffer.
 * @param[in]      twidCoefModifier twiddle coefficient modifier that supports different size FFTs with the same twiddle factor table.
-* @return none.
 */
 
-void arm_cfft_radix4by2_f16(
+ARM_DSP_ATTRIBUTE void arm_cfft_radix4by2_f16(
     float16_t * pSrc,
     uint32_t fftLen,
     const float16_t * pCoef)
@@ -127,10 +125,9 @@ void arm_cfft_radix4by2_f16(
   @deprecated    Do not use this function. It has been superseded by \ref arm_cfft_f16 and will be removed in the future.
   @param[in]     S    points to an instance of the floating-point Radix-4 CFFT/CIFFT structure
   @param[in,out] pSrc points to the complex data buffer of size <code>2*fftLen</code>. Processing occurs in-place
-  @return        none
  */
 
-void arm_cfft_radix4_f16(
+ARM_DSP_ATTRIBUTE void arm_cfft_radix4_f16(
   const arm_cfft_radix4_instance_f16 * S,
         float16_t * pSrc)
 {
@@ -154,7 +151,7 @@ void arm_cfft_radix4_f16(
 }
 
 /**
-  @} end of ComplexFFT group
+  @} end of ComplexFFTDeprecated group
  */
 
 /* ----------------------------------------------------------------------
@@ -167,17 +164,16 @@ void arm_cfft_radix4_f16(
 * @param[in]      fftLen           length of the FFT.
 * @param[in]      *pCoef           points to the twiddle coefficient buffer.
 * @param[in]      twidCoefModifier twiddle coefficient modifier that supports different size FFTs with the same twiddle factor table.
-* @return none.
 */
 
-void arm_radix4_butterfly_f16(
+ARM_DSP_ATTRIBUTE void arm_radix4_butterfly_f16(
 float16_t * pSrc,
 uint16_t fftLen,
 const float16_t * pCoef,
 uint16_t twidCoefModifier)
 {
 
-   float16_t co1, co2, co3, si1, si2, si3;
+   _Float16 co1, co2, co3, si1, si2, si3;
    uint32_t ia1, ia2, ia3;
    uint32_t i0, i1, i2, i3;
    uint32_t n1, n2, j, k;
@@ -186,14 +182,14 @@ uint16_t twidCoefModifier)
 
    /* Run the below code for Cortex-M4 and Cortex-M3 */
 
-   float16_t xaIn, yaIn, xbIn, ybIn, xcIn, ycIn, xdIn, ydIn;
-   float16_t Xaplusc, Xbplusd, Yaplusc, Ybplusd, Xaminusc, Xbminusd, Yaminusc,
+   _Float16 xaIn, yaIn, xbIn, ybIn, xcIn, ycIn, xdIn, ydIn;
+   _Float16 Xaplusc, Xbplusd, Yaplusc, Ybplusd, Xaminusc, Xbminusd, Yaminusc,
    Ybminusd;
-   float16_t Xb12C_out, Yb12C_out, Xc12C_out, Yc12C_out, Xd12C_out, Yd12C_out;
-   float16_t Xb12_out, Yb12_out, Xc12_out, Yc12_out, Xd12_out, Yd12_out;
+   _Float16 Xb12C_out, Yb12C_out, Xc12C_out, Yc12C_out, Xd12C_out, Yd12C_out;
+   _Float16 Xb12_out, Yb12_out, Xc12_out, Yc12_out, Xd12_out, Yd12_out;
    float16_t *ptr1;
-   float16_t p0,p1,p2,p3,p4,p5;
-   float16_t a0,a1,a2,a3,a4,a5,a6,a7;
+   _Float16 p0,p1,p2,p3,p4,p5;
+   _Float16 a0,a1,a2,a3,a4,a5,a6,a7;
 
    /*  Initializations for the first stage */
    n2 = fftLen;
@@ -547,7 +543,7 @@ uint16_t twidCoefModifier)
 
 #else
 
-   float16_t t1, t2, r1, r2, s1, s2;
+   _Float16 t1, t2, r1, r2, s1, s2;
 
    /* Run the below code for Cortex-M0 */
 
@@ -671,31 +667,30 @@ uint16_t twidCoefModifier)
 * @param[in]      *pCoef           points to twiddle coefficient buffer.
 * @param[in]      twidCoefModifier twiddle coefficient modifier that supports different size FFTs with the same twiddle factor table.
 * @param[in]      onebyfftLen      value of 1/fftLen.
-* @return none.
 */
 
-void arm_radix4_butterfly_inverse_f16(
+ARM_DSP_ATTRIBUTE void arm_radix4_butterfly_inverse_f16(
 float16_t * pSrc,
 uint16_t fftLen,
 const float16_t * pCoef,
 uint16_t twidCoefModifier,
 float16_t onebyfftLen)
 {
-   float16_t co1, co2, co3, si1, si2, si3;
+   _Float16 co1, co2, co3, si1, si2, si3;
    uint32_t ia1, ia2, ia3;
    uint32_t i0, i1, i2, i3;
    uint32_t n1, n2, j, k;
 
 #if defined (ARM_MATH_DSP)
 
-   float16_t xaIn, yaIn, xbIn, ybIn, xcIn, ycIn, xdIn, ydIn;
-   float16_t Xaplusc, Xbplusd, Yaplusc, Ybplusd, Xaminusc, Xbminusd, Yaminusc,
+   _Float16 xaIn, yaIn, xbIn, ybIn, xcIn, ycIn, xdIn, ydIn;
+   _Float16 Xaplusc, Xbplusd, Yaplusc, Ybplusd, Xaminusc, Xbminusd, Yaminusc,
    Ybminusd;
-   float16_t Xb12C_out, Yb12C_out, Xc12C_out, Yc12C_out, Xd12C_out, Yd12C_out;
-   float16_t Xb12_out, Yb12_out, Xc12_out, Yc12_out, Xd12_out, Yd12_out;
+   _Float16 Xb12C_out, Yb12C_out, Xc12C_out, Yc12C_out, Xd12C_out, Yd12C_out;
+   _Float16 Xb12_out, Yb12_out, Xc12_out, Yc12_out, Xd12_out, Yd12_out;
    float16_t *ptr1;
-   float16_t p0,p1,p2,p3,p4,p5,p6,p7;
-   float16_t a0,a1,a2,a3,a4,a5,a6,a7;
+   _Float16 p0,p1,p2,p3,p4,p5,p6,p7;
+   _Float16 a0,a1,a2,a3,a4,a5,a6,a7;
 
 
    /*  Initializations for the first stage */

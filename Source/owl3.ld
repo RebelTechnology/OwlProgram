@@ -12,6 +12,12 @@ MEMORY
   EXTRAM  (rwx)   : ORIGIN = 0xD0000000, LENGTH = 8M
 }
 
+PHDRS
+{
+  text PT_LOAD FLAGS(5);   /* R X */
+  data PT_LOAD FLAGS(6);   /* R W */
+}
+
 /* Define output sections */
 SECTIONS
 {
@@ -20,7 +26,7 @@ SECTIONS
   {
     _startprog = ABSOLUTE(.);         /* define a global symbol at program start */
     KEEP(*(.program_header)) /* Startup code */
-  } >PATCHRAM
+  } >PATCHRAM :text
 
   /* The program code and other data goes into PATCHRAM */
   .text :
@@ -96,7 +102,7 @@ SECTIONS
     *(.data*)          /* .data* sections */
     . = ALIGN(8);
     _edata = .;        /* define a global symbol at data end */
-  } >PATCHRAM
+  } >PATCHRAM :data
 
   /* Uninitialized data section */
   . = ALIGN(8);

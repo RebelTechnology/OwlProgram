@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_clip_q15.c
  * Description:  Floating-point vector addition
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/basic_math_functions.h"
 
@@ -45,12 +48,11 @@
   @param[in]     low           lower bound
   @param[in]     high          higher bound
   @param[in]     numSamples    number of samples to clip
-  @return        none
  */
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
-void arm_clip_q15(const q15_t * pSrc, 
+ARM_DSP_ATTRIBUTE void arm_clip_q15(const q15_t * pSrc, 
   q15_t * pDst, 
   q15_t low, 
   q15_t high, 
@@ -110,7 +112,7 @@ void arm_clip_q15(const q15_t * pSrc,
 }
 
 #else
-void arm_clip_q15(const q15_t * pSrc, 
+ARM_DSP_ATTRIBUTE void arm_clip_q15(const q15_t * pSrc, 
   q15_t * pDst, 
   q15_t low, 
   q15_t high, 

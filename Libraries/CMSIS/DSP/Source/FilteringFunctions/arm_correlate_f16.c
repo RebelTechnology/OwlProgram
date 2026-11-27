@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_correlate_f16.c
  * Description:  Correlation of floating-point sequences
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions_f16.h"
 
@@ -33,51 +36,7 @@
   @ingroup groupFilters
  */
 
-/**
-  @defgroup Corr Correlation
 
-  Correlation is a mathematical operation that is similar to convolution.
-  As with convolution, correlation uses two signals to produce a third signal.
-  The underlying algorithms in correlation and convolution are identical except that one of the inputs is flipped in convolution.
-  Correlation is commonly used to measure the similarity between two signals.
-  It has applications in pattern recognition, cryptanalysis, and searching.
-  The CMSIS library provides correlation functions for Q7, Q15, Q31 and floating-point data types.
-  Fast versions of the Q15 and Q31 functions are also provided.
-
-  @par           Algorithm
-                   Let <code>a[n]</code> and <code>b[n]</code> be sequences of length <code>srcALen</code> and <code>srcBLen</code> samples respectively.
-                   The convolution of the two signals is denoted by
-  <pre>
-      c[n] = a[n] * b[n]
-  </pre>
-                   In correlation, one of the signals is flipped in time
-  <pre>
-       c[n] = a[n] * b[-n]
-  </pre>
-  @par
-                   and this is mathematically defined as
-                   \image html CorrelateEquation.gif
-  @par
-                   The <code>pSrcA</code> points to the first input vector of length <code>srcALen</code> and <code>pSrcB</code> points to the second input vector of length <code>srcBLen</code>.
-                   The result <code>c[n]</code> is of length <code>2 * max(srcALen, srcBLen) - 1</code> and is defined over the interval <code>n=0, 1, 2, ..., (2 * max(srcALen, srcBLen) - 2)</code>.
-                   The output result is written to <code>pDst</code> and the calling function must allocate <code>2 * max(srcALen, srcBLen) - 1</code> words for the result.
-
-  @note
-                   The <code>pDst</code> should be initialized to all zeros before being used.
-
-  @par           Fixed-Point Behavior
-                   Correlation requires summing up a large number of intermediate products.
-                   As such, the Q7, Q15, and Q31 functions run a risk of overflow and saturation.
-                   Refer to the function specific documentation below for further details of the particular algorithm used.
-
-  @par           Fast Versions
-                   Fast versions are supported for Q31 and Q15.  Cycles for Fast versions are less compared to Q31 and Q15 of correlate and the design requires
-                   the input signals should be scaled down to avoid intermediate overflows.
-
-  @par           Opt Versions
-                   Opt versions are supported for Q15 and Q7.  Design uses internal scratch buffer for getting good optimisation.
-                   These versions are optimised in cycles and consumes more memory (Scratch memory) compared to Q15 and Q7 versions of correlate
- */
 
 /**
   @addtogroup Corr
@@ -91,7 +50,6 @@
   @param[in]     pSrcB      points to the second input sequence
   @param[in]     srcBLen    length of the second input sequence
   @param[out]    pDst       points to the location where the output result is written.  Length 2 * max(srcALen, srcBLen) - 1.
-  @return        none
  */
 
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
@@ -300,7 +258,7 @@
 
 
 
-void arm_correlate_f16(
+ARM_DSP_ATTRIBUTE void arm_correlate_f16(
   const float16_t * pSrcA,
         uint32_t srcALen,
   const float16_t * pSrcB,
@@ -462,7 +420,7 @@ void arm_correlate_f16(
         pA++;
     }
 
-    for (i = block3 - 1; i >= 0; i -= 2)
+    for (i = block3 - 1; i > 0; i -= 2)
     {
 
         uint32_t  count = (i + 1);
@@ -501,7 +459,7 @@ void arm_correlate_f16(
 }
 
 #else
-void arm_correlate_f16(
+ARM_DSP_ATTRIBUTE void arm_correlate_f16(
   const float16_t * pSrcA,
         uint32_t srcALen,
   const float16_t * pSrcB,
@@ -1079,7 +1037,7 @@ void arm_correlate_f16(
   /* So srcBLen is always considered as shorter or equal to srcALen */
   /* But CORR(x, y) is reverse of CORR(y, x) */
   /* So, when srcBLen > srcALen, output pointer is made to point to the end of the output buffer */
-  /* and a varaible, inv is set to 1 */
+  /* and a variable, inv is set to 1 */
   /* If lengths are not equal then zero pad has to be done to  make the two
    * inputs of same length. But to improve the performance, we assume zeroes
    * in the output instead of zero padding either of the the inputs*/
@@ -1087,7 +1045,7 @@ void arm_correlate_f16(
    * starting of the output buffer */
   /* If srcALen < srcBLen, (srcALen - srcBLen) zeroes has to included in the
    * ending of the output buffer */
-  /* Once the zero padding is done the remaining of the output is calcualted
+  /* Once the zero padding is done the remaining of the output is calculated
    * using convolution but with the shorter signal time shifted. */
 
   /* Calculate the length of the remaining sequence */

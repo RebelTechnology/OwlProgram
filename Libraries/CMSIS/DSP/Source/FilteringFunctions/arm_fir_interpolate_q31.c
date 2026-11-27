@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_interpolate_q31.c
  * Description:  Q31 FIR interpolation
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -42,8 +45,7 @@
   @param[in]     S          points to an instance of the Q31 FIR interpolator structure
   @param[in]     pSrc       points to the block of input data
   @param[out]    pDst       points to the block of output data
-  @param[in]     blockSize  number of samples to process
-  @return        none
+  @param[in]     blockSize  number of input samples to process
 
   @par           Scaling and Overflow Behavior
                    The function is implemented using an internal 64-bit accumulator.
@@ -57,7 +59,7 @@
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
-void arm_fir_interpolate_q31(
+ARM_DSP_ATTRIBUTE void arm_fir_interpolate_q31(
   const arm_fir_interpolate_instance_q31 * S,
   const q31_t * pSrc,
         q31_t * pDst,
@@ -83,7 +85,7 @@ void arm_fir_interpolate_q31(
      */
     pStateCurnt = S->pState + ((q31_t) phaseLen - 1);
     /*
-     * Total number of intput samples
+     * Total number of input samples
      */
     blkCnt = blockSize;
     /*
@@ -346,7 +348,7 @@ void arm_fir_interpolate_q31(
     }
 }
 #else
-void arm_fir_interpolate_q31(
+ARM_DSP_ATTRIBUTE void arm_fir_interpolate_q31(
   const arm_fir_interpolate_instance_q31 * S,
   const q31_t * pSrc,
         q31_t * pDst,
@@ -693,7 +695,7 @@ void arm_fir_interpolate_q31(
   /* pStateCur points to the location where the new input data should be written */
   pStateCur = S->pState + (phaseLen - 1U);
 
-  /* Total number of intput samples */
+  /* Total number of input samples */
   blkCnt = blockSize;
 
   /* Loop over the blockSize. */

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_init_f16.c
  * Description:  Floating-point matrix initialization
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions_f16.h"
 
@@ -47,10 +50,9 @@
   @param[in]     nRows     number of rows in the matrix
   @param[in]     nColumns  number of columns in the matrix
   @param[in]     pData     points to the matrix data array
-  @return        none
  */
 
-void arm_mat_init_f16(
+ARM_DSP_ATTRIBUTE void arm_mat_init_f16(
   arm_matrix_instance_f16 * S,
   uint16_t nRows,
   uint16_t nColumns,

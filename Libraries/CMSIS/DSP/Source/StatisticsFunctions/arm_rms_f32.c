@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_rms_f32.c
  * Description:  Root mean square value of the elements of a floating-point vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions.h"
 
@@ -55,11 +58,10 @@
   @param[in]     pSrc       points to the input vector
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    root mean square value returned here
-  @return        none
  */
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
-void arm_rms_f32(
+ARM_DSP_ATTRIBUTE void arm_rms_f32(
   const float32_t * pSrc,
   uint32_t blockSize,
   float32_t * pResult)
@@ -72,8 +74,8 @@ void arm_rms_f32(
     arm_sqrt_f32(pow / (float32_t) blockSize, pResult);
 }
 #else
-#if defined(ARM_MATH_NEON) && !defined(ARM_MATH_AUTOVECTORIZE)
-void arm_rms_f32(
+#if defined(ARM_MATH_NEON)
+ARM_DSP_ATTRIBUTE void arm_rms_f32(
   const float32_t * pSrc,
   uint32_t blockSize,
   float32_t * pResult)
@@ -124,7 +126,7 @@ void arm_rms_f32(
   arm_sqrt_f32(sum / (float32_t) blockSize, pResult);
 }
 #else
-void arm_rms_f32(
+ARM_DSP_ATTRIBUTE void arm_rms_f32(
   const float32_t * pSrc,
         uint32_t blockSize,
         float32_t * pResult)

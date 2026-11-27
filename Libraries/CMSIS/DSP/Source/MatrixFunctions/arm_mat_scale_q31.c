@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_scale_q31.c
  * Description:  Multiplies a Q31 matrix by a scalar
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
 
@@ -52,7 +55,7 @@
                    These are multiplied to yield a 2.62 intermediate result which is shifted with saturation to 1.31 format.
  */
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
-arm_status arm_mat_scale_q31(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_scale_q31(
   const arm_matrix_instance_q31 * pSrc,
         q31_t                     scaleFract,
         int32_t                   shift,
@@ -129,7 +132,7 @@ arm_status arm_mat_scale_q31(
 }
 
 #else
-arm_status arm_mat_scale_q31(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_scale_q31(
   const arm_matrix_instance_q31 * pSrc,
         q31_t                     scaleFract,
         int32_t                   shift,
@@ -141,7 +144,7 @@ arm_status arm_mat_scale_q31(
   uint32_t blkCnt;                               /* Loop counter */
   arm_status status;                             /* Status of matrix scaling */
   int32_t kShift = shift + 1;                    /* Shift to apply after scaling */
-  q31_t in, out;                                 /* Temporary variabels */
+  q31_t in, out;                                 /* Temporary variables */
 
 #ifdef ARM_MATH_MATRIX_CHECK
 

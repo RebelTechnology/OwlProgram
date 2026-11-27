@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mean_q7.c
  * Description:  Mean value of a Q7 vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions.h"
 
@@ -42,7 +45,6 @@
   @param[in]     pSrc       points to the input vector
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    mean value returned here
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function is implemented using a 32-bit internal accumulator.
@@ -55,7 +57,7 @@
 
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
 
-void arm_mean_q7(
+ARM_DSP_ATTRIBUTE void arm_mean_q7(
   const q7_t * pSrc,
         uint32_t blockSize,
         q7_t * pResult)
@@ -93,7 +95,7 @@ void arm_mean_q7(
     *pResult = (q7_t) (sum / (int32_t) blockSize);
 }
 #else
-void arm_mean_q7(
+ARM_DSP_ATTRIBUTE void arm_mean_q7(
   const q7_t * pSrc,
         uint32_t blockSize,
         q7_t * pResult)
@@ -113,7 +115,7 @@ void arm_mean_q7(
   while (blkCnt > 0U)
   {
     /* C = (A[0] + A[1] + A[2] + ... + A[blockSize-1]) */
-    in = read_q7x4_ia ((q7_t **) &pSrc);
+    in = read_q7x4_ia (&pSrc);
     sum += ((in << 24U) >> 24U);
     sum += ((in << 16U) >> 24U);
     sum += ((in <<  8U) >> 24U);

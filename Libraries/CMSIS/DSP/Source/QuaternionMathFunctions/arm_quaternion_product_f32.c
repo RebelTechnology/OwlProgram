@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_quaternion_product_f32.c
  * Description:  Floating-point quaternion product
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/quaternion_math_functions.h"
 #include <math.h>
@@ -60,14 +63,13 @@
   @param[in]     qb                  second array of quaternions
   @param[out]    qr                   elementwise product of quaternions
   @param[in]     nbQuaternions       number of quaternions in the array
-  @return        none
  */
 
 #if defined(ARM_MATH_MVEF) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
 
-void arm_quaternion_product_f32(const float32_t *qa, 
+ARM_DSP_ATTRIBUTE void arm_quaternion_product_f32(const float32_t *qa, 
     const float32_t *qb, 
     float32_t *qr,
     uint32_t nbQuaternions)
@@ -127,7 +129,7 @@ void arm_quaternion_product_f32(const float32_t *qa,
 
 #else
 
-void arm_quaternion_product_f32(const float32_t *qa, 
+ARM_DSP_ATTRIBUTE void arm_quaternion_product_f32(const float32_t *qa, 
     const float32_t *qb, 
     float32_t *qr,
     uint32_t nbQuaternions)

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cfft_radix4_init_f32.c
  * Description:  Radix-4 Decimation in Frequency Floating-point CFFT & CIFFT Initialization function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,22 +26,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/transform_functions.h"
 #include "arm_common_tables.h"
 
-/**
-  @ingroup groupTransforms
- */
 
 /**
-  @addtogroup ComplexFFT
+  @addtogroup ComplexFFTDeprecated
   @{
  */
 
 /**
   @brief         Initialization function for the floating-point CFFT/CIFFT.
-  @deprecated    Do not use this function. It has been superceded by \ref arm_cfft_f32 and will be removed in the future.
+  @deprecated    Do not use this function. It has been superseded by \ref arm_cfft_f32 and will be removed in the future.
   @param[in,out] S              points to an instance of the floating-point CFFT/CIFFT structure
   @param[in]     fftLen         length of the FFT
   @param[in]     ifftFlag       flag that selects transform direction
@@ -65,7 +65,7 @@
                    This Function also initializes Twiddle factor table pointer and Bit reversal table pointer.
  */
 
-arm_status arm_cfft_radix4_init_f32(
+ARM_DSP_ATTRIBUTE arm_status arm_cfft_radix4_init_f32(
   arm_cfft_radix4_instance_f32 * S,
   uint16_t fftLen,
   uint8_t ifftFlag,
@@ -73,10 +73,6 @@ arm_status arm_cfft_radix4_init_f32(
 {
    /*  Initialise the default arm status */
   arm_status status = ARM_MATH_ARGUMENT_ERROR;
-
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_FFT_ALLOW_TABLES)
-
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || defined(ARM_TABLE_TWIDDLECOEF_F32_4096)
 
   /*  Initialise the default arm status */
   status = ARM_MATH_SUCCESS;
@@ -92,8 +88,6 @@ arm_status arm_cfft_radix4_init_f32(
 
   /*  Initialise the Flag for calculation Bit reversal or not */
   S->bitReverseFlag = bitReverseFlag;
-
-#if !defined(ARM_DSP_CONFIG_TABLES) || defined(ARM_ALL_FFT_TABLES) || defined(ARM_TABLE_TWIDDLECOEF_F32_4096)
 
   /*  Initializations of structure parameters depending on the FFT length */
   switch (S->fftLen)
@@ -156,13 +150,11 @@ arm_status arm_cfft_radix4_init_f32(
     status = ARM_MATH_ARGUMENT_ERROR;
     break;
   }
-#endif
-#endif
-#endif
+
   
   return (status);
 }
 
 /**
-  @} end of ComplexFFT group
+  @} end of ComplexFFTDeprecated group
  */

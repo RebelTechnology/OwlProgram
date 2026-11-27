@@ -14,6 +14,7 @@ endif
 
 DEPS = .FORCE
 TARGET ?= patch
+NODE ?= $(or $(EMSDK_NODE),node)
 
 ifdef FAUST
 # options for FAUST compilation
@@ -23,9 +24,11 @@ PATCHFILE   ?= FaustPatch.hpp
 DEPS        += faust
 else ifdef HEAVY
 # options for Heavy PD compilation
+# PATCHFILE is c2owl's native output name (hvcc -g owl emits HeavyOWL_owl.hpp),
+# consumed directly — no rename step in heavy.mk.
 PATCHNAME   ?= $(HEAVY)
 PATCHCLASS  ?= HeavyPatch
-PATCHFILE   ?= HeavyPatch.hpp
+PATCHFILE   ?= HeavyOWL_owl.hpp
 DEPS        += heavy
 else ifdef GEN
 # options for Max/MSP Gen compilation
@@ -86,7 +89,7 @@ DEPS += $(BUILD)/registerpatch.cpp $(BUILD)/registerpatch.h $(BUILD)/Source/star
 
 all: libs patch web
 
-.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as native test run check tables resource size clean realclean sysex load store docs help
+.PHONY: .FORCE patch libs faust gen heavy soul maximilian web minify map as native test run check tables resource size clean realclean sysex load store docs tests help
 
 .FORCE:
 	@mkdir -p $(BUILD)/Source
@@ -116,6 +119,9 @@ libs: .FORCE ## build patch libraries
 web: $(DEPS) ## build Javascript patch
 	@$(MAKE) -s -f web.mk web
 	@echo Built javascript $(PATCHNAME) in $(BUILD)/web/$(TARGET).js
+
+webtest: web ## build Javascript patch and run it headless in node
+	@$(NODE) Tools/webtest.js $(BUILD)/web/$(TARGET).js
 
 minify: $(DEPS)
 	@$(MAKE) -s -f web.mk minify
@@ -191,14 +197,12 @@ tests: ## run all unit tests
 	done
 
 check: tests ## run test patches and unit tests
-	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/CppTest PATCHNAME=CppTest clean patch web run
-	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/DaisySPTest PATCHNAME=DaisySPTest clean patch web run
-	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/GenTest GEN=MIDItestMinMax clean patch web run
-	# @unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/FaustTest FAUST=FaustTest clean patch web run # FAUST is not installed for CI
-	@cp FaustSource/*.h TestPatches/FaustTest && unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/FaustTest PATCHNAME=Faust clean patch web run
-	# @unset PATCHNAME PATCHCLASS PATCHFILE SOULCLASS SOULFILE SOULHPP && $(MAKE) PATCHSOURCE=TestPatches/SoulTest SOUL=SineSynth clean patch web run # SOUL is not installed for CI
-	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/SoulTest PATCHNAME=Soul clean patch web run
-	@pip install -r Tools/hvcc/requirements.txt && unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/HeavyTest HEAVY=HeavyTest clean patch web run
+	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/CppTest PATCHNAME=CppTest clean patch webtest run
+	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/DaisySPTest PATCHNAME=DaisySPTest clean patch webtest run
+	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/GenTest GEN=MIDItestMinMax clean patch webtest run
+	@cp FaustSource/*.h TestPatches/FaustTest && unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/FaustTest PATCHNAME=Faust clean patch webtest run
+	@unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/SoulTest PATCHNAME=Soul clean patch webtest run
+	# hvcc segfaulting in CI @unset PATCHNAME PATCHCLASS PATCHFILE && $(MAKE) PATCHSOURCE=TestPatches/HeavyTest HEAVY=HeavyTest clean patch webtest run
 
 help: ## show this help
 	@echo 'Usage: make [target] ...'

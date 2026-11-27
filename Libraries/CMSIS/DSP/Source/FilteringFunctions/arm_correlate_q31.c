@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_correlate_q31.c
  * Description:  Correlation of Q31 sequences
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -44,7 +47,6 @@
   @param[in]     pSrcB      points to the second input sequence
   @param[in]     srcBLen    length of the second input sequence
   @param[out]    pDst       points to the location where the output result is written.  Length 2 * max(srcALen, srcBLen) - 1.
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function is implemented using an internal 64-bit accumulator.
@@ -62,7 +64,7 @@
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
 #include "arm_helium_utils.h"
 #include "arm_vec_filtering.h"
-void arm_correlate_q31(
+ARM_DSP_ATTRIBUTE void arm_correlate_q31(
   const q31_t * pSrcA,
         uint32_t srcALen,
   const q31_t * pSrcB,
@@ -220,7 +222,7 @@ void arm_correlate_q31(
         pA++;
     }
 
-    for (i = block3 - 1; i >= 0; i -= 2)
+    for (i = block3 - 1; i > 0; i -= 2)
     {
 
         uint32_t  count = (i + 1);
@@ -256,7 +258,7 @@ void arm_correlate_q31(
     }
 }
 #else
-void arm_correlate_q31(
+ARM_DSP_ATTRIBUTE void arm_correlate_q31(
   const q31_t * pSrcA,
         uint32_t srcALen,
   const q31_t * pSrcB,
@@ -802,7 +804,7 @@ void arm_correlate_q31(
   /* So srcBLen is always considered as shorter or equal to srcALen */
   /* But CORR(x, y) is reverse of CORR(y, x) */
   /* So, when srcBLen > srcALen, output pointer is made to point to the end of the output buffer */
-  /* and a varaible, inv is set to 1 */
+  /* and a variable, inv is set to 1 */
   /* If lengths are not equal then zero pad has to be done to  make the two
    * inputs of same length. But to improve the performance, we include zeroes
    * in the output instead of zero padding either of the the inputs*/
@@ -810,7 +812,7 @@ void arm_correlate_q31(
    * starting of the output buffer */
   /* If srcALen < srcBLen, (srcALen - srcBLen) zeroes has to included in the
    * ending of the output buffer */
-  /* Once the zero padding is done the remaining of the output is calcualted
+  /* Once the zero padding is done the remaining of the output is calculated
    * using correlation but with the shorter signal time shifted. */
 
   /* Calculate the length of the remaining sequence */

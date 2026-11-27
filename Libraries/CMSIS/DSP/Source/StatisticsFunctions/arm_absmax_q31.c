@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_absmax_q31.c
  * Description:  Maximum value of absolute values of a Q31 vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions.h"
 
@@ -43,13 +46,12 @@
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    maximum value returned here
   @param[out]    pIndex     index of maximum value returned here
-  @return        none
  */
 
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
-void arm_absmax_q31(
+ARM_DSP_ATTRIBUTE void arm_absmax_q31(
   const q31_t * pSrc,
         uint32_t blockSize,
         q31_t * pResult,
@@ -75,7 +77,7 @@ void arm_absmax_q31(
          * Get current max per lane and current index per lane
          * when a max is selected
          */
-        p0 = vcmpgeq_m(extremIdxVal, extremValVec, p);
+        p0 = vcmpgtq_m(extremIdxVal, extremValVec, p);
 
         extremValVec = vorrq_m(extremValVec, extremIdxVal, extremIdxVal, p0);
         /* store per-lane extrema indexes */
@@ -101,7 +103,7 @@ void arm_absmax_q31(
 }
 #else
 #if defined(ARM_MATH_DSP)
-void arm_absmax_q31(
+ARM_DSP_ATTRIBUTE void arm_absmax_q31(
   const q31_t * pSrc,
         uint32_t blockSize,
         q31_t * pResult,
@@ -113,7 +115,7 @@ void arm_absmax_q31(
                                                                                                             \
   /* Initialize index value to zero. */                                                                     \
   outIndex = 0U;                                                                                            \
-  /* Load first input value that act as reference value for comparision */                                  \
+  /* Load first input value that act as reference value for comparison */                                  \
   out = *pSrc++;                                                                                            \
   out = (out > 0) ? out : (q31_t)__QSUB(0, out);                                                                           \
   /* Initialize index of extrema value. */                                                                  \
@@ -188,7 +190,7 @@ void arm_absmax_q31(
   *pIndex = outIndex;  
 }
 #else
-void arm_absmax_q31(
+ARM_DSP_ATTRIBUTE void arm_absmax_q31(
   const q31_t * pSrc,
         uint32_t blockSize,
         q31_t * pResult,
@@ -200,7 +202,7 @@ void arm_absmax_q31(
 
   /* Initialise index value to zero. */
   outIndex = 0U;
-  /* Load first input value that act as reference value for comparision */
+  /* Load first input value that act as reference value for comparison */
   out = (*pSrc > 0) ? *pSrc : ((*pSrc == INT32_MIN) ? INT32_MAX : -*pSrc);
   pSrc++;
 

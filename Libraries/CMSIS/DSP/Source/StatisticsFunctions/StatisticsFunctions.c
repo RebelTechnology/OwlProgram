@@ -3,8 +3,8 @@
  * Title:        StatisticsFunctions.c
  * Description:  Combination of all statistics function source files.
  *
- * $Date:        16. March 2020
- * $Revision:    V1.1.0
+ * $Date:        14 July 2022
+ * $Revision:    V1.1.1
  *
  * Target Processor: Cortex-M cores
  * -------------------------------------------------------------------- */
@@ -93,3 +93,12 @@
 #include "arm_absmin_no_idx_q15.c"
 #include "arm_absmin_no_idx_q31.c"
 #include "arm_absmin_no_idx_q7.c"
+#include "arm_mse_q7.c"
+#include "arm_mse_q15.c"
+#include "arm_mse_q31.c"
+#include "arm_mse_f32.c"
+#include "arm_mse_f64.c"
+#include "arm_accumulate_f32.c"
+#include "arm_accumulate_f64.c"
+
+

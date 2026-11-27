@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_lms_init_q15.c
  * Description:  Q15 LMS filter initialization function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -46,7 +49,6 @@
   @param[in]     mu         step size that controls filter coefficient updates.
   @param[in]     blockSize  number of samples to process.
   @param[in]     postShift  bit shift applied to coefficients.
-  @return        none
 
   @par           Details
                    <code>pCoeffs</code> points to the array of filter coefficients stored in time reversed order:
@@ -59,7 +61,7 @@
                    input samples processed by each call to <code>arm_lms_q15()</code>.
  */
 
-void arm_lms_init_q15(
+ARM_DSP_ATTRIBUTE void arm_lms_init_q15(
   arm_lms_instance_q15 * S,
   uint16_t numTaps,
   q15_t * pCoeffs,

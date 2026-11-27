@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_sub_f64.c
  * Description:  Floating-point matrix subtraction
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
 
@@ -32,16 +35,6 @@
   @ingroup groupMatrix
  */
 
-/**
-  @defgroup MatrixSub Matrix Subtraction
-
-  Subtract two matrices.
-  \image html MatrixSubtraction.gif "Subraction of two 3 x 3 matrices"
-
-  The functions check to make sure that
-  <code>pSrcA</code>, <code>pSrcB</code>, and <code>pDst</code> have the same
-  number of rows and columns.
- */
 
 /**
   @addtogroup MatrixSub
@@ -58,7 +51,7 @@
                    - \ref ARM_MATH_SIZE_MISMATCH : Matrix size check failed
  */
 
-arm_status arm_mat_sub_f64(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_sub_f64(
   const arm_matrix_instance_f64 * pSrcA,
   const arm_matrix_instance_f64 * pSrcB,
         arm_matrix_instance_f64 * pDst)

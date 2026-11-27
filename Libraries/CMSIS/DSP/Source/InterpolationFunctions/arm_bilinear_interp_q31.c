@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_linear_interp_q31.c
  * Description:  Q31 linear interpolation
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/interpolation_functions.h"
 
@@ -55,7 +58,7 @@
     q31_t xfract, yfract;                        /* X, Y fractional parts */
     q31_t x1, x2, y1, y2;                        /* Nearest output values */
     int32_t rI, cI;                              /* Row and column indices */
-    q31_t *pYData = S->pData;                    /* pointer to output table values */
+    const q31_t *pYData = S->pData;                    /* pointer to output table values */
     uint32_t nCols = S->numCols;                 /* num of rows */
 
     /* Input is in 12.20 format */

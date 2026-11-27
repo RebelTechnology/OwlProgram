@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_sub_q31.c
  * Description:  Q31 matrix subtraction
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
 
@@ -51,14 +54,14 @@
                    Results outside of the allowable Q31 range [0x80000000 0x7FFFFFFF] are saturated.
  */
 #if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)
-arm_status arm_mat_sub_q31(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_sub_q31(
   const arm_matrix_instance_q31 * pSrcA,
   const arm_matrix_instance_q31 * pSrcB,
         arm_matrix_instance_q31 * pDst)
 {
     uint32_t        numSamples;       /* total number of elements in the matrix  */
     q31_t          *pDataA, *pDataB, *pDataDst;
-    q31x4_t       vecA, vecB, vecDst;
+    q31x4_t       vecA, vecB, vecDst = { 0 };
     q31_t const   *pSrcAVec;
     q31_t const   *pSrcBVec;
     uint32_t        blkCnt;           /* loop counters */
@@ -129,7 +132,7 @@ arm_status arm_mat_sub_q31(
 }
 
 #else
-arm_status arm_mat_sub_q31(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_sub_q31(
   const arm_matrix_instance_q31 * pSrcA,
   const arm_matrix_instance_q31 * pSrcB,
         arm_matrix_instance_q31 * pDst)

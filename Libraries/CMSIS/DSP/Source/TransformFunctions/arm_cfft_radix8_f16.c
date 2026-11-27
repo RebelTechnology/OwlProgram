@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cfft_radix8_f16.c
  * Description:  Radix-8 Decimation in Frequency CFFT & CIFFT Floating point processing function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,11 +26,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/transform_functions_f16.h"
 
 #if defined(ARM_FLOAT16_SUPPORTED)
 
+void arm_radix8_butterfly_f16(
+  float16_t * pSrc,
+  uint16_t fftLen,
+  const float16_t * pCoef,
+  uint16_t twidCoefModifier);
 
 /* ----------------------------------------------------------------------
  * Internal helper function used by the FFTs
@@ -44,7 +52,7 @@
   return        none
 */
 
-void arm_radix8_butterfly_f16(
+ARM_DSP_ATTRIBUTE void arm_radix8_butterfly_f16(
   float16_t * pSrc,
   uint16_t fftLen,
   const float16_t * pCoef,

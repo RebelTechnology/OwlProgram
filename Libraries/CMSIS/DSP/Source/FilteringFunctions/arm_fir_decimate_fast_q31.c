@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_fir_decimate_fast_q31.c
  * Description:  Fast Q31 FIR Decimator
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -43,7 +46,6 @@
   @param[in]     pSrc       points to the block of input data
   @param[out]    pDst       points to the block of output data
   @param[in]     blockSize  number of samples to process
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    This function is optimized for speed at the expense of fixed-point precision and overflow protection.
@@ -59,7 +61,7 @@
                    Use function \ref arm_fir_decimate_init_q31() to initialize the filter structure.
  */
 
-void arm_fir_decimate_fast_q31(
+ARM_DSP_ATTRIBUTE void arm_fir_decimate_fast_q31(
   const arm_fir_decimate_instance_q31 * S,
   const q31_t * pSrc,
         q31_t * pDst,

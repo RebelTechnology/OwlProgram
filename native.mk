@@ -23,6 +23,8 @@ CPPFLAGS    += -I$(BUILDSOURCE)
 CPPFLAGS    += -I$(TESTPATCHES)
 CPPFLAGS    += -I$(DSPINC)
 CPPFLAGS    += -ILibraries -ILibraries/KissFFT
+# DaisySP headers use bare size_t, which newer clang no longer provides transitively
+CPPFLAGS    += -include stddef.h
 CPPFLAGS    += -D__PROGRAM_START=1 # prevent compilation of __cmsis_start function
 CPPFLAGS    += "-DPATCHNAME=\"$(PATCHNAME)\""
 CXXFLAGS     = -std=gnu++17

@@ -1,6 +1,6 @@
 /******************************************************************************
  * @file     none.h
- * @brief    Intrinsincs when no DSP extension available
+ * @brief    Intrinsics when no DSP extension available
  * @version  V1.9.0
  * @date     20. July 2020
  ******************************************************************************/
@@ -34,8 +34,8 @@ of intrinsics.
 
 */
  
-#ifndef _NONE_H_
-#define _NONE_H_
+#ifndef NONE_H_
+#define NONE_H_
 
 #include "arm_math_types.h"
 
@@ -72,7 +72,7 @@ compiler file in Core or Core_A would not make sense.
         count += 1U;
         mask = mask >> 1U;
       }
-      return count;
+      return ((uint8_t)count);
     }
 
   __STATIC_FORCEINLINE int32_t __SSAT(int32_t val, uint32_t sat)
@@ -132,46 +132,57 @@ __STATIC_FORCEINLINE uint32_t __ROR(uint32_t op1, uint32_t op2)
 
 /**
    * @brief Clips Q63 to Q31 values.
+   * @param[in] x Value to saturate to the signed 32-bit range.
+   * @return The saturated value, without fractional rescaling.
    */
   __STATIC_FORCEINLINE q31_t clip_q63_to_q31(
   q63_t x)
   {
-    return ((q31_t) (x >> 32) != ((q31_t) x >> 31)) ?
-      ((0x7FFFFFFF ^ ((q31_t) (x >> 63)))) : (q31_t) x;
-  }
-
-  /**
-   * @brief Clips Q63 to Q15 values.
-   */
-  __STATIC_FORCEINLINE q15_t clip_q63_to_q15(
-  q63_t x)
-  {
-    return ((q31_t) (x >> 32) != ((q31_t) x >> 31)) ?
-      ((0x7FFF ^ ((q15_t) (x >> 63)))) : (q15_t) (x >> 15);
-  }
-
-  /**
-   * @brief Clips Q31 to Q7 values.
-   */
-  __STATIC_FORCEINLINE q7_t clip_q31_to_q7(
-  q31_t x)
-  {
-    return ((q31_t) (x >> 24) != ((q31_t) x >> 23)) ?
-      ((0x7F ^ ((q7_t) (x >> 31)))) : (q7_t) x;
+    /* The saturation logic below used to rely on right shifts of a signed
+       (possibly negative) value, whose result is implementation-defined
+       (C99 6.5.7/5) and is flagged by static analysers. The equivalent
+       range check is fully defined and keeps the same behaviour. */
+    if (x > (q63_t) Q31_MAX)
+    {
+      return Q31_MAX;
+    }
+    else if (x < (q63_t) Q31_MIN)
+    {
+      return Q31_MIN;
+    }
+    else
+    {
+      return (q31_t) x;
+    }
   }
 
   /**
    * @brief Clips Q31 to Q15 values.
+   * @param[in] x Value to saturate to the signed 16-bit range.
+   * @return The saturated value, without fractional rescaling.
    */
   __STATIC_FORCEINLINE q15_t clip_q31_to_q15(
   q31_t x)
   {
-    return ((q31_t) (x >> 16) != ((q31_t) x >> 15)) ?
-      ((0x7FFF ^ ((q15_t) (x >> 31)))) : (q15_t) x;
+    if (x > (q31_t) Q15_MAX)
+    {
+      return Q15_MAX;
+    }
+    else if (x < (q31_t) Q15_MIN)
+    {
+      return Q15_MIN;
+    }
+    else
+    {
+      return (q15_t) x;
+    }
   }
 
   /**
-   * @brief Multiplies 32 X 64 and returns 32 bit result in 2.30 format.
+   * @brief Multiplies Q63 by Q31 and returns a result in 2.62 format.
+   * @param[in] x Multiplicand in 1.63 format.
+   * @param[in] y Multiplicand in 1.31 format.
+   * @return The 64-bit product after discarding the lowest 32 bits.
    */
   __STATIC_FORCEINLINE q63_t mult32x64(
   q63_t x,
@@ -499,10 +510,7 @@ __STATIC_FORCEINLINE uint32_t __ROR(uint32_t op1, uint32_t op2)
   uint32_t y,
   uint64_t sum)
   {
-/*  return (sum + ((q15_t) (x >> 16) * (q15_t) (y >> 16)) + ((q15_t) x * (q15_t) y)); */
-    return ((uint64_t)(((((q31_t)x << 16) >> 16) * (((q31_t)y << 16) >> 16)) +
-                       ((((q31_t)x      ) >> 16) * (((q31_t)y      ) >> 16)) +
-                       ( ((q63_t)sum    )                                  )   ));
+      return (sum + ((q15_t) (x >> 16) * (q15_t) (y >> 16)) + ((q15_t) x * (q15_t) y));
   }
 
 
@@ -514,10 +522,7 @@ __STATIC_FORCEINLINE uint32_t __ROR(uint32_t op1, uint32_t op2)
   uint32_t y,
   uint64_t sum)
   {
-/*  return (sum + ((q15_t) (x >> 16) * (q15_t) y)) + ((q15_t) x * (q15_t) (y >> 16)); */
-    return ((uint64_t)(((((q31_t)x << 16) >> 16) * (((q31_t)y      ) >> 16)) +
-                       ((((q31_t)x      ) >> 16) * (((q31_t)y << 16) >> 16)) +
-                       ( ((q63_t)sum    )                                  )   ));
+       return (sum + ((q15_t) (x >> 16) * (q15_t) y)) + ((q15_t) x * (q15_t) (y >> 16)); 
   }
 
 

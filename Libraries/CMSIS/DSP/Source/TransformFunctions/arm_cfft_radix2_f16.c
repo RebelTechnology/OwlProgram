@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_cfft_radix2_f16.c
  * Description:  Radix-2 Decimation in Frequency CFFT & CIFFT Floating point processing function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,18 +26,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/transform_functions_f16.h"
 
+/**
+ * @defgroup ComplexFFTDeprecated Deprecated Complex FFT functions
+ */
+
 #if defined(ARM_FLOAT16_SUPPORTED)
 
-void arm_radix2_butterfly_f16(
+ARM_DSP_ATTRIBUTE void arm_radix2_butterfly_f16(
         float16_t * pSrc,
         uint32_t fftLen,
   const float16_t * pCoef,
         uint16_t twidCoefModifier);
 
-void arm_radix2_butterfly_inverse_f16(
+ARM_DSP_ATTRIBUTE void arm_radix2_butterfly_inverse_f16(
         float16_t * pSrc,
         uint32_t fftLen,
   const float16_t * pCoef,
@@ -50,11 +57,11 @@ extern void arm_bitreversal_f16(
   const uint16_t * pBitRevTab);
 
 /**
-  @ingroup groupTransforms
+  @ingroup ComplexFFT
  */
 
 /**
-  @addtogroup ComplexFFT
+  @addtogroup ComplexFFTDeprecated
   @{
  */
 
@@ -63,10 +70,9 @@ extern void arm_bitreversal_f16(
   @deprecated    Do not use this function. It has been superseded by \ref arm_cfft_f16 and will be removed in the future
   @param[in]     S    points to an instance of the floating-point Radix-2 CFFT/CIFFT structure
   @param[in,out] pSrc points to the complex data buffer of size <code>2*fftLen</code>. Processing occurs in-place
-  @return        none
  */
 
-void arm_cfft_radix2_f16(
+ARM_DSP_ATTRIBUTE void arm_cfft_radix2_f16(
 const arm_cfft_radix2_instance_f16 * S,
       float16_t * pSrc)
 {
@@ -94,7 +100,7 @@ const arm_cfft_radix2_instance_f16 * S,
 
 
 /**
-  @} end of ComplexFFT group
+  @} end of ComplexFFTDeprecated group
  */
 
 
@@ -109,10 +115,9 @@ const arm_cfft_radix2_instance_f16 * S,
 * @param[in]      fftLen           length of the FFT.
 * @param[in]      *pCoef           points to the twiddle coefficient buffer.
 * @param[in]      twidCoefModifier twiddle coefficient modifier that supports different size FFTs with the same twiddle factor table.
-* @return none.
 */
 
-void arm_radix2_butterfly_f16(
+ARM_DSP_ATTRIBUTE void arm_radix2_butterfly_f16(
 float16_t * pSrc,
 uint32_t fftLen,
 const float16_t * pCoef,
@@ -280,7 +285,7 @@ uint16_t twidCoefModifier)
 }
 
 
-void arm_radix2_butterfly_inverse_f16(
+ARM_DSP_ATTRIBUTE void arm_radix2_butterfly_inverse_f16(
 float16_t * pSrc,
 uint32_t fftLen,
 const float16_t * pCoef,

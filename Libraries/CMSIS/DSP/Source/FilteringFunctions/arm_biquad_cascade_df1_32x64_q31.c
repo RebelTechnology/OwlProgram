@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_biquad_cascade_df1_32x64_q31.c
  * Description:  High precision Q31 Biquad cascade filter processing function
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -157,7 +160,6 @@
   @param[in]     pSrc      points to the block of input data
   @param[out]    pDst      points to the block of output data
   @param[in]     blockSize number of samples to process
-  @return        none
 
   @par           Details
                    The function is implemented using an internal 64-bit accumulator.
@@ -281,7 +283,7 @@ static void arm_biquad_cas_df1_32x64_q31_scalar(const arm_biquad_cas_df1_32x64_i
 
 }
 
-void arm_biquad_cas_df1_32x64_q31(
+ARM_DSP_ATTRIBUTE void arm_biquad_cas_df1_32x64_q31(
   const arm_biquad_cas_df1_32x64_ins_q31 * S,
   const q31_t * pSrc,
         q31_t * pDst,
@@ -296,7 +298,7 @@ void arm_biquad_cas_df1_32x64_q31(
     q31_t     b0, b1, b2, a1, a2;   /*  Filter coefficients           */
     int32_t   shift = (int32_t) S->postShift + 1;   /*  Shift to be applied to the output */
     uint32_t  sample, stage = S->numStages; /*  loop counters                     */
-    q31x4_t vecCoef, vecIn;
+    q31x4_t vecCoef = { 0 }, vecIn;
     q63_t     acc;
 
     if (blockSize <= 3)
@@ -355,7 +357,7 @@ void arm_biquad_cas_df1_32x64_q31(
               vecIn = vld1q(pIn1);
               pIn1 += 1;
               Yn1 = vmlaldavaq(Yn1, vecIn, vecCoef);
-              Yn1 = asrl(Yn1, -shift);
+              Yn1 = lsll(Yn1, shift);
               /*
                * Store the output in the destination buffer in 1.31 format.
                */
@@ -377,7 +379,7 @@ void arm_biquad_cas_df1_32x64_q31(
               Yn1 = vmlaldavaq(Yn1, vecIn0, vecCoef);
               vecIn = vld1q(pIn1);
               pIn1 += 1;
-              Yn1 = asrl(Yn1, -shift);
+              Yn1 = lsll(Yn1, shift);
               /*
                * Store the output in the destination buffer in 1.31 format.
                */
@@ -390,7 +392,7 @@ void arm_biquad_cas_df1_32x64_q31(
               Yn1 = vmlaldavaq(Yn1, vecIn1, vecCoef);
               vecIn0 = vld1q(pIn1);
               pIn1 += 1;
-              Yn1 = asrl(Yn1, -shift);
+              Yn1 = lsll(Yn1, shift);
               *pOut++ = (q31_t) (Yn1 >> 32);
   
               acc = mult32x64(Yn1, a1);
@@ -400,7 +402,7 @@ void arm_biquad_cas_df1_32x64_q31(
               Yn1 = vmlaldavaq(Yn1, vecIn2, vecCoef);
               vecIn1 = vld1q(pIn1);
               pIn1 += 1;
-              Yn1 = asrl(Yn1, -shift);
+              Yn1 = lsll(Yn1, shift);
               *pOut++ = (q31_t) (Yn1 >> 32);
   
               acc = mult32x64(Yn1, a1);
@@ -410,7 +412,7 @@ void arm_biquad_cas_df1_32x64_q31(
               Yn1 = vmlaldavaq(Yn1, vecIn, vecCoef);
               vecIn2 = vld1q(pIn1);
               pIn1 += 1;
-              Yn1 = asrl(Yn1, -shift);
+              Yn1 = lsll(Yn1, shift);
               *pOut++ = (q31_t) (Yn1 >> 32);
               /*
                * Decrement the loop counter
@@ -434,7 +436,7 @@ void arm_biquad_cas_df1_32x64_q31(
               Yn2 = Yn1;
               Yn1 = acc;
               Yn1 = vmlaldavaq(Yn1, vecIn0, vecCoef);
-              Yn1 = asrl(Yn1, -shift);
+              Yn1 = lsll(Yn1, shift);
               *pOut++ = (q31_t) (Yn1 >> 32);
               /*
                * save input state
@@ -450,7 +452,7 @@ void arm_biquad_cas_df1_32x64_q31(
               Yn2 = Yn1;
               Yn1 = acc;
               Yn1 = vmlaldavaq(Yn1, vecIn0, vecCoef);
-              Yn1 = asrl(Yn1, -shift);
+              Yn1 = lsll(Yn1, shift);
               *pOut++ = (q31_t) (Yn1 >> 32);
   
               acc = mult32x64(Yn1, a1);
@@ -458,7 +460,7 @@ void arm_biquad_cas_df1_32x64_q31(
               Yn2 = Yn1;
               Yn1 = acc;
               Yn1 = vmlaldavaq(Yn1, vecIn1, vecCoef);
-              Yn1 = asrl(Yn1, -shift);
+              Yn1 = lsll(Yn1, shift);
               *pOut++ = (q31_t) (Yn1 >> 32);
               /*
                * save input state
@@ -474,7 +476,7 @@ void arm_biquad_cas_df1_32x64_q31(
               Yn2 = Yn1;
               Yn1 = acc;
               Yn1 = vmlaldavaq(Yn1, vecIn0, vecCoef);
-              Yn1 = asrl(Yn1, -shift);
+              Yn1 = lsll(Yn1, shift);
               *pOut++ = (q31_t) (Yn1 >> 32);
   
               acc = mult32x64(Yn1, a1);
@@ -482,7 +484,7 @@ void arm_biquad_cas_df1_32x64_q31(
               Yn2 = Yn1;
               Yn1 = acc;
               Yn1 = vmlaldavaq(Yn1, vecIn1, vecCoef);
-              Yn1 = asrl(Yn1, -shift);
+              Yn1 = lsll(Yn1, shift);
               *pOut++ = (q31_t) (Yn1 >> 32);
   
               acc = mult32x64(Yn1, a1);
@@ -490,7 +492,7 @@ void arm_biquad_cas_df1_32x64_q31(
               Yn2 = Yn1;
               Yn1 = acc;
               Yn1 = vmlaldavaq(Yn1, vecIn2, vecCoef);
-              Yn1 = asrl(Yn1, -shift);
+              Yn1 = lsll(Yn1, shift);
               *pOut++ = (q31_t) (Yn1 >> 32);
               /*
                * save input state
@@ -520,7 +522,7 @@ void arm_biquad_cas_df1_32x64_q31(
     }
 }
 #else
-void arm_biquad_cas_df1_32x64_q31(
+ARM_DSP_ATTRIBUTE void arm_biquad_cas_df1_32x64_q31(
   const arm_biquad_cas_df1_32x64_ins_q31 * S,
   const q31_t * pSrc,
         q31_t * pDst,

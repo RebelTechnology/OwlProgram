@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_vec_mult_q15.c
  * Description:  Q15 matrix and vector multiplication
@@ -9,6 +9,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -26,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
 
@@ -50,7 +53,7 @@
 
 #include "arm_helium_utils.h"
 
-void arm_mat_vec_mult_q15(
+ARM_DSP_ATTRIBUTE void arm_mat_vec_mult_q15(
     const arm_matrix_instance_q15 * pSrcMat,
     const q15_t     *pSrcVec,
     q15_t           *pDstVec)
@@ -266,7 +269,71 @@ void arm_mat_vec_mult_q15(
 }
 
 #else
-void arm_mat_vec_mult_q15(const arm_matrix_instance_q15 *pSrcMat, const q15_t *pVec, q15_t *pDst)
+
+#if defined(ARM_MATH_NEON)
+
+#define TMP_DEFINE_AND_INIT(TMP) \
+   int32x4_t TMP##1 = vdupq_n_s32(0); 
+   
+#define BIG_TMP_DEFINE_AND_INIT(TMP) \
+   int64x2_t TMP##1 = vdupq_n_s64(0); 
+
+#define REDUCE(sum,accum)                                          \
+    bigtmp1 = vqaddq_s64(accum.val[0],accum.val[1]);               \
+    bigtmp1 = vqaddq_s64(bigtmp1,accum.val[2]);                    \
+    bigtmp1 = vqaddq_s64(bigtmp1,accum.val[3]);                    \
+    sum = vgetq_lane_s64(bigtmp1,0) +   vgetq_lane_s64(bigtmp1,1);
+
+
+#define MAT_SCALAR_DT q15_t 
+#define VEC_SCALAR_DT q15_t 
+#define VECTOR_ACC struct { \
+    int64x2_t val[4];       \
+}
+
+#define VECTOR_DT int16x8_t
+#define SCALAR_ACC int64_t
+#define HALF_VECTOR_ACC int16x4_t
+#define NBLANE 8
+#define NBLANE_SHIFT 3
+
+#define VECTOR_ACC_INIT(acc)      \
+    acc.val[0] = vdupq_n_s64(0) ; \
+    acc.val[1] = vdupq_n_s64(0) ; \
+    acc.val[2] = vdupq_n_s64(0) ; \
+    acc.val[3] = vdupq_n_s64(0) ;
+
+#define SCALAR_ACC_INIT(acc) \
+    acc = 0
+  
+#define VEC_LOAD(v,p) \
+    v = vld1q_s16((p))
+
+
+#define VMAC(ACC,VA,VB)                                               \
+   tmp1 = vmull_s16(vget_low_s16(VA),vget_low_s16(VB));                \
+   ACC.val[0] = vaddq_s64(ACC.val[0],vmovl_s32(vget_low_s32(tmp1)));   \
+   ACC.val[1] = vaddq_s64(ACC.val[1],vmovl_s32(vget_high_s32(tmp1)));  \
+   tmp1 = vmull_s16(vget_high_s16(VA),vget_high_s16(VB));              \
+   ACC.val[2] = vaddq_s64(ACC.val[2],vmovl_s32(vget_low_s32(tmp1)));   \
+   ACC.val[3] = vaddq_s64(ACC.val[3],vmovl_s32(vget_high_s32(tmp1)));
+
+
+
+#define SCALAR_MAC(ACC,MAT,VEC) \
+    ACC = ACC + (int64_t)(MAT) * (int64_t)(VEC)
+
+#define STORE_SCALAR_ACC(DST,ACC) \
+  DST = __SSAT(ACC>>15,16)
+
+#define FUNCNAME arm_mat_vec_mult_q15
+#define MATRIX_TYPE arm_matrix_instance_q15
+
+#include "_arm_mat_vec_mult_neon.c"
+
+
+#else
+ARM_DSP_ATTRIBUTE void arm_mat_vec_mult_q15(const arm_matrix_instance_q15 *pSrcMat, const q15_t *pVec, q15_t *pDst)
 {
     uint32_t numRows = pSrcMat->numRows;
     uint32_t numCols = pSrcMat->numCols;
@@ -311,16 +378,16 @@ void arm_mat_vec_mult_q15(const arm_matrix_instance_q15 *pSrcMat, const q15_t *p
         // Main loop: matrix-vector multiplication
         while (colCnt > 0u) {
             // Read 2 values from vector
-            vecData = read_q15x2_ia ((q15_t **) &pInVec);
+            vecData = read_q15x2_ia (&pInVec);
 
             // Read 8 values from the matrix - 2 values from each of 4 rows, and do multiply accumulate
-            matData =  read_q15x2_ia ((q15_t **) &pInA1);
+            matData =  read_q15x2_ia (&pInA1);
             sum1 = __SMLALD(matData, vecData, sum1);
-            matData = read_q15x2_ia ((q15_t **) &pInA2);
+            matData = read_q15x2_ia (&pInA2);
             sum2 = __SMLALD(matData, vecData, sum2);
-            matData = read_q15x2_ia ((q15_t **) &pInA3);
+            matData = read_q15x2_ia (&pInA3);
             sum3 = __SMLALD(matData, vecData, sum3);
-            matData = read_q15x2_ia ((q15_t **) &pInA4);
+            matData = read_q15x2_ia (&pInA4);
             sum4 = __SMLALD(matData, vecData, sum4);
 
             // Decrement the loop counter
@@ -361,10 +428,10 @@ void arm_mat_vec_mult_q15(const arm_matrix_instance_q15 *pSrcMat, const q15_t *p
         colCnt = numCols >> 2;
 
         while (colCnt > 0) {
-            vecData = read_q15x2_ia ((q15_t **) &pInVec);
-            vecData2 = read_q15x2_ia ((q15_t **) &pInVec);
-            matData = read_q15x2_ia ((q15_t **) &pInA1);
-            matData2 = read_q15x2_ia ((q15_t **) &pInA1);
+            vecData = read_q15x2_ia (&pInVec);
+            vecData2 = read_q15x2_ia (&pInVec);
+            matData = read_q15x2_ia (&pInA1);
+            matData2 = read_q15x2_ia (&pInA1);
             sum = __SMLALD(matData, vecData, sum);
             sum = __SMLALD(matData2, vecData2, sum);
             colCnt--;
@@ -381,6 +448,7 @@ void arm_mat_vec_mult_q15(const arm_matrix_instance_q15 *pSrcMat, const q15_t *p
         row--;
     }
 }
+#endif /* ARM_MATH_NEON */
 #endif /* defined(ARM_MATH_MVEI) */
 
 /**

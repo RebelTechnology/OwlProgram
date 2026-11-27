@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_logsumexp_f16.c
  * Description:  LogSumExp
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions_f16.h"
 
@@ -64,7 +67,7 @@
  */
 
 
-float16_t arm_logsumexp_dot_prod_f16(const float16_t * pSrcA,
+ARM_DSP_ATTRIBUTE float16_t arm_logsumexp_dot_prod_f16(const float16_t * pSrcA,
   const float16_t * pSrcB,
   uint32_t blockSize,
   float16_t *pTmpBuffer)

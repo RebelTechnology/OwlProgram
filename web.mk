@@ -21,9 +21,18 @@ CPPFLAGS += -ILibraries -ILibraries/KissFFT -DHV_SIMD_NONE
 CPPFLAGS += -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
 CPPFLAGS += -Wno-warn-absolute-paths
 CPPFLAGS += -Wno-unknown-warning-option
-CPPFLAGS += --memory-init-file 0 # don't create separate memory init file .mem
-CPPFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_getParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus','_WEB_getButtons','_WEB_setButton', '_WEB_processMidi', '_malloc']"
-CPPFLAGS += -s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']"
+# emscripten 6 / newer clang no longer leaks size_t transitively via <stdint.h>;
+# DaisySP headers (allpass.h etc.) use bare size_t. Force-include <stddef.h>
+# (C-compatible, unlike <cstddef>, so it works for .c and .cpp TUs alike).
+# Proper fix is an upstream DaisySP submodule bump (axis 7).
+CPPFLAGS += -include stddef.h
+EMLDFLAGS += -s EXPORTED_FUNCTIONS="['_WEB_setup','_WEB_setParameter','_WEB_getParameter','_WEB_processBlock','_WEB_getPatchName','_WEB_getParameterName','_WEB_getMessage','_WEB_getStatus','_WEB_getButtons','_WEB_setButton', '_WEB_processMidi', '_malloc']"
+# emscripten >=3.1: EXTRA_EXPORTED_RUNTIME_METHODS was removed; the runtime
+# methods go in EXPORTED_RUNTIME_METHODS (no "EXTRA_" prefix). emscripten >=3.1
+# also stopped exporting HEAP* typed-array views by default, but OWL's
+# WebSource/webaudio.js accesses HEAPF32/HEAP32 directly — export them so the
+# web player works (not just cwrap).
+EMLDFLAGS += -s "EXPORTED_RUNTIME_METHODS=['cwrap','HEAPF32','HEAP32','HEAPU8']"
 CPPFLAGS += "-DPATCHNAME=\"$(PATCHNAME)\""
 
 include $(BUILDROOT)/sources.mk
@@ -40,11 +49,11 @@ EMCC_SRC := $(filter-out $(PATCHSOURCE)/$(MAXIMILIAN).cpp, $(EMCC_SRC))
 endif
 WEBDIR   = $(BUILD)/web
 
-CPPFLAGS += -s WASM=0 # disables wasm output
+EMLDFLAGS += -s WASM=0 # disables wasm output
 
 CFLAGS   = -std=gnu11
 CXXFLAGS = -std=gnu++17
-LDFLAGS  = $(CPPFLAGS)
+LDFLAGS  = $(CPPFLAGS) $(EMLDFLAGS)
 
 EMCC_OBJS = $(addprefix $(WEBDIR)/, $(notdir $(CPP_SRC:.cpp=.o)))
 EMCC_OBJS += $(addprefix $(WEBDIR)/, $(notdir $(C_SRC:.c=.o)))
@@ -88,7 +97,7 @@ vpath %.cpp WebSource
 vpath %.c Libraries/KissFFT
 
 ifeq ($(CONFIG),Debug)
-CPPFLAGS += -s ASSERTIONS=1
+EMLDFLAGS += -s ASSERTIONS=1
 endif
 
 PHONY: libs web minify
@@ -97,8 +106,11 @@ PHONY: libs web minify
 #CLOSURE = java -jar Tools/node_modules/google-closure-compiler/compiler.jar --language_in=ECMASCRIPT5
 UGLIFYJS = Tools/node_modules/uglify-js/bin/uglifyjs
 
+# emscripten 6: link the final module with em++ (not emcc) so the C++ runtime
+# (operator new/delete, __cxa_guard_*) is pulled in — emcc no longer links it by
+# default for C++ objects.
 $(WEBDIR)/$(TARGET).js: $(PATCH_OBJS)
-	$(EMCC) $(LDFLAGS) $(PATCH_OBJS) -o $(WEBDIR)/$(TARGET).js Libraries/libowlweb.a -Wl,--whole-archive Libraries/libdaisyspweb.a -Wl,--no-whole-archive
+	em++ $(LDFLAGS) $(PATCH_OBJS) -o $(WEBDIR)/$(TARGET).js Libraries/libowlweb.a -Wl,--whole-archive Libraries/libdaisyspweb.a -Wl,--no-whole-archive
 	@cp WebSource/*.js WebSource/*.html $(WEBDIR)
 
 $(WEBDIR)/%.min.js: $(WEBDIR)/%.js

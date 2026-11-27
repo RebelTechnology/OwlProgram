@@ -1,3 +1,4 @@
+﻿
 
 /* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
@@ -26,6 +27,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/distance_functions.h"
 #include <limits.h>
@@ -51,7 +54,7 @@ __STATIC_INLINE float32_t rel_entr(float32_t x, float32_t y)
 #include "arm_helium_utils.h"
 #include "arm_vec_math.h"
 
-float32_t arm_jensenshannon_distance_f32(const float32_t *pA,const float32_t *pB, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float32_t arm_jensenshannon_distance_f32(const float32_t *pA,const float32_t *pB, uint32_t blockSize)
 {
     uint32_t        blkCnt;
     float32_t       tmp;
@@ -110,7 +113,7 @@ float32_t arm_jensenshannon_distance_f32(const float32_t *pA,const float32_t *pB
 
 #else
 
-#if defined(ARM_MATH_NEON)
+#if defined(ARM_MATH_NEON) 
 
 #include "NEMath.h"
 
@@ -136,7 +139,7 @@ float32_t arm_jensenshannon_distance_f32(const float32_t *pA,const float32_t *pB
  */
 
 
-float32_t arm_jensenshannon_distance_f32(const float32_t *pA,const float32_t *pB, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float32_t arm_jensenshannon_distance_f32(const float32_t *pA,const float32_t *pB, uint32_t blockSize)
 {
     float32_t accum, result, tmp,a,b;
     uint32_t blkCnt;
@@ -218,7 +221,7 @@ float32_t arm_jensenshannon_distance_f32(const float32_t *pA,const float32_t *pB
  */
 
 
-float32_t arm_jensenshannon_distance_f32(const float32_t *pA,const float32_t *pB, uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float32_t arm_jensenshannon_distance_f32(const float32_t *pA,const float32_t *pB, uint32_t blockSize)
 {
     float32_t left, right,sum, result, tmp;
     uint32_t i;

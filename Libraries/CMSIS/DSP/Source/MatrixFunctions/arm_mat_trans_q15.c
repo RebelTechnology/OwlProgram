@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_trans_q15.c
  * Description:  Q15 matrix transpose
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
 
@@ -52,7 +55,7 @@
 
 
 
-arm_status arm_mat_trans_q15(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_trans_q15(
   const arm_matrix_instance_q15 * pSrc,
         arm_matrix_instance_q15 * pDst)
 {
@@ -96,7 +99,49 @@ arm_status arm_mat_trans_q15(
   return (status);
 }
 #else
-arm_status arm_mat_trans_q15(
+
+#if defined(ARM_MATH_NEON)
+
+#define BLOCK_ROWS 8
+#define BLOCK_ROWS_SHIFT 3
+#define LANE 8
+#define LANE_SHIFT 3
+
+#include "_arm_mat_trans_neon.c"
+
+
+ARM_DSP_ATTRIBUTE arm_status arm_mat_trans_q15(
+  const arm_matrix_instance_q15 * pSrc,
+        arm_matrix_instance_q15 * pDst)
+{
+  ARM_MAT_TRANS_NEON_INIT_U16
+
+#ifdef ARM_MATH_MATRIX_CHECK
+
+  /* Check for matrix mismatch condition */
+  if ((pSrc->numRows != pDst->numCols) || (pSrc->numCols != pDst->numRows))
+  {
+    /* Set status as ARM_MATH_SIZE_MISMATCH */
+    status = ARM_MATH_SIZE_MISMATCH;
+  }
+  else
+#endif /*    #ifdef ARM_MATH_MATRIX_CHECK    */
+
+  {
+    ARM_MAT_TRANS_NEON_U16
+
+    /* Set status as ARM_MATH_SUCCESS */
+    status = ARM_MATH_SUCCESS;
+  }
+
+  /* Return to application */
+  return (status);
+}
+
+#include "_arm_mat_trans_undef_neon.c"
+
+#else
+ARM_DSP_ATTRIBUTE arm_status arm_mat_trans_q15(
   const arm_matrix_instance_q15 * pSrc,
         arm_matrix_instance_q15 * pDst)
 {
@@ -140,7 +185,7 @@ arm_status arm_mat_trans_q15(
       while (col > 0U)        /* column loop */
       {
         /* Read two elements from row */
-        in = read_q15x2_ia ((q15_t **) &pIn);
+        in = read_q15x2_ia (&pIn);
 
         /* Unpack and store one element in  destination */
 #ifndef ARM_MATH_BIG_ENDIAN
@@ -163,7 +208,7 @@ arm_status arm_mat_trans_q15(
         pOut += nRows;
 
         /* Read two elements from row */
-        in = read_q15x2_ia ((q15_t **) &pIn);
+        in = read_q15x2_ia (&pIn);
 
         /* Unpack and store one element in destination */
 #ifndef ARM_MATH_BIG_ENDIAN
@@ -226,6 +271,7 @@ arm_status arm_mat_trans_q15(
   /* Return to application */
   return (status);
 }
+#endif /* #if defined(ARM_MATH_NEON)*/
 #endif /* defined(ARM_MATH_MVEI) */
 
 /**

@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_add_f16.c
  * Description:  Floating-point matrix addition
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions_f16.h"
 
@@ -54,7 +57,7 @@
 
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
 
-arm_status arm_mat_add_f16(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_add_f16(
   const arm_matrix_instance_f16 * pSrcA,
   const arm_matrix_instance_f16 * pSrcB,
   arm_matrix_instance_f16 * pDst)
@@ -62,7 +65,7 @@ arm_status arm_mat_add_f16(
     arm_status status;  
     uint32_t  numSamples;       /* total number of elements in the matrix  */
     float16_t *pDataA, *pDataB, *pDataDst;
-    f16x8_t vecA, vecB, vecDst;
+    f16x8_t vecA, vecB, vecDst = { 0 };
     float16_t const *pSrcAVec;
     float16_t const *pSrcBVec;
     uint32_t  blkCnt;           /* loop counters */
@@ -125,7 +128,7 @@ arm_status arm_mat_add_f16(
 }
 #else
 
-arm_status arm_mat_add_f16(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_add_f16(
   const arm_matrix_instance_f16 * pSrcA,
   const arm_matrix_instance_f16 * pSrcB,
         arm_matrix_instance_f16 * pDst)

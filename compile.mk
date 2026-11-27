@@ -43,7 +43,13 @@ LDFLAGS += -flto
 CXXFLAGS = -fno-rtti
 CXXFLAGS += -fno-exceptions
 ifdef HEAVY
-CPPFLAGS    += -D__unix__ -DHV_SIMD_NONE
+# Generated Heavy sources (mainline hvcc): force the scalar path. HvUtils.h only
+# forces HV_SIMD_NONE=1 if some HV_SIMD_* macro is already truthy; otherwise it
+# auto-detects from __ARM_NEON__/__SSE__ and leaves the scalar helpers out,
+# breaking the Cortex-M build (hv_shl_i/hv_rint_f undeclared). Define it =1.
+# NB: do NOT define __unix__ here — on ARM it skews HvUtils' host detection.
+CPPFLAGS    += -DHV_SIMD_NONE=1
+CPPFLAGS    += -DHV_BARE_METAL # no OS: skip HvUtils' platform detection warning
 endif
 ifdef FAUST
 ifneq (,$(findstring soundfile,$(FAUSTOPTS)))
@@ -80,7 +86,7 @@ DEF_FLAGS +=  -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
 DEF_FLAGS += "-DPATCHNAME=\"$(PATCHNAME)\""
 # DEF_FLAGS = -DSTM32F745xx -DARM_MATH_CM7 -D__FPU_PRESENT=1 -D__FPU_USED=1U
 INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(PERIPH_FILE)/inc -I$(SOURCE)
-INC_FLAGS += -I$(CMSIS)/Include -I$(CMSIS)/Core/Include -I$(CMSIS)/DSP/Include
+INC_FLAGS += -I$(CMSIS)/Include -I$(CMSIS)/Core/Include -I$(CMSIS)/DSP/Include -I$(CMSIS)/DSP/PrivateInclude
 CPPFLAGS += $(ARCH_FLAGS) $(INC_FLAGS) $(DEF_FLAGS)
 CPPFLAGS += -D__PROGRAM_START=1 # prevent compilation of __cmsis_start function
 CFLAGS   += -std=gnu11
@@ -92,7 +98,14 @@ CPPFLAGS += -I$(BUILDSOURCE)
 CPPFLAGS += -I$(TESTPATCHES)
 CPPFLAGS += -DARM_CORTEX
 CPPFLAGS += -DEXTERNAL_SRAM
-CPPFLAGS += -nostdlib -nostartfiles -fno-builtin -ffreestanding
+# GCC 13: -ffreestanding forces __STDC_HOSTED__=0, which makes libstdc++'s
+# bits/requires_hosted.h hard-error on <cmath>/<algorithm> (and pull the tr1
+# special-function templates referencing the absent std::__throw_domain_error).
+# Neither -D_GLIBCXX_HOSTED=1 nor -fhosted override it. Dropping -ffreestanding
+# is safe: -nostdlib -nostartfiles -fno-builtin still produce the freestanding
+# binary the linker needs; -ffreestanding only set __STDC_HOSTED__ and main()
+# special-casing, neither of which this RAM-resident patch relies on.
+CPPFLAGS += -nostdlib -nostartfiles -fno-builtin
 CPPFLAGS += -mtune=cortex-m4
 # CPPFLAGS += -mtune=cortex-m7
 CPPFLAGS += -fpic
@@ -102,6 +115,10 @@ CPPFLAGS += -ffunction-sections
 CPPFLAGS += -mno-unaligned-access
 CPPFLAGS += -fno-omit-frame-pointer
 CPPFLAGS += -flto
+# GCC 13: the tr1 special-function math templates reference
+# std::__throw_domain_error, absent under -fno-exceptions. Disable the C++
+# special math functions so <cmath> does not pull them in.
+CPPFLAGS += -D_GLIBCXX_USE_STD_SPEC_FUNCS=0
 # CPPFLAGS += -munaligned-access
 # CPPFLAGS += -mlong-calls
 # CPPFLAGS += -mpic-data-is-text-relative

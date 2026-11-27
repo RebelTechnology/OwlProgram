@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_absmin_f64.c
  * Description:  Minimum value of absolute values of a floating-point vector
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions.h"
 
@@ -43,9 +46,8 @@
   @param[in]     blockSize  number of samples in input vector
   @param[out]    pResult    minimum value returned here
   @param[out]    pIndex     index of minimum value returned here
-  @return        none
  */
-void arm_absmin_f64(
+ARM_DSP_ATTRIBUTE void arm_absmin_f64(
   const float64_t * pSrc,
         uint32_t blockSize,
         float64_t * pResult,
@@ -57,7 +59,7 @@ void arm_absmin_f64(
   /* Initialise index value to zero. */
   outIndex = 0U;
 
-  /* Load first input value that act as reference value for comparision */
+  /* Load first input value that act as reference value for comparison */
   out = fabs(*pSrc++);
 
   /* Initialize blkCnt with number of samples */

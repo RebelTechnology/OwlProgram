@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mfcc_f16.c
  * Description:  MFCC function for the f16 version
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 
 #include "dsp/transform_functions_f16.h"
@@ -52,7 +55,7 @@
 
 
 /**
-  @addtogroup MFCC
+  @addtogroup MFCCF16
   @{
  */
 
@@ -63,26 +66,31 @@
   @param[out]     pDst  points to the output MFCC values
   @param[inout]     pTmp  points to a temporary buffer of complex
 
-  @return        none
-
   @par           Description
                    The number of input samples if the FFT length used
                    when initializing the instance data structure.
 
-                   The temporary buffer has a 2*fft length size when MFCC
-                   is implemented with CFFT.
-                   It has length FFT Length + 2 when implemented with RFFT
-                   (default implementation).
-
                    The source buffer is modified by this function.
 
+  @par Size of buffers according to the target architecture and datatype:
+       They are described on the page \ref transformbuffers "transform buffers".
  */
-void arm_mfcc_f16(
+#if defined(ARM_MATH_NEON_FLOAT16)
+ARM_DSP_ATTRIBUTE void arm_mfcc_f16(
+  const arm_mfcc_instance_f16 * S,
+  float16_t *pSrc,
+  float16_t *pDst,
+  float16_t *pTmp,
+  float16_t *pTmp2
+  )
+#else
+ARM_DSP_ATTRIBUTE void arm_mfcc_f16(
   const arm_mfcc_instance_f16 * S,
   float16_t *pSrc,
   float16_t *pDst,
   float16_t *pTmp
   )
+#endif
 {
   float16_t maxValue;
   uint32_t  index; 
@@ -94,17 +102,24 @@ void arm_mfcc_f16(
   /* Normalize */
   arm_absmax_f16(pSrc,S->fftLen,&maxValue,&index);
 
-  arm_scale_f16(pSrc,1.0f16/(_Float16)maxValue,pSrc,S->fftLen);
+  if ((_Float16)maxValue != 0.0f16)
+  {
+     arm_scale_f16(pSrc,1.0f16/(_Float16)maxValue,pSrc,S->fftLen);
+  }
 
   /* Multiply by window */
   arm_mult_f16(pSrc,S->windowCoefs,pSrc,S->fftLen);
 
   /* Compute spectrum magnitude 
   */
-#if defined(ARM_MFCC_CFFT_BASED)
+#if defined(ARM_MATH_NEON_FLOAT16)
+  arm_rfft_fast_f16(&(S->rfft),pSrc,pTmp,pTmp2,0);
+  pTmp[1]=0.0f16;
+#else
+#if defined(ARM_MFCC_USE_CFFT)
   /* some HW accelerator for CMSIS-DSP used in some boards
      are only providing acceleration for CFFT.
-     With ARM_MFCC_CFFT_BASED enabled, CFFT is used and the MFCC
+     With ARM_MFCC_USE_CFFT enabled, CFFT is used and the MFCC
      will be accelerated on those boards.
  
      The default is to use RFFT
@@ -124,7 +139,12 @@ void arm_mfcc_f16(
   pTmp[S->fftLen+1]=0.0f16;
   pTmp[1]=0.0f;
 #endif
+#endif /* neon */
   arm_cmplx_mag_f16(pTmp,pSrc,S->fftLen);
+  if ((_Float16)maxValue != 0.0f16)
+  {
+     arm_scale_f16(pSrc,maxValue,pSrc,S->fftLen);
+  }
 
   /* Apply MEL filters */
   for(i=0; i<S->nbMelFilters; i++)
@@ -154,8 +174,8 @@ void arm_mfcc_f16(
       
 
 }
-
 #endif /* defined(ARM_FLOAT16_SUPPORTED) */
 /**
   @} end of MFCC group
- */
+*/
+

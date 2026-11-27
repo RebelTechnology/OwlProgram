@@ -76,12 +76,12 @@ owl.initPatchAudio = function () {
     }
 
     that.compute = function (e) {
-	var dspOutChans = HEAP32.subarray(that.outs >> 2, (that.outs + that.numOut * that.ptrsize) >> 2);
-	var dspInChans = HEAP32.subarray(that.ins >> 2, (that.ins + that.ins * that.ptrsize) >> 2);
+	var dspOutChans = Module.HEAP32.subarray(that.outs >> 2, (that.outs + that.numOut * that.ptrsize) >> 2);
+	var dspInChans = Module.HEAP32.subarray(that.ins >> 2, (that.ins + that.numIn * that.ptrsize) >> 2);
 	for (var i = 0; i < that.numIn; i++)
 	{
 	    var input = e.inputBuffer.getChannelData(i);
-	    var dspInput = HEAPF32.subarray(dspInChans[i] >> 2, (dspInChans[i] + that.vectorsize * that.ptrsize) >> 2);
+	    var dspInput = Module.HEAPF32.subarray(dspInChans[i] >> 2, (dspInChans[i] + that.vectorsize * that.ptrsize) >> 2);
 
 	    for (var j = 0; j < input.length; j++) {
 		dspInput[j] = input[j];
@@ -92,7 +92,7 @@ owl.initPatchAudio = function () {
 
 	for(var i = 0; i < that.numOut; i++){
 	    var output = e.outputBuffer.getChannelData(i);
-	    var dspOutput = HEAPF32.subarray(dspOutChans[i] >> 2, (dspOutChans[i] + that.vectorsize * that.ptrsize) >> 2);
+	    var dspOutput = Module.HEAPF32.subarray(dspOutChans[i] >> 2, (dspOutChans[i] + that.vectorsize * that.ptrsize) >> 2);
 	    for (var j = 0; j < output.length; j++) {
 		output[j] = dspOutput[j];
 	    }
@@ -237,7 +237,7 @@ owl.initPatchAudio = function () {
     // assign to our array of pointer elements an array of 32bit floats, one for each channel. currently we assume pointers are 32bits
     for (var i = 0; i < that.numIn; i++) { 
         // assign memory at that.ins[i] to a new ptr value. maybe there's an easier way, but this is clearer to me than any typedarray magic beyond the presumably TypedArray HEAP32
-        HEAP32[(that.ins >> 2) + i] = Module._malloc(that.vectorsize * that.samplesize); 
+        Module.HEAP32[(that.ins >> 2) + i] = Module._malloc(that.vectorsize * that.samplesize); 
     }
 
     //ptrsize, change to eight or use Runtime.QUANTUM? or what?
@@ -246,7 +246,7 @@ owl.initPatchAudio = function () {
     // assign to our array of pointer elements an array of 64bit floats, one for each channel. currently we assume pointers are 32bits
     for (var i = 0; i < that.numOut; i++) { 
         // assign memory at that.ins[i] to a new ptr value. maybe there's an easier way, but this is clearer to me than any typedarray magic beyond the presumably TypedArray HEAP32
-        HEAP32[(that.outs >> 2) + i] = Module._malloc(that.vectorsize * that.samplesize);
+        Module.HEAP32[(that.outs >> 2) + i] = Module._malloc(that.vectorsize * that.samplesize);
     }
 
     return that;

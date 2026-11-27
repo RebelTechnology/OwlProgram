@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_logsumexp_f16.c
  * Description:  LogSumExp
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/statistics_functions_f16.h"
 
@@ -64,7 +67,7 @@
 #include "arm_helium_utils.h"
 #include "arm_vec_math_f16.h"
 
-float16_t arm_entropy_f16(const float16_t * pSrcA,uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float16_t arm_entropy_f16(const float16_t * pSrcA,uint32_t blockSize)
 {
     uint32_t        blkCnt;
     _Float16       accum=0.0f16,p;
@@ -108,7 +111,7 @@ float16_t arm_entropy_f16(const float16_t * pSrcA,uint32_t blockSize)
 
 #else
 
-float16_t arm_entropy_f16(const float16_t * pSrcA,uint32_t blockSize)
+ARM_DSP_ATTRIBUTE float16_t arm_entropy_f16(const float16_t * pSrcA,uint32_t blockSize)
 {
     const float16_t *pIn;
     uint32_t blkCnt;

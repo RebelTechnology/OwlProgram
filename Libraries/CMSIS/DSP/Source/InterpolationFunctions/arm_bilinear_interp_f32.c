@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_bilinear_interp_f32.c
  * Description:  Floating-point bilinear interpolation
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/interpolation_functions.h"
 
@@ -51,7 +54,7 @@
    *   {
    *     uint16_t numRows;
    *     uint16_t numCols;
-   *     float32_t *pData;
+   *     const float32_t *pData;
    * } arm_bilinear_interp_instance_f32;
    * </pre>
    *
@@ -105,7 +108,7 @@
   {
     float32_t out;
     float32_t f00, f01, f10, f11;
-    float32_t *pData = S->pData;
+    const float32_t *pData = S->pData;
     int32_t xIndex, yIndex, index;
     float32_t xdiff, ydiff;
     float32_t b1, b2, b3, b4;

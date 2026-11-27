@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_cholesky_f16.c
  * Description:  Floating-point Cholesky decomposition
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,8 +26,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions_f16.h"
+#include "dsp/matrix_utils.h"
 
 #if defined(ARM_FLOAT16_SUPPORTED)
 
@@ -50,14 +54,18 @@
                    - \ref ARM_MATH_DECOMPOSITION_FAILURE      : Input matrix cannot be decomposed
    * @par
    * If the matrix is ill conditioned or only semi-definite, then it is better using the LDL^t decomposition.
-   * The decomposition of A is returning a lower triangular matrix U such that A = U U^t
+   * The decomposition of A is returning a lower triangular matrix U such that A = L L^t
+   *
+   * @par
+   * The destination matrix should be set to 0 before calling the functions because
+   * the function may not overwrite all output elements.
    */
 
 #if defined(ARM_MATH_MVE_FLOAT16) && !defined(ARM_MATH_AUTOVECTORIZE)
 
 #include "arm_helium_utils.h"
 
-arm_status arm_mat_cholesky_f16(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_cholesky_f16(
   const arm_matrix_instance_f16 * pSrc,
         arm_matrix_instance_f16 * pDst)
 {
@@ -164,10 +172,7 @@ arm_status arm_mat_cholesky_f16(
        }
 
        invSqrtVj = 1.0f16/(_Float16)sqrtf((float32_t)pG[i * n + i]);
-       for(j=i; j < n ; j++)
-       {
-         pG[j * n + i] = (_Float16)pG[j * n + i] * (_Float16)invSqrtVj ;
-       }
+       SCALE_COL_F16(pDst,i,invSqrtVj,i);
     }
 
     status = ARM_MATH_SUCCESS;
@@ -180,7 +185,7 @@ arm_status arm_mat_cholesky_f16(
 }
 
 #else
-arm_status arm_mat_cholesky_f16(
+ARM_DSP_ATTRIBUTE arm_status arm_mat_cholesky_f16(
   const arm_matrix_instance_f16 * pSrc,
         arm_matrix_instance_f16 * pDst)
 {
@@ -232,11 +237,9 @@ arm_status arm_mat_cholesky_f16(
        /* The division is done in float32 for accuracy reason and
        because doing it in f16 would not have any impact on the performances.
        */
-       invSqrtVj = 1.0f/sqrtf((float32_t)pG[i * n + i]);
-       for(j=i ; j < n ; j++)
-       {
-         pG[j * n + i] = (_Float16)pG[j * n + i] * (_Float16)invSqrtVj ;
-       }
+       invSqrtVj = (float16_t)(1.0f/sqrtf((float32_t)pG[i * n + i]));
+       SCALE_COL_F16(pDst,i,invSqrtVj,i);
+
     }
 
     status = ARM_MATH_SUCCESS;

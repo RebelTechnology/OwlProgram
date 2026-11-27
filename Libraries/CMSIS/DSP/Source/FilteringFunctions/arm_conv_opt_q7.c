@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_conv_opt_q7.c
  * Description:  Convolution of Q7 sequences
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/filtering_functions.h"
 
@@ -46,7 +49,6 @@
   @param[out]    pDst       points to the location where the output result is written.  Length srcALen+srcBLen-1.
   @param[in]     pScratch1  points to scratch buffer(of type q15_t) of size max(srcALen, srcBLen) + 2*min(srcALen, srcBLen) - 2.
   @param[in]     pScratch2  points to scratch buffer (of type q15_t) of size min(srcALen, srcBLen).
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The function is implemented using a 32-bit internal accumulator.
@@ -56,7 +58,7 @@
                    The 18.14 result is then truncated to 18.7 format by discarding the low 7 bits and then saturated to 1.7 format.
  */
 
-void arm_conv_opt_q7(
+ARM_DSP_ATTRIBUTE void arm_conv_opt_q7(
   const q7_t * pSrcA,
         uint32_t srcALen,
   const q7_t * pSrcB,
@@ -201,10 +203,10 @@ void arm_conv_opt_q7(
 
   while (blkCnt > 0)
   {
-    /* Initialze temporary scratch pointer as scratch1 */
+    /* Initialize temporary scratch pointer as scratch1 */
     pScr1 = pScratch1;
 
-    /* Clear Accumlators */
+    /* Clear Accumulators */
     acc0 = 0;
     acc1 = 0;
     acc2 = 0;
@@ -313,10 +315,10 @@ void arm_conv_opt_q7(
   /* Calculate convolution for remaining samples of Bigger length sequence */
   while (blkCnt > 0)
   {
-    /* Initialze temporary scratch pointer as scratch1 */
+    /* Initialize temporary scratch pointer as scratch1 */
     pScr1 = pScratch1;
 
-    /* Clear Accumlators */
+    /* Clear Accumulators */
     acc0 = 0;
 
     tapCnt = (srcBLen) >> 1U;

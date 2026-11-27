@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_dot_prod_q7.c
  * Description:  Q7 dot product
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/basic_math_functions.h"
 
@@ -43,7 +46,6 @@
   @param[in]     pSrcB      points to the second input vector
   @param[in]     blockSize  number of samples in each vector
   @param[out]    result     output result returned here
-  @return        none
 
   @par           Scaling and Overflow Behavior
                    The intermediate multiplications are in 1.7 x 1.7 = 2.14 format and these
@@ -57,7 +59,7 @@
 
 #include "arm_helium_utils.h"
 
-void arm_dot_prod_q7(
+ARM_DSP_ATTRIBUTE void arm_dot_prod_q7(
     const q7_t * pSrcA,
     const q7_t * pSrcB,
     uint32_t blockSize,
@@ -104,7 +106,7 @@ void arm_dot_prod_q7(
     *result = sum;
 }
 #else
-void arm_dot_prod_q7(
+ARM_DSP_ATTRIBUTE void arm_dot_prod_q7(
   const q7_t * pSrcA,
   const q7_t * pSrcB,
         uint32_t blockSize,
@@ -129,9 +131,9 @@ void arm_dot_prod_q7(
 
 #if defined (ARM_MATH_DSP)
     /* read 4 samples at a time from sourceA */
-    input1 = read_q7x4_ia ((q7_t **) &pSrcA);
+    input1 = read_q7x4_ia (&pSrcA);
     /* read 4 samples at a time from sourceB */
-    input2 = read_q7x4_ia ((q7_t **) &pSrcB);
+    input2 = read_q7x4_ia (&pSrcB);
 
     /* extract two q7_t samples to q15_t samples */
     inA1 = __SXTB16(__ROR(input1, 8));

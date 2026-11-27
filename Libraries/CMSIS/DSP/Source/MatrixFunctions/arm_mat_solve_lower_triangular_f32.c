@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_solve_lower_triangular_f32.c
  * Description:  Solve linear system LT X = A with LT lower triangular matrix
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 #include "dsp/matrix_functions.h"
 
@@ -151,7 +154,7 @@
   return (status);
 }
 #else
-#if defined(ARM_MATH_NEON) && !defined(ARM_MATH_AUTOVECTORIZE)
+#if defined(ARM_MATH_NEON)
   arm_status arm_mat_solve_lower_triangular_f32(
   const arm_matrix_instance_f32 * lt,
   const arm_matrix_instance_f32 * a,
@@ -209,7 +212,11 @@
             for(k=0; k < i; k++)
             {
                 vecX = vld1q_f32(&pX[cols*k+j]);
+#if defined(__ARM_FEATURE_FMA)
                 vecA = vfmsq_f32(vecA,vdupq_n_f32(pLT[n*i + k]),vecX);
+#else
+                vecA = vmlsq_f32(vecA,vdupq_n_f32(pLT[n*i + k]),vecX);
+#endif
             }
 
             if (pLT[n*i + i]==0.0f)

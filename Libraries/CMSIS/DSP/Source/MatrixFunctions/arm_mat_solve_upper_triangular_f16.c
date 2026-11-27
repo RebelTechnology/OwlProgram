@@ -1,4 +1,4 @@
-/* ----------------------------------------------------------------------
+﻿/* ----------------------------------------------------------------------
  * Project:      CMSIS DSP Library
  * Title:        arm_mat_solve_upper_triangular_f16.c
  * Description:  Solve linear system UT X = A with UT upper triangular matrix
@@ -8,6 +8,7 @@
  *
  * Target Processor: Cortex-M and Cortex-A cores
  * -------------------------------------------------------------------- */
+
 /*
  * Copyright (C) 2010-2021 ARM Limited or its affiliates. All rights reserved.
  *
@@ -25,6 +26,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "arm_compiler_specific.h"
+
 
 
 #include "dsp/matrix_functions_f16.h"
@@ -193,7 +196,7 @@ arm_status status;                             /* status of matrix inverse */
        {
             ut_row = &pUT[n*i];
 
-            float16_t tmp=a_col[i * cols];
+            _Float16 tmp=a_col[i * cols];
             
             for(k=n-1; k > i; k--)
             {
