@@ -49,6 +49,7 @@ ifdef HEAVY
 # breaking the Cortex-M build (hv_shl_i/hv_rint_f undeclared). Define it =1.
 # NB: do NOT define __unix__ here — on ARM it skews HvUtils' host detection.
 CPPFLAGS    += -DHV_SIMD_NONE=1
+CPPFLAGS    += -DHV_BARE_METAL # no OS: skip HvUtils' platform detection warning
 endif
 ifdef FAUST
 ifneq (,$(findstring soundfile,$(FAUSTOPTS)))
