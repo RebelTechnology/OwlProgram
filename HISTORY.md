@@ -16,6 +16,7 @@
 v23.1
 -----
 
+* Added MidiMessage::at() for polyphonic aftertouch
 * Fixed missing SmoothValue and StiffValue::normal definitions
 * Fixed SmoothValue<int> to use float lambda
 * Fixed Dockerfile hvcc build
