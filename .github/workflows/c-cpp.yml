@@ -12,26 +12,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         submodules: recursive
-    # v3 toolchain: ARM GNU 13.3.Rel1 (was 10-2020-q4), emsdk 6.0.13 (was
-    # 2.0.10), Python 3 with pip hvcc (the py2.7 setup step was failing because
-    # GitHub-hosted runners no longer provide Python 2.7).
     - name: Setup arm-none-eabi-gcc
       uses: carlosperate/arm-none-eabi-gcc-action@v1
       with:
-        release: '13.3.Rel1'
+        release: 'latest'
     - name: Setup emsdk
-      uses: mymindstorm/setup-emsdk@v14
+      uses: mymindstorm/setup-emsdk@v16
       with:
         version: 6.0.13
     - name: Setup python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
-        python-version: '3.x'
+        python-version: '3.11'
     - name: Install hvcc
-      run: pipx install hvcc==0.17.3 || pip install hvcc==0.17.3
+      run: pip install hvcc
     - name: make
       run: make
     - name: make check
