@@ -7,21 +7,38 @@ const vm = require('vm');
 
 const file = process.argv[2];
 const fs_ = 48000, bs = 64, blocks = 200;
-const fail = (msg) => { console.error('webtest FAIL: ' + msg); process.exit(1); };
-const timer = setTimeout(() => fail('runtime did not initialise'), 10000);
+// Exit by draining the event loop, not process.exit(): node can deadlock in
+// process.exit() on Linux (futex wait in its worker threads).
+process.exitCode = 1;
+class Fail extends Error {}
+const fail = (msg) => { throw new Fail(msg); };
+const timer = setTimeout(() => {
+  console.error('webtest FAIL: runtime did not initialise');
+  process.exit(1);
+}, 10000);
 
 globalThis.require = require;
 globalThis.__dirname = __dirname;
 globalThis.Module = {
   print: (s) => console.log(s),
   printErr: (s) => console.error(s),
-  onAbort: (what) => fail('abort: ' + what),
+  onAbort: (what) => console.error('webtest FAIL: abort: ' + what),
   onRuntimeInitialized: run,
 };
 vm.runInThisContext(fs.readFileSync(file, 'utf8'), { filename: file });
 
 function run() {
   clearTimeout(timer);
+  try {
+    test();
+    process.exitCode = 0;
+  } catch (e) {
+    if (!(e instanceof Fail)) throw e;
+    console.error('webtest FAIL: ' + e.message);
+  }
+}
+
+function test() {
   const M = globalThis.Module;
   // webaudio.js uses Module.HEAP32 / Module.HEAPF32
   for (const name of ['HEAP32', 'HEAPF32'])
@@ -82,5 +99,4 @@ function run() {
   console.log(`webtest OK: "${name}" params [${params.join(', ')}] ` +
               `${blocks}x${bs} samples, peak ${peak.toFixed(3)}, status "${status}"` +
               (WEB_getMessage() ? `, message "${WEB_getMessage()}"` : ''));
-  process.exit(0);
 }
