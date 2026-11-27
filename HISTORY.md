@@ -11,7 +11,7 @@
 * Fixed native, web and test builds on macOS
 * Added LibSource unit tests for DcBlockingFilter, ExponentialDecayEnvelope, IntArray, basic oscillators, NoiseGenerator, VelocityCurve, EnvelopeFollower, SmoothingFilter, DryWetProcessor, StateVariableFilter, VoltsPerOctave, AdsrEnvelope, SimpleValue and TakeoverValue
 * Heavy patches are built with mainline hvcc 0.17.3 (hvcc -g owl), replacing the Python 2.7 fork
-* Updated toolchain to Arm GNU 13.3.rel1, emscripten 6.0.13 and FAUST 2.88.0 (Docker image and CI)
+* Updated toolchain to Arm GNU 13.3.rel1, emscripten 7.0.1 and FAUST 2.88.0 (Docker image and CI)
 
 v23.1
 -----

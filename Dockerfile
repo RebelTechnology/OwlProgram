@@ -68,11 +68,11 @@ RUN curl -sSLf -o /tmp/soul.zip \
  && rm -rf /tmp/soul /tmp/soul.zip \
  && soul --version 2>&1 | head -1
 
-RUN git clone --depth 1 --branch 6.0.13 \
+RUN git clone --depth 1 --branch 7.0.1 \
       https://github.com/emscripten-core/emsdk.git /opt/emsdk \
  && cd /opt/emsdk \
- && ./emsdk install 6.0.13 \
- && ./emsdk activate 6.0.13
+ && ./emsdk install 7.0.1 \
+ && ./emsdk activate 7.0.1
 ENV EMSDK=/opt/emsdk
 ENV PATH=/opt/emsdk:/opt/emsdk/upstream/emscripten:$PATH
 
