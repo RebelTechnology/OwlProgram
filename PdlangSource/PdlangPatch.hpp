@@ -29,7 +29,6 @@ class PdlangPatch : public Patch {
   volatile uint32_t buttonsPending; // bit per OWL button id, set in buttonChanged
 
   void addParameters();
-  void addLegacyParameters();
   void allocateContext();
 
 public:

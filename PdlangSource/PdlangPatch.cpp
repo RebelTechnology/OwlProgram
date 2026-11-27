@@ -117,30 +117,11 @@ static bool parseButton(const char* r, uint8_t* id){
   return false;
 }
 
-// hvcc's hv_string_to_hash (MurmurHash2, seed = length)
-static uint32_t hvHash(const char* s){
-  const uint32_t m = 0x5bd1e995; const int r = 24;
-  uint32_t len = strlen(s), h = len;
-  const uint8_t* d = (const uint8_t*)s;
-  while(len >= 4){
-    uint32_t k = d[0] | (d[1] << 8) | (d[2] << 16) | ((uint32_t)d[3] << 24);
-    k *= m; k ^= k >> r; k *= m; h *= m; h ^= k; d += 4; len -= 4;
-  }
-  switch(len){
-  case 3: h ^= d[2] << 16; // fall through
-  case 2: h ^= d[1] << 8;  // fall through
-  case 1: h ^= d[0]; h *= m;
-  }
-  h ^= h >> 13; h *= m; h ^= h >> 15;
-  return h;
-}
-
 PdlangPatch* PdlangPatch::instance = NULL;
 
 PdlangPatch::PdlangPatch() : nmap(0), buttonsPending(0) {
   instance = this;
   addParameters();
-  addLegacyParameters();
   // the audio buffers are touched every sample: allocate them before the ctx's large blocks
   blocksize = getBlockSize();
   nin = pdlang_num_inputs();
@@ -209,25 +190,35 @@ void PdlangPatch::allocateContext(){
   pdlang_init_blocks(bases, getSampleRate());
 }
 
-// the @owl parameters and buttons the patch declares (pdlang_param_info)
+// the @owl parameters and buttons the patch declares, and its Channel-* host receives (pdlang_param_info)
 void PdlangPatch::addParameters(){
   int count = pdlang_param_info(0, NULL);
   for(int i = 0; i < count && nmap < PDLANG_MAX_PARAMS; ++i){
     pdlang_param_info_t info;
     pdlang_param_info(i, &info);
-    if(!info.raw || !info.raw[0])
-      continue;
+    const char* raw = info.raw;
     Map m = {info.hash, NONE, 0, info.min, info.max};
     bool isIn = info.type == 0 || info.type == 2;
-    if(parseButton(info.raw, &m.id))
+    if(info.type == 4){
+      // a plain receive exposed with --host-receive (pdlang.mk): the OWL names [r Channel-A..E], [r Channel-Push], 0..1
+      if(strncmp(info.name, "Channel-", 8) != 0)
+        continue;
+      raw = info.name + 8;
+      m.min = 0.0f;
+      m.max = 1.0f;
+      isIn = true;
+    }
+    if(!raw || !raw[0])
+      continue;
+    if(parseButton(raw, &m.id))
       m.kind = isIn ? BUTTON_IN : BUTTON_OUT;
-    else if(parseParam(info.raw, &m.id))
+    else if(parseParam(raw, &m.id))
       m.kind = isIn ? PARAM_IN : PARAM_OUT;
     else
       continue;
     if(m.kind == PARAM_IN){
       registerParameter((PatchParameterId)m.id, info.name);
-      if(m.max != m.min)
+      if(info.type != 4 && m.max != m.min)
         setParameterValue((PatchParameterId)m.id, (info.def - m.min) / (m.max - m.min));
     }else if(m.kind == PARAM_OUT){
       char* nm = outnames[nmap];
@@ -235,31 +226,6 @@ void PdlangPatch::addParameters(){
       nm[sizeof(outnames[0]) - 2] = 0;
       strcat(nm, ">");
       registerParameter((PatchParameterId)m.id, nm);
-    }
-    map[nmap++] = m;
-  }
-}
-
-// legacy OWL names (c2owl's 'Channel-' prefix): [r Channel-A..E] parameters and
-// [r Channel-Push] / [r Channel-B1..B8] buttons, 0..1. Plain receives are not in
-// pdlang_param_info, so they cannot be detected: only assumed for a patch that
-// declares no @owl parameters at all.
-void PdlangPatch::addLegacyParameters(){
-  static const char* const legacy[] = {"A", "B", "C", "D", "E", // as the library compiler: A..E
-                                       "Push", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8"};
-  size_t nlegacy = nmap == 0 ? sizeof(legacy) / sizeof(legacy[0]) : 0;
-  for(size_t k = 0; k < nlegacy && nmap < PDLANG_MAX_PARAMS; ++k){
-    Map m = {0, NONE, 0, 0.0f, 1.0f};
-    if(parseButton(legacy[k], &m.id))
-      m.kind = BUTTON_IN;
-    else if(parseParam(legacy[k], &m.id))
-      m.kind = PARAM_IN;
-    char nm[24] = "Channel-";
-    strcat(nm, legacy[k]);
-    m.hash = hvHash(nm);
-    if(m.kind == PARAM_IN){
-      strcpy(outnames[nmap], nm);
-      registerParameter((PatchParameterId)m.id, outnames[nmap]);
     }
     map[nmap++] = m;
   }
