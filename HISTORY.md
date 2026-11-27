@@ -1,3 +1,6 @@
+* Updated toolchain to Arm GNU 13.3.rel1, emscripten 6.0.13 and FAUST 2.88.0 (Docker image and CI)
+* Heavy patches are built with mainline hvcc 0.17.3 (hvcc -g owl), replacing the Python 2.7 fork
+* Added MidiMessage::at() for poly aftertouch
 * Added SmoothValue::normalForSampleRate() to rescale lambda between sample rates
 * Fixed TapTempo per-sample clock, WavetableOscillator out-of-bounds read and negative-FM phase wrap
 * Added LibSource unit tests for 17 classes
