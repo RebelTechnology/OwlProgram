@@ -1,3 +1,4 @@
+* Updated CMSIS-Core to v6.4.0 (CMSIS 6)
 * Updated CMSIS-DSP to v1.18.0
 * PatchMetadata holds up to 40 parameters (was 20)
 * Added Gen output map (GEN_OUTPUT_MAP in GenParameterMap.h) with optional bipolar outputs
