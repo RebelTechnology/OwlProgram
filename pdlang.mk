@@ -11,6 +11,7 @@
 # Included by compile.mk, native.mk and web.mk, which set:
 #   PDLANGOBJ     the object to build
 #   PDLANGTARGET  the pdlang --target triple (empty: the host)
+#   PDLANGCPU     the -mcpu for that target (empty: pdlang's default, the Cortex-M4F)
 
 # The top-level Makefile exports these, so unset ones arrive here as empty strings: test for empty, not ?=
 ifeq ($(PDLANGFILE),)
@@ -40,6 +41,9 @@ PDLANGFLAGS  = -c -O2 -fcompat=$(PDLANGMODE) -fmath=$(PDLANGMATH) -fprecision=$(
 PDLANGFLAGS += --host-receive=$(PDLANG_HOST_RECEIVES) -Wno-unused-host-receive
 ifneq ($(PDLANGTARGET),)
 PDLANGFLAGS += --target=$(PDLANGTARGET)
+endif
+ifneq ($(PDLANGCPU),)
+PDLANGFLAGS += -mcpu=$(PDLANGCPU)
 endif
 
 $(PDLANGOBJ): $(PATCHSOURCE)/$(PDLANGFILE) .FORCE

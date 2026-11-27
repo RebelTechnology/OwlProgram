@@ -58,22 +58,26 @@ endif
 
 ifeq ($(PLATFORM),OWL0)
 ## Flags for F1
-ARCH_FLAGS = -mcpu=cortex-m0 -mfloat-abi=soft -msoft-float
+ARCH_CPU = cortex-m0
+ARCH_FLAGS = -mcpu=$(ARCH_CPU) -mfloat-abi=soft -msoft-float
 DEF_FLAGS = -DSTM32F1XX -DARM_MATH_CM0 -D__FPU_PRESENT=0 -D__FPU_USED=0U
 LDSCRIPT    ?= $(BUILDROOT)/Source/owl0.ld
 else ifeq ($(PLATFORM),OWL1)
 ## Flags for F40x
-ARCH_FLAGS = -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
+ARCH_CPU = cortex-m4
+ARCH_FLAGS = -mcpu=$(ARCH_CPU) -mfloat-abi=hard -mfpu=fpv4-sp-d16
 DEF_FLAGS = -DSTM32F4XX -DARM_MATH_CM4 -D__FPU_PRESENT=1 -D__FPU_USED=1U
 LDSCRIPT    ?= $(BUILDROOT)/Source/owl1.ld
 else ifeq ($(PLATFORM),OWL2)
 ## Flags for F42x/F43x
-ARCH_FLAGS = -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
+ARCH_CPU = cortex-m4
+ARCH_FLAGS = -mcpu=$(ARCH_CPU) -mfloat-abi=hard -mfpu=fpv4-sp-d16
 DEF_FLAGS = -DSTM32F4XX -DARM_MATH_CM4 -D__FPU_PRESENT=1 -D__FPU_USED=1U
 LDSCRIPT    ?= $(BUILDROOT)/Source/owl2.ld
 else ifeq ($(PLATFORM),OWL3)
 ## Flags for H7
-ARCH_FLAGS = -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-d16
+ARCH_CPU = cortex-m7
+ARCH_FLAGS = -mcpu=$(ARCH_CPU) -mfloat-abi=hard -mfpu=fpv5-d16
 DEF_FLAGS = -DSTM32H7XX -DARM_MATH_CM7 -D__FPU_PRESENT=1 -D__FPU_USED=1U
 LDSCRIPT    ?= $(BUILDROOT)/Source/owl3.ld
 else
@@ -105,8 +109,7 @@ CPPFLAGS += -DEXTERNAL_SRAM
 # binary the linker needs; -ffreestanding only set __STDC_HOSTED__ and main()
 # special-casing, neither of which this RAM-resident patch relies on.
 CPPFLAGS += -nostdlib -nostartfiles -fno-builtin
-CPPFLAGS += -mtune=cortex-m4
-# CPPFLAGS += -mtune=cortex-m7
+CPPFLAGS += -mtune=$(ARCH_CPU)
 CPPFLAGS += -fpic
 CPPFLAGS += -fpie
 CPPFLAGS += -fdata-sections
@@ -135,6 +138,7 @@ endif
 ifdef PDLANG
 # pdlang object (pdlang.mk) and its wrapper from PdlangSource
 PDLANGTARGET   = thumbv7em-none-eabihf
+PDLANGCPU      = $(ARCH_CPU)
 PDLANGOBJ      = $(BUILD)/pdlang_patch.o
 PATCH_CPP_SRC += $(BUILDROOT)/PdlangSource/PdlangPatch.cpp
 CPPFLAGS      += -I$(BUILDROOT)/PdlangSource
