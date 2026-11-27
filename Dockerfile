@@ -72,9 +72,11 @@ RUN git clone --depth 1 --branch 7.0.1 \
       https://github.com/emscripten-core/emsdk.git /opt/emsdk \
  && cd /opt/emsdk \
  && ./emsdk install 7.0.1 \
- && ./emsdk activate 7.0.1
+ && ./emsdk activate 7.0.1 \
+ && ln -sf "$(ls -d /opt/emsdk/node/*/bin | head -1)/node" /usr/local/bin/node \
+ && node --version
 ENV EMSDK=/opt/emsdk
-ENV PATH=/opt/emsdk:/opt/emsdk/upstream/emscripten:$PATH
+ENV PATH=/opt/emsdk/upstream/emscripten:$PATH
 
 RUN pipx install hvcc==0.17.3 \
  && /root/.local/bin/hvcc --version 2>&1 | head -1 || pip3 install --break-system-packages hvcc==0.17.3
@@ -99,8 +101,9 @@ RUN echo "=== toolchain versions (PLATFORM=${PLATFORM}) ===" \
  && arm-none-eabi-gcc --version | head -1 \
  && gcc --version | head -1 \
  && (faust --version 2>&1 | head -1) \
- && (soul --version 2>&1 | head -1) \
+ && (soul version 2>&1 | grep -m1 "SOUL version") \
  && (emcc --version 2>&1 | head -1) \
+ && node --version \
  && (hvcc --version 2>&1 | head -1 || echo "hvcc via pipx") \
  && echo "base: ubuntu 24.04"
 
