@@ -1,3 +1,6 @@
+v24.0
+-----
+
 * Updated CMSIS-Core to v6.4.0 (CMSIS 6)
 * Updated CMSIS-DSP to v1.18.0
 * PatchMetadata holds up to 40 parameters (was 20)
@@ -20,7 +23,6 @@ v23.1
 * Fixed missing SmoothValue and StiffValue::normal definitions
 * Fixed SmoothValue<int> to use float lambda
 * Fixed Dockerfile hvcc build
-
 
 v23.0
 -----
