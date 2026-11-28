@@ -493,7 +493,22 @@ inline t_sample cosine_interp(t_sample a, t_sample x, t_sample y) {
 	return(x*(t_sample(1.)-a2)+y*a2);
 }
 
+// 4-point Lagrange cubic, as in Max 9
 inline t_sample cubic_interp(t_sample a, t_sample w, t_sample x, t_sample y, t_sample z) {
+	const t_sample a1 = t_sample(1.) + a;
+	const t_sample aa = a * a1;
+	const t_sample b = t_sample(1.) - a;
+	const t_sample b1 = t_sample(2.) - a;
+	const t_sample bb = b * b1;
+	const t_sample fw = t_sample(-.1666667) * bb * a;
+	const t_sample fx = t_sample(.5) * bb * a1;
+	const t_sample fy = t_sample(.5) * aa * b1;
+	const t_sample fz = t_sample(-.1666667) * aa * b;
+	return w * fw + x * fx + y * fy + z * fz;
+}
+
+// the previous cubic_interp; Max 9 keeps it as "fastcubic" and deprecates it, as it shows some instability with feedback
+inline t_sample fastcubic_interp(t_sample a, t_sample w, t_sample x, t_sample y, t_sample z) {
 	const t_sample a2 = a*a;
 	const t_sample f0 = z - y - w + x;
 	const t_sample f1 = w - x - f0;
@@ -980,6 +995,23 @@ struct Delay {
 	}
 
 	// cubic requires extra sample of compensation:
+	inline t_sample read_fastcubic(t_sample d) {
+		// min 1 sample delay for read before write (r != w)
+		// plus extra 1 sample compensation for 4-point interpolation
+		const t_sample r = t_sample(size + reader) - clamp(d, t_sample(1.)+t_sample(reader != writer), maxdelay);
+		long r1 = long(r);
+		long r2 = r1+1;
+		long r3 = r1+2;
+		long r4 = r1+3;
+		t_sample a = r - (t_sample)r1;
+		t_sample w = memory[r1 & wrap];
+		t_sample x = memory[r2 & wrap];
+		t_sample y = memory[r3 & wrap];
+		t_sample z = memory[r4 & wrap];
+		return fastcubic_interp(a, w, x, y, z);
+	}
+
+	// cubic requires extra sample of compensation:
 	inline t_sample read_cubic(t_sample d) {
 		// min 1 sample delay for read before write (r != w)
 		// plus extra 1 sample compensation for 4-point interpolation
@@ -1011,6 +1043,27 @@ struct Delay {
 		t_sample y = memory[r3 & wrap];
 		t_sample z = memory[r4 & wrap];
 		return spline_interp(a, w, x, y, z);
+	}
+
+	// spline requires extra sample of compensation:
+	inline t_sample read_spline6(t_sample d) {
+		// min 1 sample delay for read before write (r != w)
+		// plus extra 1 sample compensation for 4-point interpolation
+		const t_sample r = t_sample(size + reader) - clamp(d, t_sample(1.)+t_sample(reader != writer), maxdelay);
+		long r0 = long(r);
+		long r1 = r0+1;
+		long r2 = r0+2;
+		long r3 = r0+3;
+		long r4 = r0+4;
+		long r5 = r0+5;
+		t_sample a = r - (t_sample)r0;
+		t_sample y0 = memory[r0 & wrap];
+		t_sample y1 = memory[r1 & wrap];
+		t_sample y2 = memory[r2 & wrap];
+		t_sample y3 = memory[r3 & wrap];
+		t_sample y4 = memory[r4 & wrap];
+		t_sample y5 = memory[r5 & wrap];
+		return spline6_interp(a, y0, y1, y2, y3, y4, y5);
 	}
 };
 
