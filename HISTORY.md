@@ -1,3 +1,5 @@
+* Added gen~ data loaded from WAV resources: a data object named after a resource is filled from it
+
 v24.1
 -----
 
