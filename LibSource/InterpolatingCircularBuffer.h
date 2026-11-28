@@ -10,6 +10,13 @@ class InterpolatingCircularFloatBuffer : public CircularBuffer<float> {
 protected:
   float delay_samples = 0;
 public:
+  /**
+   * Shortest delay that delay(in, out, ...) reads with: the 4-point interpolators
+   * read one sample past the delay position, which must already be written.
+   */
+  static constexpr float min_delay =
+    (im == CUBIC_4P_INTERPOLATION || im == CUBIC_4P_SMOOTH_INTERPOLATION || im == HERMITE_INTERPOLATION) ? 1 : 0;
+
   InterpolatingCircularFloatBuffer() {}
   InterpolatingCircularFloatBuffer(float* data, size_t size): CircularFloatBuffer(data, size) {}
   using CircularBuffer<float>::writeAt;
@@ -62,8 +69,11 @@ public:
   /**
    * Write to buffer and read with a fractional delay
    * @note input buffer length is added to delay time
+   * @note delays shorter than min_delay are clipped to it
    */
   void delay(float* in, float* out, size_t len, float readDelay){
+    if(readDelay < min_delay)
+      readDelay = min_delay;
     write(in, len);
     delay(out, len, readDelay + len); // set delay relative to where we started writing
   }
@@ -89,8 +99,13 @@ public:
    * Write to buffer and read with a delay that ramps up or down
    * from @param beginDelay to @param endDelay
    * @note input buffer length is added to delay times
+   * @note delays shorter than min_delay are clipped to it
    */
   void delay(float* in, float* out, size_t len, float beginDelay, float endDelay){
+    if(beginDelay < min_delay)
+      beginDelay = min_delay;
+    if(endDelay < min_delay)
+      endDelay = min_delay;
     write(in, len);
     delay(out, len, beginDelay + len, endDelay + len); // set delays relative to where we started writing
   }

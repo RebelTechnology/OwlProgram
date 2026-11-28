@@ -1077,9 +1077,9 @@ struct Delay {
 
 	// cubic requires extra sample of compensation:
 	inline t_sample read_fastcubic(t_sample d) {
-		// min 1 sample delay for read before write (r != w)
-		// plus extra 1 sample compensation for 4-point interpolation
-		const t_sample r = t_sample(size + reader) - clamp(d, t_sample(1.)+t_sample(reader != writer), maxdelay);
+		// lowest d is 2 (not Max 9's 1) plus the read-before-write sample, so the newest of the
+		// 4 points is never past the last write; lower d is clipped to it
+		const t_sample r = t_sample(size + reader) - clamp(d, t_sample(2.)+t_sample(reader != writer), maxdelay);
 		long r1 = long(r);
 		long r2 = r1+1;
 		long r3 = r1+2;
@@ -1094,9 +1094,9 @@ struct Delay {
 
 	// cubic requires extra sample of compensation:
 	inline t_sample read_cubic(t_sample d) {
-		// min 1 sample delay for read before write (r != w)
-		// plus extra 1 sample compensation for 4-point interpolation
-		const t_sample r = t_sample(size + reader) - clamp(d, t_sample(1.)+t_sample(reader != writer), maxdelay);
+		// lowest d is 2 (not Max 9's 1) plus the read-before-write sample, so the newest of the
+		// 4 points is never past the last write; lower d is clipped to it
+		const t_sample r = t_sample(size + reader) - clamp(d, t_sample(2.)+t_sample(reader != writer), maxdelay);
 		long r1 = long(r);
 		long r2 = r1+1;
 		long r3 = r1+2;
@@ -1111,9 +1111,9 @@ struct Delay {
 
 	// spline requires extra sample of compensation:
 	inline t_sample read_spline(t_sample d) {
-		// min 1 sample delay for read before write (r != w)
-		// plus extra 1 sample compensation for 4-point interpolation
-		const t_sample r = t_sample(size + reader) - clamp(d, t_sample(1.)+t_sample(reader != writer), maxdelay);
+		// lowest d is 2 (not Max 9's 1) plus the read-before-write sample, so the newest of the
+		// 4 points is never past the last write; lower d is clipped to it
+		const t_sample r = t_sample(size + reader) - clamp(d, t_sample(2.)+t_sample(reader != writer), maxdelay);
 		long r1 = long(r);
 		long r2 = r1+1;
 		long r3 = r1+2;
@@ -1128,9 +1128,9 @@ struct Delay {
 
 	// spline requires extra sample of compensation:
 	inline t_sample read_spline6(t_sample d) {
-		// min 1 sample delay for read before write (r != w)
-		// plus extra 1 sample compensation for 4-point interpolation
-		const t_sample r = t_sample(size + reader) - clamp(d, t_sample(1.)+t_sample(reader != writer), maxdelay);
+		// lowest d is 4 (not Max 9's 1) plus the read-before-write sample, so the newest of the
+		// 6 points is never past the last write; lower d is clipped to it
+		const t_sample r = t_sample(size + reader) - clamp(d, t_sample(4.)+t_sample(reader != writer), maxdelay);
 		long r0 = long(r);
 		long r1 = r0+1;
 		long r2 = r0+2;

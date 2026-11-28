@@ -5,6 +5,30 @@
 
 class InterpolatingCircularBufferTestPatch : public TestPatch {
 public:
+  template<InterpolationMethod im>
+  void checkShortDelay(float min){
+    auto* buffer = InterpolatingCircularFloatBuffer<im>::create(64);
+    FloatArray input = FloatArray::create(16);
+    FloatArray output = FloatArray::create(16);
+    float v = 0;
+    for(int k=0; k<8; ++k){ // fill and wrap the buffer
+      for(size_t i=0; i<input.getSize(); ++i)
+	input[i] = v++;
+      buffer->delay(input, output, input.getSize(), 3);
+    }
+    for(float rd : {0.0f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f}){
+      for(size_t i=0; i<input.getSize(); ++i)
+	input[i] = v++;
+      buffer->delay(input, output, input.getSize(), rd);
+      float d = rd < min ? min : rd;
+      for(size_t i=0; i<output.getSize(); ++i)
+	CHECK_CLOSE(output[i], input[i] - d, 1e-3);
+    }
+    InterpolatingCircularFloatBuffer<im>::destroy(buffer);
+    FloatArray::destroy(input);
+    FloatArray::destroy(output);
+  }
+
   typedef InterpolatingCircularFloatBuffer<LINEAR_INTERPOLATION> LinearFloatBuffer;
   // typedef InterpolatingCircularFloatBuffer<COSINE_INTERPOLATION> CosineFloatBuffer;
   // typedef InterpolatingCircularFloatBuffer<HERMITE_INTERPOLATION> HermiteFloatBuffer;
@@ -130,6 +154,16 @@ public:
 	CHECK_CLOSE(buffer->readAt(j+0.5f), j+0.5f, DEFAULT_TOLERANCE);
       LinearFloatBuffer::destroy(buffer);
       FloatArray::destroy(input);
+    }
+    {
+      TEST("4-point delays shorter than a sample");
+      // a ramp through the delay: every output must lie on it, the 4-point
+      // methods clip readDelay to 1 instead of reading the unwritten slot
+      checkShortDelay<LINEAR_INTERPOLATION>(0);
+      checkShortDelay<CUBIC_3P_INTERPOLATION>(0);
+      checkShortDelay<CUBIC_4P_INTERPOLATION>(1);
+      checkShortDelay<CUBIC_4P_SMOOTH_INTERPOLATION>(1);
+      checkShortDelay<HERMITE_INTERPOLATION>(1);
     }
     {
       TEST("fractional rate read");
