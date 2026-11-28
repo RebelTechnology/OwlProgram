@@ -214,8 +214,12 @@ inline t_sample wrap(t_sample v, t_sample lo1, t_sample hi1){
 	const t_sample range = hi - lo;
 	if (v >= lo && v < hi) return v;
 	if (range <= 0.000000001) return lo;	// no point...
+	// long, not int64_t as in Max 9: float to 64-bit int is a library call on Cortex-M
 	const long numWraps = long((v-lo)/range) - (v < lo);
-	return v - range * t_sample(numWraps);
+	const t_sample result = v - range * t_sample(numWraps);
+	// rounding can land exactly on hi
+	if (result >= hi) return result - range;
+	return result;
 }
 
 // this version gives far better performance when wrapping is relatively rare

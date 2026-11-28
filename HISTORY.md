@@ -1,3 +1,5 @@
+* Fixed gen~ wrap returning the upper bound for inputs just below the lower bound (from Max 9)
+
 v24.1
 -----
 
