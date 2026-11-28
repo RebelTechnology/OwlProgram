@@ -82,7 +82,7 @@ $(error PLATFORM="$(PLATFORM)" not recognized. Known platforms: OWL0, OWL1, OWL2
 endif
 
 ARCH_FLAGS += -fsingle-precision-constant -mthumb
-DEF_FLAGS +=  -DDSY_CORE_DSP -DDSY_CUSTOM_DSP
+DEF_FLAGS +=  -DDSY_CORE_DSP -DDSY_CUSTOM_DSP -DARM_MATH_LOOPUNROLL
 DEF_FLAGS += "-DPATCHNAME=\"$(PATCHNAME)\""
 # DEF_FLAGS = -DSTM32F745xx -DARM_MATH_CM7 -D__FPU_PRESENT=1 -D__FPU_USED=1U
 INC_FLAGS = -I$(BUILDROOT)/Libraries -I$(PERIPH_FILE)/inc -I$(SOURCE)
@@ -102,12 +102,13 @@ CPPFLAGS += -DEXTERNAL_SRAM
 # bits/requires_hosted.h hard-error on <cmath>/<algorithm> (and pull the tr1
 # special-function templates referencing the absent std::__throw_domain_error).
 # Neither -D_GLIBCXX_HOSTED=1 nor -fhosted override it. Dropping -ffreestanding
-# is safe: -nostdlib -nostartfiles -fno-builtin still produce the freestanding
-# binary the linker needs; -ffreestanding only set __STDC_HOSTED__ and main()
+# is safe: -nostdlib -nostartfiles still produce the freestanding binary the
+# linker needs; -ffreestanding only set __STDC_HOSTED__ and main()
 # special-casing, neither of which this RAM-resident patch relies on.
-CPPFLAGS += -nostdlib -nostartfiles -fno-builtin
-CPPFLAGS += -mtune=cortex-m4
-# CPPFLAGS += -mtune=cortex-m7
+# No -fno-builtin: it stopped GCC expanding fminf / fmaxf / floorf / fabsf /
+# sqrtf and friends to single FPU instructions (vminnm, vrintm, vsqrt, ...),
+# leaving calls into newlib. No -mtune: -mcpu already tunes for each platform.
+CPPFLAGS += -nostdlib -nostartfiles
 CPPFLAGS += -fpic
 CPPFLAGS += -fpie
 CPPFLAGS += -fdata-sections

@@ -32,7 +32,7 @@ public:
     ison = on;
   }
   void clock(){
-    if(trig < min_limit)
+    if(trig < max_limit)
       trig++;
   }
   void clock(size_t steps){

@@ -21,12 +21,15 @@ public:
   }
   
   void process(float* input, float* output, size_t size){
+    const float lambda = this->lambda;
+    float y = this->y;
     float x;
     while(size--){
       x = *input++;
       y = y*lambda + x*(1.0f - lambda);
       *output++ = y;
     }
+    this->y = y;
   }
   
   /* perform in-place processing */

@@ -2,6 +2,7 @@
 #define __WavetableOscillator_h__
 
 #include "Oscillator.h"
+#include "InterpolatingCircularBuffer.h"
 
 class WavetableOscillator : public OscillatorTemplate<WavetableOscillator> {
 private:
@@ -20,8 +21,10 @@ public:
     return wave;
   }    
   float getSample(){
-    size_t index = phase*wave.getSize();
-    // index = min(index, size-1);
+    size_t size = wave.getSize();
+    size_t index = phase*size;
+    if(index >= size) // guard against phase >= 1 or negative phase wrapping size_t
+      index = size-1;
     return wave[index];
   }
 };
@@ -41,7 +44,10 @@ public:
     setSampleRate(sr);
   }  
   float getSample(){
-    size_t index = phase*wave.getSize();
+    size_t size = wave.getSize();
+    size_t index = phase*size;
+    if(index >= size)
+      index = size-1;
     float sample = wave[index];
     sample -= polyblep(phase, incr);
     return sample;

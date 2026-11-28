@@ -1,3 +1,16 @@
+v24.1
+-----
+
+* CMSIS-DSP built with ARM_MATH_LOOPUNROLL: biquad and vector functions up to 30% faster
+* Added AdsrEnvelope block generate() and process(), up to 33% faster than per-sample
+* Faster block processing (state kept in registers) in StateVariableFilter, SmoothingFilter, DcBlockingFilter, EnvelopeFollower, InterpolatingSignalGenerator and Sine, AntialiasedRamp, AntialiasedSquareWave and Vosim oscillators
+* Patches built without -fno-builtin and -mtune=cortex-m4: fminf, fmaxf, fabsf, sqrtf and friends compile to FPU instructions
+* Faust floorf, ceilf, sqrtf, rintf and roundf use FPU instructions on Cortex-M7
+* Fixed web build fast pow/exp/log lookup tables left empty
+* Added unit tests for TapTempo and WavetableOscillator, and for SmoothValue::normalForSampleRate()
+* Added SmoothValue::normalForSampleRate() to rescale lambda between sample rates
+* Fixed TapTempo per-sample clock, WavetableOscillator out-of-bounds read and negative-FM phase wrap
+
 v24.0
 -----
 

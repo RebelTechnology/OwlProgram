@@ -136,6 +136,15 @@ public:
     }
     return level;
   }
+  void generate(FloatArray output){
+    float* out = output.getData();
+    run(output.getSize(), [out](size_t i, float value){ out[i] = value; });
+  }
+  void process(FloatArray input, FloatArray output){
+    const float* in = input.getData();
+    float* out = output.getData();
+    run(output.getSize(), [in, out](size_t i, float value){ out[i] = in[i]*value; });
+  }
   [[deprecated("use generate() instead.")]]
   float getNextSample(){
     return generate(); // increments envelope one step
@@ -153,6 +162,97 @@ public:
   }
   static void destroy(AdsrEnvelope<linear>* env){
     delete env;
+  }
+protected:
+  // generate() on locals; generate() itself stays on the members so callers still inline it
+  inline void step(EnvelopeStage& stage, EnvelopeTrigger& trig, bool& gateState, int& gateTime, float& level,
+                   const float& attackIncrement, const float& decayIncrement, const float& releaseIncrement,
+                   const float& sustain, const bool& retrigger){
+    if(gateTime == 0){
+      stage = kAttack;
+      if(trig == kTrigger){
+        gateState = false;
+      }
+    }
+    if(gateTime >= 0){
+      gateTime--; // this will stop at -1
+    }
+    switch (stage) {
+    case kAttack:
+      // attack ramp
+      level = increment(level, attackIncrement);
+      if(level >= 1.0){
+        level = 1.0;
+        stage = kDecay;
+      }else if(gateState == false && trig == kGate){
+        stage = kRelease;
+      }
+      break;
+    case kDecay:
+      // decay ramp
+      level = decrement(level, decayIncrement);
+      if(level <= sustain){
+        level = sustain;
+        if(trig == kGate){
+          stage = kSustain;
+        } else { // (trig == kTrigger)
+          stage = kRelease;
+        }
+      } else if(gateState == false && trig == kGate){
+        stage = kRelease;
+      }
+      break;
+    case kSustain:
+      level = sustain;
+      if(gateState == false){
+        stage = kRelease;
+      }
+      break;
+    case kRelease:
+      // release ramp
+      level = decrement(level, releaseIncrement);
+      if(level <= MINLEVEL){
+        level = MINLEVEL;
+        if (retrigger == true){
+          this->stage = stage; this->trig = trig; this->gateState = gateState; this->gateTime = gateTime; this->level = level;
+          trigger();
+          stage = this->stage; trig = this->trig; gateState = this->gateState; gateTime = this->gateTime;
+        }
+        else // (retrigger == false)
+          stage = kIdle;
+      }else if(gateState == true ){ // if during release the gate is on again, start over from the current level
+        stage = kAttack;
+      }
+      break;
+    case kIdle:
+      level = MINLEVEL;
+      if(gateState == true)
+        stage = kAttack;
+      break;
+    }
+  }
+  template<typename Emit>
+  void run(size_t n, Emit emit){
+    EnvelopeStage stage = this->stage;
+    EnvelopeTrigger trig = this->trig;
+    bool gateState = this->gateState;
+    int gateTime = this->gateTime;
+    float level = this->level;
+    const float attackIncrement = this->attackIncrement;
+    const float decayIncrement = this->decayIncrement;
+    const float releaseIncrement = this->releaseIncrement;
+    const float sustain = this->sustain;
+    const bool retrigger = this->retrigger;
+    for(size_t i = 0; i < n; ++i){
+      step(stage, trig, gateState, gateTime, level,
+           attackIncrement, decayIncrement, releaseIncrement, sustain, retrigger);
+      emit(i, level);
+    }
+    this->stage = stage;
+    this->trig = trig;
+    this->gateState = gateState;
+    this->gateTime = gateTime;
+    this->level = level;
   }
 protected:
   float sampleRate;

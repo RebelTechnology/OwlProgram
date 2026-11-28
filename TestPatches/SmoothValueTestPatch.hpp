@@ -60,6 +60,17 @@ public:
       CHECK(SmoothFloat::normal(0.95, 16) < 1);
       CHECK_CLOSE(StiffInt::normal(0.5), 0.5, DEFAULT_TOLERANCE);
     }
+    {
+      TEST("normalForSampleRate");
+      // Same sample rate leaves lambda unchanged.
+      CHECK_CLOSE(SmoothFloat::normalForSampleRate(0.9, 48000, 48000), 0.9, DEFAULT_TOLERANCE);
+      // Doubling the sample rate halves the exponent: lambda -> sqrt(lambda).
+      CHECK_CLOSE(SmoothFloat::normalForSampleRate(0.9, 48000, 96000), sqrtf(0.9), DEFAULT_TOLERANCE);
+      // Halving the sample rate squares lambda.
+      CHECK_CLOSE(SmoothFloat::normalForSampleRate(0.81, 48000, 24000), 0.81f*0.81f, DEFAULT_TOLERANCE);
+      // Higher sample rate pushes lambda towards 1 (more smoothing per sample).
+      CHECK(SmoothFloat::normalForSampleRate(0.9, 48000, 96000) > 0.9f);
+    }
   }
 };
 

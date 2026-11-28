@@ -157,7 +157,7 @@ public:
   }
 
   void moveReadHead(int32_t samples){
-    FLOW_ASSERT(getReadCapacity() < samples, "underflow");
+    FLOW_ASSERT(getReadCapacity() >= samples, "underflow");
     readpos = (readpos + samples) % size;
     empty = readpos == writepos;
   }

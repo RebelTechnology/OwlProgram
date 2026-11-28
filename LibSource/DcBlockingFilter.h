@@ -13,7 +13,7 @@ private:
   float x1, y1;
   float R;
 public:
-  DcBlockingFilter(float R = 0.995): R(R), x1(0), y1(0) {}
+  DcBlockingFilter(float R = 0.995): x1(0), y1(0), R(R) {}
 
   /**
    * Get adaptation time constant in samples.
@@ -39,6 +39,8 @@ public:
   }
   
   void process(float* input, float* output, size_t size){
+    const float R = this->R;
+    float x1 = this->x1;
     float x;
     float y = y1;
     while(size--){
@@ -48,6 +50,7 @@ public:
       *output++ = y;
     }
     y1 = y;
+    this->x1 = x1;
   }
   
   /* perform in-place processing */

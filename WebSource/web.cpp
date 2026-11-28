@@ -4,6 +4,9 @@
 #include "main.h"
 #include "message.h"
 #include "PatchProcessor.h"
+#include "basicmaths.h"
+#include "fastpow.h"
+#include "fastlog.h"
 #ifdef USE_MIDI_CALLBACK
 #include "MidiMessage.h"
 #endif
@@ -289,4 +292,19 @@ void vPortFree( void *pv ){
   free(pv);
 }
 
-void setSystemTables(ProgramVector* pv){}
+// The lookup tables of fast_powf, fast_expf, fast_logf and the rest (basicmaths.c), which the Faust
+// architecture uses for pow, exp and log (faustmath.h). On a device the firmware serves its own tables
+// (OpenWare Source/FastPowTable.h, FastLogTable.h: precision 11 and 14); without them every lookup read a
+// null table of precision 0. Filled here at the firmware's precisions, so the web build computes as the
+// device does.
+#define WEB_POW_PRECISION 11
+#define WEB_LOG_PRECISION 14
+static uint32_t web_pow_table[1 << WEB_POW_PRECISION];
+static float web_log_table[1 << WEB_LOG_PRECISION];
+
+void setSystemTables(ProgramVector* pv){
+  powFastSetTable(web_pow_table, WEB_POW_PRECISION);
+  fast_pow_set_table(web_pow_table, 1 << WEB_POW_PRECISION);
+  fill_icsi_log_table(web_log_table, WEB_LOG_PRECISION);
+  fast_log_set_table(web_log_table, 1 << WEB_LOG_PRECISION);
+}

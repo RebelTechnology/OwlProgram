@@ -81,7 +81,7 @@ owl.initPatchAudio = function () {
 	for (var i = 0; i < that.numIn; i++)
 	{
 	    var input = e.inputBuffer.getChannelData(i);
-	    var dspInput = Module.HEAPF32.subarray(dspInChans[i] >> 2, (dspInChans[i] + that.vectorsize * that.ptrsize) >> 2);
+	    var dspInput = Module.HEAPF32.subarray(dspInChans[i] >> 2, (dspInChans[i] + that.vectorsize * that.samplesize) >> 2);
 
 	    for (var j = 0; j < input.length; j++) {
 		dspInput[j] = input[j];
@@ -92,7 +92,7 @@ owl.initPatchAudio = function () {
 
 	for(var i = 0; i < that.numOut; i++){
 	    var output = e.outputBuffer.getChannelData(i);
-	    var dspOutput = Module.HEAPF32.subarray(dspOutChans[i] >> 2, (dspOutChans[i] + that.vectorsize * that.ptrsize) >> 2);
+	    var dspOutput = Module.HEAPF32.subarray(dspOutChans[i] >> 2, (dspOutChans[i] + that.vectorsize * that.samplesize) >> 2);
 	    for (var j = 0; j < output.length; j++) {
 		output[j] = dspOutput[j];
 	    }

@@ -19,6 +19,9 @@ public:
   static constexpr float end_phase = 1;
   float waveshape = 0;
   float getSample(){
+    return getSample(phase, waveshape);
+  }
+  static float getSample(float phase, float waveshape){
     // return 1 - phase;
     float square = phase < 0 ? 0.0f : 1.0f;
     float saw = phase;
@@ -67,8 +70,11 @@ public:
     float* out = output.getData();
     size_t len = output.getSize();
     float sample, s1, s2;
+    const float incr = this->incr;
+    const float waveshape = this->waveshape;
+    float phase = this->phase;
     while(len--){
-      sample = getSample() * (1 - 0.4*waveshape);
+      sample = getSample(phase, waveshape) * (1 - 0.4*waveshape);
       s1 = formant1->generate();
       s2 = formant2->generate();
       *out++ = (s1*s1 + s2*s2)*sample;
@@ -79,14 +85,18 @@ public:
 	formant2->reset();
       }
     }
+    this->phase = phase;
   }
   void generate(FloatArray output, FloatArray input){
     float* out = output.getData();
     float* fm = input.getData();
     size_t len = output.getSize();
     float sample, s1, s2;
+    const float incr = this->incr;
+    const float waveshape = this->waveshape;
+    float phase = this->phase;
     while(len--){
-      sample = getSample() * (1 - 0.4*waveshape);
+      sample = getSample(phase, waveshape) * (1 - 0.4*waveshape);
       s1 = formant1->generate();
       s2 = formant2->generate();
       *out++ = (s1*s1 + s2*s2)*sample;
@@ -97,6 +107,7 @@ public:
 	formant2->reset();
       }
     }
+    this->phase = phase;
   }
   static VosimOscillator* create(float sr){
     SineOscillator* f1 = SineOscillator::create(sr);
