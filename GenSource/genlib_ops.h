@@ -426,6 +426,39 @@ inline float genlib_fasterpow (float x, float p) {
 	return genlib_fasterpow2(p * genlib_fasterlog2 (x));
 }
 
+// from http://dspguru.com/dsp/tricks/fixed-point-atan2-with-self-normalization
+inline float genlib_fasteratan2(float y, float x) {
+	const float coeff_1 = (float)(GENLIB_PI/4);
+	const float coeff_2 = 3 * (float)(GENLIB_PI/4);
+	float abs_y = fabsf(y) + 1e-10f; // kludge to prevent 0/0 condition
+	float r, angle;
+	if (x >= 0) {
+		r = (x - abs_y) / (x + abs_y);
+		angle = coeff_1 - coeff_1 * r;
+	}
+	else {
+		r = (x + abs_y) / (abs_y - x);
+		angle = coeff_2 - coeff_1 * r;
+	}
+	if (y < 0) {
+		return (-angle); // negate if in quad III or IV
+	}
+	else {
+		return (angle);
+	}
+}
+
+// http://math.stackexchange.com/questions/107292/rapid-approximation-of-tanhx
+// The rational fit holds for x >= 0 only (Max 9 applies it as is: -4 gives +22);
+// mirror it for negative x and clamp, as tanh is odd and bounded by 1.
+inline float genlib_fastertanh(float x) {
+	const float ax = fabsf(x);
+	float y = (-.67436811832e-5f + (.2468149110712040f + (.583691066395175e-1f + .3357335044280075e-1f * ax) * ax) * ax) /
+			(.2464845986383725f + (.609347197060491e-1f + (.1086202599228572f + .2874707922475963e-1f * ax) * ax) * ax);
+	if (y > 1.f) y = 1.f;
+	return x < 0 ? -y : y;
+}
+
 ////////////////////////////////////////////////////////////////
 
 inline t_sample fastertanfull(t_sample x) {
@@ -446,6 +479,22 @@ inline t_sample fasterexp(t_sample x) {
 
 inline t_sample fasterpow(t_sample x, t_sample p) {
 	return (t_sample)genlib_fasterpow((float)x, (float)p);
+}
+
+inline t_sample fasterlog2(t_sample x) {
+	return (t_sample)genlib_fasterlog2((float)x);
+}
+
+inline t_sample fasterpow2(t_sample p) {
+	return (t_sample)genlib_fasterpow2((float)p);
+}
+
+inline t_sample fasteratan2(t_sample y, t_sample x) {
+	return (t_sample)genlib_fasteratan2((float)y, (float)x);
+}
+
+inline t_sample fastertanh(t_sample x) {
+	return (t_sample)genlib_fastertanh((float)x);
 }
 /****************************************************************/
 
