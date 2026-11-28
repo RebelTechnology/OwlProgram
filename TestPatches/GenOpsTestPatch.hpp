@@ -63,6 +63,23 @@ public:
       CHECK_EQUAL(d.read_step(10), d.read_linear(10));
     }
     {
+      TEST("short delays never read past the last write");
+      Delay d;
+      d.reset("delaytest", 64);
+      for(int i=0; i<200; ++i){ // ramp 0..199, wrapping the 64-sample memory
+	d.write(i);
+	d.step();
+      }
+      // read before write: lowest delay 2+1 for 4-point reads, 4+1 for spline6
+      for(int i=0; i<=40; ++i){
+	float t = i * 0.25f;
+	CHECK_CLOSE(d.read_cubic(t), d.read_linear(fmaxf(t, 3)) + 1, 1e-3);
+	CHECK_CLOSE(d.read_spline(t), d.read_linear(fmaxf(t, 3)) + 1, 1e-3);
+	CHECK_CLOSE(d.read_spline6(t), d.read_linear(fmaxf(t, 5)) + 2, 1e-3);
+	CHECK(d.read_fastcubic(t) <= 199.0f);
+      }
+    }
+    {
       TEST("fastertanh");
       float maxerr = 0;
       for(int i=-800; i<=800; ++i){
