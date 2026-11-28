@@ -191,7 +191,7 @@ run: $(DEPS) ## run patch natively
 grind: $(DEPS) ## run valgrind on patch natively
 	@$(MAKE) -s -f native.mk grind
 
-tests: ## run all unit tests
+tests: clean ## run all unit tests
 	@for nm in $(TESTS) ; do \
 		$(MAKE) -s TEST=$$nm test || exit;\
 	done
