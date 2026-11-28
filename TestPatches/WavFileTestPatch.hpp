@@ -52,6 +52,21 @@ public:
       FloatArray::destroy(out);
     }
     {
+      TEST("8-bit PCM is unsigned");
+      const uint8_t u8[] = { 128, 255, 0, 192, 64 };
+      uint8_t ubuf[44 + sizeof(u8)];
+      size_t ulen = makeWav(ubuf, 1, 1, 8, u8, sizeof(u8));
+      WavFile wav(ubuf, ulen);
+      CHECK(wav.isValid());
+      FloatArray all = wav.createFloatArray();
+      CHECK_EQUAL(all[0], 0.0f);
+      CHECK_CLOSE(all[1], 127/128.0f, 1e-6);
+      CHECK_EQUAL(all[2], -1.0f);
+      CHECK_EQUAL(all[3], 0.5f);
+      CHECK_EQUAL(all[4], -0.5f);
+      FloatArray::destroy(all);
+    }
+    {
       TEST("mono float");
       const float f[] = { 0.25f, -0.5f, 1.0f, 0.0f };
       uint8_t fbuf[44 + sizeof(f)];

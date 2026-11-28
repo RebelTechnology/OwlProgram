@@ -92,9 +92,9 @@ public:
       len = output.getSize();
     size_t pos = all ? 0 : channel % channels;
     if(header->audio_format == 1 && header->bps == 8){ // WAVE_FORMAT_PCM 8-bit
-      int8_t* data = (int8_t*)getData();      
+      uint8_t* data = (uint8_t*)getData(); // 8-bit WAV is unsigned, 128 = 0
       for(size_t i=0; i<len; ++i){
-        output[i] = (float)data[pos] / 128.0f;
+        output[i] = ((float)data[pos] - 128.0f) / 128.0f;
         pos += all ? 1 : channels;
       }
     }else if(header->audio_format == 1 && header->bps == 16){ // WAVE_FORMAT_PCM 16-bit
