@@ -1,3 +1,4 @@
+* gen~ noise uses Max 9's xoshiro128+ generator instead of a 32-bit LCG
 * Added gen~ fastertanh, fasteratan2, fasterlog2 and fasterpow2 (Max 9)
 * gen~ cubic interpolation is the 4-point Lagrange cubic of Max 9; added fastcubic (the previous cubic) and spline6 delay interpolation
 * Fixed gen~ wrap returning the upper bound for inputs just below the lower bound (from Max 9)

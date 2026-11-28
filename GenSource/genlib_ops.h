@@ -799,26 +799,58 @@ struct DCBlock {
 };
 
 struct Noise {
-	unsigned long last;
-	static long uniqueTickCount(void) {
-		static long lasttime = 0;
-		long time = genlib_ticks();
+	uint32_t state[4];
+
+	// uses system clock to generate a random seed
+	// ensures distinct seeds even if creating several Noise objects at the same clock value
+	static uint64_t uniqueTickCount(void) {
+		static uint64_t lasttime = 0;
+		uint64_t time = genlib_ticks();
 		return (time <= lasttime) ? (++lasttime) : (lasttime = time);
 	}
 
 	Noise() { reset(); }
 	Noise(t_sample seed) { reset(seed); }
-	void reset() { last = uniqueTickCount() * uniqueTickCount(); }
-	void reset(t_sample seed) { last = seed; }
 
+	// Max 9 seeds with (uint64_t)(seed*1E6); seed from the float's bits or the tick count
+	// instead: float <-> 64-bit int conversions are soft-float library code on Cortex-M
+	void reset(t_sample seed) {
+		union { float f; uint32_t u; } bits = { (float)seed };
+		seed_state(bits.u);
+	}
+	void reset() { seed_state(uniqueTickCount()); }
+	void seed_state(uint64_t x) {
+		state[3] = splitmix32(state[2] = splitmix32(state[1] = splitmix32(state[0] = splitmix32(x))));
+	}
+
+	// adapted from the xoshiro128+ PRNG, see http://prng.di.unimi.it
+	/*  xoshiro128+: Written in 2018 by David Blackman and Sebastiano Vigna (vigna@acm.org)
+	To the extent possible under law, the author has dedicated all copyright
+	and related and neighboring rights to this software to the public domain
+	worldwide. This software is distributed without any warranty.
+	See <http://creativecommons.org/publicdomain/zero/1.0/>. */
 	inline t_sample operator()() {
-		last = 1664525L * last + 1013904223L;
-		union {
-			uint32_t ui32;
-			float f;
-		} u = { (uint32_t)(0x3f800000 | (0x007fffff & last)) }; // type-punning
+		const uint32_t result = state[0] + state[3];
+		const uint32_t t = state[1] << 9;
+		state[2] ^= state[0];
+		state[3] ^= state[1];
+		state[1] ^= state[2];
+		state[0] ^= state[3];
+		state[2] ^= t;
+		state[3] = (state[3] << 11) | (state[3] >> 21); // rotl(s[3], 11)
+		// top 24 bits to 0..2 (2^-23), then -1..1
+		return ((result >> 8) * 1.1920928955078125e-7f) - 1.f;
+	}
 
-		return (u.f * 2.f) - 3.f;
+	// splitmix32 suggested by David Blackman and Sebastiano Vigna as a good seed for xoshiro:
+	/* This is a fixed-increment version of Java 8's SplittableRandom generator
+	See http://dx.doi.org/10.1145/2714064.2660195 and
+	http://docs.oracle.com/javase/8/docs/api/java/util/SplittableRandom.html */
+	static uint32_t splitmix32(uint64_t seed) {
+		uint64_t z = (seed += 0x9e3779b97f4a7c15);
+		z = (z ^ (z >> 33)) * 0x62a9d9ed799705f5;
+		z = (z ^ (z >> 28)) * 0xcb24d0a5c88c35b3;
+		return z >> 32;
 	}
 };
 
