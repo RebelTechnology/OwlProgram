@@ -1,3 +1,4 @@
+* Fixed InterpolatingCircularFloatBuffer cubic and Hermite delays shorter than one sample reading the oldest sample in the buffer
 * Fixed gen~ cubic, spline and spline6 delay reads using stale samples at delays shorter than 3 (spline6: 5) samples
 * gen~ noise uses Max 9's xoshiro128+ generator instead of a 32-bit LCG
 * Added gen~ fastertanh, fasteratan2, fasterlog2 and fasterpow2 (Max 9)
