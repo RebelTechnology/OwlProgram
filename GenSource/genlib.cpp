@@ -20,6 +20,9 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "genlib.h"
 #include "genlib_exportfunctions.h"
+#include "Resource.h"
+#include "WavFile.h"
+#include "message.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h> // for memcpy
@@ -152,7 +155,7 @@ unsigned long systime_ticks(void)
 // void operator delete[](void *p) { sysmem_freeptr(p); }
 
 void * genlib_obtain_reference_from_string(const char * name) {
-	return 0; // to be implemented
+	return (void*)Resource::load(name);
 }
 
 // the rest is stuff to isolate gensym, attrs, atoms, buffers etc.
@@ -208,6 +211,7 @@ typedef struct {
 	t_genlib_data_info	info;
 	t_sample			cursor;	// used by Delay
 	//t_symbol *		name;
+	int					loaded;	// filled from a WAV resource: never zeroed on resize
 } t_dsp_gen_data;	
 
 t_genlib_data * genlib_obtain_data_from_reference(void *ref) 
@@ -217,6 +221,28 @@ t_genlib_data * genlib_obtain_data_from_reference(void *ref)
 	self->info.channels = 0;
 	self->info.data = 0;
 	self->cursor = 0;
+	self->loaded = 0;
+	if (ref != 0) {
+		static_assert(sizeof(t_sample) == sizeof(float), "WAV resources need 32-bit t_sample");
+		Resource* resource = (Resource*)ref;
+		WavFile wav(resource->getData(), resource->getSize());
+		if (wav.isValid()) {
+			size_t frames = wav.getNumberOfSamples();
+			size_t channels = wav.getNumberOfChannels();
+			// allocate with sysmem_newptr: genlib_data_release() frees with sysmem_freeptr
+			t_sample* data = (t_sample *)sysmem_newptr(sizeof(t_sample) * frames * channels);
+			if (data) {
+				wav.read(0, FloatArray((float*)data, frames * channels), true);
+				self->info.dim = frames;
+				self->info.channels = channels;
+				self->info.data = data;
+				self->loaded = 1;
+			} else {
+				genlib_report_error("allocating [data]: out of memory");
+			}
+		}
+		Resource::destroy(resource);
+	}
 	return (t_genlib_data *)self;
 }
 
@@ -261,6 +287,15 @@ void genlib_data_resize(t_genlib_data *b, long s, long c) {
 	old = self->info.data;
 	olddim = self->info.dim;
 	oldchannels = self->info.channels;
+
+	// keep data loaded from a resource
+	int keep = self->loaded;
+	if (keep) {
+		if (s != olddim)
+			debugMessage("data frames / WAV frames", (int)s, olddim);
+		if (c != oldchannels)
+			debugMessage("data channels / WAV channels", (int)c, oldchannels);
+	}
 	
 	// limit [data] size:
 	if (s * c > DATA_MAXIMUM_ELEMENTS) {
@@ -282,11 +317,12 @@ void genlib_data_resize(t_genlib_data *b, long s, long c) {
 			self->info.channels = c;
 		}
 		
-		set_zero64(self->info.data, s * c);
+		if (!keep)
+			set_zero64(self->info.data, s * c);
 		return;
 		
 	} else {
-		
+
 		// allocate new:
 		replaced = (t_sample *)sysmem_newptr(sz);
 		

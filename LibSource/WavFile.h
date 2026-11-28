@@ -80,23 +80,28 @@ public:
   void* getData(){
     return datachunk->id + sizeof(WavDataChunk);
   }
-  void read(size_t channel, FloatArray output){
+  /**
+   * Read one channel, or with all=true every channel, interleaved
+   */
+  void read(size_t channel, FloatArray output, bool all=false){
     size_t channels = getNumberOfChannels();
     size_t len = getNumberOfSamples();
+    if(all)
+      len *= channels;
     if(len > output.getSize())
       len = output.getSize();
-    size_t pos = channel % channels;
+    size_t pos = all ? 0 : channel % channels;
     if(header->audio_format == 1 && header->bps == 8){ // WAVE_FORMAT_PCM 8-bit
-      int8_t* data = (int8_t*)getData();      
+      uint8_t* data = (uint8_t*)getData(); // 8-bit WAV is unsigned, 128 = 0
       for(size_t i=0; i<len; ++i){
-	output[i] = (float)data[pos] / 128.0f;
-	pos += channels;
+        output[i] = ((float)data[pos] - 128.0f) / 128.0f;
+        pos += all ? 1 : channels;
       }
     }else if(header->audio_format == 1 && header->bps == 16){ // WAVE_FORMAT_PCM 16-bit
       int16_t* data = (int16_t*)getData();      
       for(size_t i=0; i<len; ++i){
-	output[i] = (float)data[pos] / 32768.0f;
-	pos += channels;
+        output[i] = (float)data[pos] / 32768.0f;
+        pos += all ? 1 : channels;
       }
       // todo: 24-bit data needs decoding
     // }else if(header->audio_format == 1 && header->bps == 24){ // WAVE_FORMAT_PCM 24-bit
@@ -108,14 +113,22 @@ public:
     }else if(header->audio_format == 3 && header->bps == 32){ // WAVE_FORMAT_IEEE_FLOAT
       float* data = (float*)getData();
       for(size_t i=0; i<len; ++i){
-	output[i] = data[pos];
-	pos += channels;
+        output[i] = data[pos];
+        pos += all ? 1 : channels;
       }
     }
   }
   FloatArray createFloatArray(size_t channel){
     FloatArray output = FloatArray::create(getNumberOfSamples());
     read(channel, output);
+    return output;
+  }
+  /**
+   * Create an array with all channels, interleaved
+   */
+  FloatArray createFloatArray(){
+    FloatArray output = FloatArray::create(getNumberOfSamples() * getNumberOfChannels());
+    read(0, output, true);
     return output;
   }
 };

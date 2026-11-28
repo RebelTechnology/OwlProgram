@@ -1,3 +1,6 @@
+* Fixed WavFile reading 8-bit PCM as signed (WAV stores 8-bit samples unsigned)
+* Added gen~ data loaded from WAV resources: a data object named after a resource is filled from it
+
 v24.1
 -----
 
