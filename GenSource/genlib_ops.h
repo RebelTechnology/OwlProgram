@@ -17,6 +17,14 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************************************************/
 
+/*******************************************************************************************************************
+Parts of this file are from the gen~ export of Max 9 (genlib_ops.h, Copyright (c) 2023 Cycling '74): wrap() (result
+range fix), cubic_interp(), fastcubic_interp(), spline6_interp(), genlib_fasteratan2(), genlib_fastertanh(),
+Delay::read_fastcubic(), Delay::read_spline6() and Noise. That code is dual-licensed by Cycling '74 under the Cycling
+'74 License for Max-Generated Code for Export or the GNU General Public License version 3, and is used here under the
+GPLv3. See https://support.cycling74.com/hc/en-us/articles/360050779193-Gen-Code-Export-Licensing-FAQ
+*******************************************************************************************************************/
+
 #ifndef GENLIB_OPS_H
 #define GENLIB_OPS_H 1
 
@@ -499,7 +507,7 @@ inline t_sample spline_interp(t_sample a, t_sample w, t_sample x, t_sample y, t_
 	return(f0*a*a2 + f1*a2 + f2*a + x);
 }
 
-// 6-point, 5th-order B-spline (from Max 9's genlib_ops.h, for exports that use interp mode "spline6")
+// 6-point, 5th-order B-spline (from Max 9, for exports that use interp mode "spline6")
 inline t_sample spline6_interp(t_sample a, t_sample y0, t_sample y1, t_sample y2, t_sample y3, t_sample y4, t_sample y5) {
 	// http://yehar.com/blog/wp-content/uploads/2009/08/deip.pdf
 	// 6-point, 5th-order B-spline (x-form)
