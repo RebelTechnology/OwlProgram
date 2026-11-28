@@ -80,12 +80,17 @@ public:
   void* getData(){
     return datachunk->id + sizeof(WavDataChunk);
   }
+  /**
+   * Read one channel, or with all=true every channel, interleaved
+   */
   void read(size_t channel, FloatArray output, bool all=false){
     size_t channels = getNumberOfChannels();
     size_t len = getNumberOfSamples();
+    if(all)
+      len *= channels;
     if(len > output.getSize())
       len = output.getSize();
-    size_t pos = channel % channels;
+    size_t pos = all ? 0 : channel % channels;
     if(header->audio_format == 1 && header->bps == 8){ // WAVE_FORMAT_PCM 8-bit
       int8_t* data = (int8_t*)getData();      
       for(size_t i=0; i<len; ++i){
@@ -118,6 +123,9 @@ public:
     read(channel, output);
     return output;
   }
+  /**
+   * Create an array with all channels, interleaved
+   */
   FloatArray createFloatArray(){
     FloatArray output = FloatArray::create(getNumberOfSamples() * getNumberOfChannels());
     read(0, output, true);
