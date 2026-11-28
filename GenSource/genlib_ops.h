@@ -17,6 +17,14 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************************************************/
 
+/*******************************************************************************************************************
+Parts of this file are from the gen~ export of Max 9 (genlib_ops.h, Copyright (c) 2023 Cycling '74): wrap() (result
+range fix), cubic_interp(), fastcubic_interp(), spline6_interp(), genlib_fasteratan2(), genlib_fastertanh(),
+Delay::read_fastcubic(), Delay::read_spline6() and Noise. That code is dual-licensed by Cycling '74 under the Cycling
+'74 License for Max-Generated Code for Export or the GNU General Public License version 3, and is used here under the
+GPLv3. See https://support.cycling74.com/hc/en-us/articles/360050779193-Gen-Code-Export-Licensing-FAQ
+*******************************************************************************************************************/
+
 #ifndef GENLIB_OPS_H
 #define GENLIB_OPS_H 1
 
@@ -206,8 +214,12 @@ inline t_sample wrap(t_sample v, t_sample lo1, t_sample hi1){
 	const t_sample range = hi - lo;
 	if (v >= lo && v < hi) return v;
 	if (range <= 0.000000001) return lo;	// no point...
+	// long, not int64_t as in Max 9: float to 64-bit int is a library call on Cortex-M
 	const long numWraps = long((v-lo)/range) - (v < lo);
-	return v - range * t_sample(numWraps);
+	const t_sample result = v - range * t_sample(numWraps);
+	// rounding can land exactly on hi
+	if (result >= hi) return result - range;
+	return result;
 }
 
 // this version gives far better performance when wrapping is relatively rare
@@ -414,6 +426,39 @@ inline float genlib_fasterpow (float x, float p) {
 	return genlib_fasterpow2(p * genlib_fasterlog2 (x));
 }
 
+// from http://dspguru.com/dsp/tricks/fixed-point-atan2-with-self-normalization
+inline float genlib_fasteratan2(float y, float x) {
+	const float coeff_1 = (float)(GENLIB_PI/4);
+	const float coeff_2 = 3 * (float)(GENLIB_PI/4);
+	float abs_y = fabsf(y) + 1e-10f; // kludge to prevent 0/0 condition
+	float r, angle;
+	if (x >= 0) {
+		r = (x - abs_y) / (x + abs_y);
+		angle = coeff_1 - coeff_1 * r;
+	}
+	else {
+		r = (x + abs_y) / (abs_y - x);
+		angle = coeff_2 - coeff_1 * r;
+	}
+	if (y < 0) {
+		return (-angle); // negate if in quad III or IV
+	}
+	else {
+		return (angle);
+	}
+}
+
+// http://math.stackexchange.com/questions/107292/rapid-approximation-of-tanhx
+// The rational fit holds for x >= 0 only (Max 9 applies it as is: -4 gives +22);
+// mirror it for negative x and clamp, as tanh is odd and bounded by 1.
+inline float genlib_fastertanh(float x) {
+	const float ax = fabsf(x);
+	float y = (-.67436811832e-5f + (.2468149110712040f + (.583691066395175e-1f + .3357335044280075e-1f * ax) * ax) * ax) /
+			(.2464845986383725f + (.609347197060491e-1f + (.1086202599228572f + .2874707922475963e-1f * ax) * ax) * ax);
+	if (y > 1.f) y = 1.f;
+	return x < 0 ? -y : y;
+}
+
 ////////////////////////////////////////////////////////////////
 
 inline t_sample fastertanfull(t_sample x) {
@@ -434,6 +479,22 @@ inline t_sample fasterexp(t_sample x) {
 
 inline t_sample fasterpow(t_sample x, t_sample p) {
 	return (t_sample)genlib_fasterpow((float)x, (float)p);
+}
+
+inline t_sample fasterlog2(t_sample x) {
+	return (t_sample)genlib_fasterlog2((float)x);
+}
+
+inline t_sample fasterpow2(t_sample p) {
+	return (t_sample)genlib_fasterpow2((float)p);
+}
+
+inline t_sample fasteratan2(t_sample y, t_sample x) {
+	return (t_sample)genlib_fasteratan2((float)y, (float)x);
+}
+
+inline t_sample fastertanh(t_sample x) {
+	return (t_sample)genlib_fastertanh((float)x);
 }
 /****************************************************************/
 
@@ -481,7 +542,22 @@ inline t_sample cosine_interp(t_sample a, t_sample x, t_sample y) {
 	return(x*(t_sample(1.)-a2)+y*a2);
 }
 
+// 4-point Lagrange cubic, as in Max 9
 inline t_sample cubic_interp(t_sample a, t_sample w, t_sample x, t_sample y, t_sample z) {
+	const t_sample a1 = t_sample(1.) + a;
+	const t_sample aa = a * a1;
+	const t_sample b = t_sample(1.) - a;
+	const t_sample b1 = t_sample(2.) - a;
+	const t_sample bb = b * b1;
+	const t_sample fw = t_sample(-.1666667) * bb * a;
+	const t_sample fx = t_sample(.5) * bb * a1;
+	const t_sample fy = t_sample(.5) * aa * b1;
+	const t_sample fz = t_sample(-.1666667) * aa * b;
+	return w * fw + x * fx + y * fy + z * fz;
+}
+
+// the previous cubic_interp; Max 9 keeps it as "fastcubic" and deprecates it, as it shows some instability with feedback
+inline t_sample fastcubic_interp(t_sample a, t_sample w, t_sample x, t_sample y, t_sample z) {
 	const t_sample a2 = a*a;
 	const t_sample f0 = z - y - w + x;
 	const t_sample f1 = w - x - f0;
@@ -499,7 +575,7 @@ inline t_sample spline_interp(t_sample a, t_sample w, t_sample x, t_sample y, t_
 	return(f0*a*a2 + f1*a2 + f2*a + x);
 }
 
-// 6-point, 5th-order B-spline (from Max 9's genlib_ops.h, for exports that use interp mode "spline6")
+// 6-point, 5th-order B-spline (from Max 9, for exports that use interp mode "spline6")
 inline t_sample spline6_interp(t_sample a, t_sample y0, t_sample y1, t_sample y2, t_sample y3, t_sample y4, t_sample y5) {
 	// http://yehar.com/blog/wp-content/uploads/2009/08/deip.pdf
 	// 6-point, 5th-order B-spline (x-form)
@@ -723,26 +799,58 @@ struct DCBlock {
 };
 
 struct Noise {
-	unsigned long last;
-	static long uniqueTickCount(void) {
-		static long lasttime = 0;
-		long time = genlib_ticks();
+	uint32_t state[4];
+
+	// uses system clock to generate a random seed
+	// ensures distinct seeds even if creating several Noise objects at the same clock value
+	static uint64_t uniqueTickCount(void) {
+		static uint64_t lasttime = 0;
+		uint64_t time = genlib_ticks();
 		return (time <= lasttime) ? (++lasttime) : (lasttime = time);
 	}
 
 	Noise() { reset(); }
 	Noise(t_sample seed) { reset(seed); }
-	void reset() { last = uniqueTickCount() * uniqueTickCount(); }
-	void reset(t_sample seed) { last = seed; }
 
+	// Max 9 seeds with (uint64_t)(seed*1E6); seed from the float's bits or the tick count
+	// instead: float <-> 64-bit int conversions are soft-float library code on Cortex-M
+	void reset(t_sample seed) {
+		union { float f; uint32_t u; } bits = { (float)seed };
+		seed_state(bits.u);
+	}
+	void reset() { seed_state(uniqueTickCount()); }
+	void seed_state(uint64_t x) {
+		state[3] = splitmix32(state[2] = splitmix32(state[1] = splitmix32(state[0] = splitmix32(x))));
+	}
+
+	// adapted from the xoshiro128+ PRNG, see http://prng.di.unimi.it
+	/*  xoshiro128+: Written in 2018 by David Blackman and Sebastiano Vigna (vigna@acm.org)
+	To the extent possible under law, the author has dedicated all copyright
+	and related and neighboring rights to this software to the public domain
+	worldwide. This software is distributed without any warranty.
+	See <http://creativecommons.org/publicdomain/zero/1.0/>. */
 	inline t_sample operator()() {
-		last = 1664525L * last + 1013904223L;
-		union {
-			uint32_t ui32;
-			float f;
-		} u = { (uint32_t)(0x3f800000 | (0x007fffff & last)) }; // type-punning
+		const uint32_t result = state[0] + state[3];
+		const uint32_t t = state[1] << 9;
+		state[2] ^= state[0];
+		state[3] ^= state[1];
+		state[1] ^= state[2];
+		state[0] ^= state[3];
+		state[2] ^= t;
+		state[3] = (state[3] << 11) | (state[3] >> 21); // rotl(s[3], 11)
+		// top 24 bits to 0..2 (2^-23), then -1..1
+		return ((result >> 8) * 1.1920928955078125e-7f) - 1.f;
+	}
 
-		return (u.f * 2.f) - 3.f;
+	// splitmix32 suggested by David Blackman and Sebastiano Vigna as a good seed for xoshiro:
+	/* This is a fixed-increment version of Java 8's SplittableRandom generator
+	See http://dx.doi.org/10.1145/2714064.2660195 and
+	http://docs.oracle.com/javase/8/docs/api/java/util/SplittableRandom.html */
+	static uint32_t splitmix32(uint64_t seed) {
+		uint64_t z = (seed += 0x9e3779b97f4a7c15);
+		z = (z ^ (z >> 33)) * 0x62a9d9ed799705f5;
+		z = (z ^ (z >> 28)) * 0xcb24d0a5c88c35b3;
+		return z >> 32;
 	}
 };
 
@@ -968,6 +1076,23 @@ struct Delay {
 	}
 
 	// cubic requires extra sample of compensation:
+	inline t_sample read_fastcubic(t_sample d) {
+		// min 1 sample delay for read before write (r != w)
+		// plus extra 1 sample compensation for 4-point interpolation
+		const t_sample r = t_sample(size + reader) - clamp(d, t_sample(1.)+t_sample(reader != writer), maxdelay);
+		long r1 = long(r);
+		long r2 = r1+1;
+		long r3 = r1+2;
+		long r4 = r1+3;
+		t_sample a = r - (t_sample)r1;
+		t_sample w = memory[r1 & wrap];
+		t_sample x = memory[r2 & wrap];
+		t_sample y = memory[r3 & wrap];
+		t_sample z = memory[r4 & wrap];
+		return fastcubic_interp(a, w, x, y, z);
+	}
+
+	// cubic requires extra sample of compensation:
 	inline t_sample read_cubic(t_sample d) {
 		// min 1 sample delay for read before write (r != w)
 		// plus extra 1 sample compensation for 4-point interpolation
@@ -999,6 +1124,27 @@ struct Delay {
 		t_sample y = memory[r3 & wrap];
 		t_sample z = memory[r4 & wrap];
 		return spline_interp(a, w, x, y, z);
+	}
+
+	// spline requires extra sample of compensation:
+	inline t_sample read_spline6(t_sample d) {
+		// min 1 sample delay for read before write (r != w)
+		// plus extra 1 sample compensation for 4-point interpolation
+		const t_sample r = t_sample(size + reader) - clamp(d, t_sample(1.)+t_sample(reader != writer), maxdelay);
+		long r0 = long(r);
+		long r1 = r0+1;
+		long r2 = r0+2;
+		long r3 = r0+3;
+		long r4 = r0+4;
+		long r5 = r0+5;
+		t_sample a = r - (t_sample)r0;
+		t_sample y0 = memory[r0 & wrap];
+		t_sample y1 = memory[r1 & wrap];
+		t_sample y2 = memory[r2 & wrap];
+		t_sample y3 = memory[r3 & wrap];
+		t_sample y4 = memory[r4 & wrap];
+		t_sample y5 = memory[r5 & wrap];
+		return spline6_interp(a, y0, y1, y2, y3, y4, y5);
 	}
 };
 
